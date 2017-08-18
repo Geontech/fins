@@ -1,0 +1,15 @@
+Possible Changes:
+- Add verification that "IP_NAME" is filled out before allowing user to save
+- Checking that parameters given for values of other parameters have matching types
+- In drop-down menus containing parameter names, remove names that are not of the proper type (ie. a "string" parameter when a "boolean" is required)
+- Format booleans to always be lowercase when saving
+- IP Page:
+    * Allow users to add new child parameters 
+    * Save list of parameters from the sub-IP to use in a dropdown menu (similar to Parent)
+    * May be an issue with finding common path if an IP has not been selected already
+- Filesets:
+    * Display temp in a way that let's users have some control
+
+- Add more error/update messages to the log to help with debugging
+- Add FAQ and help menu so the GUI is more self-explanatory
+- Make it generally prettier
