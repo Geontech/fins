@@ -1,5 +1,16 @@
 #!/usr/bin/python
-
+#====================================================================================
+# Company:      Geon Technologies, LLC
+# File:         ip_func.py
+# Description:  Main python script for the FINS GUI. Creates the GUI and handles all
+#               the main functions
+#
+# Revision History:
+# Date        Author            Revision
+# ----------  ----------------- -----------------------------------------------------
+# 2017-08-18  Alex Newgent      Initial Version
+#
+#====================================================================================
 import pygtk
 import json
 pygtk.require('2.0')
@@ -9,7 +20,7 @@ import gui_func
 from collections import OrderedDict
 from ip_func import ip_page
 from filesets_func import filesets_page
-from streams_func import scrolled_page
+from scrolled_func import scrolled_page
 
 #------------------------------------------------------------------------------------
 # Class for the Main Window
@@ -156,12 +167,6 @@ class main_window:
         self.page_box.pack_start(self.notebook,expand=True,fill=True,padding=5)
         # Create an event box (for formatting reasons only)
         eb = gtk.EventBox()
-        color_map = eb.get_colormap()                   # Grab the color map
-        color = color_map.alloc_color("dark cyan")      # Get a color
-        style = eb.get_style().copy()                   # Grab the widgets style
-        style.bg[gtk.STATE_NORMAL] = color              # Change the background color
-        eb.set_style(style)                             # Add the modified style
-
         # Add the page box to the event box
         eb.add(self.page_box)
         self.main_box.pack_start(eb)

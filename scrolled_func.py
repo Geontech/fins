@@ -1,3 +1,15 @@
+#====================================================================================
+# Company:      Geon Technologies, LLC
+# File:         streams_func.py
+# Description:  Python script used to handle Params, Streams, and registers
+#               page in the fins gui
+#
+# Revision History:
+# Date        Author            Revision
+# ----------  ----------------- -----------------------------------------------------
+# 2017-08-18  Alex Newgent      Initial Version
+#
+#====================================================================================
 import pygtk
 import json
 pygtk.require('2.0')
@@ -114,7 +126,7 @@ class scrolled_page:
         # Initial list widgets for the frame
         key_list = gui_func.key_dict[self.key]
         for i,key in enumerate(key_list):
-            key = key.title()
+            key = key.title()       # Capitalize first lett
             if widgets[i] == 0:
                 widget_list.append(gtk.Entry())
                 widget_list[-1].connect("changed",self.change_font)

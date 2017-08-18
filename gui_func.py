@@ -1,3 +1,14 @@
+#====================================================================================
+# Company:     Geon Technologies, LLC
+# File:        gui_func.py
+# Description: Python script with common functions used in the FINS GUI
+#
+# Revision History:
+# Date        Author            Revision
+# ----------  ----------------- -----------------------------------------------------
+# 2017-08-18  Alex Newgent      Initial Version
+#
+#====================================================================================
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -10,15 +21,9 @@ from collections import OrderedDict
 params_filename = "ip_params.json"
 # Default name for an override parameters file
 override_filename = "ip_override.json"
-# Names of each field for a parameter
-PARAM_NAMES = ["Name","Value","Type","Used In"]
 # Names of keys for parameter dicts
 param_keys = ["name","value","type","used_in"]
-temp = ["*.cache", "*.data", "*.xpr", "*.log", "*.jou",
-                            "*.hw", "component.xml", " xgui", "*.str",
-                            "*.ip_user_files", "*.srcs",  "*.runs", "*.sim",
-                            "*.txt", "*.mat", ".Xil", "*.coe", "*.edn",
-                            "*.edif", "*_netlist.v", "*_netlist.vhd"]
+
 
 # Keys for streams dict
 stream_keys = ["name","mode","bit_width","is_complex","is_signed","packet_size"]
@@ -31,13 +36,15 @@ fileset_keys = ["source","sim","constraints","temp"]
 ip_keys = ["name","repo_name","module_name","vendor","library","params"]
 
 key_dict = {"params":param_keys,"registers":register_keys,"filesets":fileset_keys,"streams":stream_keys,"ip":ip_keys}
-# String to source Xilinx
-ENV_STRING = "source /opt/Xilinx/Vivado/2016.2/settings64.sh"
+
+temp = ["*.cache", "*.data", "*.xpr", "*.log", "*.jou",
+                            "*.hw", "component.xml", " xgui", "*.str",
+                            "*.ip_user_files", "*.srcs",  "*.runs", "*.sim",
+                            "*.txt", "*.mat", ".Xil", "*.coe", "*.edn",
+                            "*.edif", "*_netlist.v", "*_netlist.vhd"]
 
 # Path and filename of the window's logo image
 IMG_STRING = "./geontech_logo.png"
-
-pixbuf = gtk.gdk.pixbuf_new_from_file(IMG_STRING)
 
 # List of mandatory parameters
 mandatory_params = ["IP_NAME","IP_TOP","IP_TESTBENCH","IP_PACKAGE",
@@ -53,6 +60,7 @@ json_format =   OrderedDict([
                                 ("registers",[])
                             ])
 
+# List of error messages when editing parameters
 error_message = ["ERROR: Name must begin with a letter (a-z or A-Z)",
                     "ERROR: Value and Type fields do not agree.",
                     "ERROR: Type must begin with a letter",
@@ -60,26 +68,17 @@ error_message = ["ERROR: Name must begin with a letter (a-z or A-Z)",
                     "ERROR: Item must be integer or parameter",
                     "ERROR: Name already in use"]
 
+# Colors to use when printing messages (from X11 rgb.txt)
 error_color = "firebrick1"
 success_color = "black"
 #------------------------------------------------------------------------------------
-# A
+# Create a Button
 #------------------------------------------------------------------------------------
 
-# Creates a box with image and text for buttons
-def add_image_label (stock,text,expand=True):
-    hbox = gtk.HBox()
-    img = gtk.Image()
-    img.set_from_stock(stock,gtk.ICON_SIZE_BUTTON)
-    hbox.pack_start(img,expand=False,fill=False,padding=0)
-    hbox.pack_start(gtk.Label(text),expand=expand,fill=True,padding=5)
-    hbox.show_all()
-    return hbox;
 
 #------------------------------------------------------------------------------------
-# C
+# Edit Parameters
 #------------------------------------------------------------------------------------
-
 # Saves the edits a user made to the entry boxes on the IP page
 def cell_changed (cell, path, new_text, column, model,params,log=None):
     if new_text == model[path][column]:
@@ -90,7 +89,6 @@ def cell_changed (cell, path, new_text, column, model,params,log=None):
         for entry in model[path]:
             test.append(entry)
         test[column] = new_text
-        print(column)
         errors = check_input(test, name, params,model,column)
         if errors:
             pass_err = []
@@ -107,15 +105,6 @@ def cell_changed (cell, path, new_text, column, model,params,log=None):
                 return;
     model[path][column] = new_text
 
-def update_log (log, messages,tag="error"):
-    table = log.get_tag_table()
-    text_color = table.lookup(tag)
-    for error in messages:
-        end_pos = log.get_end_iter()
-        log.insert(end_pos,"\n " + error["message"])
-        line_pos = log.get_iter_at_line(-1)
-        end_pos = log.get_end_iter()
-        log.apply_tag(text_color,line_pos,end_pos)
 # Allows the user to toggle non-mandatory check buttons
 def cell_toggled (cell, path, column, model, treeview):
     if column == len(model[path])-1 and mandatory(model[path][0]):
@@ -131,6 +120,54 @@ def change_box_colors (widget,color):
         widget.get_child().modify_text(gtk.STATE_NORMAL,gtk.gdk.color_parse(color))
     parent = widget.get_parent().get_children()[1]
     parent.modify_fg(gtk.STATE_NORMAL,gtk.gdk.color_parse(color))
+
+# Function for keyboard shortcut move
+def move_param (widget, event, model):
+    # Check if CTRL is being held
+    if "GDK_CONTROL_MASK" in event.get_state().value_names:
+        # Get the iter for the selected row
+        position = widget.get_selection().get_selected()[1]
+        # Get the integer position for the selected row
+        int_pos = widget.get_selection().get_selected_rows()[1][0][0]
+        # Grab the path for the current selected row
+        curr_path = widget.get_cursor()
+        # Create a list for the destination row
+        next_path = list(curr_path[0])
+        # Grab all the items in the selected row
+        selected_row = []
+        for item in model[position]:
+            selected_row.append(item)
+        # Move the selection up one row
+        if event.keyval == 65362:
+            # Check that we aren't at the top row
+            if int_pos:
+                # Delete the row and reinsert it one row up
+                model.remove(position)
+                model.insert(int_pos-1,selected_row)
+                # Set the location of the next selected path
+                next_path[0] = next_path[0]-1
+        elif event.keyval == 65364:
+            # Delete the row and reinsert it
+            model.remove(position)
+            if model.insert(int_pos+1,selected_row):
+                # If the new location is valid, set it as the new selection
+                next_path[0] = next_path[0]+1
+        # Make the cursor follow the item the user is moving
+        widget.set_cursor(curr_path[0])
+        widget.get_selection().select_path(tuple(next_path))
+    return;
+
+# Delete the selected row of a tree model
+def delete_row (widget, event,model):
+    # Check that the button pressed was "Delete"
+    if event.keyval == 65535:
+        # Get the row's position
+        position = widget.get_selection().get_selected()[1]
+        # Make sure the position exists
+        if position:
+            # If the row is not mandatory, delete it
+            if not any(model[position][0] in string for string in mandatory_params):
+                del model[position]
 
 def check_input (text, name, params,model, pos=0 ):
     error_list = []
@@ -157,7 +194,6 @@ def check_input (text, name, params,model, pos=0 ):
             if not text[1].isdigit():
                 if not any(text[1] == s[0] for s in params):
                     error_list.append({"message":error_message[1],"pos":[1,2]})
-
     else:
         if name == "streams":
             if not any(text[1].lower() == s for s in ["master","slave"]):
@@ -174,27 +210,25 @@ def check_input (text, name, params,model, pos=0 ):
                     error_list.append({"message":error_message[k],"pos":[i+start]})
     return error_list;
 
-# Function to create a GTK button
-def create_button(text,connect_func,stock=None,expand=True,**connect_args):
-    # Check if user wanted an image on the button
-    if stock:
-        # Create the button
-        button = gtk.Button()
-        # Create a box with the image and label
-        hbox = add_image_label(stock,text,expand)
-        # Add the box to the button
-        button.add(hbox)
+# Checks if the parameter is in the mandatory params list
+def mandatory (parameter):
+    if not any(parameter == string for string in mandatory_params):
+        return False;
     else:
-        # If no image, just put the text on the button
-        button = gtk.Button(text)
-    # Check if there are any connection arguments
-    if not connect_args:
-        button.connect("clicked",connect_func)
-    else:
-        button.connect("clicked",connect_func,connect_args)
-    # Set the button to appear and return it
-    button.show()
-    return button;
+        return True;
+#------------------------------------------------------------------------------------
+# Interact with the user
+#------------------------------------------------------------------------------------
+# Print messages to the error log
+def update_log (log, messages,tag="error"):
+    table = log.get_tag_table()
+    text_color = table.lookup(tag)
+    for error in messages:
+        end_pos = log.get_end_iter()
+        log.insert(end_pos,"\n " + error["message"])
+        line_pos = log.get_iter_at_line(-1)
+        end_pos = log.get_end_iter()
+        log.apply_tag(text_color,line_pos,end_pos)
 
 # Creates a pop-up used to select a file
 def create_file_chooser (title,parent=None,string="*"):
@@ -228,18 +262,9 @@ def create_file_chooser (title,parent=None,string="*"):
             sel.destroy()
             return ok;
 
-def run_dialog (sel, string):
-    while True:
-        ok = sel.run()
-        if ok:
-            name = sel.get_filename()
-            if not any(string == s for s in ["folder","*"]):
-                if string in name:
-                    sel.destroy()
-                    return name;
-            else:
-                return name;
-
+#------------------------------------------------------------------------------------
+# Convenience functions
+#------------------------------------------------------------------------------------
 # Function that creates a box with a label and one widget
 def create_label_widget (label, widget,shadow_type=gtk.SHADOW_NONE):
     frame = gtk.Frame(label)
@@ -262,21 +287,8 @@ def create_scroll_window ():
     scroll_box.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
     return scroll_box;
 
-# Delete the selected row of a tree model
-def delete_row (widget, event,model):
-    # Check that the button pressed was "Delete"
-    if event.keyval == 65535:
-        # Get the row's position
-        position = widget.get_selection().get_selected()[1]
-        # Make sure the position exists
-        if position:
-            # If the row is not mandatory, delete it
-            if not any(model[position][0] in string for string in mandatory_params):
-                del model[position]
-
 # Create a gtk treeview
 def create_tree (model,key,editable=True,form=[0],connect_func=delete_row,params=None,log=None):
-    print(log)
     # Set the treeview model (should be a gtk ListStore)
     treeview = gtk.TreeView(model)
     key_list = []
@@ -355,9 +367,37 @@ def create_type_list ():
         types.append([text])
     return types;
 
-#------------------------------------------------------------------------------------
-# F
-#------------------------------------------------------------------------------------
+# Function to create a GTK button
+def create_button(text,connect_func,stock=None,expand=True,**connect_args):
+    # Check if user wanted an image on the button
+    if stock:
+        # Create the button
+        button = gtk.Button()
+        # Create a box with the image and label
+        hbox = add_image_label(stock,text,expand)
+        # Add the box to the button
+        button.add(hbox)
+    else:
+        # If no image, just put the text on the button
+        button = gtk.Button(text)
+    # Check if there are any connection arguments
+    if not connect_args:
+        button.connect("clicked",connect_func)
+    else:
+        button.connect("clicked",connect_func,connect_args)
+    # Set the button to appear and return it
+    button.show()
+    return button;
+
+# Creates a box with image and text for buttons
+def add_image_label (stock,text,expand=True):
+    hbox = gtk.HBox()
+    img = gtk.Image()
+    img.set_from_stock(stock,gtk.ICON_SIZE_BUTTON)
+    hbox.pack_start(img,expand=False,fill=False,padding=0)
+    hbox.pack_start(gtk.Label(text),expand=expand,fill=True,padding=5)
+    hbox.show_all()
+    return hbox;
 
 # Format a dictionary to a list for use in a gtk ListStore
 def format_item(item, key_list, buttons=False):
@@ -374,13 +414,8 @@ def format_item(item, key_list, buttons=False):
             data.append(entry in item[buttons["key"]])
     return data;
 
-#------------------------------------------------------------------------------------
-# G
-#------------------------------------------------------------------------------------
-
+# Function for finding relative path between two paths
 def get_relative_path (path1,path2):
-    print(path1)
-    print(path2)
     common_path = os.path.commonprefix([path1,path2])
     relative_path = os.path.relpath(path2,common_path)
     return relative_path;
@@ -392,54 +427,9 @@ def get_value(params_dict, param_name):
             return param['value']
     return ''
 
-#------------------------------------------------------------------------------------
-# M
-#------------------------------------------------------------------------------------
-
-# Function for keyboard shortcut move
-def move_param (widget, event, model):
-    # Check if CTRL is being held
-    if "GDK_CONTROL_MASK" in event.get_state().value_names:
-        # Get the iter for the selected row
-        position = widget.get_selection().get_selected()[1]
-        # Get the integer position for the selected row
-        int_pos = widget.get_selection().get_selected_rows()[1][0][0]
-        # Grab the path for the current selected row
-        curr_path = widget.get_cursor()
-        # Create a list for the destination row
-        next_path = list(curr_path[0])
-        # Grab all the items in the selected row
-        selected_row = []
-        for item in model[position]:
-            selected_row.append(item)
-        # Move the selection up one row
-        if event.keyval == 65362:
-            # Check that we aren't at the top row
-            if int_pos:
-                # Delete the row and reinsert it one row up
-                model.remove(position)
-                model.insert(int_pos-1,selected_row)
-                # Set the location of the next selected path
-                next_path[0] = next_path[0]-1
-        elif event.keyval == 65364:
-            # Delete the row and reinsert it
-            model.remove(position)
-            if model.insert(int_pos+1,selected_row):
-                # If the new location is valid, set it as the new selection
-                next_path[0] = next_path[0]+1
-        # Make the cursor follow the item the user is moving
-        widget.set_cursor(curr_path[0])
-        widget.get_selection().select_path(tuple(next_path))
-    return;
-
-# Checks if the parameter is in the mandatory params list
-def mandatory (parameter):
-    if not any(parameter == string for string in mandatory_params):
-        return False;
-    else:
-        return True;
-
+# Class for the top menu widget
 class topmenu:
+    # Substitute for a case statement
     colors = {  0: "grey93",
                 1: "SteelBlue4",
                 2: "DarkRed",
@@ -447,6 +437,7 @@ class topmenu:
                 4: "DarkSlateBlue",
                 5: "grey0"}
 
+    # Create a menu bar for the window
     def get_main_menu(self,window):
         accel_group = gtk.AccelGroup()
         item_factory = gtk.ItemFactory(gtk.MenuBar, "<main>",accel_group)
@@ -454,6 +445,8 @@ class topmenu:
         window.add_accel_group(accel_group)
         self.item_factory = item_factory
         return item_factory.get_widget("<main>")
+
+    # Function for changing the color in the window
     def day_theme (self,*args):
         window = args[0]
         eb = window.get_children()[0].get_children()[1]
@@ -462,12 +455,13 @@ class topmenu:
         style = eb.get_style().copy()
         style.bg[gtk.STATE_NORMAL] = color
         eb.set_style(style)
-        # print(args[0].get_children()[0].get_children()[1].get_children())
+
     def __init__(self,window,load_func,save_func):
+        # Create boxes in the menu bar
         self.menu_items = (
-            # Path name                 Key Shortcut    Function        ??  Widget Type
-            ( "/_File",                 None,           None,           0,  "<Branch>" ),
-            ( "/File/Open",             "<control>O",   load_func,      0,  None ),
+            # Path name                 Key Shortcut    Function        Arg Widget Type
+            ( "/_File",                 None,           None,           0,  "<Branch>"  ),
+            ( "/File/Open",             "<control>O",   load_func,      0,  None        ),
             ( "/File/Save",             "<control>S",   save_func,      0,  None ),
             ( "/File/sep1",             None,           None,           0,  "<Separator>" ),
             ( "/File/Quit",             "<control>Q",   gtk.main_quit,  0,  None ),
@@ -488,9 +482,4 @@ class topmenu:
         self.main_vbox.show()
 
         menubar = self.get_main_menu(window)
-        # frame = gtk.Frame()
-        # frame.add(menubar)
-        # frame.set_properties("shadow-type",gtk.SHADOW_ETCHED_OUT)
         self.main_vbox.pack_start(menubar, False, True, 0)
-        menubar.show()
-        # frame.show()

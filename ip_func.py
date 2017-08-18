@@ -1,3 +1,14 @@
+#====================================================================================
+# Company:     Geon Technologies, LLC
+# File:        ip_func.py
+# Description: Python script used to handle "IP" page in the fins gui
+#
+# Revision History:
+# Date        Author            Revision
+# ----------  ----------------- -----------------------------------------------------
+# 2017-08-18  Alex Newgent      Initial Version
+#
+#====================================================================================
 import pygtk
 pygtk.require('2.0')
 import gtk
@@ -126,6 +137,7 @@ class ip_page:
 
     # Function for selecting new IP file to include
     def select_ip (self,widget):
+        # Get filename
         fullname = gui_func.create_file_chooser("Select Sub-IP Params File",self.window,"*.json")
         if fullname:
             pathname,filename = os.path.split(fullname)
@@ -134,46 +146,57 @@ class ip_page:
         else:
             return;
 
-        param_details = OrderedDict([("name",""),("repo_name",""),("module_name",""),("vendor",""),("library",""),("params",[])])
+        # Create an OD for the specific IP
+        param_details = OrderedDict()
         param_details["name"]           = gui_func.get_value(param_dict,"IP_NAME")
-
         # Get ip path
         if self.path != pathname + "/":
             relative_path = "./" + gui_func.get_relative_path(self.path,pathname)
         else:
             relative_path = "./"
-        param_details["vendor"]         = gui_func.get_value(param_dict,"IP_COMPANY_URL")
         param_details["repo_name"]      = relative_path
-
         param_details["module_name"]    = " "
+        param_details["vendor"]         = gui_func.get_value(param_dict,"IP_COMPANY_URL")
         param_details["library"]        = " "
+        param_details["params"]         = []
         for param in param_dict["params"]:
             if not gui_func.mandatory(param["name"]):
                 new_entry = OrderedDict([("name",param["name"]),("parent","")])
                 param_details["params"].append(new_entry)
+
+        # Add the IP name to the dropdown list
         self.selection_box.append_text(param_details["name"])
+        # Add the info the the class store
         self.store.append(param_details)
+        # Set the new IP to active selection and save it
         self.selection_box.set_active(len(self.store)-1)
         self.save_edited_ip(widget)
         return;
 
+    # Updates ip store with user entered info
     def save_edited_ip (self, widget):
+        # Get position in list of active IP
         index = self.selection_box.get_active()
+        # Save the displayed information to the IP in store
         self.store[index] = self.grab_selected()
+        # Change the name in the dropdown menu to reflect any edits
         store_position = self.selection_box.get_active_iter()
         store = self.selection_box.get_model()
         store[store_position][0] = self.store[index]["name"]
         return;
 
+    # Undo all edits not currently saved
     def reset_edited_ip (self, widget):
         index = self.selection_box.get_active()
         self.update_ip_display(self.store[index])
 
+    # Clear and re-stock the dropdown menu
     def update_selections (self):
         self.selection_box.get_model().clear()
         for text in self.store:
             self.selection_box.append_text(text["name"])
 
+    # Update the page when the user chooses another IP
     def selection_changed (self, widget):
         ip_name = widget.get_active_text()
         if ip_name == "Add New":
@@ -183,9 +206,11 @@ class ip_page:
             self.update_ip_display(self.store[index])
         return;
 
+    # Store is already in list format, so just return it
     def create_save_entry (self):
         return self.store;
 
+    # Take info from store and put it into the display
     def update_ip_display (self,selected_param):
         for i,key in enumerate(gui_func.ip_keys):
             try: self.details_box.get_children()[i].get_children()[0].set_text(selected_param[key])
@@ -194,6 +219,7 @@ class ip_page:
                 for entry in selected_param[key]:
                     self.param_store.append([entry["name"],entry["parent"]])
 
+    # Add new IP from given dictionary
     def update_stored_ip (self,ip):
         for entry in ip["ip"]:
             temp = OrderedDict()

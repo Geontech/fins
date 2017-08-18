@@ -1,3 +1,14 @@
+#====================================================================================
+# Company:     Geon Technologies, LLC
+# File:        filesets_func.py
+# Description: Python script used to handle "Filesets" page in the fins gui
+#
+# Revision History:
+# Date        Author            Revision
+# ----------  ----------------- -----------------------------------------------------
+# 2017-08-18  Alex Newgent      Initial Version
+#
+#====================================================================================
 import pygtk
 pygtk.require('2.0')
 import gtk
