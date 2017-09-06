@@ -1,0 +1,15 @@
+#===============================================================================
+# Company:     Geon Technologies, LLC
+# File:        rfnoc.srcs
+# Description: Auto-generated from Jinja2 IP Parameters Makefile Template
+# Generated:   {{ now }}
+#===============================================================================
+$(addprefix
+{%- for param in json_params['params'] -%}
+{% if param['name'] == "SIM_FILES_DEST" -%} {{ param['value']}}, \
+{% endif -%}
+{% endfor %}
+{%- for source_file in json_params['filesets']['source'] -%}
+{{ source_file }} \
+{% endfor -%}
+) \
