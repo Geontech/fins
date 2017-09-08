@@ -38,7 +38,7 @@ A default set of parameters is provided to you when the GUI is launched, and cli
 
 FinStreams is a library of MATLAB/Octave functions used to model and simulate firmware IP. It is a stanalone library and can be used separate from the JSON FinSpecification.
 
-![FinStreams](./streams/documentation/finstreams.svg "FinStreams")
+![FinStreams](./streams/documentation/finstreams.png "FinStreams")
 
 To run an example of a stanalone usage of FinStreams, use the following commands:
 
@@ -51,7 +51,7 @@ To run an example of a stanalone usage of FinStreams, use the following commands
 
 The `codegen` folder contains scripts and templates for generation of HDL, MATLAB/Octave, and Xilinx TCL parameter files using Jinja2. Parameters from a JSON FINS file are inserted into the code generation templates for rapid customization of a firmware intellectual property module. The `Makefile` within the repository of the firmware IP module should control this code generation process as shown below.
 
-![FINS Detail](./documentation/fins_detail.svg "FINS Detail")
+![FINS Detail](./documentation/fins_detail.png "FINS Detail")
 
 For an example of the parameter generation, see our FIR Filter [here](https://github.com/Geontech/fir_filter.git).
 
