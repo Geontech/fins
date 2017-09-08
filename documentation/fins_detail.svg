@@ -10,8 +10,9 @@
     <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 20; stroke: #008000" x1="920" y1="190" x2="920" y2="310"/>
     <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 20; stroke: #008000" d="M 380,310 A 10,10 0 0 0 390,320"/>
     <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 20; stroke: #008000" d="M 910,320 A 10,10 0 0 0 920,310"/>
-    <text font-size="16.9333" style="fill: #008000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="911" y="255.167">
-      <tspan x="911" y="255.167">VIVADO</tspan>
+    <text font-size="16.9333" style="fill: #008000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="911" y="244.583">
+      <tspan x="911" y="244.583">Python</tspan>
+      <tspan x="911" y="265.75">Jinja2</tspan>
     </text>
   </g>
   <g>
