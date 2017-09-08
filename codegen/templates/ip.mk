@@ -13,7 +13,7 @@ SIM_FILES         := {{ json_params['filesets']['sim']|join(' ') }}
 CONSTRAINTS_FILES := {{ json_params['filesets']['constraints']|join(' ') }}
 USER_IP_TARGETS   := {% for ip in json_params['ip'] %}{% if ip['library'] == "user" %}{{ ip['repo_name'] }}/{{ ip['name'] }}.xpr {% endif -%}{% endfor %}
 IP_TARGET         := {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.xpr
-SIM_TARGET        := {{ json_params['params']|selectattr('name', 'equalto', 'SIM_TXT_FILENAME')|map(attribute='value')|join('') }}
+SIM_TARGET        := sim_results.txt
 NETLIST_TARGET    := {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_netlist.edif
 
 .PHONY: all clean clean-ip sim

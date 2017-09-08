@@ -48,36 +48,10 @@ tcl.temp_name         = 'ip_params.tcl'
 make.temp_name        = 'ip.mk'
 hdl_streams.temp_name = 'ip_streams.vhd'
 
-# Parameter filenames
+# Static Parameter filenames
 mat.file_name         = 'ip_params.m'
 tcl.file_name         = 'ip_params.tcl'
 make.file_name        = 'ip.mk'
-
-# Use a custom filename for streams
-streams_name = params_func.getValue(json_params,'IP_STREAMS')
-if streams_name:
-    # Set Filename
-    hdl_streams.file_name = streams_name + '.vhd'
-else:
-    # Set the default package name to be <IP_NAME>_pkg
-    default_streams_name = params_func.getValue(json_params,'IP_NAME') + '_streams'
-    # Insert this default parameter into the json_params dictionary
-    json_params['params'].append({u'name':u'IP_STREAMS',u'value':default_streams_name,u'type':u'string',u'used_in':[u'tcl']})
-    # Set Filename
-    hdl_streams.file_name = default_streams_name + '.vhd'
-
-# Use a custom filename for streams
-package_name = params_func.getValue(json_params,'IP_PACKAGE')
-if package_name:
-    # Set Filename
-    hdl.file_name = package_name + '.vhd'
-else:
-    # Set the default package name to be <IP_NAME>_pkg
-    default_package_name = params_func.getValue(json_params,'IP_NAME') + '_pkg'
-    # Insert this default parameter into the json_params dictionary
-    json_params['params'].append({u'name':u'IP_PACKAGE',u'value':default_package_name,u'type':u'string',u'used_in':[u'tcl']})
-    # Set Filename
-    hdl.file_name = default_package_name + '.vhd'
 
 #-------------------------------------------------------------------------------
 # Read JSON Parameters/Configuration Files
@@ -102,6 +76,35 @@ if (os.path.exists(override_filename)):
 now = datetime.datetime.utcnow()
 # Setup Jinja2 environment
 env = params_func.env_setup(DEBUG_ON)
+
+#-------------------------------------------------------------------------------
+# Get Custom Parameter filenames
+#-------------------------------------------------------------------------------
+# Use a custom filename for streams
+streams_name = params_func.getValue(json_params,'IP_STREAMS')
+if streams_name:
+    # Set Filename
+    hdl_streams.file_name = streams_name + '.vhd'
+else:
+    # Set the default streams name to be <IP_NAME>_streams
+    default_streams_name = params_func.getValue(json_params,'IP_NAME') + '_streams'
+    # Insert this default parameter into the json_params dictionary
+    json_params['params'].append({u'name':u'IP_STREAMS',u'value':default_streams_name,u'type':u'string',u'used_in':[u'tcl']})
+    # Set Filename
+    hdl_streams.file_name = default_streams_name + '.vhd'
+
+# Use a custom filename for streams
+package_name = params_func.getValue(json_params,'IP_PACKAGE')
+if package_name:
+    # Set Filename
+    hdl.file_name = package_name + '.vhd'
+else:
+    # Set the default package name to be <IP_NAME>_pkg
+    default_package_name = params_func.getValue(json_params,'IP_NAME') + '_pkg'
+    # Insert this default parameter into the json_params dictionary
+    json_params['params'].append({u'name':u'IP_PACKAGE',u'value':default_package_name,u'type':u'string',u'used_in':[u'tcl']})
+    # Set Filename
+    hdl.file_name = default_package_name + '.vhd'
 
 #-------------------------------------------------------------------------------
 # Generate the Files from Templates

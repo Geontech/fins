@@ -2,12 +2,12 @@
 #  Company:      Geon Technologies, LLC
 #  File:         ip_create.tcl
 #  Description:  This is a generic script for creating and packaging IP
-#  Tool Version: Vivado 2016.2
+#  Tool Version: Vivado 2015.4, 2016.2
 #
 #  Revision History:
 #  Date        Author             Revision
 #  ----------  -----------------  ----------------------------------------------
-#  2017-07-21  Josh Schindehette  Initial Version
+#  2017-09-07  Josh Schindehette  Initial Version
 #
 #===============================================================================
 
@@ -48,11 +48,15 @@ if {[file exists ip_import.tcl]} {
 # Set the top module
 if {[info exists "IP_TOP"]} {
     set_property "top" $IP_TOP [get_filesets "sources*"]
+} else {
+    set_property "top" $IP_NAME [get_filesets "sources*"]
 }
 
 # Set the top module for the simulation
 if {[info exists "IP_TESTBENCH"]} {
     set_property "top" $IP_TESTBENCH [get_filesets "sim*"]
+} else {
+    set_property "top" ${IP_NAME}_tb [get_filesets "sim*"]
 }
 
 # Package the project

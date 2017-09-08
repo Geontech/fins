@@ -27,7 +27,7 @@
 % Revision History:
 % Date        Author             Revision
 % ----------  -----------------  -----------------------------------------------
-% 2017-08-10  Josh Schindehette  Initial Version
+% 2017-09-07  Josh Schindehette  Initial Version
 %
 %===============================================================================
 function [ result ] = fins_check( varargin )
@@ -180,6 +180,15 @@ function [ result ] = fins_check( varargin )
       else
         fprintf('Error: The .is_complex field is TRUE but the data in the .values field is not complex.\n');
         result = false;
+      end
+    else
+      if (~isreal(stream.values))
+        fprintf('Error: The .is_complex field is FALSE but the data in the .values field is complex.\n');
+        result = false;
+      else
+        if (verbose)
+          fprintf('Note: The data is correctly designated as real.\n');
+        end
       end
     end
     % Check "frame_size" field
