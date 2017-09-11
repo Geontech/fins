@@ -1,6 +1,4 @@
-![FINS Logo](./gui/geontech_logo.png "Geon Technologies FINS")
-
-# FINS
+![Geon Technologies FINS](./gui/fins_logo.png "Geon Technologies FINS")
 
 This repository contains Python scripts, Xilinx TCL scripts, MATLAB/Octave functions, and a PyGTK+ GUI for the rapid customization and generation of firmware intellectual property using the JSON-based Firmware IP Node Specification (FINS).
 

@@ -44,7 +44,7 @@ temp = ["*.cache", "*.data", "*.xpr", "*.log", "*.jou",
                             "*.edif", "*_netlist.v", "*_netlist.vhd"]
 
 # Path and filename of the window's logo image
-IMG_STRING = "./geontech_logo.png"
+IMG_STRING = "./fins_logo.png"
 
 # List of mandatory parameters
 mandatory_params = ["IP_NAME","IP_TOP","IP_TESTBENCH","IP_PACKAGE",
