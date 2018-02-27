@@ -49,9 +49,10 @@ make.temp_name        = 'ip.mk'
 hdl_streams.temp_name = 'ip_streams.vhd'
 
 # Static Parameter filenames
-mat.file_name         = 'ip_params.m'
-tcl.file_name         = 'ip_params.tcl'
-make.file_name        = 'ip.mk'
+mat.file_name  = 'ip_params.m'
+tcl.file_name  = 'ip_params.tcl'
+make.file_name = 'ip.mk'
+
 
 #-------------------------------------------------------------------------------
 # Read JSON Parameters/Configuration Files
@@ -68,6 +69,10 @@ if (os.path.exists(override_filename)):
         if DEBUG_ON: pprint.pprint(json_override)
         json_params = params_func.overrideParams(json_params, json_override)
         if DEBUG_ON: pprint.pprint(json_params)
+
+# Dynamic Parameter filenames
+hdl.file_name         = params_func.getValue(json_params,'IP_NAME') + '_pkg.vhd'
+hdl_streams.file_name = params_func.getValue(json_params,'IP_NAME') + '_streams.vhd'
 
 #-------------------------------------------------------------------------------
 # Setup Jinja2 Environment
