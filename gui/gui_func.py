@@ -47,7 +47,7 @@ temp = ["*.cache", "*.data", "*.xpr", "*.log", "*.jou",
 IMG_STRING = "./fins_logo.png"
 
 # List of mandatory parameters
-mandatory_params = ["IP_NAME","IP_TOP","IP_TESTBENCH","IP_PACKAGE",
+mandatory_params = ["IP_NAME","IP_TOP","IP_TESTBENCH",
                     "IP_COMPANY_NAME","IP_COMPANY_URL","IP_COMPANY_LOGO",
                     "IP_DESCRIPTION"]
 

@@ -1,6 +1,6 @@
 --==============================================================================
 -- Company:     Geon Technologies, LLC
--- File:        {{ json_params['params']|selectattr('name', 'equalto', 'IP_STREAMS')|map(attribute='value')|join('') }}.vhd
+-- File:        {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams.vhd
 -- Description: Auto-generated from Jinja2 VHDL package template
 -- Generated:   {{ now }}
 --==============================================================================
@@ -12,10 +12,10 @@ use ieee.numeric_std.all;
 
 -- User Libraries
 library work;
-use work.{{ json_params['params']|selectattr('name', 'equalto', 'IP_PACKAGE')|map(attribute='value')|join('') }}.all;
+use work.{{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_pkg.all;
 
 -- Entity
-entity {{ json_params['params']|selectattr('name', 'equalto', 'IP_STREAMS')|map(attribute='value')|join('') }} is
+entity {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams is
   generic (
     G_SIM_FILES_DEST : string := "../../../"
   );
@@ -30,10 +30,10 @@ entity {{ json_params['params']|selectattr('name', 'equalto', 'IP_STREAMS')|map(
     {% if stream['mode'] == "slave" -%}m{%- else -%}s{%- endif -%}_axis_{{ stream['name'] }}_tready : {% if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif %} std_logic{%- if loop.index < loop.length -%};{%- endif -%}
   {% endfor %}
   );
-end {{ json_params['params']|selectattr('name', 'equalto', 'IP_STREAMS')|map(attribute='value')|join('') }};
+end {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams;
 
 -- Architecture
-architecture struct of {{ json_params['params']|selectattr('name', 'equalto', 'IP_STREAMS')|map(attribute='value')|join('') }} is
+architecture struct of {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams is
 begin
 {%- for stream in json_params['streams'] %}
   {%- if stream['mode'] == "slave" %}

@@ -6,7 +6,7 @@
 #===============================================================================
 
 # File Lists
-PARAM_FILES       := ip_params.tcl ip_params.m ip_override.json {{ json_params['params']|selectattr('name', 'equalto', 'IP_PACKAGE')|map(attribute='value')|join('') }}.vhd {{ json_params['params']|selectattr('name', 'equalto', 'IP_STREAMS')|map(attribute='value')|join('') }}.vhd
+PARAM_FILES       := ip_params.tcl ip_params.m ip_override.json {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_pkg.vhd {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams.vhd
 TEMP_FILES        := {{ json_params['filesets']['temp']|join(' ') }}
 SOURCE_FILES      := {{ json_params['filesets']['source']|join(' ') }}
 SIM_FILES         := {{ json_params['filesets']['sim']|join(' ') }}
