@@ -12,7 +12,7 @@ use ieee.numeric_std.all;
 
 -- User Libraries
 library work;
-use work.{{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_pkg.all;
+use work.{{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params.all;
 
 -- Entity
 entity {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams is

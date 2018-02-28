@@ -42,7 +42,7 @@ make                  = params_func.template()
 hdl_streams           = params_func.template()
 
 # Template filenames
-hdl.temp_name         = 'ip_pkg.vhd'
+hdl.temp_name         = 'ip_params.vhd'
 mat.temp_name         = 'ip_params.m'
 tcl.temp_name         = 'ip_params.tcl'
 make.temp_name        = 'ip.mk'
@@ -71,7 +71,7 @@ if (os.path.exists(override_filename)):
         if DEBUG_ON: pprint.pprint(json_params)
 
 # Dynamic Parameter filenames
-hdl.file_name         = params_func.getValue(json_params,'IP_NAME') + '_pkg.vhd'
+hdl.file_name         = params_func.getValue(json_params,'IP_NAME') + '_params.vhd'
 hdl_streams.file_name = params_func.getValue(json_params,'IP_NAME') + '_streams.vhd'
 
 #-------------------------------------------------------------------------------

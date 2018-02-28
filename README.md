@@ -2,7 +2,7 @@
 
 This repository contains Python scripts, Xilinx TCL scripts, MATLAB/Octave functions, and a PyGTK+ GUI for the rapid customization and generation of firmware intellectual property using the JSON-based Firmware IP Node Specification (FINS).
 
-![FINS Overview](./documentation/fins_overview.png "FINS Overview")
+![FINS Overview](./docs/fins_overview.png "FINS Overview")
 
 ## Prerequisites
 
@@ -49,7 +49,7 @@ To run an example of a stanalone usage of FinStreams, use the following commands
 
 The `codegen` folder contains scripts and templates for generation of HDL, MATLAB/Octave, and Xilinx TCL parameter files using Jinja2. Parameters from a JSON FINS file are inserted into the code generation templates for rapid customization of a firmware intellectual property module. The `Makefile` within the repository of the firmware IP module should control this code generation process as shown below.
 
-![FINS Detail](./documentation/fins_detail.png "FINS Detail")
+![FINS Detail](./docs/fins_detail.png "FINS Detail")
 
 For an example of the parameter generation, see our FIR Filter [here](https://github.com/Geontech/fir_filter.git).
 
