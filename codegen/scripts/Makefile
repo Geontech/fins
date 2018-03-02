@@ -7,12 +7,12 @@
 #              permission is obtained from Geon Technologies, LLC
 # Description: Makefile to retrieve repositories and generate parameters
 #===============================================================================
-.PHONY: all sim netlist clean params
+.PHONY: all sim netlist clean clean-all params
 
 all sim netlist: params
 	make -f ip.mk $@
 
-clean: params
+clean clean-all: params
 	make -f ip.mk $@
 	rm -rf ip.mk
 

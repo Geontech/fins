@@ -16,13 +16,17 @@ IP_TARGET         := {{ json_params['params']|selectattr('name', 'equalto', 'IP_
 SIM_TARGET        := sim_results.txt
 NETLIST_TARGET    := {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_netlist.edif
 
-.PHONY: all clean sim
+.PHONY: all clean clean-all sim
 
 all: $(IP_TARGET)
 
 clean:
+	rm -rf $(TEMP_FILES) $(PARAM_FILES)
+
+clean-all:
 {% for ip in json_params['ip'] -%}
-{% if ip['library'] == "user" %}	make -C {{ ip['repo_name'] }} $@
+{% if ip['library'] == "user" %}	ln -srf {{ ip['repo_name'] }}/fins/codegen/scripts/Makefile {{ ip['repo_name'] }}
+	make -C {{ ip['repo_name'] }} $@
 {% endif -%}
 {% endfor %}	rm -rf $(TEMP_FILES) $(PARAM_FILES)
 
@@ -47,6 +51,7 @@ $(NETLIST_TARGET) : $(IP_TARGET)
 {% for ip in json_params['ip'] %}
 {% if ip['library'] == "user" %}
 {{ ip['repo_name'] }}/{{ ip['name'] }}.xpr :
+	ln -srf {{ ip['repo_name'] }}/fins/codegen/scripts/Makefile {{ ip['repo_name'] }}
 	make -C {{ ip['repo_name'] }} all
 {% endif -%}
 {% endfor %}

@@ -21,9 +21,9 @@ if {[info exists "IP_PART"]} {
     create_project $IP_NAME . -force -part xc7z020clg484-1
 }
 
-# Check if there is a ./repos/ directory where sub-ip could be located
-if {[file exists repos]} {
-    set_property ip_repo_paths repos [current_project]
+# Check if there is a directory where sub-ip could be located
+if {[info exists "IP_USER_IP_CATALOG"]} {
+    set_property ip_repo_paths $IP_USER_IP_CATALOG [current_project]
     update_ip_catalog
 }
 
