@@ -28,18 +28,19 @@ from jinja2 import FileSystemLoader
 # Script Constants
 #-------------------------------------------------------------------------------
 # Turn on verbose output for this script
-DEBUG_ON              = False
+DEBUG_ON = False
 
 # JSON Filename
-params_filename       = 'ip_params.json'
-override_filename     = 'ip_override.json'
+params_filename   = 'ip_params.json'
+override_filename = 'ip_override.json'
 
 # Create a class for each file
-hdl                   = params_func.template()
-mat                   = params_func.template()
-tcl                   = params_func.template()
-make                  = params_func.template()
-hdl_streams           = params_func.template()
+hdl         = params_func.template()
+mat         = params_func.template()
+tcl         = params_func.template()
+make        = params_func.template()
+hdl_streams = params_func.template()
+hdl_regs    = params_func.template()
 
 # Template filenames
 hdl.temp_name         = 'ip_params.vhd'
@@ -47,12 +48,12 @@ mat.temp_name         = 'ip_params.m'
 tcl.temp_name         = 'ip_params.tcl'
 make.temp_name        = 'ip.mk'
 hdl_streams.temp_name = 'ip_streams.vhd'
+hdl_regs.temp_name    = 'ip_regs.vhd'
 
 # Static Parameter filenames
 mat.file_name  = 'ip_params.m'
 tcl.file_name  = 'ip_params.tcl'
 make.file_name = 'ip.mk'
-
 
 #-------------------------------------------------------------------------------
 # Read JSON Parameters/Configuration Files
@@ -73,6 +74,7 @@ if (os.path.exists(override_filename)):
 # Dynamic Parameter filenames
 hdl.file_name         = params_func.getValue(json_params,'IP_NAME') + '_params.vhd'
 hdl_streams.file_name = params_func.getValue(json_params,'IP_NAME') + '_streams.vhd'
+hdl_regs.file_name    = params_func.getValue(json_params,'IP_NAME') + '_regs.vhd'
 
 #-------------------------------------------------------------------------------
 # Setup Jinja2 Environment
@@ -87,6 +89,9 @@ env = params_func.env_setup(DEBUG_ON)
 #-------------------------------------------------------------------------------
 # Generate VHDL Streams File
 hdl_streams.make_file(env, json_params, now)
+
+# Generate VHDL Regs File
+hdl_regs.make_file(env, json_params, now)
 
 # Generate VHDL Package File
 hdl.make_file(env, json_params, now)
@@ -108,7 +113,7 @@ if 'ip' in json_params:
     # Loop through IP
     for ip in json_params['ip']:
         # Loop thorugh parameters of IP
-        param_index = 0;
+        param_index = 0
         for param in ip['params']:
             # Get the value of parent parameter
             parent_value = params_func.getValue(json_params, param['parent'])

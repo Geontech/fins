@@ -24,7 +24,7 @@ def getValue(params_dict, param_name):
 
 # Function to override parameters
 def overrideParams(params_dict, override_dict):
-    param_index = 0;
+    param_index = 0
     for param in params_dict['params']:
         for override_param in override_dict['params']:
             if (override_param['name'] == param['name']):

@@ -5,16 +5,19 @@
 # Generated:   {{ now }}
 #===============================================================================
 
+# Variables
+IP_NAME := {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}
+
 # File Lists
-PARAM_FILES       := ip_params.tcl ip_params.m ip_override.json {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params.vhd {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams.vhd
+PARAM_FILES       := ip_params.tcl ip_params.m ip_override.json $(IP_NAME)_params.vhd $(IP_NAME)_streams.vhd $(IP_NAME)_regs.vhd 
 TEMP_FILES        := {{ json_params['filesets']['temp']|join(' ') }}
 SOURCE_FILES      := {{ json_params['filesets']['source']|join(' ') }}
 SIM_FILES         := {{ json_params['filesets']['sim']|join(' ') }}
 CONSTRAINTS_FILES := {{ json_params['filesets']['constraints']|join(' ') }}
 USER_IP_TARGETS   := {% for ip in json_params['ip'] %}{% if ip['library'] == "user" %}{{ ip['repo_name'] }}/{{ ip['name'] }}.xpr {% endif -%}{% endfor %}
-IP_TARGET         := {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.xpr
+IP_TARGET         := $(IP_NAME).xpr
 SIM_TARGET        := sim_results.txt
-NETLIST_TARGET    := {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_netlist.edif
+NETLIST_TARGET    := $(IP_NAME)_netlist.edif
 
 .PHONY: all clean clean-all sim
 
@@ -43,7 +46,7 @@ $(SIM_TARGET) : $(IP_TARGET)
 
 $(NETLIST_TARGET) : $(IP_TARGET)
 	vivado -mode batch -source ./fins/xilinx/ip_netlist.tcl >> ip_netlist.log 2>&1
-	rm -rf {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_netlist
+	rm -rf $(IP_NAME)_netlist
 	find . -name "*.edif" ! -name "$@" -delete
 	find . -name "*.edn" ! -name "$@" -delete
 

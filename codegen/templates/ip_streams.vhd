@@ -1,7 +1,7 @@
 --==============================================================================
 -- Company:     Geon Technologies, LLC
 -- File:        {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams.vhd
--- Description: Auto-generated from Jinja2 VHDL package template
+-- Description: Auto-generated from Jinja2 VHDL streams template
 -- Generated:   {{ now }}
 --==============================================================================
 
