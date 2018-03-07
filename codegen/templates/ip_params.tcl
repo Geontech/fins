@@ -8,7 +8,7 @@
 # Parameters
 {% for param in fins['params'] -%}
 {% if "tcl" in param['used_in'] -%}
-{% if param['type'] == "string" -%} set {{ param['name'] }} "{{ param['value'] }}"
+{% if param['value'] is string -%} set {{ param['name'] }} "{{ param['value'] }}"
 {% elif param['type'] == "code" -%} {{ param['value'] }}
 {% else -%} set {{ param['name'] }} {{ param['value'] }}
 {% endif -%}

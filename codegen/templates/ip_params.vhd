@@ -30,8 +30,8 @@ package {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute
 {% if param['type'] == "code" -%} {{ param['value'] }}
 {% else -%} constant {{ param['name'] }} : {{ param['type'] }} :=
 {%- if param['value'] is iterable and param['value'] is not string %} ({{ param['value']|join(', ') }});
-{% elif param['type'] == "string" %} "{{ param['value'] }}";
-{% else %} {{ param['value'] }};
+{% elif param['value'] is string %} "{{ param['value'] }}";
+{% else %} {{ param['value']|lower }};
 {% endif -%}
 {% endif -%}
 {% endif -%}

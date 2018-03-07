@@ -11,8 +11,8 @@
 {% if param['type'] == "code" -%} {{ param['value'] }}
 {% else -%} params.{{ param['name'] }} =
 {%- if param['value'] is iterable and param['value'] is not string %} [{{ param['value']|join(', ') }}];
-{% elif param['type'] == "string" %} '{{ param['value'] }}';
-{% else %} {{ param['value'] }};
+{% elif param['value'] is string %} '{{ param['value'] }}';
+{% else %} {{ param['value']|lower }};
 {% endif -%}
 {% endif -%}
 {% endif -%}
