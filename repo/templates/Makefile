@@ -7,25 +7,25 @@
 #              permission is obtained from Geon Technologies, LLC
 # Description: Makefile to retrieve repositories and generate parameters
 #===============================================================================
-# This should match IP_NAME in ip_params.json
-IP_NAME := {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}
+IP_NAME := signal_detector
 IP_PROJ := $(IP_NAME).xpr
+IP_MAKE := ip.mk
 
-.PHONY: all sim netlist clean clean-all params
+.PHONY: all sim netlist clean clean-all fins
 
 all: $(IP_PROJ)
 
-sim netlist: ip.mk
-	make -f ip.mk $@
+sim netlist: $(IP_MAKE)
+	make -f $(IP_MAKE) $@
 
-clean clean-all: ip.mk
-	make -f ip.mk $@
-	rm -f ip.mk
+clean clean-all: $(IP_MAKE)
+	make -f $(IP_MAKE) $@
+	rm -f $(IP_MAKE)
 
-params: ip.mk
+fins: $(IP_MAKE)
 
-ip.mk: ip_params.json
-	python ./fins/codegen/scripts/gen_ip_params.py
+$(IP_MAKE): fins.json
+	python ./fins/codegen/scripts/gen_fins.py
 
-$(IP_PROJ): ip.mk
-	make -f ip.mk all
+$(IP_PROJ): $(IP_MAKE)
+	make -f $(IP_MAKE) all

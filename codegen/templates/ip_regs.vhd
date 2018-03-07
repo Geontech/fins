@@ -1,6 +1,6 @@
 --==============================================================================
 -- Company:     Geon Technologies, LLC
--- File:        {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_regs.vhd
+-- File:        {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_regs.vhd
 -- Description: Auto-generated from Jinja2 VHDL regs template
 -- Generated:   {{ now }}
 --==============================================================================
@@ -13,10 +13,10 @@ use ieee.math_real.all;
 
 -- User Libraries
 library work;
-use work.{{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params.all;
+use work.{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params.all;
 
 -- Entity
-entity {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_regs is
+entity {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_regs is
   generic (
     G_ADDR_WIDTH : natural := 16;
     G_DATA_WIDTH : natural := 32;
@@ -32,7 +32,7 @@ entity {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(att
     s_swconfig_rd_enable : in  std_logic;
     s_swconfig_rd_valid  : out std_logic;
     s_swconfig_rd_data   : out std_logic_vector(G_DATA_WIDTH-1 downto 0);
-    {% for region in json_params['regs']['regions'] -%}
+    {% for region in fins['regs']['regions'] -%}
     {% if region['passthrough'] -%}
     -- Decoded Passthrough Master Software Configuration Bus
     m_swconfig_{{ region['name'] }}_clk       : out std_logic;
@@ -42,27 +42,26 @@ entity {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(att
     m_swconfig_{{ region['name'] }}_wr_data   : out std_logic_vector(G_DATA_WIDTH-1 downto 0);
     m_swconfig_{{ region['name'] }}_rd_enable : out std_logic;
     m_swconfig_{{ region['name'] }}_rd_valid  : in  std_logic;
-    m_swconfig_{{ region['name'] }}_rd_data   : in  std_logic_vector(G_DATA_WIDTH-1 downto 0)
-      {%- if loop.index < loop.length -%};{%- endif -%}
+    m_swconfig_{{ region['name'] }}_rd_data   : in  std_logic_vector(G_DATA_WIDTH-1 downto 0){%- if loop.index < loop.length -%};{%- endif -%}
     {% else -%}
     -- Register Inputs/Outputs
-    {% for reg in region['regs'] -%}
-      {{ region['name'] }}_{{ reg['name'] }} : {% if reg['writeable'] %}out{% else %}in {% endif %} std_logic_vector({{ reg['width'] }}-1 downto 0)
-    {%- endfor %}
-      {%- if loop.index < loop.length -%};{%- endif -%}
+    {% for reg in region['regs'] %}
+    {{ region['name'] }}_{{ reg['name'] }} : {% if reg['writeable'] %}out{% else %}in {% endif %} std_logic_vector({{ reg['width'] }}-1 downto 0){% if loop.index < loop.length %};{% endif %}
+    {%- endfor -%}
+    {%- if loop.index < loop.length %};{% endif %}
     {% endif %}
     {% endfor %}
   );
-end {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_regs;
+end {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_regs;
 
-architecture rtl of {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_regs is
+architecture rtl of {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_regs is
 
   ------------------------------------------------------------------------------
   -- Constants
   ------------------------------------------------------------------------------
   constant REG_RD_ERROR_CODE : std_logic_vector(G_DATA_WIDTH-1 downto 0) := x"BADADD00";
 
-  {% for region in json_params['regs']['regions']|selectattr('passthrough', 'equalto', False)|list -%}
+  {% for region in fins['regs']['regions']|selectattr('passthrough', 'equalto', False)|list -%}
   ------------------------------------------------------------------------------
   -- Signals: Local Decode of "{{ region['name'] }}" base address region
   ------------------------------------------------------------------------------
@@ -101,7 +100,7 @@ begin
   ------------------------------------------------------------------------------
   -- Passthrough Clocks and Resets
   ------------------------------------------------------------------------------
-  {% for region in json_params['regs']['regions']|selectattr('passthrough', 'equalto', True)|list -%}
+  {% for region in fins['regs']['regions']|selectattr('passthrough', 'equalto', True)|list -%}
   m_swconfig_{{ region['name'] }}_clk   <= s_swconfig_clk;
   m_swconfig_{{ region['name'] }}_reset <= s_swconfig_reset;
   {% endfor %}
@@ -113,12 +112,12 @@ begin
   begin
     if (rising_edge(s_swconfig_clk)) then
       -- Data
-      {% for region in json_params['regs']['regions'] -%}
+      {% for region in fins['regs']['regions'] -%}
       m_swconfig_{{ region['name'] }}_wr_data <= s_swconfig_wr_data;
       {% endfor %}
       
       if (s_swconfig_reset = '1') then
-        {% for region in json_params['regs']['regions'] -%}
+        {% for region in fins['regs']['regions'] -%}
         m_swconfig_{{ region['name'] }}_wr_enable <= '0';
         m_swconfig_{{ region['name'] }}_rd_enable <= '0';
         m_swconfig_{{ region['name'] }}_address   <= (others => '0');
@@ -127,7 +126,7 @@ begin
         s_swconfig_rd_data  <= (others => '0');
       else
         -- Address
-        {% for region in json_params['regs']['regions'] -%}
+        {% for region in fins['regs']['regions'] -%}
         m_swconfig_{{ region['name'] }}_address <= s_swconfig_address(G_ADDR_WIDTH-G_BAR_WIDTH-1 downto 0);
         {% endfor %}
         
@@ -135,13 +134,13 @@ begin
         -- Note: Read responds by default with this error code
         s_swconfig_rd_valid <= s_swconfig_rd_enable;
         s_swconfig_rd_data  <= REG_RD_ERROR_CODE;
-        {% for region in json_params['regs']['regions'] -%}
+        {% for region in fins['regs']['regions'] -%}
         m_swconfig_{{ region['name'] }}_wr_enable <= '0';
         m_swconfig_{{ region['name'] }}_rd_enable <= '0';
         {% endfor %}
 
         -- Decode base address region
-        {% for region in json_params['regs']['regions'] -%}
+        {% for region in fins['regs']['regions'] -%}
         if ({{ loop.index-1 }} = unsigned(s_swconfig_address(G_ADDR_WIDTH-1 downto G_ADDR_WIDTH-G_BAR_WIDTH))) then
           m_swconfig_{{ region['name'] }}_wr_enable <= s_swconfig_wr_enable;
           m_swconfig_{{ region['name'] }}_rd_enable <= s_swconfig_rd_enable;
@@ -153,7 +152,7 @@ begin
     end if;
   end process s_bar_decode;
   
-  {% for region in json_params['regs']['regions']|selectattr('passthrough', 'equalto', False) -%}
+  {% for region in fins['regs']['regions']|selectattr('passthrough', 'equalto', False) -%}
   ------------------------------------------------------------------------------
   -- Local Register Decode of "{{ region['name'] }}" base address region
   ------------------------------------------------------------------------------
@@ -226,8 +225,10 @@ begin
     {{ region['name'] }}_reg_rd_values <= {{ region['name'] }}_reg_values;
 
     -- Assign external read values
-    {% for reg in region['regs']|selectattr('writeable', 'equalto', False)|list -%}
-    {{ region['name'] }}_reg_values({{ loop.index-1 }}*G_DATA_WIDTH+{{ reg['width'] }}-1 downto {{ loop.index-1 }}*G_DATA_WIDTH); <= {{ region['name'] }}_{{ reg['name'] }};
+    {% for reg in region['regs'] -%}
+    {% if not reg['writeable'] -%}
+    {{ region['name'] }}_reg_rd_values({{ loop.index-1 }}*G_DATA_WIDTH+{{ reg['width'] }}-1 downto {{ loop.index-1 }}*G_DATA_WIDTH) <= {{ region['name'] }}_{{ reg['name'] }};
+    {% endif %}
     {% endfor %}
   end process c_{{ region['name'] }}_read;
 

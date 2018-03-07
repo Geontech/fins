@@ -6,7 +6,7 @@
 #===============================================================================
 
 # Parameters
-{% for param in json_params['params'] -%}
+{% for param in fins['params'] -%}
 {% if "tcl" in param['used_in'] -%}
 {% if param['type'] == "string" -%} set {{ param['name'] }} "{{ param['value'] }}"
 {% elif param['type'] == "code" -%} {{ param['value'] }}
@@ -17,18 +17,18 @@
 
 # List the source files
 set SOURCE_FILES [list \
-{% for source_file in json_params['filesets']['source'] -%}
+{% for source_file in fins['filesets']['source'] -%}
 {{ source_file }} \
 {% endfor %}]
 
 # List the simulation files
 set SIM_FILES [list \
-{% for sim_file in json_params['filesets']['sim'] -%}
+{% for sim_file in fins['filesets']['sim'] -%}
 {{ sim_file }} \
 {% endfor %}]
 
 # List the constraints files
 set CONSTRAINTS_FILES [list \
-{% for constraint_file in json_params['filesets']['constraints'] -%}
+{% for constraint_file in fins['filesets']['constraints'] -%}
 {{ constraint_file }} \
 {% endfor %}]

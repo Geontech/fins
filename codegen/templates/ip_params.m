@@ -1,12 +1,12 @@
 %===============================================================================
 % Company:     Geon Technologies, LLC
-% File:        sim_params.m
-% Description: Auto-generated from Jinja2 Matlab/Octave Sim Params Template
+% File:        ip_params.m
+% Description: Auto-generated from Jinja2 Matlab/Octave Params Template
 % Generated:   {{ now }}
 %===============================================================================
 
 % Parameters
-{% for param in json_params['params'] -%}
+{% for param in fins['params'] -%}
 {% if "mat" in param['used_in'] -%}
 {% if param['type'] == "code" -%} {{ param['value'] }}
 {% else -%} params.{{ param['name'] }} =
@@ -19,7 +19,7 @@
 {% endfor %}
 
 % Streams
-{% for stream in json_params['streams'] -%}
+{% for stream in fins['streams'] -%}
 streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.bit_width   = params.{{ stream['bit_width'] }};
 streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.is_complex  = params.{{ stream['is_complex'] }};
 streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.is_signed   = params.{{ stream['is_signed'] }};

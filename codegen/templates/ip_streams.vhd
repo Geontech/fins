@@ -1,6 +1,6 @@
 --==============================================================================
 -- Company:     Geon Technologies, LLC
--- File:        {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams.vhd
+-- File:        {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams.vhd
 -- Description: Auto-generated from Jinja2 VHDL streams template
 -- Generated:   {{ now }}
 --==============================================================================
@@ -12,16 +12,16 @@ use ieee.numeric_std.all;
 
 -- User Libraries
 library work;
-use work.{{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params.all;
+use work.{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params.all;
 
 -- Entity
-entity {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams is
+entity {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams is
   generic (
     G_SIM_FILES_DEST : string := "../../../"
   );
   port (
     simulation_done : in boolean;
-  {%- for stream in json_params['streams'] %}
+  {%- for stream in fins['streams'] %}
     -- {{ stream['name'] }} Stream
     {% if stream['mode'] == "slave" -%}m{%- else -%}s{%- endif -%}_axis_{{ stream['name'] }}_clk    : in std_logic;
     {% if stream['mode'] == "slave" -%}m{%- else -%}s{%- endif -%}_axis_{{ stream['name'] }}_tdata  : {% if stream['mode'] == "slave" -%}out{%- else -%}in{%- endif %} std_logic_vector({{ stream['bit_width'] }}-1 downto 0);
@@ -30,12 +30,12 @@ entity {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(att
     {% if stream['mode'] == "slave" -%}m{%- else -%}s{%- endif -%}_axis_{{ stream['name'] }}_tready : {% if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif %} std_logic{%- if loop.index < loop.length -%};{%- endif -%}
   {% endfor %}
   );
-end {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams;
+end {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams;
 
 -- Architecture
-architecture struct of {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams is
+architecture struct of {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams is
 begin
-{%- for stream in json_params['streams'] %}
+{%- for stream in fins['streams'] %}
   {%- if stream['mode'] == "slave" %}
   -- Input from file
   u_stream_in_{{ stream['name'] }} : entity work.axis_file_reader

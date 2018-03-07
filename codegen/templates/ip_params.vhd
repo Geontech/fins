@@ -1,6 +1,6 @@
 --==============================================================================
 -- Company:     Geon Technologies, LLC
--- File:        {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params.vhd
+-- File:        {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params.vhd
 -- Description: Auto-generated from Jinja2 VHDL package template
 -- Generated:   {{ now }}
 --==============================================================================
@@ -10,12 +10,23 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+-- User Libraries
+library work;
+{% for param in fins['params'] -%}
+{% if "hdl" in param['used_in'] -%}
+{% if param['type'] == "package" -%}
+use work.{{ param['value'] }}.all;
+{% endif -%}
+{% endif -%}
+{% endfor %}
+
 -- Package
-package {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params is
+package {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params is
 
 -- Parameters
-{% for param in json_params['params'] -%}
+{% for param in fins['params'] -%}
 {% if "hdl" in param['used_in'] -%}
+{% if param['type'] != "package" -%}
 {% if param['type'] == "code" -%} {{ param['value'] }}
 {% else -%} constant {{ param['name'] }} : {{ param['type'] }} :=
 {%- if param['value'] is iterable and param['value'] is not string %} ({{ param['value']|join(', ') }});
@@ -24,6 +35,7 @@ package {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(at
 {% endif -%}
 {% endif -%}
 {% endif -%}
+{% endif -%}
 {% endfor %}
 
-end {{ json_params['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params;
+end {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params;

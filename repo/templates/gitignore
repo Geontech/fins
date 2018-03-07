@@ -1,0 +1,43 @@
+# Simulation Outputs
+sim_out*.txt
+sim_in*.txt
+sim_results.mat
+sim_results.txt
+
+# Vivado Log Files
+vivado*.jou
+vivado*.log
+vivado_*.str
+vivado_*.zip
+/xgui/*
+
+# Vivado Project Files
+/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.cache/*
+/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.srcs/*
+/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.hw/*
+/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.ip_user_files/*
+/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.runs/*
+/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.sim/*
+/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.xpr
+/*.coe
+/component.xml
+
+# FINS Log Files
+/ip_create.log
+/ip_simulate.log
+/ip_netlist.log
+
+# FINS Generated Parameter Files
+/ip.mk
+/fins_edit.json
+/ip_params.m
+/ip_params.tcl
+/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params.vhd
+/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams.vhd
+/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_regs.vhd
+
+# DIA Diagram Editor Temporary Files
+*.dia~
+
+# Octave Workspace Files
+/octave-workspace
