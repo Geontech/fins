@@ -29,6 +29,7 @@ fins_edit_filename = 'fins_edit.json'
 hdl         = params_func.template()
 mat         = params_func.template()
 tcl         = params_func.template()
+tcl_ip      = params_func.template()
 make        = params_func.template()
 hdl_streams = params_func.template()
 hdl_regs    = params_func.template()
@@ -37,6 +38,7 @@ hdl_regs    = params_func.template()
 hdl.temp_name         = 'ip_params.vhd'
 mat.temp_name         = 'ip_params.m'
 tcl.temp_name         = 'ip_params.tcl'
+tcl_ip.temp_name      = 'ip_import_user.tcl'
 make.temp_name        = 'ip.mk'
 hdl_streams.temp_name = 'ip_streams.vhd'
 hdl_regs.temp_name    = 'ip_regs.vhd'
@@ -60,6 +62,7 @@ IP_NAME = params_func.get_param_value(fins,'IP_NAME')
 # Dynamic Parameter filenames
 mat.file_name         = 'ip_params.m'
 tcl.file_name         = 'ip_params.tcl'
+tcl_ip.file_name      = 'ip_import_user.tcl'
 make.file_name        = 'ip.mk'
 hdl.file_name         = IP_NAME + '_params.vhd'
 hdl_streams.file_name = IP_NAME + '_streams.vhd'
@@ -76,6 +79,8 @@ if 'streams' in fins:
     hdl_streams.make_file(env, fins, now)
 if 'regs' in fins:
     hdl_regs.make_file(env, fins, now)
+if 'ip' in fins:
+    tcl_ip.make_file(env, fins, now)
 hdl.make_file(env, fins, now)
 mat.make_file(env, fins, now)
 tcl.make_file(env, fins, now)

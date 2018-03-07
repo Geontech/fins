@@ -9,7 +9,7 @@
 IP_NAME := {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}
 
 # File Lists
-FINS_FILES        := ip_params.tcl ip_params.m fins_edit.json $(IP_NAME)_params.vhd $(IP_NAME)_streams.vhd $(IP_NAME)_regs.vhd 
+FINS_FILES        := ip_params.tcl ip_import_user.tcl ip_params.m fins_edit.json $(IP_NAME)_params.vhd $(IP_NAME)_streams.vhd $(IP_NAME)_regs.vhd 
 TEMP_FILES        := {{ fins['filesets']['temp']|join(' ') }}
 SOURCE_FILES      := {{ fins['filesets']['source']|join(' ') }}
 SIM_FILES         := {{ fins['filesets']['sim']|join(' ') }}

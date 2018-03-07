@@ -45,6 +45,11 @@ if {[file exists ip_import.tcl]} {
     source ip_import.tcl
 }
 
+# Add User IP that will be used in this project if the file exists
+if {[file exists ip_import_user.tcl]} {
+    source ip_import_user.tcl
+}
+
 # Set the top module
 if {[info exists "IP_TOP"]} {
     set_property "top" $IP_TOP [get_filesets "sources*"]
