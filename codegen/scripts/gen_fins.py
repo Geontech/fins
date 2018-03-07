@@ -8,7 +8,6 @@
 # Description: Python script for generating parameter files using Jinja2
 #              templates
 #===============================================================================
-
 import os
 import json
 import types
@@ -73,8 +72,10 @@ now = datetime.datetime.utcnow()
 env = params_func.env_setup(DEBUG_ON)
 
 # Generate Files from templates
-hdl_streams.make_file(env, fins, now)
-hdl_regs.make_file(env, fins, now)
+if 'streams' in fins:
+    hdl_streams.make_file(env, fins, now)
+if 'regs' in fins:
+    hdl_regs.make_file(env, fins, now)
 hdl.make_file(env, fins, now)
 mat.make_file(env, fins, now)
 tcl.make_file(env, fins, now)
