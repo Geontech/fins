@@ -84,7 +84,7 @@ architecture rtl of {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|m
   constant {{ region['name'] }}_reg_default : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0) := 
     {% for reg in region['regs'] -%}
     std_logic_vector(resize(to_unsigned({{ reg['default'] }}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %}&{% else %};{% endif %}
-    {%- endfor %}
+    {% endfor %}
 
   -- The Bit Mask for Writeable Register Values
   -- Note: The mask prevents bits from being written in invalid areas
@@ -140,6 +140,7 @@ begin
         {% endfor %}
 
         -- Decode base address region
+        {% if fins['regs']['regions']|length > 1 %}
         {% for region in fins['regs']['regions'] -%}
         if ({{ loop.index-1 }} = unsigned(s_swconfig_address(G_ADDR_WIDTH-1 downto G_ADDR_WIDTH-G_BAR_WIDTH))) then
           m_swconfig_{{ region['name'] }}_wr_enable <= s_swconfig_wr_enable;
@@ -148,6 +149,14 @@ begin
           s_swconfig_rd_data  <= m_swconfig_{{ region['name'] }}_rd_data;
         end if;
         {% endfor %}
+        {% else %}
+        {% for region in fins['regs']['regions'] -%}
+        m_swconfig_{{ region['name'] }}_wr_enable <= s_swconfig_wr_enable;
+        m_swconfig_{{ region['name'] }}_rd_enable <= s_swconfig_rd_enable;
+        s_swconfig_rd_valid <= m_swconfig_{{ region['name'] }}_rd_valid;
+        s_swconfig_rd_data  <= m_swconfig_{{ region['name'] }}_rd_data;
+        {% endfor %}
+        {% endif %}
       end if;
     end if;
   end process s_bar_decode;
@@ -211,7 +220,7 @@ begin
   -- Assign register outputs
   {% for reg in region['regs']|selectattr('writeable', 'equalto', True)|list -%}
   {{ region['name'] }}_{{ reg['name'] }} <= {{ region['name'] }}_reg_values({{ loop.index-1 }}*G_DATA_WIDTH+{{ reg['width'] }}-1 downto {{ loop.index-1 }}*G_DATA_WIDTH);
-  {%- endfor %}
+  {% endfor %}
 
   -- Combinatorial Process to assign register read values
   c_{{ region['name'] }}_read : process (
