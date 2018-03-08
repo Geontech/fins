@@ -82,7 +82,7 @@ function [] = fins_write( varargin )
       end
       % Round data if not integers
       int_values = stream.values(:);
-      if (any((rem(real(stream.values),1) > 0) || (rem(imag(stream.values),1) > 0)))
+      if (any((rem(real(stream.values),1) > 0)) || any((rem(imag(stream.values),1) > 0)))
         fprintf('WARNING: Values for %s are not purely integers. Rounding data...\n', stream_name);
         int_values = complex(round(real(int_values)), round(imag(int_values)));
       end
