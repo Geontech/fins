@@ -7,7 +7,7 @@
 #              permission is obtained from Geon Technologies, LLC
 # Description: Makefile to retrieve repositories and generate parameters
 #===============================================================================
-IP_NAME := signal_detector
+IP_NAME := {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}
 IP_PROJ := $(IP_NAME).xpr
 IP_MAKE := ip.mk
 
