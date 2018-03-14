@@ -82,15 +82,19 @@ architecture rtl of {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|m
 
   -- Default for Writeable Register Values
   constant {{ region['name'] }}_reg_default : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0) := 
-    {% for reg in region['regs'] -%}
-    std_logic_vector(resize(to_unsigned({{ reg['default'] }}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %}&{% else %};{% endif %}
+    {% for reg in region['regs']|reverse -%}
+    std_logic_vector(resize(to_unsigned({{ reg['default'] }}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% else %};{% endif %}
     {% endfor %}
 
   -- The Bit Mask for Writeable Register Values
   -- Note: The mask prevents bits from being written in invalid areas
   constant {{ region['name'] }}_reg_wr_mask : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0) := 
-    {% for reg in region['regs'] -%}
-    std_logic_vector(resize(to_unsigned({% if reg['writeable'] %}2**{{ reg['width'] }}-1{% else %}0{% endif %}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %}&{% else %};{% endif %}
+    {% for reg in region['regs']|reverse -%}
+    {%- if reg['writeable'] and ((reg['width'] == 32) or (reg['width'] == '32')) %}
+    x"FFFFFFFF"{% if loop.index < loop.length %} &{% else %};{% endif %}
+    {%- else %}
+    std_logic_vector(resize(to_unsigned({% if reg['writeable'] %}2**{{ reg['width'] }}-1{% else %}0{% endif %}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% else %};{% endif %}
+    {%- endif -%}
     {% endfor %}
 
   {% endfor %}

@@ -40,9 +40,17 @@ $(IP_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES) $(USER_IP_TARGE
 	vivado -mode batch -source ./fins/xilinx/ip_create.tcl >> ip_create.log 2>&1
 
 $(SIM_TARGET) : $(IP_TARGET)
+	{% if 'tools' in fins and 'sim' in fins['tools'] and 'matlab' in fins['tools']['sim'] -%}
+	matlab -nosplash -nodesktop -r "sim_setup;exit" >> ip_simulate.log 2>&1
+	{%- else -%}
 	octave sim_setup.m >> ip_simulate.log 2>&1
+	{%- endif %}
 	vivado -mode batch -source ./fins/xilinx/ip_simulate.tcl >> ip_simulate.log 2>&1
+	{% if 'tools' in fins and 'sim' in fins['tools'] and 'matlab' in fins['tools']['sim'] -%}
+	matlab -nosplash -nodesktop -r "sim_verify;exit" >> ip_simulate.log 2>&1
+	{%- else -%}
 	octave sim_verify.m >> ip_simulate.log 2>&1
+	{%- endif %}
 
 $(NETLIST_TARGET) : $(IP_TARGET)
 	vivado -mode batch -source ./fins/xilinx/ip_netlist.tcl >> ip_netlist.log 2>&1
