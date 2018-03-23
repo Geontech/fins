@@ -96,8 +96,10 @@ if 'regs' in fins:
     hdl_regs.make_file(env, fins, now)
 if 'ip' in fins:
     tcl_ip.make_file(env, fins, now)
-hdl.make_file(env, fins, now)
-mat.make_file(env, fins, now)
+if 'params' in fins:
+    hdl.make_file(env, fins, now)
+if ('streams' in fins) or ('params' in fins):
+    mat.make_file(env, fins, now)
 tcl.make_file(env, fins, now)
 make.make_file(env, fins, now)
 
@@ -108,25 +110,24 @@ make.make_file(env, fins, now)
 if 'ip' in fins:
     # Loop through IP
     for ip in fins['ip']:
-        # Loop thorugh parameters of IP
-        param_index = 0
-        for param in ip['params']:
-            # Get the value of parent parameter
-            parent_value = params_func.get_param_value(fins, param['parent'])
-            if parent_value is not None:
-                # Put the value into the IP
-                ip['params'][param_index]['value'] = parent_value
-                # Remove the 'parent' field
-                ip['params'][param_index].pop('parent', None)
-            else:
-                print 'Error: {} of {} not found in parent IP'.format(param['parent'], ip['name'])
-                exit()
-            # Increment the index
-            param_index += 1
-        # Once we are done retrieving parameter values, write the
-        # fins edit JSON file for sub-ip
-        with open(ip['repo_name'] + '/' + fins_edit_filename, 'w') as fins_edit_file:
-            # Strip all fields except for params
-            fins_edit_params = {}
-            fins_edit_params['params'] = ip['params']
-            json.dump(fins_edit_params, fins_edit_file, sort_keys=True, indent=2)
+        # Make sure there are params
+        if 'params' in ip:
+            # Loop through parameters of IP
+            for param_ix, param in enumerate(ip['params']):
+                # Get the value of parent parameter
+                parent_value = params_func.get_param_value(fins, param['parent'])
+                if parent_value is not None:
+                    # Put the value into the IP
+                    ip['params'][param_ix]['value'] = parent_value
+                    # Remove the 'parent' field
+                    ip['params'][param_ix].pop('parent', None)
+                else:
+                    print 'Error: {} of {} not found in parent IP'.format(param['parent'], ip['name'])
+                    exit()
+            # Once we are done retrieving parameter values, write the
+            # fins edit JSON file for sub-ip
+            with open(ip['repo_name'] + '/' + fins_edit_filename, 'w') as fins_edit_file:
+                # Strip all fields except for params
+                fins_edit_params = {}
+                fins_edit_params['params'] = ip['params']
+                json.dump(fins_edit_params, fins_edit_file, sort_keys=True, indent=2)
