@@ -32,6 +32,7 @@ vivado_*.zip
 /ip_params.m
 /ip_params.tcl
 /ip_import_user.tcl
+/fins_edit.json
 /{{ fins['name'] }}_params.vhd
 /{{ fins['name'] }}_streams.vhd
 /{{ fins['name'] }}_regs.vhd

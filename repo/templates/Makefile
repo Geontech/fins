@@ -26,7 +26,7 @@ fins: $(IP_MAKE)
 
 persona: fins.json
 	python ./fins/codegen/scripts/gen_persona.py
-	redhawk-codegen -C ./rh_persona --persona ./rh_persona/signal_detector.spd.xml
+	redhawk-codegen -C ./rh_persona --persona ./rh_persona/$(IP_NAME).spd.xml
 
 $(IP_MAKE): fins.json
 	python ./fins/codegen/scripts/gen_fins.py
