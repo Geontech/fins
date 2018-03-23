@@ -5,13 +5,20 @@
 # Generated:   {{ now }}
 #===============================================================================
 
+# IP Definition
+set IP_NAME "{{ fins['name'] }}"
+{% if 'description' in fins %}set IP_DESCRIPTION "{{ fins['description'] }}"{% endif %}
+{% if 'company_name' in fins %}set IP_COMPANY_NAME "{{ fins['company_name'] }}"{% endif %}
+{% if 'company_url' in fins %}set IP_COMPANY_URL "{{ fins['company_url'] }}"{% endif %}
+{% if 'company_logo' in fins %}set IP_COMPANY_LOGO "{{ fins['company_logo'] }}"{% endif %}
+{% if 'user_ip_catalog' in fins %}set IP_USER_IP_CATALOG "{{ fins['user_ip_catalog'] }}"{% endif %}
+
 # Parameters
 {% for param in fins['params'] -%}
-{% if "tcl" in param['used_in'] -%}
-{% if param['value'] is string -%} set {{ param['name'] }} "{{ param['value'] }}"
-{% elif param['type'] == "code" -%} {{ param['value'] }}
-{% else -%} set {{ param['name'] }} {{ param['value'] }}
-{% endif -%}
+set {{ param['name'] }}
+{%- if param['value'] is iterable and param['value'] is not string %} [list {{ param['value']|join(' ') }}]
+{% elif param['value'] is string %} "{{ param['value'] }}"
+{% else %} {{ param['value'] }}
 {% endif -%}
 {% endfor %}
 

@@ -12,13 +12,13 @@ vivado_*.zip
 /xgui/*
 
 # Vivado Project Files
-/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.cache/*
-/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.srcs/*
-/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.hw/*
-/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.ip_user_files/*
-/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.runs/*
-/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.sim/*
-/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}.xpr
+/{{ fins['name'] }}.cache/*
+/{{ fins['name'] }}.srcs/*
+/{{ fins['name'] }}.hw/*
+/{{ fins['name'] }}.ip_user_files/*
+/{{ fins['name'] }}.runs/*
+/{{ fins['name'] }}.sim/*
+/{{ fins['name'] }}.xpr
 /*.coe
 /component.xml
 
@@ -29,13 +29,13 @@ vivado_*.zip
 
 # FINS Generated Parameter Files
 /ip.mk
-/fins_edit.json
 /ip_params.m
 /ip_params.tcl
 /ip_import_user.tcl
-/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params.vhd
-/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams.vhd
-/{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_regs.vhd
+/{{ fins['name'] }}_params.vhd
+/{{ fins['name'] }}_streams.vhd
+/{{ fins['name'] }}_regs.vhd
+/rh_persona/*
 
 # DIA Diagram Editor Temporary Files
 *.dia~

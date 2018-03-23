@@ -20,15 +20,6 @@ FINS_FILENAME = 'fins.json'
 with open(FINS_FILENAME) as fins_data:
     fins = json.load(fins_data)
 
-# Get IP_NAME
-for param in fins['params']:
-    if param['name'] == 'IP_NAME':
-        IP_NAME = param['value']
-        break
-else:
-    print('Error: IP_NAME not found in fins.json')
-    exit()
-
 # Setup Jinja2 environment
 template_path = os.path.dirname(os.path.realpath(__file__))
 template_path = template_path[:template_path.rfind('/')]

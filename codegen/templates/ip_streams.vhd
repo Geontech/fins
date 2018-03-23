@@ -1,6 +1,6 @@
 --==============================================================================
 -- Company:     Geon Technologies, LLC
--- File:        {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams.vhd
+-- File:        {{ fins['name'] }}_streams.vhd
 -- Description: Auto-generated from Jinja2 VHDL streams template
 -- Generated:   {{ now }}
 --==============================================================================
@@ -12,10 +12,10 @@ use ieee.numeric_std.all;
 
 -- User Libraries
 library work;
-use work.{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params.all;
+use work.{{ fins['name'] }}_params.all;
 
 -- Entity
-entity {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams is
+entity {{ fins['name'] }}_streams is
   generic (
     G_SIM_FILES_DEST : string := "../../../"
   );
@@ -30,10 +30,10 @@ entity {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute=
     {% if stream['mode'] == "slave" -%}m{%- else -%}s{%- endif -%}_axis_{{ stream['name'] }}_tready : {% if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif %} std_logic{%- if loop.index < loop.length -%};{%- endif -%}
   {% endfor %}
   );
-end {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams;
+end {{ fins['name'] }}_streams;
 
 -- Architecture
-architecture struct of {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_streams is
+architecture struct of {{ fins['name'] }}_streams is
 begin
 {%- for stream in fins['streams'] %}
   {%- if stream['mode'] == "slave" %}

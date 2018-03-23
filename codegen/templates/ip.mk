@@ -5,19 +5,16 @@
 # Generated:   {{ now }}
 #===============================================================================
 
-# Variables
-IP_NAME := {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}
-
 # File Lists
-FINS_FILES        := ip_params.tcl ip_import_user.tcl ip_params.m fins_edit.json $(IP_NAME)_params.vhd $(IP_NAME)_streams.vhd $(IP_NAME)_regs.vhd 
+FINS_FILES        := ip_params.tcl ip_import_user.tcl ip_params.m fins_edit.json {{ fins['name'] }}_params.vhd {{ fins['name'] }}_streams.vhd {{ fins['name'] }}_regs.vhd 
 TEMP_FILES        := {{ fins['filesets']['temp']|join(' ') }}
 SOURCE_FILES      := {{ fins['filesets']['source']|join(' ') }}
 SIM_FILES         := {{ fins['filesets']['sim']|join(' ') }}
 CONSTRAINTS_FILES := {{ fins['filesets']['constraints']|join(' ') }}
 USER_IP_TARGETS   := {% for ip in fins['ip'] %}{% if ip['library'] == "user" %}{{ ip['repo_name'] }}/{{ ip['name'] }}.xpr {% endif -%}{% endfor %}
-IP_TARGET         := $(IP_NAME).xpr
+IP_TARGET         := {{ fins['name'] }}.xpr
 SIM_TARGET        := sim_results.txt
-NETLIST_TARGET    := $(IP_NAME)_netlist.edif
+NETLIST_TARGET    := {{ fins['name'] }}_netlist.edif
 
 .PHONY: all clean clean-all sim
 
@@ -54,7 +51,7 @@ $(SIM_TARGET) : $(IP_TARGET)
 
 $(NETLIST_TARGET) : $(IP_TARGET)
 	vivado -mode batch -source ./fins/xilinx/ip_netlist.tcl >> ip_netlist.log 2>&1
-	rm -rf $(IP_NAME)_netlist
+	rm -rf {{ fins['name'] }}_netlist
 	find . -name "*.edif" ! -name "$@" -delete
 	find . -name "*.edn" ! -name "$@" -delete
 

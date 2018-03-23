@@ -9,6 +9,7 @@
 #              templates
 #===============================================================================
 import os
+import re
 import json
 import types
 import shutil
@@ -49,24 +50,38 @@ with open(fins_filename) as fins_data:
     if DEBUG_ON: pprint(fins)
 
 # Import JSON Override Parameters if they exist
-if (os.path.exists(fins_edit_filename)):
+if os.path.exists(fins_edit_filename):
     with open(fins_edit_filename) as fins_edit_data:
         fins_edit = json.load(fins_edit_data)
         if DEBUG_ON: pprint(fins_edit)
         fins = params_func.edit_params(fins, fins_edit)
         if DEBUG_ON: pprint(fins)
 
-# Get IP_NAME
-IP_NAME = params_func.get_param_value(fins,'IP_NAME')
-
 # Dynamic Parameter filenames
 mat.file_name         = 'ip_params.m'
 tcl.file_name         = 'ip_params.tcl'
 tcl_ip.file_name      = 'ip_import_user.tcl'
 make.file_name        = 'ip.mk'
-hdl.file_name         = IP_NAME + '_params.vhd'
-hdl_streams.file_name = IP_NAME + '_streams.vhd'
-hdl_regs.file_name    = IP_NAME + '_regs.vhd'
+hdl.file_name         = fins['name'] + '_params.vhd'
+hdl_streams.file_name = fins['name'] + '_streams.vhd'
+hdl_regs.file_name    = fins['name'] + '_regs.vhd'
+
+# Check if any of the source files are package files and add them to fins
+hdl_packages = []
+for source_file in fins['filesets']['source']:
+    if not os.path.exists(source_file):
+        continue
+    if hdl.file_name in source_file or hdl_regs.file_name in source_file:
+        continue
+    with open(source_file) as source_file_data:
+        source_file_text = source_file_data.read()
+        regex_pattern = re.compile(r'\npackage *\w* *is', re.IGNORECASE)
+        match = regex_pattern.search(source_file_text)
+        if match:
+            hdl_package = source_file[source_file.rfind('/')+1:source_file.rfind('.')]
+            hdl_packages.append(hdl_package)
+if hdl_packages:
+    fins['packages'] = hdl_packages
 
 # Get current date and time
 now = datetime.datetime.utcnow()

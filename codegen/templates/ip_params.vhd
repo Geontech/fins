@@ -1,6 +1,6 @@
 --==============================================================================
 -- Company:     Geon Technologies, LLC
--- File:        {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params.vhd
+-- File:        {{ fins['name'] }}_params.vhd
 -- Description: Auto-generated from Jinja2 VHDL package template
 -- Generated:   {{ now }}
 --==============================================================================
@@ -11,31 +11,25 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 -- User Libraries
+{% if 'packages' in fins -%}
 library work;
-{% for param in fins['params'] -%}
-{% if "hdl" in param['used_in'] -%}
-{% if param['type'] == "package" -%}
-use work.{{ param['value'] }}.all;
-{% endif -%}
-{% endif -%}
+{% for pkg in fins['packages'] -%}
+use work.{{ pkg }}.all;
 {% endfor %}
+{% endif %}
 
 -- Package
-package {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params is
+package {{ fins['name'] }}_params is
 
 -- Parameters
 {% for param in fins['params'] -%}
-{% if "hdl" in param['used_in'] -%}
-{% if param['type'] != "package" -%}
-{% if param['type'] == "code" -%} {{ param['value'] }}
-{% else -%} constant {{ param['name'] }} : {{ param['type'] }} :=
-{%- if param['value'] is iterable and param['value'] is not string %} ({{ param['value']|join(', ') }});
-{% elif param['value'] is string %} "{{ param['value'] }}";
-{% else %} {{ param['value']|lower }};
-{% endif -%}
-{% endif -%}
-{% endif -%}
+constant {{ param['name'] }} : 
+{%- if param['value'] is iterable and param['value'] is not string %} {{ param['hdl_type'] }} := ({{ param['value']|join(', ') }});
+{% elif 'hdl_type' in param %} {{ param['hdl_type'] }} := {{ param['value'] }};
+{% elif param['value'] is string %} string := "{{ param['value'] }}";
+{% elif param['value'] is sameas true or param['value'] is sameas false %} boolean := {{ param['value']|lower }};
+{% else %} integer := {{ param['value'] }};
 {% endif -%}
 {% endfor %}
 
-end {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params;
+end {{ fins['name'] }}_params;

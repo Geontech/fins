@@ -1,6 +1,6 @@
 --==============================================================================
 -- Company:     Geon Technologies, LLC
--- File:        {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_regs.vhd
+-- File:        {{ fins['name'] }}_regs.vhd
 -- Description: Auto-generated from Jinja2 VHDL regs template
 -- Generated:   {{ now }}
 --==============================================================================
@@ -13,10 +13,10 @@ use ieee.math_real.all;
 
 -- User Libraries
 library work;
-use work.{{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_params.all;
+use work.{{ fins['name'] }}_params.all;
 
 -- Entity
-entity {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_regs is
+entity {{ fins['name'] }}_regs is
   generic (
     G_ADDR_WIDTH : natural := 16;
     G_DATA_WIDTH : natural := 32;
@@ -33,7 +33,7 @@ entity {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute=
     s_swconfig_rd_valid  : out std_logic;
     s_swconfig_rd_data   : out std_logic_vector(G_DATA_WIDTH-1 downto 0);
     {% for region in fins['regs']['regions'] -%}
-    {% if region['passthrough'] -%}
+    {% if not 'regs' in region -%}
     -- Decoded Passthrough Master Software Configuration Bus
     m_swconfig_{{ region['name'] }}_clk       : out std_logic;
     m_swconfig_{{ region['name'] }}_reset     : out std_logic;
@@ -46,22 +46,22 @@ entity {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute=
     {% else -%}
     -- Register Inputs/Outputs
     {% for reg in region['regs'] %}
-    {{ region['name'] }}_{{ reg['name'] }} : {% if reg['writeable'] %}out{% else %}in {% endif %} std_logic_vector({{ reg['width'] }}-1 downto 0){% if loop.index < loop.length %};{% endif %}
+    {{ region['name'] }}_{{ reg['name'] }} : {% if reg['writable'] %}out{% else %}in {% endif %} std_logic_vector({{ reg['width'] }}-1 downto 0){% if loop.index < loop.length %};{% endif %}
     {%- endfor -%}
     {%- if loop.index < loop.length %};{% endif %}
     {% endif %}
     {% endfor %}
   );
-end {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_regs;
+end {{ fins['name'] }}_regs;
 
-architecture rtl of {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|map(attribute='value')|join('') }}_regs is
+architecture rtl of {{ fins['name'] }}_regs is
 
   ------------------------------------------------------------------------------
   -- Constants
   ------------------------------------------------------------------------------
   constant REG_RD_ERROR_CODE : std_logic_vector(G_DATA_WIDTH-1 downto 0) := x"BADADD00";
 
-  {% for region in fins['regs']['regions']|selectattr('passthrough', 'equalto', False)|list -%}
+  {% for region in fins['regs']['regions']|selectattr('regs', 'defined')|list -%}
   ------------------------------------------------------------------------------
   -- Signals: Local Decode of "{{ region['name'] }}" base address region
   ------------------------------------------------------------------------------
@@ -73,27 +73,27 @@ architecture rtl of {{ fins['params']|selectattr('name', 'equalto', 'IP_NAME')|m
   signal m_swconfig_{{ region['name'] }}_rd_valid  : std_logic;
   signal m_swconfig_{{ region['name'] }}_rd_data   : std_logic_vector(G_DATA_WIDTH-1 downto 0);
 
-  -- Stored Writeable Register Values
+  -- Stored writable Register Values
   signal {{ region['name'] }}_reg_values    : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0);
 
   -- Register Read Values
   -- Note: If not writable, then the read values come from an external source
   signal {{ region['name'] }}_reg_rd_values : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0);
 
-  -- Default for Writeable Register Values
+  -- Default for writable Register Values
   constant {{ region['name'] }}_reg_default : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0) := 
     {% for reg in region['regs']|reverse -%}
-    std_logic_vector(resize(to_unsigned({{ reg['default'] }}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% else %};{% endif %}
+    std_logic_vector(resize(to_unsigned({% if 'default' in reg %}{{ reg['default'] }}{% else %}0{% endif %}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% else %};{% endif %}
     {% endfor %}
 
-  -- The Bit Mask for Writeable Register Values
+  -- The Bit Mask for writable Register Values
   -- Note: The mask prevents bits from being written in invalid areas
   constant {{ region['name'] }}_reg_wr_mask : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0) := 
     {% for reg in region['regs']|reverse -%}
-    {%- if reg['writeable'] and ((reg['width'] == 32) or (reg['width'] == '32')) %}
+    {%- if reg['writable'] and ((reg['width'] == 32) or (reg['width'] == '32')) %}
     x"FFFFFFFF"{% if loop.index < loop.length %} &{% else %};{% endif %}
     {%- else %}
-    std_logic_vector(resize(to_unsigned({% if reg['writeable'] %}2**{{ reg['width'] }}-1{% else %}0{% endif %}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% else %};{% endif %}
+    std_logic_vector(resize(to_unsigned({% if reg['writable'] %}2**{{ reg['width'] }}-1{% else %}0{% endif %}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% else %};{% endif %}
     {%- endif -%}
     {% endfor %}
 
@@ -104,7 +104,7 @@ begin
   ------------------------------------------------------------------------------
   -- Passthrough Clocks and Resets
   ------------------------------------------------------------------------------
-  {% for region in fins['regs']['regions']|selectattr('passthrough', 'equalto', True)|list -%}
+  {% for region in fins['regs']['regions']|selectattr('regs', 'undefined')|list -%}
   m_swconfig_{{ region['name'] }}_clk   <= s_swconfig_clk;
   m_swconfig_{{ region['name'] }}_reset <= s_swconfig_reset;
   {% endfor %}
@@ -165,7 +165,7 @@ begin
     end if;
   end process s_bar_decode;
   
-  {% for region in fins['regs']['regions']|selectattr('passthrough', 'equalto', False) -%}
+  {% for region in fins['regs']['regions']|selectattr('regs', 'defined')|list -%}
   ------------------------------------------------------------------------------
   -- Local Register Decode of "{{ region['name'] }}" base address region
   ------------------------------------------------------------------------------
@@ -222,13 +222,13 @@ begin
   end process s_{{ region['name'] }}_read;
 
   -- Assign register outputs
-  {% for reg in region['regs']|selectattr('writeable', 'equalto', True)|list -%}
+  {% for reg in region['regs']|selectattr('writable', 'equalto', True)|list -%}
   {{ region['name'] }}_{{ reg['name'] }} <= {{ region['name'] }}_reg_values({{ loop.index-1 }}*G_DATA_WIDTH+{{ reg['width'] }}-1 downto {{ loop.index-1 }}*G_DATA_WIDTH);
   {% endfor %}
 
   -- Combinatorial Process to assign register read values
   c_{{ region['name'] }}_read : process (
-    {% for reg in region['regs']|selectattr('writeable', 'equalto', False)|list -%}
+    {% for reg in region['regs']|selectattr('writable', 'equalto', False)|list -%}
     {{ region['name'] }}_{{ reg['name'] }},
     {% endfor %}
     {{ region['name'] }}_reg_values
@@ -239,7 +239,7 @@ begin
 
     -- Assign external read values
     {% for reg in region['regs'] -%}
-    {% if not reg['writeable'] -%}
+    {% if not reg['writable'] -%}
     {{ region['name'] }}_reg_rd_values({{ loop.index-1 }}*G_DATA_WIDTH+{{ reg['width'] }}-1 downto {{ loop.index-1 }}*G_DATA_WIDTH) <= {{ region['name'] }}_{{ reg['name'] }};
     {% endif %}
     {% endfor %}

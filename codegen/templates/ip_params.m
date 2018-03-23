@@ -7,14 +7,10 @@
 
 % Parameters
 {% for param in fins['params'] -%}
-{% if "mat" in param['used_in'] -%}
-{% if param['type'] == "code" -%} {{ param['value'] }}
-{% else -%} params.{{ param['name'] }} =
+params.{{ param['name'] }} =
 {%- if param['value'] is iterable and param['value'] is not string %} [{{ param['value']|join(', ') }}];
 {% elif param['value'] is string %} '{{ param['value'] }}';
 {% else %} {{ param['value']|lower }};
-{% endif -%}
-{% endif -%}
 {% endif -%}
 {% endfor %}
 
