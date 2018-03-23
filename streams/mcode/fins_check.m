@@ -1,6 +1,10 @@
 %===============================================================================
 % Company:     Geon Technologies, LLC
-% File:        fins_check.m
+% Author:      Josh Schindehette
+% Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+%              Dissemination of this information or reproduction of this 
+%              material is strictly prohibited unless prior written
+%              permission is obtained from Geon Technologies, LLC
 % Description: This function checks the fields of a FinStreams structure to make
 %              sure the user has provided valid values.
 % Inputs:      fins - FinStreams structure
@@ -23,38 +27,22 @@
 % Outputs:     result - boolean
 %                * True if all checks pass, otherwise false
 % Usage:       fins_check(FinStreams fins, <boolean verbose>)
-%
-% Revision History:
-% Date        Author             Revision
-% ----------  -----------------  -----------------------------------------------
-% 2017-09-07  Josh Schindehette  Initial Version
-%
 %===============================================================================
 function [ result ] = fins_check( varargin )
 
   %-----------------------------------------------------------------------------
   % Get Variable Inputs
   %-----------------------------------------------------------------------------
-  % Set defaults
-  input_error = true;
-  verbose     = true;
-
   % Check for valid inputs
   if ((nargin == 1) && isstruct(varargin{1}))
     % Set inputs
     fins        = varargin{1};
-    % Turn off error
-    input_error = false;
-  if ((nargin == 2) && isstruct(varargin{1}) && islogical(varargin{2}))
+    verbose     = true;
+  elseif ((nargin == 2) && isstruct(varargin{1}) && islogical(varargin{2}))
     % Set inputs
     fins        = varargin{1};
     verbose     = varargin{2};
-    % Turn off error
-    input_error = false;
-  end
-
-  % Report input error
-  if (input_error)
+  else
     error('Incorrect usage. Correct syntax: fins_check(FinStreams fins, <boolean verbose>)');
   end
 
@@ -232,14 +220,17 @@ function [ result ] = fins_check( varargin )
         end
         % Calculate the full scale value for this bit width
         if (stream.is_signed)
-          full_scale = 2^(stream.bit_width/2-1) - 1;
+          max_fs = 2^(stream.bit_width/2-1) - 1;
+          min_fs = -2^(stream.bit_width/2-1);
         else
-          full_scale = 2^(stream.bit_width/2) - 1;
+          max_fs = 2^(stream.bit_width/2) - 1;
+          min_fs = -2^(stream.bit_width/2);
         end
-        % Calculate the max of the values field
-        max_value = max(max(abs(real(stream.values))), max(abs(imag(stream.values))));
+        % Calculate the min/max of the values
+        max_value = max(max(real(stream.values)), max(imag(stream.values)));
+        min_value = min(min(real(stream.values)), min(imag(stream.values)));
         % Check that the amplitude of the values fit in the bit width
-        if (max_value > full_scale)
+        if ((max_value > max_fs) || (min_value < min_fs))
           fprintf('Error: The complex data in the .values field does not fit within fixed point format specified by .bit_width and .is_signed.\n');
           result = false;
         else
@@ -251,14 +242,17 @@ function [ result ] = fins_check( varargin )
     else
       % Calculate the full scale value for this bit width
       if (stream.is_signed)
-        full_scale = 2^(stream.bit_width-1) - 1;
+        max_fs = 2^(stream.bit_width-1) - 1;
+        min_fs = -2^(stream.bit_width-1);
       else
-        full_scale = 2^(stream.bit_width) - 1;
+        max_fs = 2^(stream.bit_width) - 1;
+        min_fs = -2^(stream.bit_width);
       end
-      % Calculate the max of the values field
-      max_value = max(abs(stream.values));
+      % Calculate the min/max of the values
+      max_value = max(stream.values);
+      min_value = min(stream.values);
       % Check that the amplitude of the values fit in the bit width
-      if (max_value > full_scale)
+      if ((max_value > max_fs) || (min_value < min_fs))
         fprintf('Error: The data in the .values field does not fit within fixed point format specified by .bit_width and .is_signed.\n');
         result = false;
       else
