@@ -122,7 +122,10 @@ if (os.path.exists(FINS_EDIT_FILENAME)):
 
 # Create a persona dictionary
 persona = {}
-persona['name'] = fins['name']
+if 'persona_name' in fins:
+    persona['name'] = fins['persona_name']
+else:
+    persona['name'] = fins['name']
 persona['id'] = 'DCE:{}'.format(uuid.uuid4())
 persona['device_kind_id'] = 'DCE:{}'.format(uuid.uuid4())
 persona['device_model_id'] = 'DCE:{}'.format(uuid.uuid4())

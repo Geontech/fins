@@ -6,10 +6,10 @@
 #include <stdint.h>
 #include <ossie/CF/DataType.h>
 #include <stddef.h>
-#include "BaseAddress.h"
 
 // This comes from the BSP
 const size_t REGS_BASE = 0x43C00000;
+const size_t REGS_SIZE = 262144;
 
 // Class used by persona
 class ExtendedFEI
@@ -76,7 +76,7 @@ class {{ persona['name'] }}_i : public {{ persona['name'] }}_persona_base
         {% endif -%}
         {% endfor %}
         {% for reg in persona['regs'] -%}
-        volatile int32_t *{{ reg['name'] }}Ptr;
+        volatile uint32_t *{{ reg['name'] }}Ptr;
         {% endfor %}
 };
 

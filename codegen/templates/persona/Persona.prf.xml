@@ -43,7 +43,7 @@
   {% endfor -%}
   <simple id="HARDWARE_ID" mode="readonly" type="string" commandline="true">
     <description>This property allows the hardware ID used by the Persona to be set when the Device is launched.</description>
-    <value>XC7Z020-1CSG484CES</value>
+    <value>xc7z020clg484-1</value>
     <kind kindtype="property"/>
     <action type="external"/>
   </simple>

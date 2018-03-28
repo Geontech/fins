@@ -159,7 +159,7 @@ void {{ persona['name'] }}_i::afterHardwareProgramSuccess()
         return;
     }
 
-    this->mapBase = mmap(0, 1024, PROT_READ | PROT_WRITE, MAP_SHARED, this->mapFd, REGS_BASE);
+    this->mapBase = mmap(0, REGS_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, this->mapFd, REGS_BASE);
 
     if (this->mapBase == (void *) -1) {
         LOG_ERROR({{ persona['name'] }}_i, "Failed to map memory with error: " << strerror(errno));
@@ -170,7 +170,7 @@ void {{ persona['name'] }}_i::afterHardwareProgramSuccess()
 
     // Set the pointers for the registers
     {% for reg in persona['regs'] -%}
-    this->{{ reg['name'] }}Ptr = (int32_t *) this->mapBase + {{ '%0#10x' | format(reg['offset']) }};
+    this->{{ reg['name'] }}Ptr = (uint32_t *) (this->mapBase + {{ '%0#10x' | format(reg['offset']) }});
     {% endfor %}
 
     // Read the registers and make sure they have the correct default values
