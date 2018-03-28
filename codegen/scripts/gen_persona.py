@@ -16,6 +16,25 @@ import datetime
 import uuid
 import jinja2
 
+# Define Constants
+FINS_FILENAME      = 'fins.json'
+FINS_EDIT_FILENAME = 'fins_edit.json'
+PERSONA_OUTPUT     = 'rh_persona'
+
+def load_fins(directory='./'):
+    # Import JSON Firmware IP Node Specification
+    with open(directory + FINS_FILENAME) as fins_file:
+        fins = json.load(fins_file)
+    # Import JSON Edits to the Parameters of FINSpec
+    if (os.path.exists(directory + FINS_EDIT_FILENAME)):
+        with open(directory + FINS_EDIT_FILENAME) as fins_edit_file:
+            fins_edit = json.load(fins_edit_file)
+        for param_ix, param in enumerate(fins['params']):
+            for edit_param in fins_edit['params']:
+                if (edit_param['name'] == param['name']):
+                    fins['params'][param_ix]['value'] = edit_param['value']
+    return fins
+
 def get_param_value(params, key_or_value):
     if isinstance(key_or_value, str) or isinstance(key_or_value, basestring):
         for param in params:
@@ -77,10 +96,10 @@ def get_persona_regs(fins, offset):
                 print('ERROR: {} IP not found in FINS'.format(region['ip_module']))
                 return None
             # Load the IP module's firmware IP node specification
-            with open(ip['repo_name'] + '/' + FINS_FILENAME) as ip_fins_data:
-                ip_fins = json.load(ip_fins_data)
-            # Recursively get the registers and add to the output
+            ip_fins = load_fins(ip['repo_name'] + '/')
+            # Recursively get the registers
             ip_regs = get_persona_regs(ip_fins, offset + 4*region_ix*(2**region_addr_width))
+            # Add to the output list
             regs.extend(ip_regs)
         else:
             # Create a single "reg" that serves as the base address for a RAM
@@ -99,26 +118,8 @@ def get_persona_regs(fins, offset):
     # Return all the registers found
     return regs
 
-
-# JSON Filename
-FINS_FILENAME      = 'fins.json'
-FINS_EDIT_FILENAME = 'fins_edit.json'
-PERSONA_OUTPUT     = 'rh_persona'
-
-# Import JSON Parameters
-with open(FINS_FILENAME) as fins_data:
-    fins = json.load(fins_data)
-
-# Import JSON Edit Parameters if they exist
-if (os.path.exists(FINS_EDIT_FILENAME)):
-    with open(FINS_EDIT_FILENAME) as fins_edit_data:
-        fins_edit = json.load(fins_edit_data)
-        param_index = 0
-        for param in fins['params']:
-            for edit_param in fins_edit['params']:
-                if (edit_param['name'] == param['name']):
-                    fins['params'][param_index]['value'] = edit_param['value']
-            param_index += 1
+# Load the FINSpec from the execution directory
+fins = load_fins()
 
 # Create a persona dictionary
 persona = {}
