@@ -23,19 +23,19 @@
     {% if 'description' in reg -%}
     <description>{{ reg['description'] }}</description>
     {% endif -%}
-    {% if 'default' in reg -%}
+    {% if 'default_values' in reg -%}
     {% if reg['length'] > 1 -%}
     <values>
-      {% for val in ram['default'] -%}
+      {% for val in reg['default_values'] -%}
       <value>{{ val }}</value>
       {% endfor -%}
     </values>
     {% else -%}
-    <value>{{ reg['default'] }}</value>
+    <value>{{ reg['default_values'][0] }}</value>
     {% endif -%}
     {% endif -%}
     {% if 'range' in reg -%}
-    <range max="{{ reg['range']['max'] }}" min="{{ reg['range']['min'] }}"/>
+    <range max="{{ reg['range_max'] }}" min="{{ reg['range_min'] }}"/>
     {% endif -%}
     <kind kindtype="property"/>
     <action type="external"/>

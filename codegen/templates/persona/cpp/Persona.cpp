@@ -176,15 +176,15 @@ void {{ persona['name'] }}_i::afterHardwareProgramSuccess()
     // Read the registers and make sure they have the correct default values
     // Note: Don't do this check for RAMs
     {% for reg in persona['regs'] -%}
-    {% if 'default' in reg -%}
+    {% if 'default_values' in reg -%}
     {% if reg['length'] > 1 -%}
-    {% for val in reg['default'] -%}
+    {% for val in reg['default_values'] -%}
     if ({{ val }} != *(this->{{ reg['name'] }}Ptr + {{ loop.index }})) {
         LOG_WARN({{ persona['name'] }}_i, "Register {{ reg['name'] }} does not have the correct default value at index {{ loop.index }}.");
     }
     {% endfor -%}
     {% else -%}
-    if ({{ reg['default']}} != *this->{{ reg['name']}}Ptr) {
+    if ({{ reg['default_values'][0] }} != *this->{{ reg['name']}}Ptr) {
         LOG_WARN({{ persona['name'] }}_i, "Register {{ reg['name'] }} does not have the correct default value.");
     }
     {% endif -%}

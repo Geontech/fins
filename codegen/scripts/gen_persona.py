@@ -72,19 +72,22 @@ def get_persona_regs(fins, offset):
                 reg['length'] = 1
                 reg['offset'] = offset + 4*region_ix*(2**region_addr_width) + 4*reg_ix
                 # Check for optional fields and set them if not set
-                if not 'default' in reg:
+                if not 'default_values' in reg:
                     # Use 0 as default to match HDL
-                    reg['default'] = 0
+                    reg['default_values'] = [0]
                 else:
-                    reg['default'] = get_param_value(fins['params'], reg['default'])
-                if not 'range' in reg:
+                    for value_ix, value in enumerate(reg['default_values']):
+                        reg['default_values'][value_ix] = get_param_value(fins['params'], value)
+                if not 'range_min' in reg:
                     # Use valid range of unsigned value with bit width
-                    reg['range'] = {}
-                    reg['range']['min'] = 0
-                    reg['range']['max'] = 2**reg['width']-1
+                    reg['range_min'] = 0
                 else:
-                    reg['range']['min'] = get_param_value(fins['params'], reg['range']['min'])
-                    reg['range']['max'] = get_param_value(fins['params'], reg['range']['max'])
+                    reg['range_min'] = get_param_value(fins['params'], reg['range_min'])
+                if not 'range_max' in reg:
+                    # Use valid range of unsigned value with bit width
+                    reg['range_max'] = 2**reg['width']-1
+                else:
+                    reg['range_max'] = get_param_value(fins['params'], reg['range_max'])
                 # Append to output
                 regs.append(reg)
         elif 'ip_module' in region:
@@ -105,13 +108,15 @@ def get_persona_regs(fins, offset):
             # Create a single "reg" that serves as the base address for a RAM
             reg = region
             reg['width'] = data_width
-            reg['range'] = {}
-            reg['range']['min'] = 0
-            reg['range']['max'] = 2**reg['width']-1
+            reg['range_min'] = 0
+            reg['range_max'] = 2**reg['width']-1
             reg['length'] = 2**region_addr_width
             reg['offset'] = offset + 4*region_ix*(2**region_addr_width)
             reg['writable'] = True
-            #reg['default] = [0] * 2**region_addr_width
+            if 'default_values' in region:
+                reg['default_values'] = region['default_values']
+            else:
+                reg['default_values'] = [0] * 2**region_addr_width
             # Append to output
             regs.append(reg)
 

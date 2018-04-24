@@ -83,7 +83,7 @@ architecture rtl of {{ fins['name'] }}_regs is
   -- Default for writable Register Values
   constant {{ region['name'] }}_reg_default : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0) := 
     {% for reg in region['regs']|reverse|list -%}
-    std_logic_vector(resize(to_unsigned({% if 'default' in reg %}{{ reg['default'] }}{% else %}0{% endif %}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% else %};{% endif %}
+    std_logic_vector(resize(to_unsigned({% if 'default_values' in reg %}{{ reg['default_values'][0] }}{% else %}0{% endif %}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% else %};{% endif %}
     {% endfor %}
 
   -- The Bit Mask for writable Register Values
