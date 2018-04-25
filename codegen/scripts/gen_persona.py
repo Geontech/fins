@@ -153,3 +153,7 @@ for template_name in env.list_templates():
     dest_filename = PERSONA_OUTPUT + '/' + template_name.replace('Persona', persona['name'])
     with open(dest_filename, 'w') as template_file:
         template_file.write(template.render(persona=persona))
+
+# Write the persona specification out to a JSON file
+with open(PERSONA_OUTPUT + '/' + persona['name'] + '.json', 'w') as persona_spec_file:
+    json.dump(persona, persona_spec_file, sort_keys=True, indent=2)
