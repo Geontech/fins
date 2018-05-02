@@ -222,8 +222,10 @@ begin
   end process s_{{ region['name'] }}_read;
 
   -- Assign register outputs
-  {% for reg in region['regs']|selectattr('writable', 'equalto', True)|list -%}
+  {% for reg in region['regs'] -%}
+  {% if reg['writable'] -%}
   {{ region['name'] }}_{{ reg['name'] }} <= {{ region['name'] }}_reg_values({{ loop.index-1 }}*G_DATA_WIDTH+{{ reg['width'] }}-1 downto {{ loop.index-1 }}*G_DATA_WIDTH);
+  {% endif -%}
   {% endfor %}
 
   -- Combinatorial Process to assign register read values
@@ -241,7 +243,7 @@ begin
     {% for reg in region['regs'] -%}
     {% if not reg['writable'] -%}
     {{ region['name'] }}_reg_rd_values({{ loop.index-1 }}*G_DATA_WIDTH+{{ reg['width'] }}-1 downto {{ loop.index-1 }}*G_DATA_WIDTH) <= {{ region['name'] }}_{{ reg['name'] }};
-    {% endif %}
+    {% endif -%}
     {% endfor %}
   end process c_{{ region['name'] }}_read;
 
