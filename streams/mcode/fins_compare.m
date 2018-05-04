@@ -1,6 +1,10 @@
 %===============================================================================
 % Company:     Geon Technologies, LLC
-% File:        fins_compare.m
+% Author:      Josh Schindehette
+% Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+%              Dissemination of this information or reproduction of this 
+%              material is strictly prohibited unless prior written
+%              permission is obtained from Geon Technologies, LLC
 % Description: This function inputs two FinStreams structures, compares them,
 %              and saves the error in the second FinStreams structure.
 % Inputs:      model_fins - FinStreams structure
@@ -23,32 +27,18 @@
 %                    .error_max_relative
 %                    .error_avg_relative
 % Usage:       [FinStreamsError fins_error] = fins_compare(FinStreams model_fins, FinStreams sim_fins)
-%
-% Revision History:
-% Date        Author             Revision
-% ----------  -----------------  -----------------------------------------------
-% 2017-08-15  Josh Schindehette  Initial Version
-%
 %===============================================================================
 function [ fins_error ] = fins_compare( varargin )
 
   %-----------------------------------------------------------------------------
   % Get Variable Inputs
   %-----------------------------------------------------------------------------
-  % Default error to be true
-  input_error = true;
-
   % Check for valid inputs
   if ((nargin == 2) && isstruct(varargin{1}) && isstruct(varargin{2}))
     % Set inputs
     model_fins  = varargin{1};
     sim_fins    = varargin{2};
-    % Turn off error
-    input_error = false;
-  end
-
-  % Report input error
-  if (input_error)
+  else
     error('Incorrect usage. Correct syntax: [FinStreamsError fins_error] = fins_compare(FinStreams model_fins, FinStreams sim_fins)');
   end
 
@@ -101,6 +91,15 @@ function [ fins_error ] = fins_compare( varargin )
       % Force the sim values to column vector
       sim_values   = sim_stream.values(:);
       %****************************************
+      % Check lengths
+      %****************************************
+      if (length(model_values) > length(sim_values))
+        error('ERROR: Simulation output has fewer values than model output.');
+      elseif (length(model_values) < length(sim_values))
+        disp('WARNING: Truncated simulation output since it has more values than model output.');
+        sim_values = sim_values(1:length(model_values));
+      end
+      %****************************************
       % Get the absolute error values
       %****************************************
       % Calculate the Error
@@ -121,7 +120,7 @@ function [ fins_error ] = fins_compare( varargin )
       error_stream.error_max_relative = max(error_stream.error_values_relative);
       error_stream.error_avg_relative = mean(error_stream.error_values_relative);
     else
-      disp('WARNING: The simulation output is empty.');
+      error('ERROR: The simulation output is empty.');
     end
 
     % Give the error_stream the same properties as sim_stream

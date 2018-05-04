@@ -1,6 +1,10 @@
 %===============================================================================
 % Company:     Geon Technologies, LLC
-% File:        fins_read.m
+% Author:      Josh Schindehette
+% Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+%              Dissemination of this information or reproduction of this 
+%              material is strictly prohibited unless prior written
+%              permission is obtained from Geon Technologies, LLC
 % Description: This function reads the values of a FinStreams structure in hex
 %              format from a series of files. If the values are complex, the
 %              data is read from the files with the imaginary component first.
@@ -17,12 +21,6 @@
 %              by modifying the following field:
 %                .values
 % Usage:       fins_read(FinStreams fins,<string file_prefix>)
-%
-% Revision History:
-% Date        Author             Revision
-% ----------  -----------------  -----------------------------------------------
-% 2017-08-11  Josh Schindehette  Initial Version
-%
 %===============================================================================
 function [ fins ] = fins_read( varargin )
 
@@ -30,25 +28,17 @@ function [ fins ] = fins_read( varargin )
   % Get Variable Inputs
   %-----------------------------------------------------------------------------
   % Defaults
-  input_error = true;
   file_prefix = 'sim_out_';
 
   % Check for valid inputs
   if ((nargin == 1) && isstruct(varargin{1}))
     % Set inputs
     fins        = varargin{1};
-    % Turn off error
-    input_error = false;
   elseif ((nargin == 2) && isstruct(varargin{1}) && ischar(varargin{2}))
     % Set inputs
     fins        = varargin{1};
     file_prefix = varargin{2};
-    % Turn off error
-    input_error = false;
-  end
-
-  % Report input error
-  if (input_error)
+  else
     error('Incorrect usage. Correct syntax: fins_read(FinStreams fins,<string file_prefix>)');
   end
 

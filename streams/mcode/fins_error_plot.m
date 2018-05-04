@@ -1,7 +1,12 @@
 %===============================================================================
 % Company:     Geon Technologies, LLC
-% File:        fins_error_plot.m
-% Description: This function plots the error values of a FinStreamsError structure
+% Author:      Josh Schindehette
+% Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+%              Dissemination of this information or reproduction of this 
+%              material is strictly prohibited unless prior written
+%              permission is obtained from Geon Technologies, LLC
+% Description: This function plots the error values of a FinStreamsError
+%              structure
 % Inputs:      fins_error - FinStreamsError structure
 %                * Each field within structure requires the following fields:
 %                    .error_values_absolute
@@ -13,31 +18,17 @@
 %                    .title
 % Outputs:     (none - this function creates a plot window)
 % Usage:       fins_error_plot(FinStreamsError fins_error)
-%
-% Revision History:
-% Date        Author             Revision
-% ----------  -----------------  -----------------------------------------------
-% 2017-08-15  Josh Schindehette  Initial Version
-%
 %===============================================================================
 function [] = fins_error_plot( varargin )
 
   %-----------------------------------------------------------------------------
   % Get Variable Inputs
   %-----------------------------------------------------------------------------
-  % Defaults
-  input_error = true;
-
   % Check for valid inputs
   if ((nargin == 1) && isstruct(varargin{1}))
     % Set inputs
     fins_error  = varargin{1};
-    % Turn off error
-    input_error = false;
-  end
-
-  % Report input error
-  if (input_error)
+  else
     error('Incorrect usage. Correct syntax: fins_error_plot(FinStreamsError fins_error)');
   end
 

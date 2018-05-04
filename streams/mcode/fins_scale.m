@@ -1,6 +1,10 @@
 %===============================================================================
 % Company:     Geon Technologies, LLC
-% File:        fins_scale.m
+% Author:      Josh Schindehette
+% Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+%              Dissemination of this information or reproduction of this 
+%              material is strictly prohibited unless prior written
+%              permission is obtained from Geon Technologies, LLC
 % Description: This function scales the values of a FinStreams structure up by a
 %              power of 2, calculated to keep the values within valid ranges
 %              allowable by the .bit_width field of each stream. Scaling the
@@ -18,31 +22,17 @@
 %              and by modifying the following field:
 %                .values
 % Usage:       fins_scale(FinStreams fins)
-%
-% Revision History:
-% Date        Author             Revision
-% ----------  -----------------  -----------------------------------------------
-% 2017-08-11  Josh Schindehette  Initial Version
-%
 %===============================================================================
 function [ fins ] = fins_scale( varargin )
 
   %-----------------------------------------------------------------------------
   % Get Variable Inputs
   %-----------------------------------------------------------------------------
-  % Default error to be true
-  input_error = true;
-
   % Check for valid inputs
   if ((nargin == 1) && isstruct(varargin{1}))
     % Set inputs
-    fins        = varargin{1};
-    % Turn off error
-    input_error = false;
-  end
-
-  % Report input error
-  if (input_error)
+    fins = varargin{1};
+  else
     error('Incorrect usage. Correct syntax: fins_scale(FinStreams fins)');
   end
 

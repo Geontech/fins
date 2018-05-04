@@ -1,6 +1,10 @@
 %===============================================================================
 % Company:     Geon Technologies, LLC
-% File:        fins_error_write.m
+% Author:      Josh Schindehette
+% Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+%              Dissemination of this information or reproduction of this 
+%              material is strictly prohibited unless prior written
+%              permission is obtained from Geon Technologies, LLC
 % Description: This function writes the error metrics of a FinStreamsError
 %              structure to a "results" file or the screen.
 % Inputs:      fins_error - FinStreamsError structure
@@ -14,12 +18,6 @@
 %                * Default prints to screen
 % Outputs:     (none - this function writes to file or screen)
 % Usage:       fins_error_write(FinStreamsError fins_error, <string filename>)
-%
-% Revision History:
-% Date        Author             Revision
-% ----------  -----------------  -----------------------------------------------
-% 2017-08-15  Josh Schindehette  Initial Version
-%
 %===============================================================================
 function [] = fins_error_write( varargin )
 
@@ -27,7 +25,6 @@ function [] = fins_error_write( varargin )
   % Get Variable Inputs
   %-----------------------------------------------------------------------------
   % Defaults
-  input_error = true;
   fileID      = 1;     % Print to screen
   file_opened = false; % No file was opened
 
@@ -35,19 +32,12 @@ function [] = fins_error_write( varargin )
   if ((nargin == 1) && isstruct(varargin{1}))
     % Set inputs
     fins_error  = varargin{1};
-    % Turn off error
-    input_error = false;
   elseif ((nargin == 2) && isstruct(varargin{1}) && ischar(varargin{2}))
     % Set inputs
     fins_error   = varargin{1};
     fileID      = fopen(varargin{2},'w');
     file_opened = true;
-    % Turn off error
-    input_error = false;
-  end
-
-  % Report input error
-  if (input_error)
+  else
     error('Incorrect usage. Correct syntax: fins_error_write(FinStreamsError fins_error, <string filename>)');
   end
 

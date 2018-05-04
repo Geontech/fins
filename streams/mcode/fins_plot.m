@@ -1,6 +1,10 @@
 %===============================================================================
 % Company:     Geon Technologies, LLC
-% File:        fins_plot.m
+% Author:      Josh Schindehette
+% Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+%              Dissemination of this information or reproduction of this 
+%              material is strictly prohibited unless prior written
+%              permission is obtained from Geon Technologies, LLC
 % Description: This function plots data that is formatted in a FinStreams
 %              structure.
 % Inputs:      model_fins - FinStreams structure
@@ -32,21 +36,12 @@
 %              fins_plot(FinStreams model_fins, FinStreams sim_fins, bool do_fft)
 %              fins_plot(FinStreams model_fins, FinStreams sim_fins, string title_prefix)
 %              fins_plot(FinStreams model_fins, FinStreams sim_fins, bool do_fft, string title_prefix)
-%
-% Revision History:
-% Date        Author             Revision
-% ----------  -----------------  -----------------------------------------------
-% 2017-08-10  Josh Schindehette  Initial Version
-%
 %===============================================================================
 function [] = fins_plot( varargin )
 
   %-----------------------------------------------------------------------------
   % Get Variable Inputs
   %-----------------------------------------------------------------------------
-  % Default error to be true
-  input_error = true;
-
   % Set defaults
   use_overlay  = false;
   sim_fins       = {};
@@ -57,57 +52,39 @@ function [] = fins_plot( varargin )
   if ((nargin == 1) && isstruct(varargin{1}))
     % Set inputs
     model_fins  = varargin{1};
-    % Turn off error
-    input_error = false;
-  elseif (nargin == 2)
-    if (isstruct(varargin{1}) && isstruct(varargin{2}))
-      % Set inputs
-      model_fins  = varargin{1};
-      sim_fins    = varargin{2};
-      % Turn off error
-      input_error = false;
-      % Turn on overlay
-      use_overlay = true;
-    elseif (isstruct(varargin{1}) && islogical(varargin{2}))
-      % Set inputs
-      model_fins  = varargin{1};
-      do_fft      = varargin{2};
-      % Turn off error
-      input_error = false;
-    elseif (isstruct(varargin{1}) && ischar(varargin{2}))
-      % Set inputs
-      model_fins   = varargin{1};
-      title_prefix = varargin{2};
-      % Turn off error
-      input_error  = false;
-    end
-  elseif (nargin == 3)
-    if (isstruct(varargin{1}) && isstruct(varargin{2}) && islogical(varargin{3}))
-      % Set inputs
-      model_fins  = varargin{1};
-      sim_fins    = varargin{2};
-      do_fft      = varargin{3};
-      % Turn off error
-      input_error = false;
-      % Turn on overlay
-      use_overlay = true;
-    elseif (isstruct(varargin{1}) && isstruct(varargin{2}) && ischar(varargin{3}))
-      % Set inputs
-      model_fins   = varargin{1};
-      sim_fins     = varargin{2};
-      title_prefix = varargin{3};
-      % Turn off error
-      input_error  = false;
-      % Turn on overlay
-      use_overlay  = true;
-    elseif (isstruct(varargin{1}) && islogical(varargin{2}) && ischar(varargin{3}))
-      % Set inputs
-      model_fins   = varargin{1};
-      do_fft       = varargin{2};
-      title_prefix = varargin{3};
-      % Turn off error
-      input_error  = false;
-    end
+  elseif ((nargin == 2) && isstruct(varargin{1}) && isstruct(varargin{2}))
+    % Set inputs
+    model_fins  = varargin{1};
+    sim_fins    = varargin{2};
+    % Turn on overlay
+    use_overlay = true;
+  elseif ((nargin == 2) && isstruct(varargin{1}) && islogical(varargin{2}))
+    % Set inputs
+    model_fins  = varargin{1};
+    do_fft      = varargin{2};
+  elseif ((nargin == 2) && isstruct(varargin{1}) && ischar(varargin{2}))
+    % Set inputs
+    model_fins   = varargin{1};
+    title_prefix = varargin{2};
+  elseif ((nargin == 3) && isstruct(varargin{1}) && isstruct(varargin{2}) && islogical(varargin{3}))
+    % Set inputs
+    model_fins  = varargin{1};
+    sim_fins    = varargin{2};
+    do_fft      = varargin{3};
+    % Turn on overlay
+    use_overlay = true;
+  elseif ((nargin == 3) && isstruct(varargin{1}) && isstruct(varargin{2}) && ischar(varargin{3}))
+    % Set inputs
+    model_fins   = varargin{1};
+    sim_fins     = varargin{2};
+    title_prefix = varargin{3};
+    % Turn on overlay
+    use_overlay  = true;
+  elseif ((nargin == 3) && isstruct(varargin{1}) && islogical(varargin{2}) && ischar(varargin{3}))
+    % Set inputs
+    model_fins   = varargin{1};
+    do_fft       = varargin{2};
+    title_prefix = varargin{3};
   elseif ((nargin == 4) && isstruct(varargin{1})  && isstruct(varargin{2}) && ...
           islogical(varargin{3}) && ischar(varargin{4}))
     % Set inputs
@@ -115,14 +92,9 @@ function [] = fins_plot( varargin )
     sim_fins     = varargin{2};
     do_fft       = varargin{3};
     title_prefix = varargin{4};
-    % Turn off error
-    input_error  = false;
     % Turn on overlay
     use_overlay  = true;
-  end
-
-  % Report input error
-  if (input_error)
+  else
     error( ...
       ['Incorrect usage. Correct syntax:\n', ...
        '    fins_plot(FinStreams sl)\n', ...

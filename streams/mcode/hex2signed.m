@@ -1,6 +1,10 @@
 %================================================================================
 % Company:     Geon Technologies, LLC
-% File:        hex2signed.m
+% Author:      Josh Schindehette
+% Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+%              Dissemination of this information or reproduction of this 
+%              material is strictly prohibited unless prior written
+%              permission is obtained from Geon Technologies, LLC
 % Description: This function converts an array of hex character arrays into
 %              an array of signed numbers.
 % Inputs:      x      : hex array with dimensions x(hex_chars, samples)
@@ -8,12 +12,6 @@
 %                       'column' dimension contains the samples
 %              N_BITS : number of bits
 % Outputs:     y      : column matrix of signed decimal values
-%
-% Revision History:
-% Date        Author             Revision
-% ----------  -----------------  ------------------------------------------------
-% 2017-07-25  Josh Schindehette  Initial Version
-%
 %================================================================================
 function y = hex2signed(x, N_BITS)
 

@@ -1,14 +1,12 @@
 %================================================================================
 % Company:     Geon Technologies, LLC
-% File:        signed2hex.m
+% Author:      Josh Schindehette
+% Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+%              Dissemination of this information or reproduction of this 
+%              material is strictly prohibited unless prior written
+%              permission is obtained from Geon Technologies, LLC
 % Description: This function converts a signed integer value with N_HEX*4 bit
 %              width into a hex string.
-%
-% Revision History:
-% Date        Author             Revision
-% ----------  -----------------  ------------------------------------------------
-% 2017-08-10  Josh Schindehette  Initial Version
-%
 %================================================================================
 function y = signed2hex(x, N_HEX)
 

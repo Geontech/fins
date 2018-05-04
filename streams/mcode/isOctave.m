@@ -1,11 +1,9 @@
 %===============================================================================
-% Description: Function to determine the software running the script
+% Description: Function to determine the software running the script, returns
+%              true if the environment is Octave.
 % Source:      https://www.gnu.org/software/octave/doc/v4.0.1
 %              /How-to-distinguish-between-Octave-and-Matlab_003f.html
 %===============================================================================
-%%
-%% Return: true if the environment is Octave.
-%%
 function retval = isOctave
   persistent cacheval;  % speeds up repeated calls
 
