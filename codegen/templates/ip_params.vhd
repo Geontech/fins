@@ -25,7 +25,7 @@ package {{ fins['name'] }}_params is
 {% for param in fins['params'] -%}
 {%- if 'range' in param and 'sub_type' in param %}
 type {{ param['hdl_type'] }} is array ({{ param['range'][0] }} to {{ param['range'][1] }}) of {{ param['sub_type'] }};
-{% end if -%}
+{% endif -%}
 constant {{ param['name'] }} :
 {%- if param['value'] is iterable and param['value'] is not string %} {{ param['hdl_type'] }} := ({{ param['value']|join(', ') }});
 {% elif 'hdl_type' in param %} {{ param['hdl_type'] }} := {{ param['value'] }};
