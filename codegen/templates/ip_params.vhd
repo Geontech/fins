@@ -23,7 +23,7 @@ package {{ fins['name'] }}_params is
 
 -- Parameters
 {% for param in fins['params'] -%}
-{%- if 'range' in param and 'sub_type' in parm %}
+{%- if 'range' in param and 'sub_type' in param %}
 type {{ param['hdl_type'] }} is array ({{ param['range'][0] }} to {{ param['range'][1] }}) of {{ param['sub_type'] }};
 {% end if -%}
 constant {{ param['name'] }} :
