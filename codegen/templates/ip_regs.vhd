@@ -5,6 +5,27 @@
 -- Generated:   {{ now }}
 --==============================================================================
 
+{%- set expanded_regions = [] %}
+{%- for region in fins['regs']['regions'] %}
+  {%- set temp_region = {'name':region['name'],'description':region['description'],'regs':[]} %}
+  {%- for reg in region['regs'] if 'regs' in region %}
+    {%- for param in fins['params'] if ((param['name'] == reg['default_values'][0]) and (param['value'] is iterable)) %}
+      {%- for value in param['value'] %}
+        {%- set temp = {'name':reg['name']~loop.index|string,
+                        'width':reg['width'],
+                        'default_values':[value],
+                        'writable':reg['writable'],
+                        'description':reg['description']} %}
+        {%- set _dummy = temp_region['regs'].append(temp) %}
+      {%- endfor %}
+    {%- else %}
+      {%- set temp = reg %}
+      {%- set _dummy = temp_region['regs'].append(temp) %}
+    {%- endfor %}
+  {%- endfor %}
+  {%- set _dummy = expanded_regions.append(temp_region) %}
+{%- endfor %}
+
 -- Standard Libraries
 library ieee;
 use ieee.std_logic_1164.all;
@@ -32,7 +53,7 @@ entity {{ fins['name'] }}_regs is
     s_swconfig_rd_enable : in  std_logic;
     s_swconfig_rd_valid  : out std_logic;
     s_swconfig_rd_data   : out std_logic_vector(G_DATA_WIDTH-1 downto 0);
-    {% for region in fins['regs']['regions'] -%}
+    {% for region in expanded_regions -%}
     {% if not 'regs' in region -%}
     -- Decoded Passthrough Master Software Configuration Bus
     m_swconfig_{{ region['name'] }}_clk       : out std_logic;
@@ -61,7 +82,7 @@ architecture rtl of {{ fins['name'] }}_regs is
   ------------------------------------------------------------------------------
   constant REG_RD_ERROR_CODE : std_logic_vector(G_DATA_WIDTH-1 downto 0) := x"BADADD00";
 
-  {% for region in fins['regs']['regions']|selectattr('regs', 'defined')|list -%}
+  {% for region in expanded_regions|selectattr('regs', 'defined')|list -%}
   ------------------------------------------------------------------------------
   -- Signals: Local Decode of "{{ region['name'] }}" base address region
   ------------------------------------------------------------------------------
@@ -81,14 +102,14 @@ architecture rtl of {{ fins['name'] }}_regs is
   signal {{ region['name'] }}_reg_rd_values : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0);
 
   -- Default for writable Register Values
-  constant {{ region['name'] }}_reg_default : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0) := 
+  constant {{ region['name'] }}_reg_default : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0) :=
     {% for reg in region['regs']|reverse|list -%}
     std_logic_vector(resize(to_unsigned({% if 'default_values' in reg %}{{ reg['default_values'][0] }}{% else %}0{% endif %}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% else %};{% endif %}
     {% endfor %}
 
   -- The Bit Mask for writable Register Values
   -- Note: The mask prevents bits from being written in invalid areas
-  constant {{ region['name'] }}_reg_wr_mask : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0) := 
+  constant {{ region['name'] }}_reg_wr_mask : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0) :=
     {% for reg in region['regs']|reverse|list -%}
     {% if reg['writable'] and ((reg['width'] == 32) or (reg['width'] == '32')) -%}
     x"FFFFFFFF"{% if loop.index < loop.length %} &{% else %};{% endif %}
@@ -104,7 +125,7 @@ begin
   ------------------------------------------------------------------------------
   -- Passthrough Clocks and Resets
   ------------------------------------------------------------------------------
-  {% for region in fins['regs']['regions']|selectattr('regs', 'undefined')|list -%}
+  {% for region in expanded_regions|selectattr('regs', 'undefined')|list -%}
   m_swconfig_{{ region['name'] }}_clk   <= s_swconfig_clk;
   m_swconfig_{{ region['name'] }}_reset <= s_swconfig_reset;
   {% endfor %}
@@ -116,12 +137,12 @@ begin
   begin
     if (rising_edge(s_swconfig_clk)) then
       -- Data
-      {% for region in fins['regs']['regions'] -%}
+      {% for region in expanded_regions -%}
       m_swconfig_{{ region['name'] }}_wr_data <= s_swconfig_wr_data;
       {% endfor %}
-      
+
       if (s_swconfig_reset = '1') then
-        {% for region in fins['regs']['regions'] -%}
+        {% for region in expanded_regions -%}
         m_swconfig_{{ region['name'] }}_wr_enable <= '0';
         m_swconfig_{{ region['name'] }}_rd_enable <= '0';
         m_swconfig_{{ region['name'] }}_address   <= (others => '0');
@@ -130,22 +151,22 @@ begin
         s_swconfig_rd_data  <= (others => '0');
       else
         -- Address
-        {% for region in fins['regs']['regions'] -%}
+        {% for region in expanded_regions -%}
         m_swconfig_{{ region['name'] }}_address <= s_swconfig_address(G_ADDR_WIDTH-G_BAR_WIDTH-1 downto 0);
         {% endfor %}
-        
+
         -- Set defaults
         -- Note: Read responds by default with this error code
         s_swconfig_rd_valid <= s_swconfig_rd_enable;
         s_swconfig_rd_data  <= REG_RD_ERROR_CODE;
-        {% for region in fins['regs']['regions'] -%}
+        {% for region in expanded_regions -%}
         m_swconfig_{{ region['name'] }}_wr_enable <= '0';
         m_swconfig_{{ region['name'] }}_rd_enable <= '0';
         {% endfor %}
 
         -- Decode base address region
-        {% if fins['regs']['regions']|length > 1 %}
-        {% for region in fins['regs']['regions'] -%}
+        {% if expanded_regions|length > 1 %}
+        {% for region in expanded_regions -%}
         if ({{ loop.index-1 }} = unsigned(s_swconfig_address(G_ADDR_WIDTH-1 downto G_ADDR_WIDTH-G_BAR_WIDTH))) then
           m_swconfig_{{ region['name'] }}_wr_enable <= s_swconfig_wr_enable;
           m_swconfig_{{ region['name'] }}_rd_enable <= s_swconfig_rd_enable;
@@ -154,7 +175,7 @@ begin
         end if;
         {% endfor %}
         {% else %}
-        {% for region in fins['regs']['regions'] -%}
+        {% for region in expanded_regions -%}
         m_swconfig_{{ region['name'] }}_wr_enable <= s_swconfig_wr_enable;
         m_swconfig_{{ region['name'] }}_rd_enable <= s_swconfig_rd_enable;
         s_swconfig_rd_valid <= m_swconfig_{{ region['name'] }}_rd_valid;
@@ -164,8 +185,8 @@ begin
       end if;
     end if;
   end process s_bar_decode;
-  
-  {% for region in fins['regs']['regions']|selectattr('regs', 'defined')|list -%}
+
+  {% for region in expanded_regions|selectattr('regs', 'defined')|list -%}
   ------------------------------------------------------------------------------
   -- Local Register Decode of "{{ region['name'] }}" base address region
   ------------------------------------------------------------------------------
@@ -193,7 +214,7 @@ begin
       end if;
     end if;
   end process s_{{ region['name'] }}_write;
-  
+
   -- Synchronous Process for Register Read
   s_{{ region['name'] }}_read : process (s_swconfig_clk)
   begin
