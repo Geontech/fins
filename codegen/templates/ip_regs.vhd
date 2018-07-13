@@ -6,24 +6,31 @@
 --==============================================================================
 
 {%- set expanded_regions = [] %}
+{%- set reg_count = {'total':0} %}
 {%- for region in fins['regs']['regions'] %}
-  {%- set temp_region = {'name':region['name'],'description':region['description'],'regs':[]} %}
-  {%- for reg in region['regs'] if 'regs' in region %}
-    {%- for param in fins['params'] if ((param['name'] == reg['default_values'][0]) and (param['value'] is iterable)) %}
-      {%- for value in param['value'] %}
-        {%- set temp = {'name':reg['name']~loop.index|string,
+  {%- if 'regs' in region %}
+    {%- set temp_region = {'name':region['name'],'description':region['description'],'regs':[],'total':0} %}
+    {%- for reg in region['regs'] if 'regs' in region %}
+      {%- for param in fins['params'] if ((param['name'] == reg['default_values'][0]) and (param['value'] is iterable)) %}
+        {%- set temp = {'name':reg['name'],
                         'width':reg['width'],
-                        'default_values':[value],
+                        'default_values':param['value'],
                         'writable':reg['writable'],
                         'description':reg['description']} %}
+        {%- set _dummy = temp.update({'length':temp['default_values']|length}) %}
+        {%- set _dummy = temp_region.update({'total':temp_region['total']+temp['length']}) %}
+        {%- set _dummy = temp_region['regs'].append(temp) %}
+      {%- else %}
+        {%- set temp = reg %}
+        {%- set _dummy = temp.update({'length':temp['default_values']|length}) %}
+        {%- set _dummy = temp_region.update({'total':temp_region['total']+temp['length']}) %}
         {%- set _dummy = temp_region['regs'].append(temp) %}
       {%- endfor %}
-    {%- else %}
-      {%- set temp = reg %}
-      {%- set _dummy = temp_region['regs'].append(temp) %}
     {%- endfor %}
-  {%- endfor %}
-  {%- set _dummy = expanded_regions.append(temp_region) %}
+    {%- set _dummy = expanded_regions.append(temp_region) %}
+  {%- else %}
+    {%- set _dummy = expanded_regions.append(region) %}
+  {%- endif %}
 {%- endfor %}
 
 -- Standard Libraries
@@ -66,12 +73,12 @@ entity {{ fins['name'] }}_regs is
     m_swconfig_{{ region['name'] }}_rd_data   : in  std_logic_vector(G_DATA_WIDTH-1 downto 0){%- if loop.index < loop.length -%};{%- endif -%}
     {% else -%}
     -- Register Inputs/Outputs
-    {% for reg in region['regs'] %}
-    {{ region['name'] }}_{{ reg['name'] }} : {% if reg['writable'] %}out{% else %}in {% endif %} std_logic_vector({{ reg['width'] }}-1 downto 0){% if loop.index < loop.length %};{% endif %}
-    {%- endfor -%}
-    {%- if loop.index < loop.length %};{% endif %}
-    {% endif %}
-    {% endfor %}
+    {% set outer_loop = loop -%}
+    {% for reg in region['regs'] -%}
+    {{ region['name'] }}_{{ reg['name'] }} : {% if reg['writable'] %}out{% else %}in {% endif %} std_logic_vector({{ reg['width'] }}*{{ reg['length'] }}-1 downto 0){% if loop.index < loop.length or outer_loop.index < outer_loop.length %};{% endif %}
+    {% endfor -%}
+    {% endif -%}
+    {% endfor -%}
   );
 end {{ fins['name'] }}_regs;
 
@@ -95,29 +102,42 @@ architecture rtl of {{ fins['name'] }}_regs is
   signal m_swconfig_{{ region['name'] }}_rd_data   : std_logic_vector(G_DATA_WIDTH-1 downto 0);
 
   -- Stored writable Register Values
-  signal {{ region['name'] }}_reg_values    : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0);
+  signal {{ region['name'] }}_reg_values    : std_logic_vector(G_DATA_WIDTH*{{ region['total'] }}-1 downto 0);
 
   -- Register Read Values
   -- Note: If not writable, then the read values come from an external source
-  signal {{ region['name'] }}_reg_rd_values : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0);
+  signal {{ region['name'] }}_reg_rd_values : std_logic_vector(G_DATA_WIDTH*{{ region['total'] }}-1 downto 0);
 
   -- Default for writable Register Values
-  constant {{ region['name'] }}_reg_default : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0) :=
-    {% for reg in region['regs']|reverse|list -%}
-    std_logic_vector(resize(to_unsigned({% if 'default_values' in reg %}{{ reg['default_values'][0] }}{% else %}0{% endif %}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% else %};{% endif %}
+  constant {{ region['name'] }}_reg_default : std_logic_vector(G_DATA_WIDTH*{{ region['total'] }}-1 downto 0) :=
+    {%- for reg in region['regs']|reverse|list -%}
+    {%- for value in reg['default_values'] if 'default_values' in reg and reg['length'] > 1 %}
+    std_logic_vector(resize(to_signed({{ value }}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% endif -%}
+    {%- else %}
+    std_logic_vector(resize(to_signed({% if not 'default_values' in reg %}0{% else %}{{ reg['default_values'][0] }}{% endif %}, {{ reg['width'] }}), G_DATA_WIDTH))
+    {%- endfor -%}
+    {%- if loop.index < loop.length %} & {% else %} ;{% endif -%}
     {% endfor %}
 
   -- The Bit Mask for writable Register Values
   -- Note: The mask prevents bits from being written in invalid areas
-  constant {{ region['name'] }}_reg_wr_mask : std_logic_vector(G_DATA_WIDTH*{{ region['regs']|length }}-1 downto 0) :=
-    {% for reg in region['regs']|reverse|list -%}
+  constant {{ region['name'] }}_reg_wr_mask : std_logic_vector(G_DATA_WIDTH*{{ region['total'] }}-1 downto 0) :=
+    {% for reg in region['regs']|reverse|list %}
+    {%- for value in reg['default_values'] if 'default_values' in reg and reg['length'] > 1 %}
     {% if reg['writable'] and ((reg['width'] == 32) or (reg['width'] == '32')) -%}
-    x"FFFFFFFF"{% if loop.index < loop.length %} &{% else %};{% endif %}
-    {% else -%}
-    std_logic_vector(resize(to_unsigned({% if reg['writable'] %}2**{{ reg['width'] }}-1{% else %}0{% endif %}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% else %};{% endif %}
+    x"FFFFFFFF"{% if loop.index < loop.length %} &{% endif %}
+    {%- else -%}
+    std_logic_vector(resize(to_unsigned(to_signed({% if reg['writable'] %}-1{% else %}0{% endif %}, {{ reg['width'] }})), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% endif -%}
     {% endif -%}
+    {% else %}
+    {%- if reg['writable'] and ((reg['width'] == 32) or (reg['width'] == '32')) -%}
+    x"FFFFFFFF"
+    {%- else -%}
+    std_logic_vector(resize(to_unsigned(to_signed({% if reg['writable'] %}-1{% else %}0{% endif %}, {{ reg['width'] }})), G_DATA_WIDTH))
+    {%- endif -%}
+    {%- endfor -%}
+    {%- if loop.index < loop.length %} &{% else %};{% endif %}
     {% endfor %}
-
   {% endfor %}
 
 begin
@@ -165,7 +185,7 @@ begin
         {% endfor %}
 
         -- Decode base address region
-        {% if expanded_regions|length > 1 %}
+        {% if expanded_regions|length > 1 -%}
         {% for region in expanded_regions -%}
         if ({{ loop.index-1 }} = unsigned(s_swconfig_address(G_ADDR_WIDTH-1 downto G_ADDR_WIDTH-G_BAR_WIDTH))) then
           m_swconfig_{{ region['name'] }}_wr_enable <= s_swconfig_wr_enable;
@@ -180,8 +200,8 @@ begin
         m_swconfig_{{ region['name'] }}_rd_enable <= s_swconfig_rd_enable;
         s_swconfig_rd_valid <= m_swconfig_{{ region['name'] }}_rd_valid;
         s_swconfig_rd_data  <= m_swconfig_{{ region['name'] }}_rd_data;
-        {% endfor %}
-        {% endif %}
+        {% endfor -%}
+        {% endif -%}
       end if;
     end if;
   end process s_bar_decode;
@@ -243,17 +263,26 @@ begin
   end process s_{{ region['name'] }}_read;
 
   -- Assign register outputs
-  {% for reg in region['regs'] -%}
+  {% set track_loop = {'index':0} %}
+  {%- for reg in region['regs'] -%}
   {% if reg['writable'] -%}
-  {{ region['name'] }}_{{ reg['name'] }} <= {{ region['name'] }}_reg_values({{ loop.index-1 }}*G_DATA_WIDTH+{{ reg['width'] }}-1 downto {{ loop.index-1 }}*G_DATA_WIDTH);
+  {% set outer_loop = loop -%}
+  {% for value in reg['default_values'] if 'default_values' in reg -%}
+  {{ region['name'] }}_{{ reg['name'] }}({{ loop.index }}*{{ reg['width'] }}-1 downto {{ loop.index0 }} * {{ reg['width'] }})
+    <= {{ region['name'] }}_reg_values({{ track_loop['index'] }}*G_DATA_WIDTH+{{ reg['width'] }}-1 downto {{ track_loop['index'] }}*G_DATA_WIDTH);
+  {% set _dummy = track_loop.update({'index':track_loop['index']+1}) %}
+  {% else -%}
+  {{ region['name'] }}_{{ reg['name'] }} <= {{ region['name'] }}_reg_values({{ track_loop['index'] }}*G_DATA_WIDTH+{{ reg['width'] }}-1 downto {{ track_loop['index'] }}*G_DATA_WIDTH);
+  {% set _dummy = track_loop.update({'index':track_loop['index']+1}) %}
+  {% endfor -%}
   {% endif -%}
-  {% endfor %}
+  {% endfor -%}
 
   -- Combinatorial Process to assign register read values
   c_{{ region['name'] }}_read : process (
     {% for reg in region['regs']|selectattr('writable', 'equalto', False)|list -%}
     {{ region['name'] }}_{{ reg['name'] }},
-    {% endfor %}
+    {% endfor -%}
     {{ region['name'] }}_reg_values
   )
   begin
