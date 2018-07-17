@@ -2,7 +2,7 @@
 % Company:     Geon Technologies, LLC
 % Author:      Josh Schindehette
 % Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
-%              Dissemination of this information or reproduction of this 
+%              Dissemination of this information or reproduction of this
 %              material is strictly prohibited unless prior written
 %              permission is obtained from Geon Technologies, LLC
 % Description: This function writes the values of a FinStreams structure in hex
@@ -62,50 +62,8 @@ function [] = fins_write( varargin )
     %****************************************
     % Convert to hex
     %****************************************
-    % Check if complex
-    if (stream.is_complex)
-      % Check that the bit width is even
-      if (mod(stream.bit_width,2) > 0)
-        error(['The complex values for ',stream_name,' cannot be converted to hex because the bit width (',stream.bit_width,') is odd.']);
-      end
-      % Round data if not integers
-      int_values = stream.values(:);
-      if (any((rem(real(stream.values),1) > 0)) || any((rem(imag(stream.values),1) > 0)))
-        fprintf('WARNING: Values for %s are not purely integers. Rounding data...\n', stream_name);
-        int_values = complex(round(real(int_values)), round(imag(int_values)));
-      end
-      % Convert to hex
-      num_hex_digits = ceil((stream.bit_width / 2) / 4); % /2 for complex, /4 for bits in hex character
-      if (stream.is_signed)
-        hex_values = [signed2hex(imag(int_values), num_hex_digits), signed2hex(real(int_values), num_hex_digits)];
-      else
-        hex_values = [dec2hex(imag(int_values), num_hex_digits), dec2hex(real(int_values), num_hex_digits)];
-      end
-    else
-      % Round data if not integers
-      int_values = stream.values(:);
-      if (any(rem(stream.values,1) > 0))
-        fprintf('WARNING: Values for %s are not purely integers. Rounding data...\n', stream_name);
-        int_values = round(int_values);
-      end
-      % Convert to hex
-      num_hex_digits = ceil(stream.bit_width / 4); % /4 for bits in hex character
-      if (stream.is_signed)
-        hex_values = signed2hex(int_values, num_hex_digits);
-      else
-        hex_values = dec2hex(int_values, num_hex_digits);
-      end
-    end
-    %****************************************
-    % Write to file
-    %****************************************
-    % Open file
-    fileID = fopen([file_prefix,stream_name,'.txt'],'w');
-    % Write hexadecimal values to file
-    for n=1:length(stream.values)
-      fprintf(fileID, '%s\n', hex_values(n,:));
-    end
-    % Close file
-    fclose(fileID);
+    filename = [file_prefix,stream_name,'.txt'];
+    write_hex_file(stream.values,filename,stream.bit_width,stream.is_complex,...
+                    stream.is_signed);
   end
 end

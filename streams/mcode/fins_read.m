@@ -2,7 +2,7 @@
 % Company:     Geon Technologies, LLC
 % Author:      Josh Schindehette
 % Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
-%              Dissemination of this information or reproduction of this 
+%              Dissemination of this information or reproduction of this
 %              material is strictly prohibited unless prior written
 %              permission is obtained from Geon Technologies, LLC
 % Description: This function reads the values of a FinStreams structure in hex
@@ -62,44 +62,17 @@ function [ fins ] = fins_read( varargin )
     %****************************************
     stream_name = stream_names{n};
     stream = fins.(stream_name);
+
     %****************************************
-    % Check if file exists
+    % Open/Read the File
     %****************************************
     % Construct filename
     filename = [file_prefix,stream_name,'.txt'];
-    % Check if file exists
-    if (~exist(filename))
-      error(['File: ',filename,' cannot be read because it does not exist. Did you run the simulation?']);
-    end
-    %****************************************
-    % Read the file
-    %****************************************
-    % Read in hex values
-    values_hex = char(textread(filename,'%s'));
-    % Convert to numeric
-    if (stream.is_complex)
-      % Check to make sure number of hex characters can be split evenly for the
-      % complex data
-      half_num_hex = size(values_hex,2) / 2;
-      if (mod(half_num_hex,1) ~= 0)
-        error(['Complex data cannot be read from file: ',filename,' because it does not have an even number of hex characters.']);
-      end
-      % Convert to integers
-      if (stream.is_signed)
-        stream.values = complex(hex2signed(values_hex(:, half_num_hex+1:end), stream.bit_width/2), ...
-                                hex2signed(values_hex(:, 1:half_num_hex),     stream.bit_width/2));
-      else
-        stream.values = complex(hex2dec(values_hex(:, half_num_hex+1:end)), ...
-                                hex2dec(values_hex(:, 1:half_num_hex    )));
-      end
-    else
-      % Convert to integers
-      if (stream.is_signed)
-        stream.values = hex2signed(values_hex, stream.bit_width);
-      else
-        stream.values = hex2dec(values_hex);
-      end
-    end
+
+    % Open and read values
+    stream.values = read_hex_file(filename,stream.bit_width,...
+                                  stream.is_complex,stream.is_signed);
+
     %****************************************
     % Put the stream back in FinStreams
     %****************************************

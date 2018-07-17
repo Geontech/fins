@@ -6,6 +6,8 @@ This repository contains Python scripts, Xilinx TCL scripts, MATLAB/Octave funct
 
 ## Prerequisites
 
+This repository relies upon submodules, so make sure you use the `--recurse-submodules` flag when cloning this repository. If you forget to use that flag, then execute `git submodule update --init --recursive`.
+
 The software packages required to use FINS are:
  * [Xilinx Vivado](https://www.xilinx.com/products/design-tools/vivado.html) (Tested with 2015.4 and 2016.2)
  * [GNU Make](https://www.gnu.org/software/make/)
@@ -17,7 +19,7 @@ The software packages required to use FINS are:
 
 ## Getting Started
 
-The best way to get started with FINS is to view our FIR Filter example [here](https://github.com/Geontech/fir_filter.git).
+The best way to get started with FINS is to view our FIR Filter example [here](https://curiosity.office.geontech.com/firmware/fir_filter).
 
 ## Capabilities
 

@@ -1,0 +1,3 @@
+[submodule "streams/mcode/hex"]
+	path = streams/mcode/hex
+	url = git@curiosity.office.geontech.com:firmware/models/hex.git
