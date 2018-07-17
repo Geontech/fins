@@ -127,13 +127,13 @@ architecture rtl of {{ fins['name'] }}_regs is
     {% if reg['writable'] and ((reg['width'] == 32) or (reg['width'] == '32')) -%}
     x"FFFFFFFF"{% if loop.index < loop.length %} &{% endif %}
     {%- else -%}
-    std_logic_vector(resize(to_unsigned(to_signed({% if reg['writable'] %}-1{% else %}0{% endif %}, {{ reg['width'] }})), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% endif -%}
+    std_logic_vector(resize(unsigned(to_signed({% if reg['writable'] %}-1{% else %}0{% endif %}, {{ reg['width'] }})), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% endif -%}
     {% endif -%}
     {% else %}
     {%- if reg['writable'] and ((reg['width'] == 32) or (reg['width'] == '32')) -%}
     x"FFFFFFFF"
     {%- else -%}
-    std_logic_vector(resize(to_unsigned(to_signed({% if reg['writable'] %}-1{% else %}0{% endif %}, {{ reg['width'] }})), G_DATA_WIDTH))
+    std_logic_vector(resize(unsigned(to_signed({% if reg['writable'] %}-1{% else %}0{% endif %}, {{ reg['width'] }})), G_DATA_WIDTH))
     {%- endif -%}
     {%- endfor -%}
     {%- if loop.index < loop.length %} &{% else %};{% endif %}
