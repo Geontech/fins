@@ -63,5 +63,9 @@ function [ fins ] = fins_scale( varargin )
                                                           stream.bit_width, ...
                                                           stream.is_complex, ...
                                                           stream.is_signed);
+    %****************************************
+    % Put the stream back in FinStreams
+    %****************************************
+    fins.(stream_name) = stream;
   end
 end
