@@ -5,33 +5,49 @@
 -- Generated:   {{ now }}
 --==============================================================================
 
-{%- set expanded_regions = [] %}
-{%- set reg_count = {'total':0} %}
-{%- for region in fins['regs']['regions'] %}
-  {%- if 'regs' in region %}
-    {%- set temp_region = {'name':region['name'],'description':region['description'],'regs':[],'total':0} %}
-    {%- for reg in region['regs'] if 'regs' in region %}
-      {%- for param in fins['params'] if ((param['name'] == reg['default_values'][0]) and (param['value'] is iterable)) %}
-        {%- set temp = {'name':reg['name'],
-                        'width':reg['width'],
-                        'default_values':param['value'],
-                        'writable':reg['writable'],
-                        'description':reg['description']} %}
-        {%- set _dummy = temp.update({'length':temp['default_values']|length}) %}
-        {%- set _dummy = temp_region.update({'total':temp_region['total']+temp['length']}) %}
-        {%- set _dummy = temp_region['regs'].append(temp) %}
-      {%- else %}
-        {%- set temp = reg %}
-        {%- set _dummy = temp.update({'length':temp['default_values']|length}) %}
-        {%- set _dummy = temp_region.update({'total':temp_region['total']+temp['length']}) %}
-        {%- set _dummy = temp_region['regs'].append(temp) %}
-      {%- endfor %}
-    {%- endfor %}
-    {%- set _dummy = expanded_regions.append(temp_region) %}
-  {%- else %}
-    {%- set _dummy = expanded_regions.append(region) %}
-  {%- endif %}
-{%- endfor %}
+{%- set expanded_regions = [] -%}
+{%- for region in fins['regs']['regions'] -%}
+  {%- set temp_region = {'name':region['name'],'description':region['description'],'total':0,'regs':[]} -%}
+  {%- for reg in region['regs'] if 'regs' in region %}
+    {%- set temp_reg = {'name': reg['name'],'width':reg['width'],'writable':reg['writable'],'description':reg['description'],'default_values':[]} -%}
+    {# Update the default values of the register #}
+    {%- if 'default_values' in reg -%}
+      {%- for value in reg['default_values'] %}
+        {%- for param in fins['params'] if ((param['name'] == value) and (param['value'] is iterable)) -%}
+          {%- for entry in param['value'] -%}
+            {%- set _dummy = temp_reg['default_values'].append(entry) -%}
+          {%- endfor -%}
+        {%- else -%}
+          {%- set _dummy = temp_reg['default_values'].append(value) -%}
+        {%- endfor -%}
+      {%- endfor -%}
+    {%- elif 'length' in reg -%}
+      {%- for param in fins['params'] if (param['name'] == reg['length']) -%}
+        {%- for i in range(param['value']) -%}
+          {%- set _dummy = temp_reg['default_values'].append(0) -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- for i in range(reg['length']) -%}
+          {%- set _dummy = temp_reg['default_values'].append(0) -%}
+        {%- endfor -%}
+      {%- endfor -%}
+    {%- else -%}
+      {%- set _dummy = temp_reg['default_values'].append(0) -%}
+    {%- endif -%}
+
+    {# Update the signed value of the register #}
+    {%- if 'is_signed' in reg -%}
+      {%- set _dummy = temp_reg.update({'is_signed':reg['is_signed']}) -%}
+    {%- else -%}
+      {%- set _dummy = temp_reg.update({'is_signed':false}) -%}
+    {%- endif -%}
+    {%- set _dummy = temp_region['regs'].append(temp_reg) -%}
+    {%- set _dummy = temp_region.update({'total':temp_region['total']+temp_reg['default_values']|length}) -%}
+  {%- else -%}
+    {%- set temp_region = region -%}
+  {%- endfor -%}
+  {%- set _dummy = expanded_regions.append(temp_region) -%}
+{%- endfor -%}
 
 -- Standard Libraries
 library ieee;
@@ -61,7 +77,7 @@ entity {{ fins['name'] }}_regs is
     s_swconfig_rd_valid  : out std_logic;
     s_swconfig_rd_data   : out std_logic_vector(G_DATA_WIDTH-1 downto 0);
     {% for region in expanded_regions -%}
-    {% if not 'regs' in region -%}
+    {% if region['total'] == 0 -%}
     -- Decoded Passthrough Master Software Configuration Bus
     m_swconfig_{{ region['name'] }}_clk       : out std_logic;
     m_swconfig_{{ region['name'] }}_reset     : out std_logic;
@@ -75,7 +91,7 @@ entity {{ fins['name'] }}_regs is
     -- Register Inputs/Outputs
     {% set outer_loop = loop -%}
     {% for reg in region['regs'] -%}
-    {{ region['name'] }}_{{ reg['name'] }} : {% if reg['writable'] %}out{% else %}in {% endif %} std_logic_vector({{ reg['width'] }}*{{ reg['length'] }}-1 downto 0){% if loop.index < loop.length or outer_loop.index < outer_loop.length %};{% endif %}
+    {{ region['name'] }}_{{ reg['name'] }} : {% if reg['writable'] %}out{% else %}in {% endif %} std_logic_vector({{ reg['width'] }}*{{ reg['default_values']|length }}-1 downto 0){% if loop.index < loop.length or outer_loop.index < outer_loop.length %};{% endif %}
     {% endfor -%}
     {% endif -%}
     {% endfor -%}
@@ -89,7 +105,7 @@ architecture rtl of {{ fins['name'] }}_regs is
   ------------------------------------------------------------------------------
   constant REG_RD_ERROR_CODE : std_logic_vector(G_DATA_WIDTH-1 downto 0) := x"BADADD00";
 
-  {% for region in expanded_regions|selectattr('regs', 'defined')|list -%}
+  {% for region in expanded_regions|selectattr('total', 'greaterthan',0)|list -%}
   ------------------------------------------------------------------------------
   -- Signals: Local Decode of "{{ region['name'] }}" base address region
   ------------------------------------------------------------------------------
@@ -111,10 +127,12 @@ architecture rtl of {{ fins['name'] }}_regs is
   -- Default for writable Register Values
   constant {{ region['name'] }}_reg_default : std_logic_vector(G_DATA_WIDTH*{{ region['total'] }}-1 downto 0) :=
     {%- for reg in region['regs']|reverse|list -%}
-    {%- for value in reg['default_values'] if 'default_values' in reg and reg['length'] > 1 %}
+    {%- for value in reg['default_values']|reverse|list %}
+    {%- if (reg['is_signed']==true) %}
     std_logic_vector(resize(to_signed({{ value }}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% endif -%}
     {%- else %}
-    std_logic_vector(resize(to_signed({% if not 'default_values' in reg %}0{% else %}{{ reg['default_values'][0] }}{% endif %}, {{ reg['width'] }}), G_DATA_WIDTH))
+    std_logic_vector(resize(to_unsigned({{ value }}, {{ reg['width'] }}), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% endif -%}
+    {%- endif %}
     {%- endfor -%}
     {%- if loop.index < loop.length %} & {% else %} ;{% endif -%}
     {% endfor %}
@@ -123,18 +141,12 @@ architecture rtl of {{ fins['name'] }}_regs is
   -- Note: The mask prevents bits from being written in invalid areas
   constant {{ region['name'] }}_reg_wr_mask : std_logic_vector(G_DATA_WIDTH*{{ region['total'] }}-1 downto 0) :=
     {% for reg in region['regs']|reverse|list %}
-    {%- for value in reg['default_values'] if 'default_values' in reg and reg['length'] > 1 %}
+    {%- for value in reg['default_values']  %}
     {% if reg['writable'] and ((reg['width'] == 32) or (reg['width'] == '32')) -%}
     x"FFFFFFFF"{% if loop.index < loop.length %} &{% endif %}
     {%- else -%}
     std_logic_vector(resize(unsigned(to_signed({% if reg['writable'] %}-1{% else %}0{% endif %}, {{ reg['width'] }})), G_DATA_WIDTH)){% if loop.index < loop.length %} &{% endif -%}
     {% endif -%}
-    {% else %}
-    {%- if reg['writable'] and ((reg['width'] == 32) or (reg['width'] == '32')) -%}
-    x"FFFFFFFF"
-    {%- else -%}
-    std_logic_vector(resize(unsigned(to_signed({% if reg['writable'] %}-1{% else %}0{% endif %}, {{ reg['width'] }})), G_DATA_WIDTH))
-    {%- endif -%}
     {%- endfor -%}
     {%- if loop.index < loop.length %} &{% else %};{% endif %}
     {% endfor %}
@@ -145,7 +157,7 @@ begin
   ------------------------------------------------------------------------------
   -- Passthrough Clocks and Resets
   ------------------------------------------------------------------------------
-  {% for region in expanded_regions|selectattr('regs', 'undefined')|list -%}
+  {% for region in expanded_regions|selectattr('total', 'equalto',0)|list -%}
   m_swconfig_{{ region['name'] }}_clk   <= s_swconfig_clk;
   m_swconfig_{{ region['name'] }}_reset <= s_swconfig_reset;
   {% endfor %}
@@ -206,7 +218,7 @@ begin
     end if;
   end process s_bar_decode;
 
-  {% for region in expanded_regions|selectattr('regs', 'defined')|list -%}
+  {% for region in expanded_regions|selectattr('total', 'greaterthan',0)|list -%}
   ------------------------------------------------------------------------------
   -- Local Register Decode of "{{ region['name'] }}" base address region
   ------------------------------------------------------------------------------
@@ -220,7 +232,7 @@ begin
         -- Check if writing
         if (m_swconfig_{{ region['name'] }}_wr_enable = '1') then
           -- Loop through Registers
-          for reg_ix in 0 to {{ region['regs']|length }}-1 loop
+          for reg_ix in 0 to {{ region['total'] }}-1 loop
             -- Decode Address
             if (reg_ix = unsigned(m_swconfig_{{ region['name'] }}_address)) then
               -- Loop through Bits
@@ -251,7 +263,7 @@ begin
           -- Set read valid when read enable received
           m_swconfig_{{ region['name'] }}_rd_valid <= '1';
           -- Loop through Registers
-          for reg_ix in 0 to {{ region['regs']|length }}-1 loop
+          for reg_ix in 0 to {{ region['total'] }}-1 loop
             -- Decode Address
             if (reg_ix = unsigned(m_swconfig_{{ region['name'] }}_address)) then
               m_swconfig_{{ region['name'] }}_rd_data <= {{ region['name'] }}_reg_rd_values((reg_ix+1)*G_DATA_WIDTH-1 downto reg_ix*G_DATA_WIDTH);
@@ -262,24 +274,20 @@ begin
     end if;
   end process s_{{ region['name'] }}_read;
 
-  -- Assign register outputs
-  {% set track_loop = {'index':0} %}
-  {%- for reg in region['regs'] -%}
+  -- Assign outputs to writable registers
+  {% set track_loop = {'index':0} -%}
+  {% for reg in region['regs'] -%}
   {% if reg['writable'] -%}
-  {% set outer_loop = loop -%}
-  {% for value in reg['default_values'] if 'default_values' in reg -%}
-  {{ region['name'] }}_{{ reg['name'] }}({{ loop.index }}*{{ reg['width'] }}-1 downto {{ loop.index0 }} * {{ reg['width'] }})
-    <= {{ region['name'] }}_reg_values({{ track_loop['index'] }}*G_DATA_WIDTH+{{ reg['width'] }}-1 downto {{ track_loop['index'] }}*G_DATA_WIDTH);
-  {% set _dummy = track_loop.update({'index':track_loop['index']+1}) %}
-  {% else -%}
-  {{ region['name'] }}_{{ reg['name'] }} <= {{ region['name'] }}_reg_values({{ track_loop['index'] }}*G_DATA_WIDTH+{{ reg['width'] }}-1 downto {{ track_loop['index'] }}*G_DATA_WIDTH);
-  {% set _dummy = track_loop.update({'index':track_loop['index']+1}) %}
-  {% endfor -%}
+  {% for value in reg['default_values'] -%}
+    {{ region['name'] }}_{{ reg['name'] }}(({{ loop.index }})*{{ reg['width'] }}-1 downto {{ loop.index0 }}*{{ reg['width'] }})
+      <= {{ region['name'] }}_reg_values(({{ loop.index0 }}+{{track_loop['index']}})*G_DATA_WIDTH+{{ reg['width'] }}-1 downto ({{ loop.index0 }}+{{ track_loop['index'] }})*G_DATA_WIDTH);
+  {% endfor %}
   {% endif -%}
-  {% endfor -%}
+  {% set _dummy = track_loop.update({'index':track_loop['index']+reg['default_values']|length}) %}
+  {% endfor %}
 
   -- Combinatorial Process to assign register read values
-  c_{{ region['name'] }}_read : process (
+  c_{{ region['name'] }}_reg_outputs : process (
     {% for reg in region['regs']|selectattr('writable', 'equalto', False)|list -%}
     {{ region['name'] }}_{{ reg['name'] }},
     {% endfor -%}
@@ -289,13 +297,18 @@ begin
     -- Set defaults
     {{ region['name'] }}_reg_rd_values <= {{ region['name'] }}_reg_values;
 
-    -- Assign external read values
+    -- Assign outputs from non-writable register
+    {% set track_loop = {'index':0} -%}
     {% for reg in region['regs'] -%}
     {% if not reg['writable'] -%}
-    {{ region['name'] }}_reg_rd_values({{ loop.index-1 }}*G_DATA_WIDTH+{{ reg['width'] }}-1 downto {{ loop.index-1 }}*G_DATA_WIDTH) <= {{ region['name'] }}_{{ reg['name'] }};
+    for ix in 0 to {{ reg['default_values']|length }}-1 loop
+      {{ region['name'] }}_reg_rd_values((ix+{{ track_loop['index'] }})*G_DATA_WIDTH+{{ reg['width'] }}-1 downto (ix+{{ track_loop['index'] }})*G_DATA_WIDTH)
+        <= {{ region['name'] }}_{{ reg['name'] }}((ix+1)*{{ reg['width'] }}-1 downto ix*{{ reg['width'] }});
+    end loop;
     {% endif -%}
+    {% set _dummy = track_loop.update({'index':track_loop['index']+reg['default_values']|length}) %}
     {% endfor %}
-  end process c_{{ region['name'] }}_read;
+  end process c_{{ region['name'] }}_reg_outputs;
 
   {% endfor %}
 
