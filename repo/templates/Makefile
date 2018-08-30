@@ -30,6 +30,7 @@ fins: $(IP_MAKE)
 persona: $(PERSONA_PROJ)
 
 $(IP_MAKE): fins.json
+	python ./fins/repo/scripts/validate_fins.py
 	python ./fins/codegen/scripts/gen_fins.py
 
 $(IP_PROJ): $(IP_MAKE)

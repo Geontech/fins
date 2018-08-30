@@ -1,14 +1,11 @@
 #===============================================================================
-#  Company:      Geon Technologies, LLC
-#  File:         ip_simulate.tcl
-#  Description:  This is a generic script to run an IP simulation
-#  Tool Version: Vivado 2016.2
-#
-#  Revision History:
-#  Date        Author             Revision
-#  ----------  -----------------  ----------------------------------------------
-#  2017-05-04  Josh Schindehette  Initial Version
-#
+# Company:     Geon Technologies, LLC
+# Author:      Josh Schindehette
+# Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+#              Dissemination of this information or reproduction of this 
+#              material is strictly prohibited unless prior written
+#              permission is obtained from Geon Technologies, LLC
+# Description: This is a generic TCL script to run an IP simulation
 #===============================================================================
 
 # Import the name of the project
@@ -22,5 +19,17 @@ if {[current_project -quiet] == ""} {
 # Launch Simulation
 launch_sim
 
+# Check that the simulation launched correctly
+if { [current_time] != "1 us" } {
+    error "***** SIMULATION FAILED (t<1us) *****"
+}
+
 # Run Simulation until there is no more stimulus
 run all
+
+# Check that the simulation_done signal is True
+if { [get_value [get_objects "simulation_done"]] == "FALSE" } {
+    error "***** SIMULATION FAILED *****"
+} else {
+    puts "***** SIMULATION PASSED *****"
+}

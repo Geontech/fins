@@ -1,7 +1,10 @@
 %===============================================================================
 % Company:     Geon Technologies, LLC
-% File:        ip_params.m
-% Description: Auto-generated from Jinja2 Matlab/Octave Params Template
+% Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+%              Dissemination of this information or reproduction of this 
+%              material is strictly prohibited unless prior written
+%              permission is obtained from Geon Technologies, LLC
+% Description: Auto-generated MATLAB/Octave parameter script
 % Generated:   {{ now }}
 %===============================================================================
 
@@ -16,8 +19,8 @@ params.{{ param['name'] }} =
 
 % Streams
 {% for stream in fins['streams'] -%}
-streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.bit_width   = params.{{ stream['bit_width'] }};
-streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.is_complex  = params.{{ stream['is_complex'] }};
-streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.is_signed   = params.{{ stream['is_signed'] }};
-streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.frame_size  = params.{{ stream['packet_size'] }};
+streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.bit_width   = {{ stream['bit_width'] }};
+streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.is_complex  = {{ stream['is_complex'] | lower }};
+streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.is_signed   = {{ stream['is_signed'] | lower }};
+streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.frame_size  = {{ stream['packet_size'] }};
 {% endfor %}

@@ -1,7 +1,10 @@
 #===============================================================================
 # Company:     Geon Technologies, LLC
-# File:        ip_params.tcl
-# Description: Auto-generated from Jinja2 IP Parameters TCL Template
+# Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+#              Dissemination of this information or reproduction of this 
+#              material is strictly prohibited unless prior written
+#              permission is obtained from Geon Technologies, LLC
+# Description: Auto-generated TCL parameter script
 # Generated:   {{ now }}
 #===============================================================================
 
@@ -12,6 +15,9 @@ set IP_NAME "{{ fins['name'] }}"
 {% if 'company_url' in fins %}set IP_COMPANY_URL "{{ fins['company_url'] }}"{% endif %}
 {% if 'company_logo' in fins %}set IP_COMPANY_LOGO "{{ fins['company_logo'] }}"{% endif %}
 {% if 'user_ip_catalog' in fins %}set IP_USER_IP_CATALOG "{{ fins['user_ip_catalog'] }}"{% endif %}
+{% if 'part' in fins %}set IP_PART "{{ fins['part'] }}"{% endif %}
+{% if 'top_source' in fins %}set IP_TOP "{{ fins['top_source'] }}"{% endif %}
+{% if 'top_sim' in fins %}set IP_TESTBENCH "{{ fins['top_sim'] }}"{% endif %}
 
 # Parameters
 {% for param in fins['params'] -%}

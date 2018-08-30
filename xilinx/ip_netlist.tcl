@@ -1,15 +1,12 @@
 #===============================================================================
-#  Company:      Geon Technologies, LLC
-#  File:         ip_netlist.tcl
-#  Description:  This is a generic script for synthesizing and generating an
-#                EDIF netlist from an IP project
-#  Tool Version: Vivado 2015.4, 2016.2
-#
-#  Revision History:
-#  Date        Author             Revision
-#  ----------  -----------------  ----------------------------------------------
-#  2017-07-21  Josh Schindehette  Initial Version
-#
+# Company:     Geon Technologies, LLC
+# Author:      Josh Schindehette
+# Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+#              Dissemination of this information or reproduction of this 
+#              material is strictly prohibited unless prior written
+#              permission is obtained from Geon Technologies, LLC
+# Description: This is a TCL generic script for synthesizing and generating an
+#              EDIF netlist from an IP project
 #===============================================================================
 
 # Import the name of the project

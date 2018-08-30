@@ -1,63 +1,73 @@
-![Geon Technologies FINS](./gui/fins_logo.png "Geon Technologies FINS")
+![Geon Technologies FINS](./docs/fins-logo.png "Geon Technologies FINS")
 
-This repository contains Python scripts, Xilinx TCL scripts, MATLAB/Octave functions, and a PyGTK+ GUI for the rapid customization and generation of firmware intellectual property using the JSON-based Firmware IP Node Specification (FINS).
+This repository contains software that implements the JavaScript Object Notation (JSON) Firmware IP Node Specification (FINS).
 
 ![FINS Overview](./docs/fins_overview.png "FINS Overview")
+
+## Description
+
+Firmware IP Node Specification (FINS) is an innovative Geon software tool chain that defines a programmable logic processing module and automates the firmware design, verification, and integration workflows. The foundation of FINS is the definition of a modular IP (intellectual property) node with a human-readable JSON schema. Geon has focused on several core capabilities that use this schema to accelerate embedded systems development. 
+
+The first capability is the rapid reconfiguration and insertion of firmware IP. Firmware IP is often designed as a single-use module, and significant effort is required to apply this IP to other solutions. With a single update to the JSON schema, the FINS automation software reconfigures the IP and all its dependencies. Transitioning between programmable logic platforms is also usually a time-consuming problem. FINS generates portable modules compatible with firmware integration tools and platform board support layers, easing this problem. Geon has successfully used this technology with the Xilinx Vivado IP Integrator integration tool, Analog Devices board support layers, and Ettus Research board support layers, creating portable and re-useable firmware modules that substantially reduce IP integration time. 
+
+The second capability is the model-driven verification of firmware IP. Firmware IP models provide unit simulations for verification from behavioral-level to bit-level. Modeling tools such as MATLAB or GNU Octave excel at data generation and analysis, a weakness of hardware description languages. Through FINS, Geon uses modeling tools to unit test firmware IP nodes, optimizing data accuracy, data throughput, and processing capacity. 
+
+The final capability is the code generation of both firmware and software to manage the boundary between these two domains. FINS defines and propagates software configurable properties to both firmware and software configurations. This automation capability integrates with the REDHAWK SDR architecture to deploy the firmware IP node, enabling component deployment to the remote sensor or other systems. 
 
 ## Prerequisites
 
 This repository relies upon submodules, so make sure you use the `--recurse-submodules` flag when cloning this repository. If you forget to use that flag, then execute `git submodule update --init --recursive`.
 
 The software packages required to use FINS are:
- * [Xilinx Vivado](https://www.xilinx.com/products/design-tools/vivado.html) (Tested with 2015.4 and 2016.2)
+ * [Xilinx Vivado](https://www.xilinx.com/products/design-tools/vivado.html) (Tested with 2015.4, 2016.2, and 2018.2)
  * [GNU Make](https://www.gnu.org/software/make/)
  * [Python](https://www.python.org/) (Tested with 2.7)
  * [Jinja2](http://jinja.pocoo.org/)
  * [PyGTK+](http://www.pygtk.org/)
- * [GNU Octave](https://www.gnu.org/software/octave/)
- * [Git](https://git-scm.com/)
+ * [GNU Octave](https://www.gnu.org/software/octave/) or [Mathworks MATLAB](https://www.mathworks.com/products/matlab.html)
 
 ## Getting Started
 
-The best way to get started with FINS is to view our FIR Filter example [here](https://curiosity.office.geontech.com/firmware/fir_filter).
+To start using FINS, add FINS as a submodule by executing the following commands in the root of your firmware IP module repository:
 
-## Capabilities
+```bash
+$ git submodule add git@curiosity.office.geontech.com:firmware/fins.git
+$ git submodule update --init --recursive
+```
 
-Here is a brief description of the capabilities of FINS:
+Next, you must have a `fins.json` file in the root of your repository with the following contents at a minimum:
 
-### GUI
+```json
+{
+    "name":"elite_firmware_ip"
+}
+```
 
-A PyGTK+ GUI is provided to interact with the JSON FINS files. To launch the GUI, use the following commands:
+Execute the following command in the root of your repository to autogenerate the top-level `Makefile` and `.gitignore`:
 
-    $ cd ./gui
-    $ python fins_gui.py
+```bash
+$ python ./fins/repo/scripts/gen_repo.py
+```
 
-A default set of parameters is provided to you when the GUI is launched, and click `File>Open` to modify an existing parameter file. The tabs of the GUI correspond to different sets of information stored in the JSON FINS files.
+The next step is to fill out the required keys of the `fins.json` file and design your top-level code and testbench. Once everything is all setup, you may now use the `make` command with the following targets:
 
-### FinStreams
+* `all`: (Default) Builds and packages the intellectual property with Vivado
+* `fins`: Uses Jinja2 to generate the firmware IP node specification files
+* `sim`: Runs the simulation
+* `netlist`: Synthesizes the intellectual property into a single netlist
+* `clean`: Deletes all parameter files, temporary files, and project files for this repository only
+* `clean-all`: Deletes all parameter files, temporary files, and project files for this repository and all submodule IP repositories
 
-FinStreams is a library of MATLAB/Octave functions used to model and simulate firmware IP. It is a stanalone library and can be used separate from the JSON FinSpecification.
+Notes:
+* To use the `sim` target, your top level testbench must terminate all signal activity when finished and must have a boolean signal called `simulation_done` that is `true` at the end of the simulation.
+* When developing the `fins.json` file, the `make fins` command will be very helpful
 
-![FinStreams](./streams/documentation/finstreams.png "FinStreams")
+## Block Diagrams
 
-To run an example of a stanalone usage of FinStreams, use the following commands:
-
-    $ cd ./streams/examples/gain
-    $ make
-
-> Note: By default, GNU Octave is used for this example simulation. You can use MATLAB by typing `make matlab` instead of just `make`.
-
-### Code Generation
-
-The `codegen` folder contains scripts and templates for generation of HDL, MATLAB/Octave, and Xilinx TCL parameter files using Jinja2. Parameters from a JSON FINS file are inserted into the code generation templates for rapid customization of a firmware intellectual property module. The `Makefile` within the repository of the firmware IP module should control this code generation process as shown below.
+### Execution Flow and Inputs/Outputs
 
 ![FINS Detail](./docs/fins_detail.png "FINS Detail")
 
-For an example of the parameter generation, see our FIR Filter [here](https://github.com/Geontech/fir_filter.git).
+### FINS "Streams" Simulation Automation
 
-### Xilinx TCL Scripts
-
-The `xilinx` folder contains generic scripts for generating Vivado packaged IP, simulating using XSIM, and generating IP netlists. These scripts use the TCL parameter file from the code generation to generate specific IP.
-
-
-As always, [let us know](https://geontech.com/contact-us/) how we can help you with all your FPGA and DSP needs!
+![FINS Streams](./streams/docs/finstreams.png "FINS Streams")

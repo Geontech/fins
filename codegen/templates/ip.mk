@@ -1,12 +1,15 @@
 #===============================================================================
 # Company:     Geon Technologies, LLC
-# File:        ip.mk
-# Description: Auto-generated from Jinja2 IP Parameters Makefile Template
+# Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+#              Dissemination of this information or reproduction of this 
+#              material is strictly prohibited unless prior written
+#              permission is obtained from Geon Technologies, LLC
+# Description: Auto-generated IP generation Makefile
 # Generated:   {{ now }}
 #===============================================================================
 
 # File Lists
-FINS_FILES        := ip_params.tcl ip_import_user.tcl ip_params.m fins_edit.json {{ fins['name'] }}_params.vhd {{ fins['name'] }}_streams.vhd {{ fins['name'] }}_regs.vhd 
+FINS_FILES        := ip_params.tcl ip_import_user.tcl ip_params.m fins_edit.json fins_swconfig_register_map.json fins_axilite_register_map.json {{ fins['name'] }}_params.vhd {{ fins['name'] }}_streams.vhd {{ fins['name'] }}_swconfig.vhd {{ fins['name'] }}_swconfig.md {{ fins['name'] }}_swconfig_verify.vhd {{ fins['name'] }}_axilite.md {{ fins['name'] }}_axilite.vhd
 TEMP_FILES        := {{ fins['filesets']['temp']|join(' ') }}
 SOURCE_FILES      := {{ fins['filesets']['source']|join(' ') }}
 SIM_FILES         := {{ fins['filesets']['sim']|join(' ') }}
@@ -37,16 +40,20 @@ $(IP_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES) $(USER_IP_TARGE
 	vivado -mode batch -source ./fins/xilinx/ip_create.tcl >> ip_create.log 2>&1
 
 $(SIM_TARGET) : $(IP_TARGET)
-	{% if 'tools' in fins and 'sim' in fins['tools'] and 'matlab' in fins['tools']['sim'] -%}
+	{% if 'modeling_tool' in fins -%}
+	{% if 'matlab' in fins['modeling_tool'] -%}
 	matlab -nosplash -nodesktop -r "sim_setup;exit" >> ip_simulate.log 2>&1
 	{%- else -%}
 	octave sim_setup.m >> ip_simulate.log 2>&1
 	{%- endif %}
+	{%- endif %}
 	vivado -mode batch -source ./fins/xilinx/ip_simulate.tcl >> ip_simulate.log 2>&1
-	{% if 'tools' in fins and 'sim' in fins['tools'] and 'matlab' in fins['tools']['sim'] -%}
+	{% if 'modeling_tool' in fins -%}
+	{% if 'matlab' in fins['modeling_tool'] -%}
 	matlab -nosplash -nodesktop -r "sim_verify;exit" >> ip_simulate.log 2>&1
 	{%- else -%}
 	octave sim_verify.m >> ip_simulate.log 2>&1
+	{%- endif %}
 	{%- endif %}
 
 $(NETLIST_TARGET) : $(IP_TARGET)
