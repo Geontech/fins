@@ -1,14 +1,11 @@
 #===============================================================================
-#  Company:      Geon Technologies, LLC
-#  File:         ip_create.tcl
-#  Description:  This is a generic script for creating and packaging IP
-#  Tool Version: Vivado 2015.4, 2016.2
-#
-#  Revision History:
-#  Date        Author             Revision
-#  ----------  -----------------  ----------------------------------------------
-#  2017-09-07  Josh Schindehette  Initial Version
-#
+# Company:     Geon Technologies, LLC
+# Author:      Josh Schindehette
+# Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+#              Dissemination of this information or reproduction of this 
+#              material is strictly prohibited unless prior written
+#              permission is obtained from Geon Technologies, LLC
+# Description: This is a generic TCL script for creating and packaging IP
 #===============================================================================
 
 # Source the Parameters Script

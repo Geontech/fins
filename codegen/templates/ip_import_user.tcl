@@ -1,7 +1,10 @@
 #===============================================================================
 # Company:     Geon Technologies, LLC
-# File:        ip_import_user.tcl
-# Description: Auto-generated from Jinja2 IP Parameters TCL Template
+# Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+#              Dissemination of this information or reproduction of this 
+#              material is strictly prohibited unless prior written
+#              permission is obtained from Geon Technologies, LLC
+# Description: Auto-generated TCL user IP import script
 # Generated:   {{ now }}
 #===============================================================================
 

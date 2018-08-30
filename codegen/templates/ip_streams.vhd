@@ -1,7 +1,10 @@
 --==============================================================================
 -- Company:     Geon Technologies, LLC
--- File:        {{ fins['name'] }}_streams.vhd
--- Description: Auto-generated from Jinja2 VHDL streams template
+-- Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+--              Dissemination of this information or reproduction of this 
+--              material is strictly prohibited unless prior written
+--              permission is obtained from Geon Technologies, LLC
+-- Description: Auto-generated AXI-Stream test component
 -- Generated:   {{ now }}
 --==============================================================================
 
@@ -9,10 +12,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-
--- User Libraries
-library work;
-use work.{{ fins['name'] }}_params.all;
 
 -- Entity
 entity {{ fins['name'] }}_streams is

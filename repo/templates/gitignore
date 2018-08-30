@@ -33,9 +33,15 @@ vivado_*.zip
 /ip_params.tcl
 /ip_import_user.tcl
 /fins_edit.json
+/fins_swconfig_register_map.json
+/fins_axilite_register_map.json
 /{{ fins['name'] }}_params.vhd
 /{{ fins['name'] }}_streams.vhd
-/{{ fins['name'] }}_regs.vhd
+/{{ fins['name'] }}_swconfig.vhd
+/{{ fins['name'] }}_swconfig.md
+/{{ fins['name'] }}_swconfig_verify.vhd
+/{{ fins['name'] }}_axilite.vhd
+/{{ fins['name'] }}_axilite.md
 /rh_persona/*
 
 # DIA Diagram Editor Temporary Files

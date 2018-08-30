@@ -1,7 +1,10 @@
 --==============================================================================
 -- Company:     Geon Technologies, LLC
--- File:        {{ fins['name'] }}_params.vhd
--- Description: Auto-generated from Jinja2 VHDL package template
+-- Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+--              Dissemination of this information or reproduction of this 
+--              material is strictly prohibited unless prior written
+--              permission is obtained from Geon Technologies, LLC
+-- Description: Auto-generated parameter package file
 -- Generated:   {{ now }}
 --==============================================================================
 
@@ -9,14 +12,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-
--- User Libraries
-{% if 'packages' in fins -%}
-library work;
-{% for pkg in fins['packages'] -%}
-use work.{{ pkg }}.all;
-{% endfor %}
-{% endif %}
 
 -- Package
 package {{ fins['name'] }}_params is
