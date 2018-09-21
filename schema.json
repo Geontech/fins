@@ -2,11 +2,19 @@
   "is_required" : true,
   "types"       : ["dict"],
   "fields"      : {
-    "name"            : {
+    "name" : {
       "is_required" : true,
       "types"       : ["unicode"]
     },
+    "project_name" : {
+      "is_required" : false,
+      "types"       : ["unicode"]
+    },
     "description"     : {
+      "is_required" : false,
+      "types"       : ["unicode"]
+    },
+    "version"     : {
       "is_required" : false,
       "types"       : ["unicode"]
     },
@@ -35,6 +43,10 @@
       "types"       : ["unicode"]
     },
     "top_sim" : {
+      "is_required" : false,
+      "types"       : ["unicode"]
+    },
+    "modeling_tool" : {
       "is_required" : false,
       "types"       : ["unicode"]
     },
@@ -307,16 +319,6 @@
               "types"       : ["int", "unicode"]
             }
           }
-        }
-      }
-    },
-    "tools" : {
-      "is_required" : false,
-      "types"       : ["dict"],
-      "fields"      : {
-        "sim" : {
-          "is_required" : false,
-          "types"       : ["unicode"]
         }
       }
     },

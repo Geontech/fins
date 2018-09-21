@@ -13,7 +13,7 @@ source ip_params.tcl
 
 # Open project if not open
 if {[current_project -quiet] == ""} {
-    open_project "$IP_NAME.xpr"
+    open_project "$IP_PROJECT_NAME.xpr"
 }
 
 # Launch Simulation

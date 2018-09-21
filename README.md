@@ -58,9 +58,10 @@ The next step is to fill out the required keys of the `fins.json` file and desig
 * `clean`: Deletes all parameter files, temporary files, and project files for this repository only
 * `clean-all`: Deletes all parameter files, temporary files, and project files for this repository and all submodule IP repositories
 
-Notes:
+**Notes:**
 * To use the `sim` target, your top level testbench must terminate all signal activity when finished and must have a boolean signal called `simulation_done` that is `true` at the end of the simulation.
 * When developing the `fins.json` file, the `make fins` command will be very helpful
+* To use modeling tools like Octave or MATLAB with the `sim` target, you must define the top-level key `modeling_tool` in `fins.json` and set it to "octave" or "matlab". Once that key is defined, you must have two files in the root of your repository: `sim_setup.m` which is run before the HDL simulation and `sim_verify.m` which is run after the HDL simulation.
 
 ## Block Diagrams
 
