@@ -36,12 +36,20 @@ def load_fins(directory='./'):
         fins = json.load(fins_file)
     # Import JSON Edits to the Parameters of FINSpec
     if (os.path.exists(directory + FINS_EDIT_FILENAME)):
+        # Open fins_edit.json
         with open(directory + FINS_EDIT_FILENAME) as fins_edit_file:
             fins_edit = json.load(fins_edit_file)
+        # Override parameters
         for param_ix, param in enumerate(fins['params']):
             for edit_param in fins_edit['params']:
                 if (edit_param['name'].lower() == param['name'].lower()):
                     fins['params'][param_ix]['value'] = edit_param['value']
+        # Create a catalog name
+        if 'name' in fins_edit:
+            fins['project_name']  = fins_edit['name']
+    else:
+        # Set the default catalog name to the name
+        fins['project_name']  = fins['name']
     return fins
 
 # NOTE: Identical function in gen_persona.py
@@ -221,15 +229,14 @@ def create_sub_ip_fins_edit(fins):
 
     # Create files for each IP
     for ip in fins['ip']:
-        # Make sure there are params
-        if 'params' in ip:
-            # Once we are done retrieving parameter values, write the
-            # fins edit JSON file for sub-ip
-            with open(ip['repo_name'] + '/' + FINS_EDIT_FILENAME, 'w') as fins_edit_file:
-                # Strip all fields except for params
-                fins_edit_params = {}
-                fins_edit_params['params'] = ip['params']
-                json.dump(fins_edit_params, fins_edit_file, sort_keys=True, indent=2)
+        # Once we are done retrieving parameter values, write the
+        # fins edit JSON file for sub-ip
+        with open(ip['repo_name'] + '/' + FINS_EDIT_FILENAME, 'w') as fins_edit_file:
+            # Strip all fields except for params
+            fins_edit_params = {}
+            fins_edit_params['params'] = ip['params']
+            fins_edit_params['name'] = ip['name']
+            json.dump(fins_edit_params, fins_edit_file, sort_keys=True, indent=2)
 
 # NOTE: This is a recursive function
 # NOTE: There is a similar function in gen_persona.py called "get_persona_regs"

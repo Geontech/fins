@@ -169,8 +169,6 @@ function [] = fins_plot( varargin )
         p2 = plot(f,sim_stream_freq,'r');
         legend([p1,p2],'Model','Simulation');
       end
-      % Set the axis boundaries
-      axis([-pi pi]);
     else
       % Check if data is complex
       if (~isreal(model_stream.values))

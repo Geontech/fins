@@ -13,9 +13,9 @@ source ip_params.tcl
 
 # Create Project
 if {[info exists "IP_PART"]} {
-    create_project $IP_NAME . -force -part $IP_PART
+    create_project $IP_PROJECT_NAME . -force -part $IP_PART
 } else {
-    create_project $IP_NAME . -force -part xc7z020clg484-1
+    create_project $IP_PROJECT_NAME . -force -part xc7z020clg484-1
 }
 
 # Check if there is a directory where sub-ip could be located
@@ -64,9 +64,18 @@ if {[info exists "IP_TESTBENCH"]} {
 # Package the project
 if {[info exists "IP_COMPANY_URL"]} {
     ipx::package_project -root_dir . -vendor $IP_COMPANY_URL -library user
-    set_property company_url "www.$IP_COMPANY_URL" [ipx::current_core]
+    set_property company_url "http://$IP_COMPANY_URL" [ipx::current_core]
 } else {
     ipx::package_project -root_dir . -library user
+}
+
+# Set the Name
+set_property name $IP_PROJECT_NAME [ipx::current_core]
+set_property display_name $IP_PROJECT_NAME [ipx::current_core]
+
+# Set the Version
+if {[info exists "IP_VERSION"]} {
+    set_property version $IP_VERSION [ipx::current_core]
 }
 
 # Set Vendor Display Name

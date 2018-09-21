@@ -25,7 +25,7 @@ package {{ fins['name'] }}_swconfig_verify is
   ------------------------------------------------------------------------------
   {%- for reg in fins['swconfig']['regs'] %}
   {%- for n in range(reg['length']) %}
-  constant REG_{{ reg['name'] | upper }}_OFFSET{{ n }} : natural := {{ reg['offset'] }};
+  constant REG_{{ reg['name'] | upper }}_OFFSET{{ n }} : natural := {{ reg['offset'] + n }};
   {%- endfor %}
   {%- endfor %}
 
@@ -161,15 +161,15 @@ package body {{ fins['name'] }}_swconfig_verify is
     );
     {%- if reg['is_signed'] %}
     assert ({{ reg['default_values'][n] }} = to_integer(signed(s_swconfig_rd_data({{ reg['width'] }}-1 downto 0))))
-      report "ERROR: Incorrect default value for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset']) }}"
+      report "ERROR: Incorrect default value for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset'] + n) }}"
       severity failure;
-    write(my_line, string'("PASS: Correct default value for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset']) }}"));
+    write(my_line, string'("PASS: Correct default value for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset'] + n) }}"));
     writeline(output, my_line);
     {%- else %}
     assert ({{ reg['default_values'][n] }} = to_integer(unsigned(s_swconfig_rd_data({{ reg['width'] }}-1 downto 0))))
-      report "ERROR: Incorrect default value for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset']) }}"
+      report "ERROR: Incorrect default value for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset'] + n) }}"
       severity failure;
-    write(my_line, string'("PASS: Correct default value for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset']) }}"));
+    write(my_line, string'("PASS: Correct default value for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset'] + n) }}"));
     writeline(output, my_line);
     {%- endif %}
     {%- endfor %}
@@ -204,9 +204,9 @@ package body {{ fins['name'] }}_swconfig_verify is
     {%- else %}
     assert ({{ 2**reg['width']-1 }} = to_integer(unsigned(s_swconfig_rd_data)))
     {%- endif %}
-      report "ERROR: Incorrect write width for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset']) }}"
+      report "ERROR: Incorrect write width for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset'] + n) }}"
       severity failure;
-    write(my_line, string'("PASS: Correct write width for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset']) }}"));
+    write(my_line, string'("PASS: Correct write width for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset'] + n) }}"));
     writeline(output, my_line);
     {%- endfor %}
     -- Write back to default value
@@ -236,15 +236,15 @@ package body {{ fins['name'] }}_swconfig_verify is
     );
     {%- if reg['is_signed'] %}
     assert ({{ reg['default_values'][n] }} = to_integer(signed(s_swconfig_rd_data({{ reg['width'] }}-1 downto 0))))
-      report "ERROR: Incorrect default value for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset']) }}"
+      report "ERROR: Write to default value failed for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset'] + n) }}"
       severity failure;
-    write(my_line, string'("PASS: Correct default value for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset']) }}"));
+    write(my_line, string'("PASS: Correctly written back to default value for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset'] + n) }}"));
     writeline(output, my_line);
     {%- else %}
     assert ({{ reg['default_values'][n] }} = to_integer(unsigned(s_swconfig_rd_data({{ reg['width'] }}-1 downto 0))))
-      report "ERROR: Incorrect default value for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset']) }}"
+      report "ERROR: Write to default value failed for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset']) }}"
       severity failure;
-    write(my_line, string'("PASS: Correct default value for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset']) }}"));
+    write(my_line, string'("PASS: Correctly written back to default value for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset'] + n) }}"));
     writeline(output, my_line);
     {%- endif %}
     {%- endfor %}
@@ -258,7 +258,7 @@ package body {{ fins['name'] }}_swconfig_verify is
     --*********************************************
     {%- set last_reg = fins['swconfig']['regs'] | last %}
     read_reg(
-      {{ last_reg['offset'] + 1 }},
+      {{ last_reg['offset'] + last_reg['length'] }},
       s_swconfig_clk       ,
       s_swconfig_reset     ,
       s_swconfig_address   ,

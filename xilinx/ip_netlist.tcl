@@ -13,7 +13,7 @@
 source ip_params.tcl
 
 # Assign the netlist project name
-set IP_NETLIST "${IP_NAME}_netlist"
+set IP_NETLIST "$IP_PROJECT_NAME_netlist"
 
 # Create Project
 if {[info exists "IP_PART"]} {
@@ -28,9 +28,9 @@ update_ip_catalog
 
 # Create the IP within the project
 if {[info exists "IP_COMPANY_URL"]} {
-    create_ip -name $IP_NAME -vendor $IP_COMPANY_URL -library user -version 1.0 -module_name $IP_NETLIST
+    create_ip -name $IP_PROJECT_NAME -vendor $IP_COMPANY_URL -library user -version 1.0 -module_name $IP_NETLIST
 } else {
-    create_ip -name $IP_NAME -vendor user.org -library user -version 1.0 -module_name $IP_NETLIST
+    create_ip -name $IP_PROJECT_NAME -vendor user.org -library user -version 1.0 -module_name $IP_NETLIST
 }
 
 # Generate all the stuffs
@@ -39,7 +39,7 @@ generate_target all [get_files "${IP_NETLIST}.xci"]
 # Create the IP synthesis run
 set IP_SYNTH_RUN [create_ip_run [get_files "${IP_NETLIST}.xci"]]
 
-# Launch and Open the synthesis run
+# Launch and open the synthesis run
 launch_run -jobs 2 $IP_SYNTH_RUN
 wait_on_run $IP_SYNTH_RUN
 open_run $IP_SYNTH_RUN

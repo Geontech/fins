@@ -10,7 +10,9 @@
 
 # IP Definition
 set IP_NAME "{{ fins['name'] }}"
+set IP_PROJECT_NAME "{{ fins['project_name'] }}"
 {% if 'description' in fins %}set IP_DESCRIPTION "{{ fins['description'] }}"{% endif %}
+{% if 'version' in fins %}set IP_VERSION "{{ fins['version'] }}"{% endif %}
 {% if 'company_name' in fins %}set IP_COMPANY_NAME "{{ fins['company_name'] }}"{% endif %}
 {% if 'company_url' in fins %}set IP_COMPANY_URL "{{ fins['company_url'] }}"{% endif %}
 {% if 'company_logo' in fins %}set IP_COMPANY_LOGO "{{ fins['company_logo'] }}"{% endif %}
@@ -30,18 +32,38 @@ set {{ param['name'] }}
 
 # List the source files
 set SOURCE_FILES [list \
-{% for source_file in fins['filesets']['source'] -%}
+{%- if 'params' in fins %}
+{{ fins['name'] }}_params.vhd \
+{%- endif %}
+{%- if 'swconfig' in fins %}
+{{ fins['name'] }}_swconfig.vhd \
+{%- endif %}
+{%- if 'axilite' in fins %}
+{{ fins['name'] }}_axilite.vhd \
+{%- endif %}
+{%- for source_file in fins['filesets']['source'] %}
 {{ source_file }} \
-{% endfor %}]
+{%- endfor %}
+]
 
 # List the simulation files
 set SIM_FILES [list \
-{% for sim_file in fins['filesets']['sim'] -%}
+{%- if 'streams' in fins %}
+{{ fins['name'] }}_streams.vhd \
+./fins/streams/hdl/axis_file_reader.vhd \
+./fins/streams/hdl/axis_file_writer.vhd \
+{%- endif %}
+{%- if 'swconfig' in fins %}
+{{ fins['name'] }}_swconfig_verify.vhd \
+{%- endif %}
+{%- for sim_file in fins['filesets']['sim'] %}
 {{ sim_file }} \
-{% endfor %}]
+{%- endfor %}
+]
 
 # List the constraints files
 set CONSTRAINTS_FILES [list \
-{% for constraint_file in fins['filesets']['constraints'] -%}
+{%- for constraint_file in fins['filesets']['constraints'] %}
 {{ constraint_file }} \
-{% endfor %}]
+{%- endfor %}
+]
