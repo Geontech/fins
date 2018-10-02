@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="43cm" height="30cm" viewBox="698 258 843 583" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 4; stroke: #000000" x="700" y="300" width="640" height="540"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1020" y="573.9">
+      <tspan x="1020" y="573.9"></tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="709.736" y1="460" x2="850.264" y2="460"/>
+    <polygon style="fill: #000000" points="702.236,460 712.236,455 709.736,460 712.236,465 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="702.236,460 712.236,455 709.736,460 712.236,465 "/>
+    <polygon style="fill: #000000" points="857.764,460 847.764,465 850.264,460 847.764,455 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="857.764,460 847.764,465 850.264,460 847.764,455 "/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="720" y="456.255">
+    <tspan x="720" y="456.255">s_swconfig / s_axi</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="980" y1="360" x2="1090.26" y2="360"/>
+    <polygon style="fill: #000000" points="1097.76,360 1087.76,365 1090.26,360 1087.76,355 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1097.76,360 1087.76,365 1090.26,360 1087.76,355 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="980" y1="380" x2="1090.26" y2="380"/>
+    <polygon style="fill: #000000" points="1097.76,380 1087.76,385 1090.26,380 1087.76,375 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1097.76,380 1087.76,385 1090.26,380 1087.76,375 "/>
+  </g>
+  <g>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 4; stroke: #000000" x="700" y="260" width="640" height="40"/>
+    <text font-size="14.1111" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1020" y="284.281">
+      <tspan x="1020" y="284.281">[NAME]_swconfig.vhd / [NAME]_axilite.vhd</tspan>
+    </text>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1040" y="357">
+    <tspan x="1040" y="357">wr_data</tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1040" y="377">
+    <tspan x="1040" y="377">wr_enable</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="860" y="340" width="120" height="240"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="860" y="340" width="120" height="240"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="920" y="455.9">
+      <tspan x="920" y="455.9">Write</tspan>
+      <tspan x="920" y="471.9">Decode</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="980" y1="460" x2="1090.26" y2="460"/>
+    <polygon style="fill: #000000" points="1097.76,460 1087.76,465 1090.26,460 1087.76,455 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1097.76,460 1087.76,465 1090.26,460 1087.76,455 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="980" y1="480" x2="1090.26" y2="480"/>
+    <polygon style="fill: #000000" points="1097.76,480 1087.76,485 1090.26,480 1087.76,475 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1097.76,480 1087.76,485 1090.26,480 1087.76,475 "/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1040" y="457">
+    <tspan x="1040" y="457">wr_data</tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1040" y="477">
+    <tspan x="1040" y="477">wr_enable</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1220" y1="460" x2="1330.26" y2="460"/>
+    <polygon style="fill: #000000" points="1337.76,460 1327.76,465 1330.26,460 1327.76,455 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1337.76,460 1327.76,465 1330.26,460 1327.76,455 "/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1320" y="457">
+    <tspan x="1320" y="457">wr_data</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="980" y1="540" x2="1330.26" y2="540"/>
+    <polygon style="fill: #000000" points="1337.76,540 1327.76,545 1330.26,540 1327.76,535 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1337.76,540 1327.76,545 1330.26,540 1327.76,535 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="980" y1="560" x2="1330.26" y2="560"/>
+    <polygon style="fill: #000000" points="1337.76,560 1327.76,565 1330.26,560 1327.76,555 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1337.76,560 1327.76,565 1330.26,560 1327.76,555 "/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1320" y="537">
+    <tspan x="1320" y="537">wr_data</tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1320" y="557">
+    <tspan x="1320" y="557">wr_enable</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="1100" y="620" width="120" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1100" y="620" width="120" height="40"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1160" y="643.9">
+      <tspan x="1160" y="643.9">Register</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="989.736" y1="640" x2="1100" y2="640"/>
+    <polygon style="fill: #000000" points="982.236,640 992.236,635 989.736,640 992.236,645 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="982.236,640 992.236,635 989.736,640 992.236,645 "/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1040" y="637">
+    <tspan x="1040" y="637">rd_data</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="980" y1="760" x2="1330.26" y2="760"/>
+    <polygon style="fill: #000000" points="1337.76,760 1327.76,765 1330.26,760 1327.76,755 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1337.76,760 1327.76,765 1330.26,760 1327.76,755 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="989.736" y1="780" x2="1340" y2="780"/>
+    <polygon style="fill: #000000" points="982.236,780 992.236,775 989.736,780 992.236,785 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="982.236,780 992.236,775 989.736,780 992.236,785 "/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1320" y="757">
+    <tspan x="1320" y="757">rd_enable</tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1320" y="777">
+    <tspan x="1320" y="777">rd_valid</tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1160" y="741">
+    <tspan x="1160" y="741">"remote"</tspan>
+    <tspan x="1160" y="757">read_ports</tspan>
+  </text>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="709.736,460 840,460 840,720 850.264,720 "/>
+    <polygon style="fill: #000000" points="702.236,460 712.236,455 709.736,460 712.236,465 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="702.236,460 712.236,455 709.736,460 712.236,465 "/>
+    <polygon style="fill: #000000" points="857.764,720 847.764,725 850.264,720 847.764,715 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="857.764,720 847.764,725 850.264,720 847.764,715 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="989.736" y1="700" x2="1340" y2="700"/>
+    <polygon style="fill: #000000" points="982.236,700 992.236,695 989.736,700 992.236,705 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="982.236,700 992.236,695 989.736,700 992.236,705 "/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1320" y="697">
+    <tspan x="1320" y="697">rd_data</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="989.736" y1="800" x2="1340" y2="800"/>
+    <polygon style="fill: #000000" points="982.236,800 992.236,795 989.736,800 992.236,805 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="982.236,800 992.236,795 989.736,800 992.236,805 "/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1320" y="797">
+    <tspan x="1320" y="797">rd_data</tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1160" y="681">
+    <tspan x="1160" y="681">"external"</tspan>
+    <tspan x="1160" y="697">read_ports</tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1160" y="521">
+    <tspan x="1160" y="521">"remote"</tspan>
+    <tspan x="1160" y="537">write_ports</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="1420" y="680" width="120" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1420" y="680" width="120" height="40"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1480" y="703.9">
+      <tspan x="1480" y="703.9">Register</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1420" y1="700" x2="1349.74" y2="700"/>
+    <polygon style="fill: #000000" points="1342.24,700 1352.24,695 1349.74,700 1352.24,705 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1342.24,700 1352.24,695 1349.74,700 1352.24,705 "/>
+  </g>
+  <text font-size="12.7998" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1160" y="601">
+    <tspan x="1160" y="601">"internal"</tspan>
+    <tspan x="1160" y="617">read_ports</tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1160" y="421">
+    <tspan x="1160" y="421">"external"</tspan>
+    <tspan x="1160" y="437">write_ports</tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #0000ff;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1160" y="321">
+    <tspan x="1160" y="321">"internal"</tspan>
+    <tspan x="1160" y="337">write_ports</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="860" y="620" width="120" height="200"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="860" y="620" width="120" height="200"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="920" y="715.9">
+      <tspan x="920" y="715.9">Read</tspan>
+      <tspan x="920" y="731.9">Decode</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1420" y="740" width="120" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1420" y="740" width="120" height="80"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1480" y="783.9">
+      <tspan x="1480" y="783.9">Register</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1340" y1="760" x2="1410.26" y2="760"/>
+    <polygon style="fill: #000000" points="1417.76,760 1407.76,765 1410.26,760 1407.76,755 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1417.76,760 1407.76,765 1410.26,760 1407.76,755 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1420" y1="780" x2="1349.74" y2="780"/>
+    <polygon style="fill: #000000" points="1342.24,780 1352.24,775 1349.74,780 1352.24,785 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1342.24,780 1352.24,775 1349.74,780 1352.24,785 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1420" y1="800" x2="1349.74" y2="800"/>
+    <polygon style="fill: #000000" points="1342.24,800 1352.24,795 1349.74,800 1352.24,805 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1342.24,800 1352.24,795 1349.74,800 1352.24,805 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1420" y="520" width="120" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1420" y="520" width="120" height="60"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1480" y="553.9">
+      <tspan x="1480" y="553.9">Register</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1340" y1="540" x2="1410.26" y2="540"/>
+    <polygon style="fill: #000000" points="1417.76,540 1407.76,545 1410.26,540 1407.76,535 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1417.76,540 1407.76,545 1410.26,540 1407.76,535 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1340" y1="560" x2="1410.26" y2="560"/>
+    <polygon style="fill: #000000" points="1417.76,560 1407.76,565 1410.26,560 1407.76,555 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1417.76,560 1407.76,565 1410.26,560 1407.76,555 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1100" y="440" width="120" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1100" y="440" width="120" height="60"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1160" y="473.9">
+      <tspan x="1160" y="473.9">Register</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1100" y="340" width="120" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1100" y="340" width="120" height="60"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1160" y="373.9">
+      <tspan x="1160" y="373.9">Register</tspan>
+    </text>
+  </g>
+</svg>

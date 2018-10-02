@@ -190,19 +190,19 @@ def validate_ip(fins):
     for ip in fins['ip']:
         # Make sure the IP repository is there
         if not os.path.isdir(ip['repo_name']):
-            print 'ERROR: ip submodule',ip['module_name'],'does not exist or path is incorrect'
+            print 'ERROR: IP',ip['name'],'does not exist or path',ip['repo_name'],'is incorrect'
             sys.exit(1)
         # Make sure the IP repository has a FINS file
         if not os.path.isfile(ip['repo_name']+'/fins.json'):
-            print 'WARNING: ip submodule',ip['module_name'],'is not integrated with fins'
+            print 'WARNING: IP',ip['name'],'is not integrated with fins'
         # Make sure all parameters have a parent
         for param in ip['params']:
             if not param['parent'] in parent_names:
-                print 'ERROR: The parent for parameter',param['name'],'in ip submodule',ip['module_name'],'does not exist'
+                print 'ERROR: The parent for parameter',param['name'],'in IP',ip['name'],'does not exist'
                 sys.exit(1)
         # Notify of success
         if VERBOSE:
-            print 'PASS:',ip['module_name']
+            print 'PASS:',ip['name']
 
 def validate_registers(regs):
     reg_names = []
@@ -259,11 +259,11 @@ def validate_swconfig(fins):
                 print 'ERROR: No ip in fins to link to',region['name']
                 sys.exit(1)
             # Gather the list of IP names
-            ip_module_names = []
+            ip_names = []
             for ip in fins['ip']:
-                ip_module_names.append(ip['module_name'])
+                ip_names.append(ip['name'])
             # Make sure the ip module exists
-            if not region['ip_module'] in ip_module_names:
+            if not region['ip_module'] in ip_names:
                 print 'ERROR: ip_module',region['ip_module'],'not in fins["ip"]'
                 sys.exit(1)
             # Notify of success

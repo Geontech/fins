@@ -114,10 +114,6 @@
           "is_required" : true,
           "types"       : ["unicode"]
         },
-        "module_name" : {
-          "is_required" : true,
-          "types"       : ["unicode"]
-        },
         "vendor"      : {
           "is_required" : true,
           "types"       : ["unicode"]
@@ -138,6 +134,32 @@
             "parent"  : {
               "is_required" : true,
               "types"       : ["unicode"]
+            }
+          }
+        },
+        "instances" : {
+          "is_required" : true,
+          "types"       : ["list"],
+          "list_types"  : ["dict"],
+          "fields"      : {
+            "module_name"    : {
+              "is_required" : true,
+              "types"       : ["unicode"]
+            },
+            "generics" : {
+              "is_required" : false,
+              "types"       : ["list"],
+              "list_types"  : ["dict"],
+              "fields"      : {
+                "name"    : {
+                  "is_required" : true,
+                  "types"       : ["unicode"]
+                },
+                "value"  : {
+                  "is_required" : true,
+                  "types"       : ["unicode", "bool", "int"]
+                }
+              }
             }
           }
         }
