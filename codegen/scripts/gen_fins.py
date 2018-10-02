@@ -150,7 +150,7 @@ def convert_fields_to_literal(fins):
             for reg in fins['axilite']['regs']:
                 reg = convert_register_fields_to_literal(reg, params)
 
-    # Convert all non-string fields of ip to literals
+    # Convert all string fields of ip to literals
     if 'ip' in fins:
         for ip in fins['ip']:
             # Make sure there are params
@@ -268,7 +268,7 @@ def get_flattened_swconfig(fins, base_offset):
         elif 'ip_module' in region:
             # Get the IP module that this is a passthrough region for
             for ip in fins['ip']:
-                if region['ip_module'].lower() == ip['module_name'].lower():
+                if region['ip_module'].lower() == ip['name'].lower():
                     break
             else:
                 print('ERROR: {} IP not found in FINS'.format(region['ip_module']))

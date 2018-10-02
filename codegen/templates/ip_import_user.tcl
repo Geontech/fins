@@ -9,6 +9,15 @@
 #===============================================================================
 
 # Create User IP
-{% for ip in fins['ip'] -%}
-create_ip -name {{ ip['name'] }} -vendor {{ ip['vendor'] }} -library {{ ip['library'] }} -version 1.0 -module_name {{ ip['module_name'] }}
-{% endfor %}
+{%- for ip in fins['ip'] %}
+{%- for instance in ip['instances'] %}
+create_ip -name {{ ip['name'] }} -vendor {{ ip['vendor'] }} -library {{ ip['library'] }} -version 1.0 -module_name {{ instance['module_name'] }}
+{%- if 'generics' in instance %}
+set_property -dict [list \
+    {%- for generic in instance['generics'] %}
+    CONFIG.{{ generic['name'] }} {{ generic['value'] }} \
+    {%- endfor %}
+] [get_ips {{ instance['module_name'] }}]
+{%- endif %}
+{%- endfor %}
+{%- endfor %}
