@@ -197,6 +197,8 @@ def apply_register_defaults(reg):
             reg['range_max'] = 2**(reg['width']-1) - 1
         else:
             reg['range_max'] = 2**reg['width'] - 1
+    if not 'is_ram' in reg:
+        reg['is_ram'] = False
     return reg
 
 def apply_all_register_defaults(fins):

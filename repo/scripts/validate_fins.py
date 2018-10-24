@@ -205,6 +205,9 @@ def validate_ip(fins):
             print 'PASS:',ip['name']
 
 def validate_registers(regs):
+    # Iterate through all registers
+    num_rams = 0
+    num_regs = 0
     reg_names = []
     for reg in regs:
         reg_names.append(reg['name'])
@@ -240,11 +243,33 @@ def validate_registers(regs):
             if not reg['read_ports'].lower() in READ_PORTS_VALUES:
                 print 'ERROR: Register',reg['name'],'has an invalid value for read_ports:',reg['write_ports']
                 sys.exit(1)
+        if 'is_ram' in reg:
+            if reg['is_ram']:
+                num_rams = num_rams + 1
+                if 'default_values' in reg:
+                    # Make sure if default_values is not set if this is a RAM
+                    print 'ERROR: Register',reg['name'],'default_values cannot be set when is_ram is true'
+                    sys.exit(1)
+                if not 'length' in reg:
+                    # Make sure length was set if this is a RAM
+                    print 'ERROR: Register',reg['name'],'length must be set when is_ram is true'
+                    sys.exit(1)
+            else:
+                num_regs = num_regs + 1
+        else:
+            num_regs = num_regs + 1
         # Notify of success
         if VERBOSE:
             print 'PASS: register',reg['name']
+
+    # Check for name duplicates in the same region
     if (len(reg_names) != len(set(reg_names))):
         print 'ERROR: Duplicate register names detected'
+        sys.exit(1)
+
+    # Check for registers and RAMs in the same region
+    if (num_regs > 0) and (num_rams > 0):
+        print 'ERROR: Registers and RAMs cannot coexist in the same region'
         sys.exit(1)
 
 def validate_swconfig(fins):

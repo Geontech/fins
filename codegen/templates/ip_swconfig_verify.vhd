@@ -30,6 +30,11 @@ package {{ fins['name'] }}_swconfig_verify is
   {%- endfor %}
 
   ------------------------------------------------------------------------------
+  -- Types
+  ------------------------------------------------------------------------------
+  type t_reg_array is array (natural range <>) of integer;
+
+  ------------------------------------------------------------------------------
   -- Procedures
   ------------------------------------------------------------------------------
   procedure write_reg (
@@ -47,6 +52,32 @@ package {{ fins['name'] }}_swconfig_verify is
 
   procedure read_reg (
     reg_rd_address              : natural;
+    signal s_swconfig_clk       : in  std_logic;
+    signal s_swconfig_reset     : in  std_logic;
+    signal s_swconfig_address   : out std_logic_vector;
+    signal s_swconfig_wr_enable : out std_logic;
+    signal s_swconfig_wr_data   : out std_logic_vector;
+    signal s_swconfig_rd_enable : out std_logic;
+    signal s_swconfig_rd_valid  : in  std_logic;
+    signal s_swconfig_rd_data   : in  std_logic_vector
+  );
+
+  procedure write_regs (
+    reg_wr_address              : natural;
+    reg_wr_data                 : t_reg_array;
+    signal s_swconfig_clk       : in  std_logic;
+    signal s_swconfig_reset     : in  std_logic;
+    signal s_swconfig_address   : out std_logic_vector;
+    signal s_swconfig_wr_enable : out std_logic;
+    signal s_swconfig_wr_data   : out std_logic_vector;
+    signal s_swconfig_rd_enable : out std_logic;
+    signal s_swconfig_rd_valid  : in  std_logic;
+    signal s_swconfig_rd_data   : in  std_logic_vector
+  );
+
+  procedure verify_regs (
+    reg_rd_address              : natural;
+    reg_rd_data                 : t_reg_array;
     signal s_swconfig_clk       : in  std_logic;
     signal s_swconfig_reset     : in  std_logic;
     signal s_swconfig_address   : out std_logic_vector;
@@ -120,6 +151,72 @@ package body {{ fins['name'] }}_swconfig_verify is
     s_swconfig_address <= (others => '1');
   end read_reg;
 
+  -- Procedure to load a contiguous set of registers through the Software Configuration Bus
+  procedure write_regs (
+    reg_wr_address              : natural;
+    reg_wr_data                 : t_reg_array;
+    signal s_swconfig_clk       : in  std_logic;
+    signal s_swconfig_reset     : in  std_logic;
+    signal s_swconfig_address   : out std_logic_vector;
+    signal s_swconfig_wr_enable : out std_logic;
+    signal s_swconfig_wr_data   : out std_logic_vector;
+    signal s_swconfig_rd_enable : out std_logic;
+    signal s_swconfig_rd_valid  : in  std_logic;
+    signal s_swconfig_rd_data   : in  std_logic_vector
+  ) is
+  begin
+    for n in reg_wr_data'low to reg_wr_data'high loop
+      write_reg(
+        reg_wr_address + (n - reg_wr_data'low),
+        std_logic_vector(to_unsigned(reg_wr_data(n), s_swconfig_wr_data'length)),
+        s_swconfig_clk,
+        s_swconfig_reset,
+        s_swconfig_address,
+        s_swconfig_wr_enable,
+        s_swconfig_wr_data,
+        s_swconfig_rd_enable,
+        s_swconfig_rd_valid,
+        s_swconfig_rd_data
+      );
+    end loop;
+  end write_regs;
+
+  -- Procedure to verify a contiguous set of registers through the Software Configuration Bus
+  procedure verify_regs (
+    reg_rd_address              : natural;
+    reg_rd_data                 : t_reg_array;
+    signal s_swconfig_clk       : in  std_logic;
+    signal s_swconfig_reset     : in  std_logic;
+    signal s_swconfig_address   : out std_logic_vector;
+    signal s_swconfig_wr_enable : out std_logic;
+    signal s_swconfig_wr_data   : out std_logic_vector;
+    signal s_swconfig_rd_enable : out std_logic;
+    signal s_swconfig_rd_valid  : in  std_logic;
+    signal s_swconfig_rd_data   : in  std_logic_vector
+  ) is
+    variable my_line : line;
+  begin
+    for n in reg_rd_data'low to reg_rd_data'high loop
+      read_reg(
+        reg_rd_address + (n - reg_rd_data'low),
+        s_swconfig_clk,
+        s_swconfig_reset,
+        s_swconfig_address,
+        s_swconfig_wr_enable,
+        s_swconfig_wr_data,
+        s_swconfig_rd_enable,
+        s_swconfig_rd_valid,
+        s_swconfig_rd_data
+      );
+      -- TODO: Support signed comparison
+      assert (reg_rd_data(n) = to_integer(unsigned(s_swconfig_rd_data)))
+        report "ERROR: Incorrect value in register at address " & integer'image(reg_rd_address + n)
+        severity failure;
+    end loop;
+    write(my_line, string'("PASS: Correct values for registers with starting offset ") & integer'image(reg_rd_address));
+    writeline(output, my_line);
+  end verify_regs;
+
   -- Procedure to verify all registers in the Software Configuration Bus
   procedure verify_swconfig (
     signal s_swconfig_clk       : in  std_logic;
@@ -145,7 +242,7 @@ package body {{ fins['name'] }}_swconfig_verify is
     --*********************************************
     -- Register: {{ reg['name'] }}
     --*********************************************
-    {%- if reg['is_readable'] %}
+    {%- if reg['is_readable'] and not reg['is_ram'] %}
     -- Verify default values
     {%- for n in range(reg['length']) %}
     read_reg(
@@ -250,7 +347,7 @@ package body {{ fins['name'] }}_swconfig_verify is
     {%- endfor %}
     {%- endif %}
     {%- else %}
-    -- Register cannot be verified here since it is not readable
+    -- Register cannot be verified here since it is either not readable or it is a RAM
     {%- endif %}
     {%- endfor %}
     --*********************************************

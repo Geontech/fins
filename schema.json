@@ -259,6 +259,10 @@
                 "range_max"      : {
                   "is_required" : false,
                   "types"       : ["int", "unicode"]
+                },
+                "is_ram"      : {
+                  "is_required" : false,
+                  "types"       : ["bool", "unicode"]
                 }
               }
             }
@@ -339,6 +343,10 @@
             "range_max"      : {
               "is_required" : false,
               "types"       : ["int", "unicode"]
+            },
+            "is_ram"      : {
+              "is_required" : false,
+              "types"       : ["bool", "unicode"]
             }
           }
         }
