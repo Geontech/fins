@@ -49,7 +49,7 @@ entity {{ fins['name'] }}_swconfig is
     s_swconfig_rd_valid  : out std_logic;
     s_swconfig_rd_data   : out std_logic_vector(G_DATA_WIDTH-1 downto 0);
     {%- for region in fins['swconfig']['regions'] %}
-    {%- if not 'regs' in region %}
+    {%- if (not 'regs' in region) or (region['regs'] | selectattr('is_ram') | list | length > 0) %}
     --**********************************************************
     -- Decoded Passthrough Master Software Configuration Bus
     --**********************************************************
@@ -60,19 +60,19 @@ entity {{ fins['name'] }}_swconfig is
     m_swconfig_{{ region['name'] }}_wr_data   : out std_logic_vector(G_DATA_WIDTH-1 downto 0);
     m_swconfig_{{ region['name'] }}_rd_enable : out std_logic;
     m_swconfig_{{ region['name'] }}_rd_valid  : in  std_logic;
-    m_swconfig_{{ region['name'] }}_rd_data   : in  std_logic_vector(G_DATA_WIDTH-1 downto 0){%- if not loop.last -%};{%- endif -%}
+    m_swconfig_{{ region['name'] }}_rd_data   : in  std_logic_vector(G_DATA_WIDTH-1 downto 0)
     {%- else %}
     --**********************************************************
     -- Registers for Region: {{ region['name'] }}
     --**********************************************************
-    {%- for reg in region['regs'] | selectattr('is_writable') | selectattr('write_ports', 'ne', 'internal') | list %}
+    {%- for reg in region['regs'] | selectattr('is_writable') | selectattr('is_ram', 'eq', False) | selectattr('write_ports', 'ne', 'internal') | list %}
     {%- if (reg['write_ports'] | lower) == 'remote' %}
     {{ region['name'] }}_{{ reg['name'] }}_wr_en    : out std_logic_vector({{ reg['length'] }}-1 downto 0);
     {%- endif %}
     {{ region['name'] }}_{{ reg['name'] }}_wr_data  : out std_logic_vector({{ reg['width'] }}*{{ reg['length'] }}-1 downto 0)
     {%- if (region['regs'] | selectattr('is_readable') | selectattr('read_ports', 'ne', 'internal') | list | length > 0) or (not loop.last) %};{% endif %}
     {%- endfor %}
-    {%- for reg in region['regs'] | selectattr('is_readable') | selectattr('read_ports', 'ne', 'internal') | list %}
+    {%- for reg in region['regs'] | selectattr('is_readable') | selectattr('is_ram', 'eq', False) | selectattr('read_ports', 'ne', 'internal') | list %}
     {%- if (reg['read_ports'] | lower) == 'remote' %}
     {{ region['name'] }}_{{ reg['name'] }}_rd_en    : out std_logic_vector({{ reg['length'] }}-1 downto 0);
     {{ region['name'] }}_{{ reg['name'] }}_rd_valid : in  std_logic_vector({{ reg['length'] }}-1 downto 0);
@@ -81,6 +81,7 @@ entity {{ fins['name'] }}_swconfig is
     {%- if not loop.last %};{% endif %}
     {%- endfor %}
     {%- endif %}
+    {%- if not loop.last -%};{%- endif -%}
     {%- endfor %}
   );
 end {{ fins['name'] }}_swconfig;
@@ -109,7 +110,8 @@ architecture rtl of {{ fins['name'] }}_swconfig is
   attribute X_INTERFACE_INFO of s_swconfig_rd_valid  : signal is "geontech.com:user:swconfig:1.0 S_SWCONFIG RD_VALID";
   attribute X_INTERFACE_INFO of s_swconfig_rd_data   : signal is "geontech.com:user:swconfig:1.0 S_SWCONFIG RD_DATA";
 
-  {% for region in fins['swconfig']['regions']|selectattr('regs', 'undefined')|list -%}
+  {%- for region in fins['swconfig']['regions'] %}
+  {%- if (not 'regs' in region) or (region['regs'] | selectattr('is_ram') | list | length > 0) %}
   -- Infer swconfig bus on master interface for {{ region['name'] }}
   attribute X_INTERFACE_INFO of m_swconfig_{{ region['name'] }}_clk       : signal is "geontech.com:user:swconfig:1.0 M_SWCONFIG CLK";
   attribute X_INTERFACE_INFO of m_swconfig_{{ region['name'] }}_reset     : signal is "geontech.com:user:swconfig:1.0 M_SWCONFIG RESET";
@@ -119,9 +121,11 @@ architecture rtl of {{ fins['name'] }}_swconfig is
   attribute X_INTERFACE_INFO of m_swconfig_{{ region['name'] }}_rd_enable : signal is "geontech.com:user:swconfig:1.0 M_SWCONFIG RD_ENABLE";
   attribute X_INTERFACE_INFO of m_swconfig_{{ region['name'] }}_rd_valid  : signal is "geontech.com:user:swconfig:1.0 M_SWCONFIG RD_VALID";
   attribute X_INTERFACE_INFO of m_swconfig_{{ region['name'] }}_rd_data   : signal is "geontech.com:user:swconfig:1.0 M_SWCONFIG RD_DATA";
-  {% endfor -%}
+  {%- endif %}
+  {%- endfor %}
 
-  {% for region in fins['swconfig']['regions']|selectattr('regs', 'defined')|list -%}
+  {%- for region in fins['swconfig']['regions'] %}
+  {%- if ('regs' in region) and (region['regs'] | selectattr('is_ram') | list | length == 0) %}
   ------------------------------------------------------------------------------
   -- Signals: Decoded "{{ region['name'] }}" base address region
   ------------------------------------------------------------------------------
@@ -131,12 +135,12 @@ architecture rtl of {{ fins['name'] }}_swconfig is
   constant {{ region['name'] | upper }}_NUM_REGS : natural := {{ region['regs']|sum(attribute='length') }};
 
   -- Software Configuration Bus Signals
-  signal m_swconfig_{{ region['name'] }}_address      : std_logic_vector(G_ADDR_WIDTH-G_BAR_WIDTH-1 downto 0);
-  signal m_swconfig_{{ region['name'] }}_wr_enable    : std_logic;
-  signal m_swconfig_{{ region['name'] }}_wr_data      : std_logic_vector(G_DATA_WIDTH-1 downto 0);
-  signal m_swconfig_{{ region['name'] }}_rd_enable    : std_logic;
-  signal m_swconfig_{{ region['name'] }}_rd_valid     : std_logic;
-  signal m_swconfig_{{ region['name'] }}_rd_data      : std_logic_vector(G_DATA_WIDTH-1 downto 0);
+  signal m_swconfig_{{ region['name'] }}_address   : std_logic_vector(G_ADDR_WIDTH-G_BAR_WIDTH-1 downto 0);
+  signal m_swconfig_{{ region['name'] }}_wr_enable : std_logic;
+  signal m_swconfig_{{ region['name'] }}_wr_data   : std_logic_vector(G_DATA_WIDTH-1 downto 0);
+  signal m_swconfig_{{ region['name'] }}_rd_enable : std_logic;
+  signal m_swconfig_{{ region['name'] }}_rd_valid  : std_logic;
+  signal m_swconfig_{{ region['name'] }}_rd_data   : std_logic_vector(G_DATA_WIDTH-1 downto 0);
 
   -- Register Signals
   signal {{ region['name'] }}_reg_wr_enables : std_logic_vector({{ region['name'] | upper }}_NUM_REGS-1 downto 0);               -- Registered Array of Decoded Write Enables
@@ -165,7 +169,7 @@ architecture rtl of {{ fins['name'] }}_swconfig is
   --       Remote registers have an entry here, but they are set to all zeros 
   --       since the write is happing in a remote location
   constant {{ region['name'] }}_reg_wr_mask : std_logic_vector(G_DATA_WIDTH*{{ region['name'] | upper }}_NUM_REGS-1 downto 0) :=
-    {%- for reg in region['regs']|reverse|list %}
+    {%- for reg in region['regs'] | reverse | list %}
     {%- set reg_loop = loop %}
     {%- for n in range(reg['length']) %}
     {%- if (reg['write_ports'] | lower) == 'remote' %}
@@ -178,19 +182,17 @@ architecture rtl of {{ fins['name'] }}_swconfig is
     {%- if loop.last and reg_loop.last %};{% else %} &{% endif %} -- {{ reg['name'] }}, {% if reg['is_writable'] %}WRITE:{{ reg['write_ports'] }}, {% endif %}{% if reg['is_readable'] %}READ:{{ reg['read_ports'] }}{% endif %}
     {%- endfor %}
     {%- endfor %}
+  {%- endif %}
   {%- endfor %}
 
 begin
 
-  {%- if fins['swconfig']['regions'] | selectattr('regs', 'undefined') | list | length > 0 %}
-  ------------------------------------------------------------------------------
-  -- Passthrough Clocks and Resets
-  ------------------------------------------------------------------------------
-  {%- endif %}
-  {%- for region in fins['swconfig']['regions']|selectattr('regs', 'undefined')|list %}
-  -- Master Software Configuration Bus: {{ region['name'] }}
+  {%- for region in fins['swconfig']['regions'] %}
+  {%- if (not 'regs' in region) or (region['regs'] | selectattr('is_ram') | list | length > 0) %}
+  -- Passthrough Clock and Reset: {{ region['name'] }}
   m_swconfig_{{ region['name'] }}_clk   <= s_swconfig_clk;
   m_swconfig_{{ region['name'] }}_reset <= s_swconfig_reset;
+  {%- endif %}
   {%- endfor %}
 
   ------------------------------------------------------------------------------
@@ -253,7 +255,7 @@ begin
   {%- endif %}
 
   {%- for region in fins['swconfig']['regions'] %}
-  {%- if 'regs' in region %}
+  {%- if ('regs' in region) and (region['regs'] | selectattr('is_ram') | list | length == 0) %}
   ------------------------------------------------------------------------------
   -- Local Register Decode for "{{ region['name'] }}" Base Address Region
   ------------------------------------------------------------------------------

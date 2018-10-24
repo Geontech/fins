@@ -110,6 +110,7 @@ A detailed explanation of the keys within each register dictionary is located in
 | is_read_from_write   | bool or `fins["params"][N]["name"]`   | NO       | true          |                                     | A flag indicating if the read data comes from the write data. It lets the software know that if a value is written then the same value may be read back. |
 | range_min            | uint or `fins["params"][N]["name"]`   | NO       | 0             | 0 to 2^32-1                         | The minimum value of the register. It instructs the software to not set invalid values in the firmware. |
 | range_max            | uint or `fins["params"][N]["name"]`   | NO       | 2^(`width`)   | 0 to 2^32-1                         | The maximum value of the register. It instructs the software to not set invalid values in the firmware. |
+| is_ram               | bool or `fins["params"][N]["name"]`   | NO       | false         |                                     | A flag indicating if this logical register references a RAM. If true, the `length` must be set to the full size of the RAM, the `default_values` must not be set, and RAMs cannot be in the same region as normal registers. Not supported for AXILITE. |
 | is_signed            | bool or `fins["params"][N]["name"]`   | NO       | false         | false ONLY                          | [NOT IMPLEMENTED] A flag indicating if the register is signed. |
 
 ### Read/Write Ports
