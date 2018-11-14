@@ -13,7 +13,7 @@
 source ip_params.tcl
 
 # Assign the netlist project name
-set IP_NETLIST "$IP_PROJECT_NAME_netlist"
+set IP_NETLIST "${IP_PROJECT_NAME}_netlist"
 
 # Create Project
 if {[info exists "IP_PART"]} {

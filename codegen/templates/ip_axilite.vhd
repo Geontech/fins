@@ -67,8 +67,11 @@ architecture rtl of {{ fins['name'] }}_axilite is
   ------------------------------------------------------------------------------
   -- Constants
   ------------------------------------------------------------------------------
+  -- The maximum software configuration data width
+  constant MAX_DATA_WIDTH : natural := 32;
+
   -- Error code when address does not correspond to a register
-  constant ERROR_CODE : std_logic_vector(G_AXI_DATA_WIDTH-1 downto 0) := x"BADADD00";
+  constant ERROR_CODE : std_logic_vector(MAX_DATA_WIDTH-1 downto 0) := x"BADADD00";
 
   -- The number of LSBs that are unused due to byte addressing of AXI-Lite
   constant ADDR_LSB : natural := 2;
@@ -106,13 +109,6 @@ architecture rtl of {{ fins['name'] }}_axilite is
   ------------------------------------------------------------------------------
   -- Register Signals
   ------------------------------------------------------------------------------
-  signal reg_wr_enables : std_logic_vector(NUM_REGS-1 downto 0);               -- Registered Array of Decoded Write Enables
-  signal reg_wr_values  : std_logic_vector(G_AXI_DATA_WIDTH*NUM_REGS-1 downto 0);  -- Registered Array Writable Local Registers
-  signal reg_wr_data    : std_logic_vector(G_AXI_DATA_WIDTH-1 downto 0);           -- Registered Write Data
-  signal reg_rd_enables : std_logic_vector(NUM_REGS-1 downto 0);               -- Registered Array of Decoded Read Enables
-  signal reg_rd_valids  : std_logic_vector(NUM_REGS-1 downto 0);               -- Non-registered Array of Decoded Read Valids
-  signal reg_rd_values  : std_logic_vector(G_AXI_DATA_WIDTH*NUM_REGS-1 downto 0);  -- Non-registered Array of Read Data
-
   -- Default for Local Registers
   constant reg_default : std_logic_vector(G_AXI_DATA_WIDTH*NUM_REGS-1 downto 0) :=
     {%- for reg in fins['axilite']['regs']|reverse|list %}
@@ -136,7 +132,7 @@ architecture rtl of {{ fins['name'] }}_axilite is
     {%- set reg_loop = loop %}
     {%- for n in range(reg['length']) %}
     {%- if (reg['write_ports'] | lower) == 'remote' %}
-    x"00000000"
+    std_logic_vector(to_unsigned(0, G_DATA_WIDTH))
     {%- elif reg['is_writable'] and ((reg['width'] == 32) or (reg['width'] == '32')) %}
     x"FFFFFFFF"
     {%- else %}
@@ -145,6 +141,14 @@ architecture rtl of {{ fins['name'] }}_axilite is
     {%- if loop.last and reg_loop.last %};{% else %} &{% endif %} -- {{ reg['name'] }}, {% if reg['is_writable'] %}WRITE:{{ reg['write_ports'] }}, {% endif %}{% if reg['is_readable'] %}READ:{{ reg['read_ports'] }}{% endif %}
     {%- endfor %}
     {%- endfor %}
+
+  -- Signals
+  signal reg_wr_enables : std_logic_vector(NUM_REGS-1 downto 0);                                 -- Registered Array of Decoded Write Enables
+  signal reg_wr_values  : std_logic_vector(G_AXI_DATA_WIDTH*NUM_REGS-1 downto 0) := reg_default; -- Registered Array Writable Local Registers
+  signal reg_wr_data    : std_logic_vector(G_AXI_DATA_WIDTH-1 downto 0);                         -- Registered Write Data
+  signal reg_rd_enables : std_logic_vector(NUM_REGS-1 downto 0);                                 -- Registered Array of Decoded Read Enables
+  signal reg_rd_valids  : std_logic_vector(NUM_REGS-1 downto 0);                                 -- Non-registered Array of Decoded Read Valids
+  signal reg_rd_values  : std_logic_vector(G_AXI_DATA_WIDTH*NUM_REGS-1 downto 0);                -- Non-registered Array of Read Data
 
 begin
 
@@ -378,16 +382,19 @@ begin
       if (S_AXI_ARESETN = '0') then
         reg_wr_values <= reg_default;
       else
-        -- Loop through all registers
+        -- Loop through all registers and then all bits
         for reg_ix in 0 to NUM_REGS-1 loop
-          -- Use the pipelined write enable
-          if (reg_wr_enables(reg_ix) = '1') then
-            -- Loop through bits
-            for bit_ix in 0 to G_AXI_DATA_WIDTH-1 loop
-              -- Masked bit-level register assignment
-              reg_wr_values(reg_ix*G_AXI_DATA_WIDTH+bit_ix) <= reg_wr_data(bit_ix) AND reg_wr_mask(reg_ix*G_AXI_DATA_WIDTH+bit_ix);
-            end loop;
-          end if;
+          for bit_ix in 0 to G_AXI_DATA_WIDTH-1 loop
+            if (reg_wr_mask(reg_ix*G_AXI_DATA_WIDTH+bit_ix) = '1') then
+              -- The bit of the register is writable, write it when enabled at runtime, otherwise hold
+              if (reg_wr_enables(reg_ix) = '1') then
+                reg_wr_values(reg_ix*G_AXI_DATA_WIDTH+bit_ix) <= reg_wr_data(bit_ix);
+              end if;
+            else
+              -- The bit of the register is not writable, set it to default constant at compile time
+              reg_wr_values(reg_ix*G_AXI_DATA_WIDTH+bit_ix) <= reg_default(reg_ix*G_AXI_DATA_WIDTH+bit_ix);
+            end if;
+          end loop;
         end loop;
       end if;
     end if;
@@ -400,12 +407,12 @@ begin
       if (S_AXI_ARESETN = '0') then
         reg_rd_enables      <= (others => '0');
         rd_valid <= '0';
-        rd_data  <= ERROR_CODE;
+        rd_data  <= ERROR_CODE(MAX_DATA_WIDTH-1 downto MAX_DATA_WIDTH-G_AXI_DATA_WIDTH);
       else
         -- Set Default
         reg_rd_enables      <= (others => '0');
         rd_valid <= rd_enable;
-        rd_data  <= ERROR_CODE;
+        rd_data  <= ERROR_CODE(MAX_DATA_WIDTH-1 downto MAX_DATA_WIDTH-G_AXI_DATA_WIDTH);
 
         -- Loop through Registers
         for reg_ix in 0 to NUM_REGS-1 loop

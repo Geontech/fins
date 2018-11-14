@@ -35,6 +35,18 @@ package {{ fins['name'] }}_swconfig_verify is
   type t_reg_array is array (natural range <>) of integer;
 
   ------------------------------------------------------------------------------
+  -- Constants
+  ------------------------------------------------------------------------------
+  -- The maximum software configuration data width
+  constant MAX_DATA_WIDTH : natural := 32;
+
+  -- Error code when address does not correspond to a register
+  constant ERROR_CODE : std_logic_vector(MAX_DATA_WIDTH-1 downto 0) := x"BADADD00";
+
+  -- The maximum data value
+  constant MAX_DATA_VALUE : std_logic_vector(MAX_DATA_WIDTH-1 downto 0) := x"FFFFFFFF";
+
+  ------------------------------------------------------------------------------
   -- Procedures
   ------------------------------------------------------------------------------
   procedure write_reg (
@@ -275,7 +287,7 @@ package body {{ fins['name'] }}_swconfig_verify is
     {%- for n in range(reg['length']) %}
     write_reg(
       REG_{{ reg['name'] | upper }}_OFFSET{{ n }},
-      x"FFFFFFFF"          ,
+      MAX_DATA_VALUE(s_swconfig_wr_data'length-1 downto 0),
       s_swconfig_clk       ,
       s_swconfig_reset     ,
       s_swconfig_address   ,
@@ -310,7 +322,7 @@ package body {{ fins['name'] }}_swconfig_verify is
     {%- for n in range(reg['length']) %}
     write_reg(
       REG_{{ reg['name'] | upper }}_OFFSET{{ n }},
-      x"{{ '%08X' | format(reg['default_values'][n]) }}",
+      std_logic_vector(to_unsigned({{ reg['default_values'][n] }}, s_swconfig_wr_data'length)),
       s_swconfig_clk       ,
       s_swconfig_reset     ,
       s_swconfig_address   ,
@@ -365,7 +377,7 @@ package body {{ fins['name'] }}_swconfig_verify is
       s_swconfig_rd_valid  ,
       s_swconfig_rd_data   
     );
-    assert (x"BADADD00" = s_swconfig_rd_data)
+    assert (ERROR_CODE(MAX_DATA_WIDTH-1 downto MAX_DATA_WIDTH-s_swconfig_rd_data'length) = s_swconfig_rd_data)
       report "ERROR: Incorrect Software Configuration Read Error Code"
       severity failure;
     write(my_line, string'("PASS: Correct Software Configuration Read Error Code"));
