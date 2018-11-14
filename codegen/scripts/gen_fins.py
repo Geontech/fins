@@ -34,22 +34,25 @@ def load_fins(directory='./'):
     # Import JSON Firmware IP Node Specification
     with open(directory + FINS_FILENAME) as fins_file:
         fins = json.load(fins_file)
+    # Set the default catalog name to the name
+    fins['project_name']  = fins['name']
     # Import JSON Edits to the Parameters of FINSpec
     if (os.path.exists(directory + FINS_EDIT_FILENAME)):
         # Open fins_edit.json
         with open(directory + FINS_EDIT_FILENAME) as fins_edit_file:
             fins_edit = json.load(fins_edit_file)
         # Override parameters
-        for param_ix, param in enumerate(fins['params']):
-            for edit_param in fins_edit['params']:
-                if (edit_param['name'].lower() == param['name'].lower()):
-                    fins['params'][param_ix]['value'] = edit_param['value']
-        # Create a catalog name
+        if 'params' in fins_edit:
+            for param_ix, param in enumerate(fins['params']):
+                for edit_param in fins_edit['params']:
+                    if (edit_param['name'].lower() == param['name'].lower()):
+                        fins['params'][param_ix]['value'] = edit_param['value']
+        # Override catalog name
         if 'name' in fins_edit:
-            fins['project_name']  = fins_edit['name']
-    else:
-        # Set the default catalog name to the name
-        fins['project_name']  = fins['name']
+            fins['project_name'] = fins_edit['name']
+        # Override the part
+        if 'part' in fins_edit:
+            fins['part'] = fins_edit['part']
     return fins
 
 # NOTE: Identical function in gen_persona.py
@@ -238,6 +241,8 @@ def create_sub_ip_fins_edit(fins):
             fins_edit_params = {}
             fins_edit_params['params'] = ip['params']
             fins_edit_params['name'] = ip['name']
+            if 'part' in fins:
+                fins_edit_params['part'] = fins['part']
             json.dump(fins_edit_params, fins_edit_file, sort_keys=True, indent=2)
 
 # NOTE: This is a recursive function

@@ -91,8 +91,11 @@ architecture rtl of {{ fins['name'] }}_swconfig is
   ------------------------------------------------------------------------------
   -- Constants
   ------------------------------------------------------------------------------
+  -- The maximum software configuration data width
+  constant MAX_DATA_WIDTH : natural := 32;
+
   -- Error code when address does not correspond to a register
-  constant ERROR_CODE : std_logic_vector(G_DATA_WIDTH-1 downto 0) := x"BADADD00";
+  constant ERROR_CODE : std_logic_vector(MAX_DATA_WIDTH-1 downto 0) := x"BADADD00";
 
   ------------------------------------------------------------------------------
   -- Attributes
@@ -134,22 +137,6 @@ architecture rtl of {{ fins['name'] }}_swconfig is
   --   register lengths
   constant {{ region['name'] | upper }}_NUM_REGS : natural := {{ region['regs']|sum(attribute='length') }};
 
-  -- Software Configuration Bus Signals
-  signal m_swconfig_{{ region['name'] }}_address   : std_logic_vector(G_ADDR_WIDTH-G_BAR_WIDTH-1 downto 0);
-  signal m_swconfig_{{ region['name'] }}_wr_enable : std_logic;
-  signal m_swconfig_{{ region['name'] }}_wr_data   : std_logic_vector(G_DATA_WIDTH-1 downto 0);
-  signal m_swconfig_{{ region['name'] }}_rd_enable : std_logic;
-  signal m_swconfig_{{ region['name'] }}_rd_valid  : std_logic;
-  signal m_swconfig_{{ region['name'] }}_rd_data   : std_logic_vector(G_DATA_WIDTH-1 downto 0);
-
-  -- Register Signals
-  signal {{ region['name'] }}_reg_wr_enables : std_logic_vector({{ region['name'] | upper }}_NUM_REGS-1 downto 0);               -- Registered Array of Decoded Write Enables
-  signal {{ region['name'] }}_reg_wr_values  : std_logic_vector(G_DATA_WIDTH*{{ region['name'] | upper }}_NUM_REGS-1 downto 0);  -- Registered Array Writable Local Registers
-  signal {{ region['name'] }}_reg_wr_data    : std_logic_vector(G_DATA_WIDTH-1 downto 0);           -- Registered Write Data
-  signal {{ region['name'] }}_reg_rd_enables : std_logic_vector({{ region['name'] | upper }}_NUM_REGS-1 downto 0);               -- Registered Array of Decoded Read Enables
-  signal {{ region['name'] }}_reg_rd_valids  : std_logic_vector({{ region['name'] | upper }}_NUM_REGS-1 downto 0);               -- Non-registered Array of Decoded Read Valids
-  signal {{ region['name'] }}_reg_rd_values  : std_logic_vector(G_DATA_WIDTH*{{ region['name'] | upper }}_NUM_REGS-1 downto 0);  -- Non-registered Array of Read Data
-
   -- Default for Local Registers
   constant {{ region['name'] }}_reg_default : std_logic_vector(G_DATA_WIDTH*{{ region['name'] | upper }}_NUM_REGS-1 downto 0) :=
     {%- for reg in region['regs']|reverse|list -%}
@@ -173,7 +160,7 @@ architecture rtl of {{ fins['name'] }}_swconfig is
     {%- set reg_loop = loop %}
     {%- for n in range(reg['length']) %}
     {%- if (reg['write_ports'] | lower) == 'remote' %}
-    x"00000000"
+    std_logic_vector(to_unsigned(0, G_DATA_WIDTH))
     {%- elif reg['is_writable'] and ((reg['width'] == 32) or (reg['width'] == '32')) %}
     x"FFFFFFFF"
     {%- else %}
@@ -182,6 +169,22 @@ architecture rtl of {{ fins['name'] }}_swconfig is
     {%- if loop.last and reg_loop.last %};{% else %} &{% endif %} -- {{ reg['name'] }}, {% if reg['is_writable'] %}WRITE:{{ reg['write_ports'] }}, {% endif %}{% if reg['is_readable'] %}READ:{{ reg['read_ports'] }}{% endif %}
     {%- endfor %}
     {%- endfor %}
+
+  -- Software Configuration Bus Signals
+  signal m_swconfig_{{ region['name'] }}_address   : std_logic_vector(G_ADDR_WIDTH-G_BAR_WIDTH-1 downto 0);
+  signal m_swconfig_{{ region['name'] }}_wr_enable : std_logic;
+  signal m_swconfig_{{ region['name'] }}_wr_data   : std_logic_vector(G_DATA_WIDTH-1 downto 0);
+  signal m_swconfig_{{ region['name'] }}_rd_enable : std_logic;
+  signal m_swconfig_{{ region['name'] }}_rd_valid  : std_logic;
+  signal m_swconfig_{{ region['name'] }}_rd_data   : std_logic_vector(G_DATA_WIDTH-1 downto 0);
+
+  -- Register Signals
+  signal {{ region['name'] }}_reg_wr_enables : std_logic_vector({{ region['name'] | upper }}_NUM_REGS-1 downto 0); -- Registered Array of Decoded Write Enables
+  signal {{ region['name'] }}_reg_wr_values  : std_logic_vector(G_DATA_WIDTH*{{ region['name'] | upper }}_NUM_REGS-1 downto 0) := {{ region['name'] }}_reg_default; -- Registered Array Writable Local Registers
+  signal {{ region['name'] }}_reg_wr_data    : std_logic_vector(G_DATA_WIDTH-1 downto 0); -- Registered Write Data
+  signal {{ region['name'] }}_reg_rd_enables : std_logic_vector({{ region['name'] | upper }}_NUM_REGS-1 downto 0); -- Registered Array of Decoded Read Enables
+  signal {{ region['name'] }}_reg_rd_valids  : std_logic_vector({{ region['name'] | upper }}_NUM_REGS-1 downto 0); -- Non-registered Array of Decoded Read Valids
+  signal {{ region['name'] }}_reg_rd_values  : std_logic_vector(G_DATA_WIDTH*{{ region['name'] | upper }}_NUM_REGS-1 downto 0); -- Non-registered Array of Read Data
   {%- endif %}
   {%- endfor %}
 
@@ -228,7 +231,7 @@ begin
 
         -- Set Defaults: Software Configuration Slave Control Signals
         s_swconfig_rd_valid <= s_swconfig_rd_enable;
-        s_swconfig_rd_data  <= ERROR_CODE;
+        s_swconfig_rd_data  <= ERROR_CODE(MAX_DATA_WIDTH-1 downto MAX_DATA_WIDTH-G_DATA_WIDTH);
 
         -- Decode base address region
         {%- for region in fins['swconfig']['regions'] %}
@@ -290,16 +293,19 @@ begin
       if (s_swconfig_reset = '1') then
         {{ region['name'] }}_reg_wr_values <= {{ region['name'] }}_reg_default;
       else
-        -- Loop through all registers
+        -- Loop through all registers and then all bits
         for reg_ix in 0 to {{ region['name'] | upper }}_NUM_REGS-1 loop
-          -- Use the pipelined write enable
-          if ({{ region['name'] }}_reg_wr_enables(reg_ix) = '1') then
-            -- Loop through bits
-            for bit_ix in 0 to G_DATA_WIDTH-1 loop
-              -- Masked bit-level register assignment
-              {{ region['name'] }}_reg_wr_values(reg_ix*G_DATA_WIDTH+bit_ix) <= {{ region['name'] }}_reg_wr_data(bit_ix) AND {{ region['name'] }}_reg_wr_mask(reg_ix*G_DATA_WIDTH+bit_ix);
-            end loop;
-          end if;
+          for bit_ix in 0 to G_DATA_WIDTH-1 loop
+            if ({{ region['name'] }}_reg_wr_mask(reg_ix*G_DATA_WIDTH+bit_ix) = '1') then
+              -- The bit of the register is writable, write it when enabled at runtime, otherwise hold
+              if ({{ region['name'] }}_reg_wr_enables(reg_ix) = '1') then
+                {{ region['name'] }}_reg_wr_values(reg_ix*G_DATA_WIDTH+bit_ix) <= {{ region['name'] }}_reg_wr_data(bit_ix);
+              end if;
+            else
+              -- The bit of the register is not writable, set it to default constant at compile time
+              {{ region['name'] }}_reg_wr_values(reg_ix*G_DATA_WIDTH+bit_ix) <= {{ region['name'] }}_reg_default(reg_ix*G_DATA_WIDTH+bit_ix);
+            end if;
+          end loop;
         end loop;
       end if;
     end if;
@@ -312,12 +318,12 @@ begin
       if (s_swconfig_reset = '1') then
         {{ region['name'] }}_reg_rd_enables      <= (others => '0');
         m_swconfig_{{ region['name'] }}_rd_valid <= '0';
-        m_swconfig_{{ region['name'] }}_rd_data  <= ERROR_CODE;
+        m_swconfig_{{ region['name'] }}_rd_data  <= ERROR_CODE(MAX_DATA_WIDTH-1 downto MAX_DATA_WIDTH-G_DATA_WIDTH);
       else
         -- Set Default
         {{ region['name'] }}_reg_rd_enables      <= (others => '0');
         m_swconfig_{{ region['name'] }}_rd_valid <= m_swconfig_{{ region['name'] }}_rd_enable;
-        m_swconfig_{{ region['name'] }}_rd_data  <= ERROR_CODE;
+        m_swconfig_{{ region['name'] }}_rd_data  <= ERROR_CODE(MAX_DATA_WIDTH-1 downto MAX_DATA_WIDTH-G_DATA_WIDTH);
 
         -- Loop through Registers
         for reg_ix in 0 to {{ region['name'] | upper }}_NUM_REGS-1 loop
