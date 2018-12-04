@@ -353,7 +353,7 @@
       }
     },
     "filesets" : {
-      "is_required" : false,
+      "is_required" : true,
       "types"       : ["dict"],
       "fields"      : {
         "source"      : {

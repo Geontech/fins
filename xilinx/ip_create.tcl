@@ -25,16 +25,28 @@ if {[info exists "IP_USER_IP_CATALOG"]} {
 }
 
 # Add Source Files
-add_files -norecurse $SOURCE_FILES
+if { [info exists env(DELIVERY) ] } {
+    import_files -norecurse $SOURCE_FILES
+} else {
+    add_files -norecurse $SOURCE_FILES
+}
 
 # Add Simulation Files
 if {[llength $SIM_FILES] > 0} {
-    add_files -fileset sim_1 -norecurse $SIM_FILES
+    if { [info exists env(DELIVERY) ] } {
+        import_files -fileset sim_1 -norecurse $SIM_FILES
+    } else {
+        add_files -fileset sim_1 -norecurse $SIM_FILES
+    }
 }
 
 # Add Constraints Files
 if {[llength $CONSTRAINTS_FILES] > 0} {
-    add_files -fileset constrs_1 -norecurse $CONSTRAINTS_FILES
+    if { [info exists env(DELIVERY) ] } {
+        import_files -fileset constrs_1 -norecurse $CONSTRAINTS_FILES
+    } else {
+        add_files -fileset constrs_1 -norecurse $CONSTRAINTS_FILES
+    }
 }
 
 # Add IP that will be used in this project if the file exists

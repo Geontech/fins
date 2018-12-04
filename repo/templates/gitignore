@@ -42,6 +42,7 @@ vivado_*.zip
 /{{ fins['name'] }}_swconfig_verify.vhd
 /{{ fins['name'] }}_axilite.vhd
 /{{ fins['name'] }}_axilite.md
+/{{ fins['name'] }}_axilite_verify.vhd
 /rh_persona/*
 
 # DIA Diagram Editor Temporary Files

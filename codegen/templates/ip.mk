@@ -25,6 +25,7 @@ FINS_FILES += {{ fins['name'] }}_swconfig.md
 FINS_FILES += {{ fins['name'] }}_swconfig_verify.vhd
 FINS_FILES += {{ fins['name'] }}_axilite.md
 FINS_FILES += {{ fins['name'] }}_axilite.vhd
+FINS_FILES += {{ fins['name'] }}_axilite_verify.vhd
 
 # Temporary build products
 {%- if 'temp' in fins['filesets'] %}
@@ -74,6 +75,9 @@ SIM_FILES += {{ fins['name'] }}_streams.vhd
 {%- endif %}
 {%- if 'swconfig' in fins %}
 SIM_FILES += {{ fins['name'] }}_swconfig_verify.vhd
+{%- endif %}
+{%- if 'axilite' in fins %}
+SIM_FILES += {{ fins['name'] }}_axilite_verify.vhd
 {%- endif %}
 SIM_FILES += {{ fins['filesets']['sim']|join(' ') }}
 
