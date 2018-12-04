@@ -388,6 +388,8 @@ if 'axilite' in fins:
     fins = calculate_axilite_offsets(fins, 0)
     # Render VHDL AXI-Lite Register Decode Module
     render_jinja_template(jinja_env, 'ip_axilite.vhd', fins['name'] + '_axilite.vhd', fins)
+    # Render VHDL AXI-Lite Register Decode Verification Module
+    render_jinja_template(jinja_env, 'ip_axilite_verify.vhd', fins['name'] + '_axilite_verify.vhd', fins)
     # Render Markdown AXI-Lite Register Decode Documentation
     render_jinja_template(jinja_env, 'ip_axilite.md', fins['name'] + '_axilite.md', fins)
 if ('streams' in fins) or ('params' in fins):

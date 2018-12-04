@@ -22,7 +22,7 @@ import datetime
 VERBOSE = False
 FINS_FILENAME = 'fins.json'
 SCHEMA_FILENAME = './fins/schema.json'
-FINS_OUTFILE_POSTFIXES = ['_params.vhd', '_streams.vhd', '_swconfig.vhd', '_swconfig_verify.vhd', '_axilite.vhd']
+FINS_OUTFILE_POSTFIXES = ['_params.vhd', '_streams.vhd', '_swconfig.vhd', '_swconfig_verify.vhd', '_axilite.vhd', '_axilite_verify.vhd']
 SCHEMA_TYPES = ['int', 'bool', 'unicode', 'list', 'dict']
 SCHEMA_LIST_TYPES = ['int', 'bool', 'unicode', 'dict']
 SCHEMA_KEYS = ['is_required', 'types', 'list_types', 'fields']

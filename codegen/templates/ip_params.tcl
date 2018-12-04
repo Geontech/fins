@@ -56,6 +56,9 @@ set SIM_FILES [list \
 {%- if 'swconfig' in fins %}
 {{ fins['name'] }}_swconfig_verify.vhd \
 {%- endif %}
+{%- if 'axilite' in fins %}
+{{ fins['name'] }}_axilite_verify.vhd \
+{%- endif %}
 {%- for sim_file in fins['filesets']['sim'] %}
 {{ sim_file }} \
 {%- endfor %}

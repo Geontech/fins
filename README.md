@@ -60,6 +60,7 @@ The next step is to fill out the required keys of the `fins.json` file and desig
 * To use the `sim` target, your top level testbench must terminate all signal activity when finished and must have a boolean signal called `simulation_done` that is `true` at the end of the simulation.
 * When developing the `fins.json` file, the `make fins` command will be very helpful
 * To use modeling tools like Octave or MATLAB with the `sim` target, you must define the top-level key `modeling_tool` in `fins.json` and set it to "octave" or "matlab". Once that key is defined, you must have two files in the root of your repository: `sim_setup.m` which is run before the HDL simulation and `sim_verify.m` which is run after the HDL simulation.
+* When preparing to deliver a packaged IP project, run `make` with the `DELIVERY` variable set to any value on the command line. For example: `make DELIVERY=1`. This environmental variable will cause Vivado to "import" the source, simulation, and constraints files into the project subdirectories instead of leaving them in place. This is beneficial when you would like to deliver just the packaged IP project.
 
 ## Execution Flow and Inputs/Outputs
 
