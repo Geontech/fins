@@ -38,13 +38,13 @@ package {{ fins['name'] }}_axilite_verify is
   -- Constants
   ------------------------------------------------------------------------------
   -- The maximum AXI-Lite data width
-  constant MAX_DATA_WIDTH : natural := 32;
+  constant MAX_DATA_WIDTH : natural := 64;
 
   -- Error code when address does not correspond to a register
-  constant ERROR_CODE : std_logic_vector(MAX_DATA_WIDTH-1 downto 0) := x"BADADD00";
+  constant ERROR_CODE : std_logic_vector(MAX_DATA_WIDTH-1 downto 0) := x"BADADD00BADADD01";
 
   -- The maximum data value
-  constant MAX_DATA_VALUE : std_logic_vector(MAX_DATA_WIDTH-1 downto 0) := x"FFFFFFFF";
+  constant MAX_DATA_VALUE : std_logic_vector(MAX_DATA_WIDTH-1 downto 0) := x"FFFF_FFFF_FFFF_FFFF";
 
   -- AXI-Lite is byte-addressed, so calculate the number of bytes per offset
   constant BYTES_PER_OFFSET : natural := 4;
@@ -563,11 +563,8 @@ package body {{ fins['name'] }}_axilite_verify is
       S_AXI_RVALID,
       S_AXI_RREADY
     );
-    {%- if reg['width'] == 32 %}
-    assert (x"FFFFFFFF" = S_AXI_RDATA)
-    {%- else %}
-    assert ({{ 2**reg['width']-1 }} = to_integer(unsigned(S_AXI_RDATA)))
-    {%- endif %}
+    {# maximum value for reg['width'] sized slv, front-padded with 0s to fit fins['axilite']['data_width'] #}
+    assert ({{ ("x\"{:0" ~ fins['axilite']['data_width']//4 ~ "x}\"").format(2**reg['width']-1) }} = S_AXI_RDATA)
       report "ERROR: Incorrect write width for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset'] + n) }}"
       severity failure;
     write(my_line, string'("PASS: Correct write width for register {{ reg['name'] }} at address {{ '%0#10x' | format(reg['offset'] + n) }}"));

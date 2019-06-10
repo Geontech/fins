@@ -68,10 +68,10 @@ architecture rtl of {{ fins['name'] }}_axilite is
   -- Constants
   ------------------------------------------------------------------------------
   -- The maximum software configuration data width
-  constant MAX_DATA_WIDTH : natural := 32;
+  constant MAX_DATA_WIDTH : natural := 64;
 
   -- Error code when address does not correspond to a register
-  constant ERROR_CODE : std_logic_vector(MAX_DATA_WIDTH-1 downto 0) := x"BADADD00";
+  constant ERROR_CODE : std_logic_vector(MAX_DATA_WIDTH-1 downto 0) := x"BADADD00BADADD01";
 
   -- The number of LSBs that are unused due to byte addressing of AXI-Lite
   constant ADDR_LSB : natural := 2;
@@ -133,8 +133,8 @@ architecture rtl of {{ fins['name'] }}_axilite is
     {%- for n in range(reg['length']) %}
     {%- if (reg['write_ports'] | lower) == 'remote' %}
     std_logic_vector(to_unsigned(0, G_DATA_WIDTH))
-    {%- elif reg['is_writable'] and ((reg['width'] == 32) or (reg['width'] == '32')) %}
-    x"FFFFFFFF"
+    {%- elif reg['is_writable'] and ((reg['width'] == fins['axilite']['data_width']) or (reg['width'] == (fins['axilite']['data_width'] | string))) %}
+    x"{{ "F"*(fins['axilite']['data_width']//4) }}"{# maximum value/all-ones (e.g. x"FFFFFFFF" for 32 bits) #}
     {%- else %}
     std_logic_vector(resize(unsigned(to_signed({% if reg['is_writable'] %}-1{% else %}0{% endif %}, {{ reg['width'] }})), G_AXI_DATA_WIDTH))
     {%- endif %}
