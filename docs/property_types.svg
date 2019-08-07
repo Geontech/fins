@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="40cm" height="52cm" viewBox="1057 207 785 1035" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x="1680" y="240" width="160" height="1000"/>
+    <text font-size="16.9333" style="fill: #c41230;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1760" y="745.167">
+      <tspan x="1760" y="745.167"></tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x="1060" y="240" width="580" height="1000"/>
+    <text font-size="16.9333" style="fill: #c41230;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1350" y="745.167">
+      <tspan x="1350" y="745.167"></tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1180" y="260" width="100" height="960"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1180" y="260" width="100" height="960"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1230" y="735.9">
+      <tspan x="1230" y="735.9">Decode</tspan>
+      <tspan x="1230" y="751.9">Logic</tspan>
+    </text>
+  </g>
+  <text font-size="14.1111" style="fill: #005596;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:700" x="1620" y="276.65">
+    <tspan x="1620" y="276.65">read-only-constant</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="1320" y="280" width="120" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1320" y="280" width="120" height="40"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1380" y="295.9">
+      <tspan x="1380" y="295.9">Constant</tspan>
+      <tspan x="1380" y="311.9">(default_values)</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1289.74" y1="360" x2="1720" y2="360"/>
+    <polygon style="fill: #000000" points="1282.24,360 1292.24,355 1289.74,360 1292.24,365 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1282.24,360 1292.24,355 1289.74,360 1292.24,365 "/>
+  </g>
+  <text font-size="14.1111" style="fill: #005596;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:700" x="1620" y="336.65">
+    <tspan x="1620" y="336.65">read-only-data</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1289.74" y1="420" x2="1720" y2="420"/>
+    <polygon style="fill: #000000" points="1282.24,420 1292.24,415 1289.74,420 1292.24,425 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1282.24,420 1292.24,415 1289.74,420 1292.24,425 "/>
+  </g>
+  <text font-size="14.1111" style="fill: #005596;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:700" x="1620" y="396.65">
+    <tspan x="1620" y="396.65">read-only-external</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1289.74" y1="440" x2="1720" y2="440"/>
+    <polygon style="fill: #000000" points="1282.24,440 1292.24,435 1289.74,440 1292.24,445 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1282.24,440 1292.24,435 1289.74,440 1292.24,445 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="460" x2="1710.26" y2="460"/>
+    <polygon style="fill: #000000" points="1717.76,460 1707.76,465 1710.26,460 1707.76,455 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,460 1707.76,465 1710.26,460 1707.76,455 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1289.74" y1="520" x2="1720" y2="520"/>
+    <polygon style="fill: #000000" points="1282.24,520 1292.24,515 1289.74,520 1292.24,525 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1282.24,520 1292.24,515 1289.74,520 1292.24,525 "/>
+  </g>
+  <text font-size="14.1111" style="fill: #005596;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:700" x="1620" y="496.65">
+    <tspan x="1620" y="496.65">read-only-memmap</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1289.74" y1="540" x2="1720" y2="540"/>
+    <polygon style="fill: #000000" points="1282.24,540 1292.24,535 1289.74,540 1292.24,545 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1282.24,540 1292.24,535 1289.74,540 1292.24,545 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="560" x2="1710.26" y2="560"/>
+    <polygon style="fill: #000000" points="1717.76,560 1707.76,565 1710.26,560 1707.76,555 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,560 1707.76,565 1710.26,560 1707.76,555 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="580" x2="1710.26" y2="580"/>
+    <polygon style="fill: #000000" points="1717.76,580 1707.76,585 1710.26,580 1707.76,575 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,580 1707.76,585 1710.26,580 1707.76,575 "/>
+  </g>
+  <text font-size="14.1111" style="fill: #005596;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:700" x="1620" y="616.65">
+    <tspan x="1620" y="616.65">write-only-external</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="640" x2="1710.26" y2="640"/>
+    <polygon style="fill: #000000" points="1717.76,640 1707.76,645 1710.26,640 1707.76,635 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,640 1707.76,645 1710.26,640 1707.76,635 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="660" x2="1710.26" y2="660"/>
+    <polygon style="fill: #000000" points="1717.76,660 1707.76,665 1710.26,660 1707.76,655 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,660 1707.76,665 1710.26,660 1707.76,655 "/>
+  </g>
+  <text font-size="14.1111" style="fill: #005596;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:700" x="1620" y="696.65">
+    <tspan x="1620" y="696.65">write-only-memmap</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="720" x2="1710.26" y2="720"/>
+    <polygon style="fill: #000000" points="1717.76,720 1707.76,725 1710.26,720 1707.76,715 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,720 1707.76,725 1710.26,720 1707.76,715 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="740" x2="1710.26" y2="740"/>
+    <polygon style="fill: #000000" points="1717.76,740 1707.76,745 1710.26,740 1707.76,735 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,740 1707.76,745 1710.26,740 1707.76,735 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="760" x2="1710.26" y2="760"/>
+    <polygon style="fill: #000000" points="1717.76,760 1707.76,765 1710.26,760 1707.76,755 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,760 1707.76,765 1710.26,760 1707.76,755 "/>
+  </g>
+  <text font-size="14.1111" style="fill: #005596;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:700" x="1620" y="796.65">
+    <tspan x="1620" y="796.65">read-write-internal</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="1320" y="800" width="80" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1320" y="800" width="80" height="40"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1360" y="823.9">
+      <tspan x="1360" y="823.9">Register</tspan>
+    </text>
+  </g>
+  <text font-size="14.1111" style="fill: #005596;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:700" x="1620" y="856.65">
+    <tspan x="1620" y="856.65">read-write-data</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="1320" y="860" width="80" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1320" y="860" width="80" height="40"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1360" y="883.9">
+      <tspan x="1360" y="883.9">Register</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1400" y1="880" x2="1710.26" y2="880"/>
+    <polygon style="fill: #000000" points="1717.76,880 1707.76,885 1710.26,880 1707.76,875 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,880 1707.76,885 1710.26,880 1707.76,875 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1289.74" y1="940" x2="1720" y2="940"/>
+    <polygon style="fill: #000000" points="1282.24,940 1292.24,935 1289.74,940 1292.24,945 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1282.24,940 1292.24,935 1289.74,940 1292.24,945 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1289.74" y1="960" x2="1720" y2="960"/>
+    <polygon style="fill: #000000" points="1282.24,960 1292.24,955 1289.74,960 1292.24,965 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1282.24,960 1292.24,955 1289.74,960 1292.24,965 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="956.95">
+    <tspan x="1620" y="956.95">props_status.&lt;name&gt;.rd_valid</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="980" x2="1710.26" y2="980"/>
+    <polygon style="fill: #000000" points="1717.76,980 1707.76,985 1710.26,980 1707.76,975 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,980 1707.76,985 1710.26,980 1707.76,975 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="976.95">
+    <tspan x="1620" y="976.95">props_control.&lt;name&gt;.rd_en</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="936.95">
+    <tspan x="1620" y="936.95">props_status.&lt;name&gt;.rd_data</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="1000" x2="1710.26" y2="1000"/>
+    <polygon style="fill: #000000" points="1717.76,1000 1707.76,1005 1710.26,1000 1707.76,995 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,1000 1707.76,1005 1710.26,1000 1707.76,995 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="996.95">
+    <tspan x="1620" y="996.95">props_control.&lt;name&gt;.wr_en</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="1020" x2="1710.26" y2="1020"/>
+    <polygon style="fill: #000000" points="1717.76,1020 1707.76,1025 1710.26,1020 1707.76,1015 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,1020 1707.76,1025 1710.26,1020 1707.76,1015 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="1016.95">
+    <tspan x="1620" y="1016.95">props_control.&lt;name&gt;.wr_data</tspan>
+  </text>
+  <text font-size="14.1111" style="fill: #005596;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:700" x="1620" y="916.65">
+    <tspan x="1620" y="916.65">read-write-external</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1289.74" y1="1080" x2="1720" y2="1080"/>
+    <polygon style="fill: #000000" points="1282.24,1080 1292.24,1075 1289.74,1080 1292.24,1085 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1282.24,1080 1292.24,1075 1289.74,1080 1292.24,1085 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1289.74" y1="1100" x2="1720" y2="1100"/>
+    <polygon style="fill: #000000" points="1282.24,1100 1292.24,1095 1289.74,1100 1292.24,1105 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1282.24,1100 1292.24,1095 1289.74,1100 1292.24,1105 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="1120" x2="1710.26" y2="1120"/>
+    <polygon style="fill: #000000" points="1717.76,1120 1707.76,1125 1710.26,1120 1707.76,1115 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,1120 1707.76,1125 1710.26,1120 1707.76,1115 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="1160" x2="1710.26" y2="1160"/>
+    <polygon style="fill: #000000" points="1717.76,1160 1707.76,1165 1710.26,1160 1707.76,1155 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,1160 1707.76,1165 1710.26,1160 1707.76,1155 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="1180" x2="1710.26" y2="1180"/>
+    <polygon style="fill: #000000" points="1717.76,1180 1707.76,1185 1710.26,1180 1707.76,1175 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,1180 1707.76,1185 1710.26,1180 1707.76,1175 "/>
+  </g>
+  <text font-size="14.1111" style="fill: #005596;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:700" x="1620" y="1056.65">
+    <tspan x="1620" y="1056.65">read-write-memmap</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="1200" x2="1710.26" y2="1200"/>
+    <polygon style="fill: #000000" points="1717.76,1200 1707.76,1205 1710.26,1200 1707.76,1195 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,1200 1707.76,1205 1710.26,1200 1707.76,1195 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="1196.95">
+    <tspan x="1620" y="1196.95">props_control.&lt;name&gt;.wr_addr</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="1140" x2="1710.26" y2="1140"/>
+    <polygon style="fill: #000000" points="1717.76,1140 1707.76,1145 1710.26,1140 1707.76,1135 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1717.76,1140 1707.76,1145 1710.26,1140 1707.76,1135 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="1136.95">
+    <tspan x="1620" y="1136.95">props_control.&lt;name&gt;.rd_addr</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x1="1071.97" y1="740" x2="1168.03" y2="740"/>
+    <polygon style="fill: #000000" points="1064.47,740 1074.47,735 1071.97,740 1074.47,745 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" points="1064.47,740 1074.47,735 1071.97,740 1074.47,745 "/>
+    <polygon style="fill: #000000" points="1175.53,740 1165.53,745 1168.03,740 1165.53,735 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" points="1175.53,740 1165.53,745 1168.03,740 1165.53,735 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1120" y="736.95">
+    <tspan x="1120" y="736.95">AXI4-Lite</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="1096.95">
+    <tspan x="1620" y="1096.95">props_status.&lt;name&gt;.rd_valid</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="1116.95">
+    <tspan x="1620" y="1116.95">props_control.&lt;name&gt;.rd_en</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="1076.95">
+    <tspan x="1620" y="1076.95">props_status.&lt;name&gt;.rd_data</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="1156.95">
+    <tspan x="1620" y="1156.95">props_control.&lt;name&gt;.wr_en</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="1176.95">
+    <tspan x="1620" y="1176.95">props_control.&lt;name&gt;.wr_data</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="876.95">
+    <tspan x="1620" y="876.95">props_control.&lt;name&gt;.wr_data</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="756.95">
+    <tspan x="1620" y="756.95">props_control.&lt;name&gt;.wr_addr</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="716.95">
+    <tspan x="1620" y="716.95">props_control.&lt;name&gt;.wr_en</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="736.95">
+    <tspan x="1620" y="736.95">props_control.&lt;name&gt;.wr_data</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="636.95">
+    <tspan x="1620" y="636.95">props_control.&lt;name&gt;.wr_en</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="656.95">
+    <tspan x="1620" y="656.95">props_control.&lt;name&gt;.wr_data</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="576.95">
+    <tspan x="1620" y="576.95">props_control.&lt;name&gt;.rd_addr</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="536.95">
+    <tspan x="1620" y="536.95">props_status.&lt;name&gt;.rd_valid</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="556.95">
+    <tspan x="1620" y="556.95">props_control.&lt;name&gt;.rd_en</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="516.95">
+    <tspan x="1620" y="516.95">props_status.&lt;name&gt;.rd_data</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="436.95">
+    <tspan x="1620" y="436.95">props_status.&lt;name&gt;.rd_valid</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="456.95">
+    <tspan x="1620" y="456.95">props_control.&lt;name&gt;.rd_en</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="416.95">
+    <tspan x="1620" y="416.95">props_status.&lt;name&gt;.rd_data</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1620" y="356.95">
+    <tspan x="1620" y="356.95">props_status.&lt;name&gt;.rd_data</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="1720" y="340" width="80" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1720" y="340" width="80" height="40"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1760" y="363.9">
+      <tspan x="1760" y="363.9">Register</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1720" y="400" width="80" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1720" y="400" width="80" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1760" y="435.9">
+      <tspan x="1760" y="435.9">FIFO/</tspan>
+      <tspan x="1760" y="451.9">Register</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1720" y="500" width="80" height="100"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1720" y="500" width="80" height="100"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1760" y="553.9">
+      <tspan x="1760" y="553.9">BRAM</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1720" y="620" width="80" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1720" y="620" width="80" height="60"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1760" y="645.9">
+      <tspan x="1760" y="645.9">FIFO/</tspan>
+      <tspan x="1760" y="661.9">Register</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1720" y="700" width="80" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1720" y="700" width="80" height="80"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1760" y="743.9">
+      <tspan x="1760" y="743.9">BRAM</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1720" y="920" width="80" height="120"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1720" y="920" width="80" height="120"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1760" y="975.9">
+      <tspan x="1760" y="975.9">FIFO/</tspan>
+      <tspan x="1760" y="991.9">Register</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1720" y="1060" width="80" height="160"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1720" y="1060" width="80" height="160"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1760" y="1143.9">
+      <tspan x="1760" y="1143.9">BRAM</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1320" y1="300" x2="1289.74" y2="300"/>
+    <polygon style="fill: #000000" points="1282.24,300 1292.24,295 1289.74,300 1292.24,305 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1282.24,300 1292.24,295 1289.74,300 1292.24,305 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1289.74" y1="820" x2="1310.26" y2="820"/>
+    <polygon style="fill: #000000" points="1282.24,820 1292.24,815 1289.74,820 1292.24,825 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1282.24,820 1292.24,815 1289.74,820 1292.24,825 "/>
+    <polygon style="fill: #000000" points="1317.76,820 1307.76,825 1310.26,820 1307.76,815 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1317.76,820 1307.76,825 1310.26,820 1307.76,815 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1289.74" y1="880" x2="1310.26" y2="880"/>
+    <polygon style="fill: #000000" points="1282.24,880 1292.24,875 1289.74,880 1292.24,885 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1282.24,880 1292.24,875 1289.74,880 1292.24,885 "/>
+    <polygon style="fill: #000000" points="1317.76,880 1307.76,885 1310.26,880 1307.76,875 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1317.76,880 1307.76,885 1310.26,880 1307.76,875 "/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1350" y="740">
+    <tspan x="1350" y="740"></tspan>
+  </text>
+  <text font-size="19.7556" style="fill: #c41230;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1350" y="226.537">
+    <tspan x="1350" y="226.537">AXILITE.VHD</tspan>
+  </text>
+  <text font-size="19.7556" style="fill: #c41230;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1760" y="226.825">
+    <tspan x="1760" y="226.825">USER HDL</tspan>
+  </text>
+</svg>
