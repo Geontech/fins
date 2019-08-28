@@ -73,8 +73,6 @@ class Generator:
         if not os.path.exists(root_directory+'.gitignore'):
             # Only auto-generate .gitignore if the repository doesn't have one
             self.render_jinja_template(jinja_env, '.gitignore', root_directory+'.gitignore', fins_data)
-        if 'params' in fins_data:
-            self.render_jinja_template(jinja_env, 'pkg.vhd', output_directory+fins_data['name']+'_pkg.vhd', fins_data)
         if 'streams' in fins_data:
             self.render_jinja_template(jinja_env, 'streams.vhd', output_directory+fins_data['name']+'_streams.vhd', fins_data)
         if 'ip' in fins_data:
@@ -98,9 +96,10 @@ class Generator:
             # Software Configuration bus code
             self.render_jinja_template(jinja_env, 'swconfig.vhd', output_directory+fins_data['name']+'_swconfig.vhd', fins_data)
             self.render_jinja_template(jinja_env, 'swconfig_verify.vhd', output_directory+fins_data['name']+'_swconfig_verify.vhd', fins_data)
-        if ('streams' in fins_data) or ('params' in fins_data):
-            self.render_jinja_template(jinja_env, 'params.m', output_directory+fins_data['name']+'_params.m', fins_data)
-            self.render_jinja_template(jinja_env, 'params.py', output_directory+fins_data['name']+'_params.py', fins_data)
+        if ('streams' in fins_data) or ('params' in fins_data) or ('properties' in fins_data):
+            self.render_jinja_template(jinja_env, 'pkg.vhd', output_directory+fins_data['name']+'_pkg.vhd', fins_data)
+            self.render_jinja_template(jinja_env, 'pkg.m', output_directory+fins_data['name']+'_pkg.m', fins_data)
+            self.render_jinja_template(jinja_env, 'pkg.py', output_directory+fins_data['name']+'_pkg.py', fins_data)
 
     def generate(self, fins_data, filename):
         self.generate_core(fins_data, filename)

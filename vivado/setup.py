@@ -12,6 +12,11 @@ setup(
         'fins == 0.1',
         'Jinja2 ~= 2.8',
     ],
+    package_data={
+        'fins.backend.vivado':[
+            'templates/*'
+        ]
+    },
     entry_points={
         'fins.backend.generators': [
             'vivado=fins.backend.vivado.generator:VivadoGenerator'

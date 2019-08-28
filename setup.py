@@ -28,16 +28,10 @@ setup(
         'Jinja2 ~= 2.8'
     ],
     package_data={
-        'finspy':[
-            'schema.json',
-            'templates/axilite/*',
-            'templates/core/*',
-            'templates/octave/*',
-            'templates/params/*',
-            'templates/quartus/*',
-            'templates/swconfig/*',
-            'templates/testbench/*',
-            'templates/vivado/*'
+        'fins':[
+            'loader/schema.json',
+            'backend/templates/*',
+            'backend/templates/.gitignore'
         ]
     },
     entry_points={

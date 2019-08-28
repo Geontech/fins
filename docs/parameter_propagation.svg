@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="57cm" height="25cm" viewBox="-784 -1467 1127 490" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rect style="fill: none; fill-opacity:0; stroke-width: 6; stroke: #005596" x="100" y="-1280" width="240" height="300"/>
+  <rect style="fill: none; fill-opacity:0; stroke-width: 6; stroke: #005596" x="-340" y="-1420" width="400" height="380"/>
+  <rect style="fill: none; fill-opacity:0; stroke-width: 6; stroke: #005596" x="-780" y="-1420" width="400" height="240"/>
+  <text font-size="14.1111" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-580" y="-1383.35">
+    <tspan x="-580" y="-1383.35">zynq.json</tspan>
+  </text>
+  <text font-size="22.5778" style="fill: #005596;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="220" y="-1305.35">
+    <tspan x="220" y="-1305.35">TEST_BOTTOM</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="-740" y="-1380" width="320" height="160"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="-740" y="-1380" width="320" height="160"/>
+    <text font-size="10.16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="-731" y="-1354.05">
+      <tspan x="-731" y="-1354.05">{</tspan>
+      <tspan x="-731" y="-1341.35">  "part":"...",</tspan>
+      <tspan x="-731" y="-1328.65">  "params":[...],</tspan>
+      <tspan x="-731" y="-1315.95">  "ip":[</tspan>
+      <tspan x="-731" y="-1303.25">    {</tspan>
+      <tspan x="-731" y="-1290.55">      "fins_path":"ip/test_middle/zynq.json",</tspan>
+      <tspan x="-731" y="-1277.85">      "params":[...]</tspan>
+      <tspan x="-731" y="-1265.15">    }</tspan>
+      <tspan x="-731" y="-1252.45">  ]</tspan>
+      <tspan x="-731" y="-1239.75">}</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-300" y="-1240" width="320" height="160"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="-300" y="-1240" width="320" height="160"/>
+    <text font-size="10.16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="-291" y="-1214.05">
+      <tspan x="-291" y="-1214.05">{</tspan>
+      <tspan x="-291" y="-1201.35">  "part":"...",</tspan>
+      <tspan x="-291" y="-1188.65">  "params":[...],</tspan>
+      <tspan x="-291" y="-1175.95">  "ip":[</tspan>
+      <tspan x="-291" y="-1163.25">    {</tspan>
+      <tspan x="-291" y="-1150.55">      "fins_path":"ip/test_bottom/zynq.json",</tspan>
+      <tspan x="-291" y="-1137.85">      "params":[...]</tspan>
+      <tspan x="-291" y="-1125.15">    }</tspan>
+      <tspan x="-291" y="-1112.45">  ]</tspan>
+      <tspan x="-291" y="-1099.75">}</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="140" y="-1100" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="140" y="-1100" width="160" height="80"/>
+    <text font-size="10.16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="149" y="-1075.95">
+      <tspan x="149" y="-1075.95">{</tspan>
+      <tspan x="149" y="-1063.25">  "part":"...",</tspan>
+      <tspan x="149" y="-1050.55">  "params":[...]</tspan>
+      <tspan x="149" y="-1037.85">}</tspan>
+    </text>
+  </g>
+  <text font-size="14.1111" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-140" y="-1243.35">
+    <tspan x="-140" y="-1243.35">zynq.json</tspan>
+  </text>
+  <text font-size="14.1111" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="220" y="-1103.35">
+    <tspan x="220" y="-1103.35">zynq.json</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="140" y="-1240" width="160" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="140" y="-1240" width="160" height="80"/>
+    <text font-size="10.16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="149" y="-1215.95">
+      <tspan x="149" y="-1215.95">{</tspan>
+      <tspan x="149" y="-1203.25">  "part":"...",</tspan>
+      <tspan x="149" y="-1190.55">  "params":[...]</tspan>
+      <tspan x="149" y="-1177.85">}</tspan>
+    </text>
+  </g>
+  <text font-size="14.1111" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="220" y="-1243.35">
+    <tspan x="220" y="-1243.35">zynq.json.override</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="-300" y="-1380" width="320" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="-300" y="-1380" width="320" height="80"/>
+    <text font-size="10.16" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="-291" y="-1355.95">
+      <tspan x="-291" y="-1355.95">{</tspan>
+      <tspan x="-291" y="-1343.25">  "part":"...",</tspan>
+      <tspan x="-291" y="-1330.55">  "params":[...]</tspan>
+      <tspan x="-291" y="-1317.85">}</tspan>
+    </text>
+  </g>
+  <text font-size="14.1111" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-140" y="-1383.35">
+    <tspan x="-140" y="-1383.35">zynq.json.override</tspan>
+  </text>
+  <text font-size="22.5778" style="fill: #005596;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-140" y="-1445.35">
+    <tspan x="-140" y="-1445.35">TEST_MIDDLE</tspan>
+  </text>
+  <text font-size="22.5778" style="fill: #005596;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-580" y="-1445.35">
+    <tspan x="-580" y="-1445.35">TEST_TOP</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-619" y1="-1344" x2="-303.972" y2="-1344"/>
+    <path style="fill: #c41230" d="M -624 -1344 C -624,-1345.75 -622.25,-1347.5 -620.5,-1347.5 C -618.75,-1347.5 -617,-1345.75 -617,-1344 C -617,-1342.25 -618.75,-1340.5 -620.5,-1340.5 C -622.25,-1340.5 -624,-1342.25 -624,-1344z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-621.5" y1="-1339" x2="-621.5" y2="-1349"/>
+    <polygon style="fill: #c41230" points="-296.472,-1344 -306.472,-1339 -303.972,-1344 -306.472,-1349 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" points="-296.472,-1344 -306.472,-1339 -303.972,-1344 -306.472,-1349 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" points="-580,-1280 -400,-1280 -400,-1332 -303.972,-1332 "/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-600" y1="-1280" x2="-596" y2="-1280"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-593.333" y1="-1280" x2="-589.333" y2="-1280"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-586.667" y1="-1280" x2="-582.667" y2="-1280"/>
+    <polygon style="fill: #c41230" points="-296.472,-1332 -306.472,-1327 -303.972,-1332 -306.472,-1337 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" points="-296.472,-1332 -306.472,-1327 -303.972,-1332 -306.472,-1337 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-179" y1="-1204" x2="138.028" y2="-1204"/>
+    <path style="fill: #c41230" d="M -184 -1204 C -184,-1205.75 -182.25,-1207.5 -180.5,-1207.5 C -178.75,-1207.5 -177,-1205.75 -177,-1204 C -177,-1202.25 -178.75,-1200.5 -180.5,-1200.5 C -182.25,-1200.5 -184,-1202.25 -184,-1204z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-181.5" y1="-1199" x2="-181.5" y2="-1209"/>
+    <polygon style="fill: #c41230" points="145.528,-1204 135.528,-1199 138.028,-1204 135.528,-1209 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" points="145.528,-1204 135.528,-1199 138.028,-1204 135.528,-1209 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" points="-144,-1140 36,-1140 36,-1192 138.028,-1192 "/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-164" y1="-1140" x2="-160" y2="-1140"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-157.333" y1="-1140" x2="-153.333" y2="-1140"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-150.667" y1="-1140" x2="-146.667" y2="-1140"/>
+    <polygon style="fill: #c41230" points="145.528,-1192 135.528,-1187 138.028,-1192 135.528,-1197 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" points="145.528,-1192 135.528,-1187 138.028,-1192 135.528,-1197 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" points="-619,-1332 -584,-1332 -584,-1308 -760,-1308 -760,-1280 -716,-1280 "/>
+    <path style="fill: #c41230" d="M -624 -1332 C -624,-1333.75 -622.25,-1335.5 -620.5,-1335.5 C -618.75,-1335.5 -617,-1333.75 -617,-1332 C -617,-1330.25 -618.75,-1328.5 -620.5,-1328.5 C -622.25,-1328.5 -624,-1330.25 -624,-1332z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-621.5" y1="-1327" x2="-621.5" y2="-1337"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-696" y1="-1280" x2="-700" y2="-1280"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-702.667" y1="-1280" x2="-706.667" y2="-1280"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-709.333" y1="-1280" x2="-713.333" y2="-1280"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" points="-179,-1192 -144,-1192 -144,-1168 -320,-1168 -320,-1140 -276,-1140 "/>
+    <path style="fill: #c41230" d="M -184 -1192 C -184,-1193.75 -182.25,-1195.5 -180.5,-1195.5 C -178.75,-1195.5 -177,-1193.75 -177,-1192 C -177,-1190.25 -178.75,-1188.5 -180.5,-1188.5 C -182.25,-1188.5 -184,-1190.25 -184,-1192z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-181.5" y1="-1187" x2="-181.5" y2="-1197"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-256" y1="-1140" x2="-260" y2="-1140"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-262.667" y1="-1140" x2="-266.667" y2="-1140"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-269.333" y1="-1140" x2="-273.333" y2="-1140"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="-183,-1348 -150,-1348 -150,-1270 -310,-1270 -310,-1204 -291.972,-1204 "/>
+    <path style="fill: #7f7f7f" d="M -188 -1348 C -188,-1349.75 -186.25,-1351.5 -184.5,-1351.5 C -182.75,-1351.5 -181,-1349.75 -181,-1348 C -181,-1346.25 -182.75,-1344.5 -184.5,-1344.5 C -186.25,-1344.5 -188,-1346.25 -188,-1348z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" x1="-185.5" y1="-1343" x2="-185.5" y2="-1353"/>
+    <polygon style="fill: #7f7f7f" points="-284.472,-1204 -294.472,-1199 -291.972,-1204 -294.472,-1209 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="-284.472,-1204 -294.472,-1199 -291.972,-1204 -294.472,-1209 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="-183,-1332 -160,-1332 -160,-1280 -320,-1280 -320,-1192 -291.972,-1192 "/>
+    <path style="fill: #7f7f7f" d="M -188 -1332 C -188,-1333.75 -186.25,-1335.5 -184.5,-1335.5 C -182.75,-1335.5 -181,-1333.75 -181,-1332 C -181,-1330.25 -182.75,-1328.5 -184.5,-1328.5 C -186.25,-1328.5 -188,-1330.25 -188,-1332z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" x1="-185.5" y1="-1327" x2="-185.5" y2="-1337"/>
+    <polygon style="fill: #7f7f7f" points="-284.472,-1192 -294.472,-1187 -291.972,-1192 -294.472,-1197 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="-284.472,-1192 -294.472,-1187 -291.972,-1192 -294.472,-1197 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="255,-1210 288,-1210 288,-1132 128,-1132 128,-1066 146.028,-1066 "/>
+    <path style="fill: #7f7f7f" d="M 250 -1210 C 250,-1211.75 251.75,-1213.5 253.5,-1213.5 C 255.25,-1213.5 257,-1211.75 257,-1210 C 257,-1208.25 255.25,-1206.5 253.5,-1206.5 C 251.75,-1206.5 250,-1208.25 250,-1210z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" x1="252.5" y1="-1205" x2="252.5" y2="-1215"/>
+    <polygon style="fill: #7f7f7f" points="153.528,-1066 143.528,-1061 146.028,-1066 143.528,-1071 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="153.528,-1066 143.528,-1061 146.028,-1066 143.528,-1071 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="255,-1194 278,-1194 278,-1142 118,-1142 118,-1054 146.028,-1054 "/>
+    <path style="fill: #7f7f7f" d="M 250 -1194 C 250,-1195.75 251.75,-1197.5 253.5,-1197.5 C 255.25,-1197.5 257,-1195.75 257,-1194 C 257,-1192.25 255.25,-1190.5 253.5,-1190.5 C 251.75,-1190.5 250,-1192.25 250,-1194z"/>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" x1="252.5" y1="-1189" x2="252.5" y2="-1199"/>
+    <polygon style="fill: #7f7f7f" points="153.528,-1054 143.528,-1049 146.028,-1054 143.528,-1059 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="153.528,-1054 143.528,-1049 146.028,-1054 143.528,-1059 "/>
+  </g>
+  <text font-size="14.1111" style="fill: #c41230;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:700" x="-720" y="-1055.12">
+    <tspan x="-720" y="-1055.12">SUB-IP CODE GENERATION</tspan>
+  </text>
+  <text font-size="14.1111" style="fill: #7f7f7f;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:700" x="-720" y="-1035.33">
+    <tspan x="-720" y="-1035.33">JSON LOAD AND OVERRIDE</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" x1="-780" y1="-1060" x2="-751.972" y2="-1060"/>
+    <polygon style="fill: #c41230" points="-744.472,-1060 -754.472,-1055 -751.972,-1060 -754.472,-1065 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #c41230" points="-744.472,-1060 -754.472,-1055 -751.972,-1060 -754.472,-1065 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" x1="-780" y1="-1040" x2="-751.972" y2="-1040"/>
+    <polygon style="fill: #7f7f7f" points="-744.472,-1040 -754.472,-1035 -751.972,-1040 -754.472,-1045 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="-744.472,-1040 -754.472,-1035 -751.972,-1040 -754.472,-1045 "/>
+  </g>
+</svg>

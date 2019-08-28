@@ -1,7 +1,7 @@
 #===============================================================================
 # Company:     Geon Technologies, LLC
 # Author:      Josh Schindehette
-# Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+# Copyright:   (c) 2019 Geon Technologies, LLC. All rights reserved.
 #              Dissemination of this information or reproduction of this
 #              material is strictly prohibited unless prior written
 #              permission is obtained from Geon Technologies, LLC
@@ -26,7 +26,7 @@ set {{ param['name'] }}
 {%- if 'scripts' in fins['filesets'] %}
 {%- if 'presim' in fins['filesets']['scripts'] %}
 {%- for presim_script in fins['filesets']['scripts']['presim'] %}
-{%- if 'tcl' in presim_script['type']|lower %}
+{%- if presim_script['type']|lower == 'tcl' %}
 source {{ presim_script['path'] }}
 {%- endif %}
 {%- endfor %}
@@ -57,7 +57,7 @@ run all
 {%- if 'scripts' in fins['filesets'] %}
 {%- if 'postsim' in fins['filesets']['scripts'] %}
 {%- for postsim_script in fins['filesets']['scripts']['postsim'] %}
-{%- if 'tcl' in postsim_script['type']|lower %}
+{%- if postsim_script['type']|lower == 'tcl' %}
 source {{ postsim_script['path'] }}
 {%- endif %}
 {%- endfor %}

@@ -21,14 +21,27 @@ use work.test_middle_pkg.all;
 
 -- Entity
 entity test_middle is
+  generic (
+    G_TEST_GENERIC_NATURAL:natural:=10;
+    G_TEST_GENERIC_INTEGER : integer := 100 ;
+    G_TEST_GENERIC_STRING  :  string  :=   "my_string"  ;
+    G_TEST_GENERIC_BOOLEAN : boolean := false;
+    G_TEST_GENERIC_POSITIVE : positive := 50;
+    G_TEST_GENERIC_STD_LOGIC : std_logic := '1';
+    G_TEST_GENERIC_STD_LOGIC_VECTOR : std_logic_vector(3 downto 0) := "0000"
+  );
   port (
     -- AXI-Stream Bus for Ports
-    s_axis_myinput_tvalid  : in  std_logic;
-    s_axis_myinput_tlast   : in  std_logic;
-    s_axis_myinput_tdata   : in  std_logic_vector(PORTS_WIDTH-1 downto 0);
-    m_axis_myoutput_tvalid : out std_logic;
-    m_axis_myoutput_tlast  : out std_logic;
-    m_axis_myoutput_tdata  : out std_logic_vector(PORTS_WIDTH-1 downto 0);
+    s_axis_myinput_aclk     : in  std_logic;
+    s_axis_myinput_aresetn  : in  std_logic;
+    s_axis_myinput_tvalid   : in  std_logic := '0';
+    s_axis_myinput_tlast    : in  std_logic;
+    s_axis_myinput_tdata    : in  std_logic_vector(PORTS_WIDTH-1 downto 0);
+    m_axis_myoutput_aclk    : in  std_logic;
+    m_axis_myoutput_aresetn : in  std_logic;
+    m_axis_myoutput_tvalid  : out std_logic;
+    m_axis_myoutput_tlast   : out std_logic;
+    m_axis_myoutput_tdata   : out std_logic_vector(PORTS_WIDTH-1 downto 0);
     -- AXI4-Lite Bus for Properties
     S_AXI_ACLK             : in  std_logic;
     S_AXI_ARESETN          : in  std_logic;
@@ -110,7 +123,7 @@ architecture mixed of test_middle is
   end component;
 
   -- Xilinx IP created by external_property_fifo.tcl script
-  component external_property_fifo
+  component xilinx_external_property_fifo
     port (
       clk   : in  std_logic;
       srst  : in  std_logic;
@@ -124,7 +137,7 @@ architecture mixed of test_middle is
   end component;
 
   -- Xilinx IP created by memmap_property_ram.tcl script
-  component memmap_property_ram
+  component xilinx_memmap_property_ram
     port (
       clka  : in std_logic;
       ena   : in std_logic;
@@ -138,15 +151,45 @@ architecture mixed of test_middle is
     );
   end component;
 
+  -- Intel IP created by external_property_fifo.tcl script
+  component intel_external_property_fifo is
+    port (
+      data  : in  std_logic_vector(PROPS_DATA_WIDTH-1 downto 0);
+      wrreq : in  std_logic;
+      rdreq : in  std_logic;
+      clock : in  std_logic;
+      q     : out std_logic_vector(PROPS_DATA_WIDTH-1 downto 0);
+      full  : out std_logic;
+      empty : out std_logic
+    );
+  end component;
+
+  -- Intel IP created by memmap_property_ram.tcl script
+  component intel_memmap_property_ram is
+    port (
+      data      : in  std_logic_vector(PROPS_DATA_WIDTH-1 downto 0);
+      q         : out std_logic_vector(PROPS_DATA_WIDTH-1 downto 0);
+      wraddress : in  std_logic_vector(TEST_RAM_ADDR_WIDTH-1 downto 0);
+      rdaddress : in  std_logic_vector(TEST_RAM_ADDR_WIDTH-1 downto 0);
+      wren      : in  std_logic;
+      clock     : in  std_logic
+    );
+  end component;
+
+  -- Sub-IP instantiation
   component test_bottom_0 is
     port (
       -- AXI-Stream Bus for Ports
-      s_axis_myinput_tvalid  : in  std_logic;
-      s_axis_myinput_tlast   : in  std_logic;
-      s_axis_myinput_tdata   : in  std_logic_vector(PORTS_WIDTH-1 downto 0);
-      m_axis_myoutput_tvalid : out std_logic;
-      m_axis_myoutput_tlast  : out std_logic;
-      m_axis_myoutput_tdata  : out std_logic_vector(PORTS_WIDTH-1 downto 0);
+      s_axis_myinput_aclk     : in  std_logic;
+      s_axis_myinput_aresetn  : in  std_logic;
+      s_axis_myinput_tvalid   : in  std_logic;
+      s_axis_myinput_tlast    : in  std_logic;
+      s_axis_myinput_tdata    : in  std_logic_vector(PORTS_WIDTH-1 downto 0);
+      m_axis_myoutput_aclk    : in  std_logic;
+      m_axis_myoutput_aresetn : in  std_logic;
+      m_axis_myoutput_tvalid  : out std_logic;
+      m_axis_myoutput_tlast   : out std_logic;
+      m_axis_myoutput_tdata   : out std_logic_vector(PORTS_WIDTH-1 downto 0);
       -- Software Configuration Bus for Properties
       s_swconfig_clk         : in  std_logic;
       s_swconfig_reset       : in  std_logic;
@@ -176,6 +219,7 @@ architecture mixed of test_middle is
   signal axis_myinput_tvalid_q        :  std_logic;
   signal axis_myinput_tlast_q         :  std_logic;
   signal axis_myinput_tdata_q         :  std_logic_vector(PORTS_WIDTH-1 downto 0);
+  signal external_property_fifo_rd_en : std_logic;
 
 begin
 
@@ -186,9 +230,9 @@ begin
   -- Data Processing
   --------------------------------------------------------------------------------
   -- Synchronous process for data processsing
-  s_data_processing : process (S_AXI_ACLK)
+  s_data_processing : process (s_axis_myinput_aclk)
   begin
-    if (rising_edge(S_AXI_ACLK)) then
+    if (rising_edge(s_axis_myinput_aclk)) then
       -- Data pipelines
       axis_myinput_tdata   <= s_axis_myinput_tdata;
       axis_myinput_tdata_q <= std_logic_vector(
@@ -198,7 +242,7 @@ begin
         )
       );
       -- Control pipelines
-      if (S_AXI_ARESETN = '0') then
+      if (s_axis_myinput_aresetn = '0') then
         axis_myinput_tvalid   <= '0';
         axis_myinput_tlast    <= '0';
         axis_myinput_tvalid_q <= '0';
@@ -215,20 +259,24 @@ begin
   -- Instantiate sub-ip
   u_test_bottom : test_bottom_0
     port map (
-      s_axis_myinput_tvalid  => axis_myinput_tvalid_q,
-      s_axis_myinput_tlast   => axis_myinput_tlast_q,
-      s_axis_myinput_tdata   => axis_myinput_tdata_q,
-      m_axis_myoutput_tvalid => m_axis_myoutput_tvalid,
-      m_axis_myoutput_tlast  => m_axis_myoutput_tlast,
-      m_axis_myoutput_tdata  => m_axis_myoutput_tdata,
-      s_swconfig_clk         => s_swconfig_clk,
-      s_swconfig_reset       => s_swconfig_reset,
-      s_swconfig_address     => s_swconfig_address,
-      s_swconfig_wr_enable   => s_swconfig_wr_enable,
-      s_swconfig_wr_data     => s_swconfig_wr_data,
-      s_swconfig_rd_enable   => s_swconfig_rd_enable,
-      s_swconfig_rd_valid    => s_swconfig_rd_valid,
-      s_swconfig_rd_data     => s_swconfig_rd_data
+      s_axis_myinput_aclk     => s_axis_myinput_aclk,
+      s_axis_myinput_aresetn  => s_axis_myinput_aresetn,
+      s_axis_myinput_tvalid   => axis_myinput_tvalid_q,
+      s_axis_myinput_tlast    => axis_myinput_tlast_q,
+      s_axis_myinput_tdata    => axis_myinput_tdata_q,
+      m_axis_myoutput_aclk    => m_axis_myoutput_aclk,
+      m_axis_myoutput_aresetn => m_axis_myoutput_aresetn,
+      m_axis_myoutput_tvalid  => m_axis_myoutput_tvalid,
+      m_axis_myoutput_tlast   => m_axis_myoutput_tlast,
+      m_axis_myoutput_tdata   => m_axis_myoutput_tdata,
+      s_swconfig_clk          => s_swconfig_clk,
+      s_swconfig_reset        => s_swconfig_reset,
+      s_swconfig_address      => s_swconfig_address,
+      s_swconfig_wr_enable    => s_swconfig_wr_enable,
+      s_swconfig_wr_data      => s_swconfig_wr_data,
+      s_swconfig_rd_enable    => s_swconfig_rd_enable,
+      s_swconfig_rd_valid     => s_swconfig_rd_valid,
+      s_swconfig_rd_data      => s_swconfig_rd_data
     );
 
   --------------------------------------------------------------------------------
@@ -266,17 +314,43 @@ begin
   -- Testing elements for "read-write-external"
   --------------------------------------------------------------------------------
   -- FWFT FIFO instantitation for test
-  u_external_property_fifo : external_property_fifo
-    port map (
-      clk   => S_AXI_ACLK,
-      srst  => S_AXI_ARESET,
-      din   => props_control.test_prop_read_write_external.wr_data,
-      wr_en => props_control.test_prop_read_write_external.wr_en,
-      rd_en => props_control.test_prop_read_write_external.rd_en,
-      dout  => props_status.test_prop_read_write_external.rd_data,
-      full  => open,
-      empty => open
-    );
+  u_gen_xilinx_external_property_fifo : if (USE_XILINX) generate
+    u_external_property_fifo : xilinx_external_property_fifo
+      port map (
+        clk   => s_swconfig_clk,
+        srst  => s_swconfig_reset,
+        din   => props_control.test_prop_read_write_external.wr_data,
+        wr_en => props_control.test_prop_read_write_external.wr_en,
+        rd_en => external_property_fifo_rd_en,
+        dout  => props_status.test_prop_read_write_external.rd_data,
+        full  => open,
+        empty => open
+      );
+  end generate u_gen_xilinx_external_property_fifo;
+  u_gen_intel_external_property_fifo : if (not USE_XILINX) generate
+    u_external_property_fifo : intel_external_property_fifo
+      port map (
+        clock   => s_swconfig_clk,
+        data    => props_control.test_prop_read_write_external.wr_data,
+        wrreq   => props_control.test_prop_read_write_external.wr_en,
+        rdreq   => external_property_fifo_rd_en,
+        q       => props_status.test_prop_read_write_external.rd_data,
+        full    => open,
+        empty   => open
+      );
+  end generate u_gen_intel_external_property_fifo;
+
+  -- Synchronous process to delay the fifo read enable one clock just due to this FIFO's timing
+  s_external_property_fifo : process(s_swconfig_clk)
+  begin
+    if (rising_edge(s_swconfig_clk)) then
+      if (s_swconfig_reset = '1') then
+        external_property_fifo_rd_en <= '0';
+      else
+        external_property_fifo_rd_en <= props_control.test_prop_read_write_external.rd_en;
+      end if;
+    end if;
+  end process s_external_property_fifo;
 
   -- Since this is a FWFT FIFO, the read data is valid as soon as the FIFO is read
   props_status.test_prop_read_write_external.rd_valid <= props_control.test_prop_read_write_external.rd_en;
@@ -306,18 +380,31 @@ begin
   -- Testing elements for "read-write-memmap"
   --------------------------------------------------------------------------------
   -- Simple Dual Port RAM for test
-  u_memmap_property_ram : memmap_property_ram
-    port map (
-      clka  => S_AXI_ACLK,
-      ena   => '1',
-      wea   => memmap_property_ram_wr_en,
-      addra => props_control.test_prop_read_write_memmap.wr_addr,
-      dina  => props_control.test_prop_read_write_memmap.wr_data,
-      clkb  => S_AXI_ACLK,
-      enb   => '1',
-      addrb => props_control.test_prop_read_write_memmap.rd_addr,
-      doutb => props_status.test_prop_read_write_memmap.rd_data
-    );
+  u_gen_xilinx_memmap_property_ram : if (USE_XILINX) generate
+    u_memmap_property_ram : xilinx_memmap_property_ram
+      port map (
+        clka  => s_swconfig_clk,
+        ena   => '1',
+        wea   => memmap_property_ram_wr_en,
+        addra => props_control.test_prop_read_write_memmap.wr_addr,
+        dina  => props_control.test_prop_read_write_memmap.wr_data,
+        clkb  => s_swconfig_clk,
+        enb   => '1',
+        addrb => props_control.test_prop_read_write_memmap.rd_addr,
+        doutb => props_status.test_prop_read_write_memmap.rd_data
+      );
+  end generate u_gen_xilinx_memmap_property_ram;
+  u_gen_intel_memmap_property_ram : if (not USE_XILINX) generate
+    u_memmap_property_ram : intel_memmap_property_ram
+      port map (
+        clock     => s_swconfig_clk,
+        wren      => props_control.test_prop_read_write_memmap.wr_en,
+        wraddress => props_control.test_prop_read_write_memmap.wr_addr,
+        data      => props_control.test_prop_read_write_memmap.wr_data,
+        rdaddress => props_control.test_prop_read_write_memmap.rd_addr,
+        q         => props_status.test_prop_read_write_memmap.rd_data
+      );
+  end generate u_gen_intel_memmap_property_ram;
 
   -- Remap the write enable to a std_logic_vector of width 1
   memmap_property_ram_wr_en(0) <= props_control.test_prop_read_write_memmap.wr_en;

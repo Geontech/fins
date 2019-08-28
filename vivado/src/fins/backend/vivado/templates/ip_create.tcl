@@ -1,7 +1,7 @@
 #===============================================================================
 # Company:     Geon Technologies, LLC
 # Author:      Josh Schindehette
-# Copyright:   (c) 2018 Geon Technologies, LLC. All rights reserved.
+# Copyright:   (c) 2019 Geon Technologies, LLC. All rights reserved.
 #              Dissemination of this information or reproduction of this
 #              material is strictly prohibited unless prior written
 #              permission is obtained from Geon Technologies, LLC
@@ -28,7 +28,7 @@ set {{ param['name'] }}
 {%- if 'scripts' in fins['filesets'] %}
 {%- if 'prebuild' in fins['filesets']['scripts'] %}
 {%- for prebuild_script in fins['filesets']['scripts']['prebuild'] %}
-{%- if 'tcl' in prebuild_script['type']|lower %}
+{%- if prebuild_script['type']|lower == 'tcl' %}
 source {{ prebuild_script['path'] }}
 {%- endif %}
 {%- endfor %}
@@ -97,7 +97,7 @@ if {[llength $SIM_FILES] > 0} {
 # Note: SDC constraints files will be ignored
 set CONSTRAINTS_FILES [list \
 {%- for constraint_file in fins['filesets']['constraints'] %}
-{%- if constraint_file['type'] == 'xdc' %}
+{%- if constraint_file['type']|lower == 'xdc' %}
     {{ constraint_file['path'] }} \
 {%- endif %}
 {%- endfor %}
@@ -138,42 +138,21 @@ set_property -dict [list \
 {%- endfor %}
 
 # Set the top module
-{%- if 'top_source' in fins %}
 set_property "top" {{ fins['top_source'] }} [get_filesets "sources*"]
-{%- else %}
-set_property "top" {{ fins['name'] }} [get_filesets "sources*"]
-{%- endif %}
 
 # Set the top module for the simulation
-{%- if 'top_sim' in fins %}
 set_property "top" {{ fins['top_sim'] }} [get_filesets "sim*"]
-{%- else %}
-set_property "top" {{ fins['name'] }}_tb [get_filesets "sim*"]
-{%- endif %}
 
 # Package the project
-{%- if 'library' in fins %}
-set PACKAGE_LIBRARY "{{ fins['library'] }}"
-{%- else %}
-set PACKAGE_LIBRARY "user"
-{%- endif %}
-{%- if 'company_url' in fins %}
-ipx::package_project -root_dir $PROJECT_VIVADO_DIR -vendor {{ fins['company_url'] }} -library $PACKAGE_LIBRARY
+ipx::package_project -root_dir $PROJECT_VIVADO_DIR -vendor {{ fins['company_url'] }} -library "{{ fins['library'] }}"
 set_property company_url "http://{{ fins['company_url'] }}" [ipx::current_core]
-{%- else %}
-ipx::package_project -root_dir $PROJECT_VIVADO_DIR -library $PACKAGE_LIBRARY
-{%- endif %}
 
 # Set the Name
 set_property name "{{ fins['name'] }}" [ipx::current_core]
 set_property display_name "{{ fins['name'] }}" [ipx::current_core]
 
 # Set the Version
-{%- if 'version' in fins %}
 set_property version "{{ fins['version'] }}" [ipx::current_core]
-{%- else %}
-set_property version "1.0" [ipx::current_core]
-{%- endif %}
 
 {%- if 'company_name' in fins %}
 # Set Vendor Display Name
@@ -202,7 +181,7 @@ ipx::save_core [ipx::current_core]
 {%- if 'scripts' in fins['filesets'] %}
 {%- if 'postbuild' in fins['filesets']['scripts'] %}
 {%- for postbuild_script in fins['filesets']['scripts']['postbuild'] %}
-{%- if 'tcl' in postbuild_script['type']|lower %}
+{%- if postbuild_script['type']|lower == 'tcl' %}
 source {{ postbuild_script['path'] }}
 {%- endif %}
 {%- endfor %}

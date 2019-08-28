@@ -78,7 +78,7 @@ def main():
     arg_parser.add_argument('-v', '--verbose', action='store_true', default=False,
                             help='display debug messages')
     arg_parser.add_argument('--version', action='version', version='%(prog)s '+version.__version__)
-    arg_parser.add_argument('-b', '--backend', default='source', help='code generator backend to target')
+    arg_parser.add_argument('-b', '--backend', default='core', help='code generator backend to target')
     arg_parser.add_argument('-o', '--option', action='append', default=[],
                             help='options for code generator backend')
 

@@ -54,24 +54,24 @@ package {{ fins['name']|lower }}_swconfig_verify is
     reg_wr_data                 : std_logic_vector;
     signal s_swconfig_clk       : in  std_logic;
     signal s_swconfig_reset     : in  std_logic;
-    signal s_swconfig_address   : out std_logic_vector;
+    signal s_swconfig_address   : out std_logic_vector({{ fins['properties']['addr_width'] }}-1 downto 0);
     signal s_swconfig_wr_enable : out std_logic;
-    signal s_swconfig_wr_data   : out std_logic_vector;
+    signal s_swconfig_wr_data   : out std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
     signal s_swconfig_rd_enable : out std_logic;
     signal s_swconfig_rd_valid  : in  std_logic;
-    signal s_swconfig_rd_data   : in  std_logic_vector
+    signal s_swconfig_rd_data   : in  std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0)
   );
 
   procedure {{ fins['name']|lower }}_read_reg (
     reg_rd_address              : natural;
     signal s_swconfig_clk       : in  std_logic;
     signal s_swconfig_reset     : in  std_logic;
-    signal s_swconfig_address   : out std_logic_vector;
+    signal s_swconfig_address   : out std_logic_vector({{ fins['properties']['addr_width'] }}-1 downto 0);
     signal s_swconfig_wr_enable : out std_logic;
-    signal s_swconfig_wr_data   : out std_logic_vector;
+    signal s_swconfig_wr_data   : out std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
     signal s_swconfig_rd_enable : out std_logic;
     signal s_swconfig_rd_valid  : in  std_logic;
-    signal s_swconfig_rd_data   : in  std_logic_vector
+    signal s_swconfig_rd_data   : in  std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0)
   );
 
   procedure {{ fins['name']|lower }}_write_regs (
@@ -79,12 +79,12 @@ package {{ fins['name']|lower }}_swconfig_verify is
     reg_wr_data                 : t_{{ fins['name']|lower }}_reg_array;
     signal s_swconfig_clk       : in  std_logic;
     signal s_swconfig_reset     : in  std_logic;
-    signal s_swconfig_address   : out std_logic_vector;
+    signal s_swconfig_address   : out std_logic_vector({{ fins['properties']['addr_width'] }}-1 downto 0);
     signal s_swconfig_wr_enable : out std_logic;
-    signal s_swconfig_wr_data   : out std_logic_vector;
+    signal s_swconfig_wr_data   : out std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
     signal s_swconfig_rd_enable : out std_logic;
     signal s_swconfig_rd_valid  : in  std_logic;
-    signal s_swconfig_rd_data   : in  std_logic_vector
+    signal s_swconfig_rd_data   : in  std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0)
   );
 
   procedure {{ fins['name']|lower }}_verify_regs (
@@ -92,23 +92,23 @@ package {{ fins['name']|lower }}_swconfig_verify is
     reg_rd_data                 : t_{{ fins['name']|lower }}_reg_array;
     signal s_swconfig_clk       : in  std_logic;
     signal s_swconfig_reset     : in  std_logic;
-    signal s_swconfig_address   : out std_logic_vector;
+    signal s_swconfig_address   : out std_logic_vector({{ fins['properties']['addr_width'] }}-1 downto 0);
     signal s_swconfig_wr_enable : out std_logic;
-    signal s_swconfig_wr_data   : out std_logic_vector;
+    signal s_swconfig_wr_data   : out std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
     signal s_swconfig_rd_enable : out std_logic;
     signal s_swconfig_rd_valid  : in  std_logic;
-    signal s_swconfig_rd_data   : in  std_logic_vector
+    signal s_swconfig_rd_data   : in  std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0)
   );
 
   procedure {{ fins['name']|lower }}_swconfig_verify (
     signal s_swconfig_clk       : in  std_logic;
     signal s_swconfig_reset     : in  std_logic;
-    signal s_swconfig_address   : out std_logic_vector;
+    signal s_swconfig_address   : out std_logic_vector({{ fins['properties']['addr_width'] }}-1 downto 0);
     signal s_swconfig_wr_enable : out std_logic;
-    signal s_swconfig_wr_data   : out std_logic_vector;
+    signal s_swconfig_wr_data   : out std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
     signal s_swconfig_rd_enable : out std_logic;
     signal s_swconfig_rd_valid  : in  std_logic;
-    signal s_swconfig_rd_data   : in  std_logic_vector
+    signal s_swconfig_rd_data   : in  std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0)
   );
 
 end {{ fins['name']|lower }}_swconfig_verify;
@@ -121,12 +121,12 @@ package body {{ fins['name']|lower }}_swconfig_verify is
     reg_wr_data                 : std_logic_vector;
     signal s_swconfig_clk       : in  std_logic;
     signal s_swconfig_reset     : in  std_logic;
-    signal s_swconfig_address   : out std_logic_vector;
+    signal s_swconfig_address   : out std_logic_vector({{ fins['properties']['addr_width'] }}-1 downto 0);
     signal s_swconfig_wr_enable : out std_logic;
-    signal s_swconfig_wr_data   : out std_logic_vector;
+    signal s_swconfig_wr_data   : out std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
     signal s_swconfig_rd_enable : out std_logic;
     signal s_swconfig_rd_valid  : in  std_logic;
-    signal s_swconfig_rd_data   : in  std_logic_vector
+    signal s_swconfig_rd_data   : in  std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0)
   ) is
   begin
     wait until falling_edge(s_swconfig_clk);
@@ -148,12 +148,12 @@ package body {{ fins['name']|lower }}_swconfig_verify is
     reg_rd_address              : natural;
     signal s_swconfig_clk       : in  std_logic;
     signal s_swconfig_reset     : in  std_logic;
-    signal s_swconfig_address   : out std_logic_vector;
+    signal s_swconfig_address   : out std_logic_vector({{ fins['properties']['addr_width'] }}-1 downto 0);
     signal s_swconfig_wr_enable : out std_logic;
-    signal s_swconfig_wr_data   : out std_logic_vector;
+    signal s_swconfig_wr_data   : out std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
     signal s_swconfig_rd_enable : out std_logic;
     signal s_swconfig_rd_valid  : in  std_logic;
-    signal s_swconfig_rd_data   : in  std_logic_vector
+    signal s_swconfig_rd_data   : in  std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0)
   ) is
   begin
     wait until falling_edge(s_swconfig_clk);
@@ -177,12 +177,12 @@ package body {{ fins['name']|lower }}_swconfig_verify is
     reg_wr_data                 : t_{{ fins['name']|lower }}_reg_array;
     signal s_swconfig_clk       : in  std_logic;
     signal s_swconfig_reset     : in  std_logic;
-    signal s_swconfig_address   : out std_logic_vector;
+    signal s_swconfig_address   : out std_logic_vector({{ fins['properties']['addr_width'] }}-1 downto 0);
     signal s_swconfig_wr_enable : out std_logic;
-    signal s_swconfig_wr_data   : out std_logic_vector;
+    signal s_swconfig_wr_data   : out std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
     signal s_swconfig_rd_enable : out std_logic;
     signal s_swconfig_rd_valid  : in  std_logic;
-    signal s_swconfig_rd_data   : in  std_logic_vector
+    signal s_swconfig_rd_data   : in  std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0)
   ) is
   begin
     for n in reg_wr_data'low to reg_wr_data'high loop
@@ -207,12 +207,12 @@ package body {{ fins['name']|lower }}_swconfig_verify is
     reg_rd_data                 : t_{{ fins['name']|lower }}_reg_array;
     signal s_swconfig_clk       : in  std_logic;
     signal s_swconfig_reset     : in  std_logic;
-    signal s_swconfig_address   : out std_logic_vector;
+    signal s_swconfig_address   : out std_logic_vector({{ fins['properties']['addr_width'] }}-1 downto 0);
     signal s_swconfig_wr_enable : out std_logic;
-    signal s_swconfig_wr_data   : out std_logic_vector;
+    signal s_swconfig_wr_data   : out std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
     signal s_swconfig_rd_enable : out std_logic;
     signal s_swconfig_rd_valid  : in  std_logic;
-    signal s_swconfig_rd_data   : in  std_logic_vector
+    signal s_swconfig_rd_data   : in  std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0)
   ) is
     variable my_line : line;
   begin
@@ -241,12 +241,12 @@ package body {{ fins['name']|lower }}_swconfig_verify is
   procedure {{ fins['name']|lower }}_swconfig_verify (
     signal s_swconfig_clk       : in  std_logic;
     signal s_swconfig_reset     : in  std_logic;
-    signal s_swconfig_address   : out std_logic_vector;
+    signal s_swconfig_address   : out std_logic_vector({{ fins['properties']['addr_width'] }}-1 downto 0);
     signal s_swconfig_wr_enable : out std_logic;
-    signal s_swconfig_wr_data   : out std_logic_vector;
+    signal s_swconfig_wr_data   : out std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
     signal s_swconfig_rd_enable : out std_logic;
     signal s_swconfig_rd_valid  : in  std_logic;
-    signal s_swconfig_rd_data   : in  std_logic_vector
+    signal s_swconfig_rd_data   : in  std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0)
   ) is
     variable my_line : line;
   begin
