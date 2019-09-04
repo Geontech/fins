@@ -41,6 +41,20 @@ architecture rtl of test_bottom_tb is
   signal m_axis_myoutput_tvalid  : std_logic;
   signal m_axis_myoutput_tlast   : std_logic;
   signal m_axis_myoutput_tdata   : std_logic_vector(PORTS_WIDTH-1 downto 0);
+  signal s_axis_test_in_aclk     : std_logic;
+  signal s_axis_test_in_aresetn  : std_logic;
+  signal s_axis_test_in_tready   : std_logic;
+  signal s_axis_test_in_tdata    : std_logic_vector(160-1 downto 0);
+  signal s_axis_test_in_tuser    : std_logic_vector(128-1 downto 0);
+  signal s_axis_test_in_tvalid   : std_logic;
+  signal s_axis_test_in_tlast    : std_logic;
+  signal m_axis_test_out_aclk    : std_logic;
+  signal m_axis_test_out_aresetn : std_logic;
+  signal m_axis_test_out_tready  : std_logic;
+  signal m_axis_test_out_tdata   : std_logic_vector(160-1 downto 0);
+  signal m_axis_test_out_tuser   : std_logic_vector(128-1 downto 0);
+  signal m_axis_test_out_tvalid  : std_logic;
+  signal m_axis_test_out_tlast   : std_logic;
   signal s_swconfig_clk          : std_logic;
   signal s_swconfig_reset        : std_logic;
   signal s_swconfig_address      : std_logic_vector(PROPS_ADDR_WIDTH-1 downto 0);
@@ -53,53 +67,81 @@ architecture rtl of test_bottom_tb is
   -- Testbench
   signal simulation_done  : boolean := false;
   constant CLK_PERIOD : time := 5 ns;
-  signal myinput_enable   : std_logic := '0';
+  signal s_axis_myinput_enable : std_logic := '0';
+  signal s_axis_test_in_enable : std_logic := '0';
 
 begin
 
   -- Device Under Test
   u_dut : entity work.test_bottom
     port map (
-      s_axis_myinput_aclk     => s_axis_myinput_aclk    ,
-      s_axis_myinput_aresetn  => s_axis_myinput_aresetn ,
-      s_axis_myinput_tvalid   => s_axis_myinput_tvalid  ,
-      s_axis_myinput_tlast    => s_axis_myinput_tlast   ,
-      s_axis_myinput_tdata    => s_axis_myinput_tdata   ,
-      m_axis_myoutput_aclk    => m_axis_myoutput_aclk   ,
-      m_axis_myoutput_aresetn => m_axis_myoutput_aresetn,
-      m_axis_myoutput_tvalid  => m_axis_myoutput_tvalid ,
-      m_axis_myoutput_tlast   => m_axis_myoutput_tlast  ,
-      m_axis_myoutput_tdata   => m_axis_myoutput_tdata  ,
-      s_swconfig_clk          => s_swconfig_clk         ,
-      s_swconfig_reset        => s_swconfig_reset       ,
-      s_swconfig_address      => s_swconfig_address     ,
-      s_swconfig_wr_enable    => s_swconfig_wr_enable   ,
-      s_swconfig_wr_data      => s_swconfig_wr_data     ,
-      s_swconfig_rd_enable    => s_swconfig_rd_enable   ,
-      s_swconfig_rd_valid     => s_swconfig_rd_valid    ,
-      s_swconfig_rd_data      => s_swconfig_rd_data     
+      s_axis_myinput_aclk     => s_axis_myinput_aclk     ,
+      s_axis_myinput_aresetn  => s_axis_myinput_aresetn  ,
+      s_axis_myinput_tvalid   => s_axis_myinput_tvalid   ,
+      s_axis_myinput_tlast    => s_axis_myinput_tlast    ,
+      s_axis_myinput_tdata    => s_axis_myinput_tdata    ,
+      m_axis_myoutput_aclk    => m_axis_myoutput_aclk    ,
+      m_axis_myoutput_aresetn => m_axis_myoutput_aresetn ,
+      m_axis_myoutput_tvalid  => m_axis_myoutput_tvalid  ,
+      m_axis_myoutput_tlast   => m_axis_myoutput_tlast   ,
+      m_axis_myoutput_tdata   => m_axis_myoutput_tdata   ,
+      s_axis_test_in_aclk     => s_axis_test_in_aclk     ,
+      s_axis_test_in_aresetn  => s_axis_test_in_aresetn  ,
+      s_axis_test_in_tready   => s_axis_test_in_tready   ,
+      s_axis_test_in_tdata    => s_axis_test_in_tdata    ,
+      s_axis_test_in_tuser    => s_axis_test_in_tuser    ,
+      s_axis_test_in_tvalid   => s_axis_test_in_tvalid   ,
+      s_axis_test_in_tlast    => s_axis_test_in_tlast    ,
+      m_axis_test_out_aclk    => m_axis_test_out_aclk    ,
+      m_axis_test_out_aresetn => m_axis_test_out_aresetn ,
+      m_axis_test_out_tready  => m_axis_test_out_tready  ,
+      m_axis_test_out_tdata   => m_axis_test_out_tdata   ,
+      m_axis_test_out_tuser   => m_axis_test_out_tuser   ,
+      m_axis_test_out_tvalid  => m_axis_test_out_tvalid  ,
+      m_axis_test_out_tlast   => m_axis_test_out_tlast   ,
+      s_swconfig_clk          => s_swconfig_clk          ,
+      s_swconfig_reset        => s_swconfig_reset        ,
+      s_swconfig_address      => s_swconfig_address      ,
+      s_swconfig_wr_enable    => s_swconfig_wr_enable    ,
+      s_swconfig_wr_data      => s_swconfig_wr_data      ,
+      s_swconfig_rd_enable    => s_swconfig_rd_enable    ,
+      s_swconfig_rd_valid     => s_swconfig_rd_valid     ,
+      s_swconfig_rd_data      => s_swconfig_rd_data      
     );
 
   -- File input/output streams
   -- NOTE: The source/sink filepaths are relative to where the simulation is executed
-  u_file_io : entity work.test_bottom_streams
+  u_file_io : entity work.test_bottom_axis_verify
     generic map (
       G_MYINPUT_SOURCE_FILEPATH => SIM_FILE_PATH & "sim_source_myinput.txt",
-      G_MYOUTPUT_SINK_FILEPATH  => SIM_FILE_PATH & "sim_sink_myoutput.txt"
+      G_MYOUTPUT_SINK_FILEPATH  => SIM_FILE_PATH & "sim_sink_myoutput.txt",
+      G_TEST_IN_SOURCE_FILEPATH => SIM_FILE_PATH & "sim_source_test_in.txt",
+      G_TEST_OUT_SINK_FILEPATH  => SIM_FILE_PATH & "sim_sink_test_out.txt"
     )
     port map (
-      simulation_done        => simulation_done,
-      m_axis_myinput_clk     => s_swconfig_clk,
-      m_axis_myinput_enable  => myinput_enable,
-      m_axis_myinput_tdata   => s_axis_myinput_tdata,
-      m_axis_myinput_tvalid  => s_axis_myinput_tvalid,
-      m_axis_myinput_tlast   => s_axis_myinput_tlast,
-      m_axis_myinput_tready  => '1',
-      s_axis_myoutput_clk    => s_swconfig_clk,
-      s_axis_myoutput_tdata  => m_axis_myoutput_tdata,
-      s_axis_myoutput_tvalid => m_axis_myoutput_tvalid,
-      s_axis_myoutput_tlast  => m_axis_myoutput_tlast,
-      s_axis_myoutput_tready => open
+      simulation_done         => simulation_done        ,
+      m_axis_myinput_aclk     => s_axis_myinput_aclk    ,
+      m_axis_myinput_enable   => s_axis_myinput_enable  ,
+      m_axis_myinput_tdata    => s_axis_myinput_tdata   ,
+      m_axis_myinput_tvalid   => s_axis_myinput_tvalid  ,
+      m_axis_myinput_tlast    => s_axis_myinput_tlast   ,
+      s_axis_myoutput_aclk    => m_axis_myoutput_aclk   ,
+      s_axis_myoutput_tdata   => m_axis_myoutput_tdata  ,
+      s_axis_myoutput_tvalid  => m_axis_myoutput_tvalid ,
+      s_axis_myoutput_tlast   => m_axis_myoutput_tlast  ,
+      m_axis_test_in_aclk     => s_axis_test_in_aclk    ,
+      m_axis_test_in_enable   => s_axis_test_in_enable  ,
+      m_axis_test_in_tready   => s_axis_test_in_tready  ,
+      m_axis_test_in_tdata    => s_axis_test_in_tdata   ,
+      m_axis_test_in_tuser    => s_axis_test_in_tuser   ,
+      m_axis_test_in_tvalid   => s_axis_test_in_tvalid  ,
+      m_axis_test_in_tlast    => s_axis_test_in_tlast   ,
+      s_axis_test_out_aclk    => m_axis_test_out_aclk   ,
+      s_axis_test_out_tready  => m_axis_test_out_tready ,
+      s_axis_test_out_tdata   => m_axis_test_out_tdata  ,
+      s_axis_test_out_tuser   => m_axis_test_out_tuser  ,
+      s_axis_test_out_tvalid  => m_axis_test_out_tvalid ,
+      s_axis_test_out_tlast   => m_axis_test_out_tlast  
     );
 
   -- Clock
@@ -116,10 +158,14 @@ begin
   end process w_clk;
   s_axis_myinput_aclk <= s_swconfig_clk;
   m_axis_myoutput_aclk <= s_swconfig_clk;
+  s_axis_test_in_aclk <= s_swconfig_clk;
+  m_axis_test_out_aclk <= s_swconfig_clk;
 
   -- Reset
   m_axis_myoutput_aresetn <= NOT s_swconfig_reset;
-  s_axis_myinput_aresetn <= NOT s_swconfig_reset;
+  s_axis_myinput_aresetn  <= NOT s_swconfig_reset;
+  m_axis_test_out_aresetn <= NOT s_swconfig_reset;
+  s_axis_test_in_aresetn  <= NOT s_swconfig_reset;
 
   w_test_procedure : process
     variable my_line : line;
@@ -152,7 +198,8 @@ begin
     --**************************************************
     -- Process data
     --**************************************************
-    myinput_enable <= '1';
+    s_axis_myinput_enable <= '1';
+    s_axis_test_in_enable <= '1';
     wait until falling_edge(m_axis_myoutput_tlast);
 
     --**************************************************

@@ -36,7 +36,7 @@ set_module_property GROUP "{{ fins['library'] }}"
 set_module_property ELABORATION_CALLBACK "{{ fins['name'] }}_create_sub_ip"
 
 # Define Inferred Generics
-{%- for generic in fins['generics']['hdl'] %}
+{%- for generic in fins['hdl']['generics'] %}
 add_parameter {{ generic['name'] }} {{ generic['type']|upper }} {{ generic['value'] }}
 set_parameter_property {{ generic['name'] }} HDL_PARAMETER true
 {%- if 'width' in generic %}
@@ -88,7 +88,7 @@ add_fileset_file {{ sim_file['path']|basename }} {{ sim_file['type']|upper }} PA
 {%- endfor %}
 
 # Create Interfaces
-{%- for interface in fins['ports']['interfaces'] %}
+{%- for interface in fins['hdl']['interfaces'] %}
 add_interface {{ interface['name'] }} {{ interface['type'] }} {{ interface['mode'] }}
 {%- if 'reset' in interface['type']|lower %}
 set_interface_property {{ interface['name'] }} synchronousEdges NONE
@@ -103,7 +103,7 @@ add_interface_port {{ interface['name'] }} {{ hdl_port['name'] }} {{ hdl_port['i
 {%- endfor %}
 
 # Create Conduits for the non-interface ports
-{%- for hdl_port in fins['ports']['hdl'] %}
+{%- for hdl_port in fins['hdl']['ports'] %}
 {%- if not 'interface_signal' in hdl_port %}
 add_interface {{ hdl_port['name'] }} conduit end
 add_interface_port {{ hdl_port['name'] }} {{ hdl_port['name'] }} {{ hdl_port['type'] }} {% if hdl_port['direction']|lower == 'in' %}Input{% elif hdl_port['direction']|lower == 'out' %}Output{% else %}Bidir{% endif %} "{{ hdl_port['width'] }}"

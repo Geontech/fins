@@ -7,7 +7,7 @@
 % Description: Auto-generated MATLAB/Octave parameter script
 % Generated:   {{ now }}
 %===============================================================================
-
+{% if 'params' in fins %}
 % Parameters
 {% for param in fins['params'] -%}
 params.{{ param['name'] }} =
@@ -16,11 +16,22 @@ params.{{ param['name'] }} =
 {% else %} {{ param['value']|lower }};
 {% endif -%}
 {% endfor %}
+{% endif %}
 
-% Streams
-{% for stream in fins['streams'] -%}
-streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.bit_width   = {{ stream['bit_width'] }};
-streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.is_complex  = {{ stream['is_complex'] | lower }};
-streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.is_signed   = {{ stream['is_signed'] | lower }};
-streams.{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}.{{ stream['name'] }}.frame_size  = {{ stream['packet_size'] }};
-{% endfor %}
+{% if 'ports' in fins %}
+% Ports
+{%- for port in fins['ports']['ports'] %}
+ports.{{ port['direction']|lower }}.{{ port['name']|lower }}.data.bit_width    = {{ port['data']['bit_width'] }};
+ports.{{ port['direction']|lower }}.{{ port['name']|lower }}.data.is_complex   = {{ port['data']['is_complex']|lower }};
+ports.{{ port['direction']|lower }}.{{ port['name']|lower }}.data.is_signed    = {{ port['data']['is_signed']|lower }};
+ports.{{ port['direction']|lower }}.{{ port['name']|lower }}.data.num_samples  = {{ port['data']['num_samples'] }};
+ports.{{ port['direction']|lower }}.{{ port['name']|lower }}.data.num_channels = {{ port['data']['num_channels'] }};
+{%- if 'metadata' in port %}
+{%- for metafield in port['metadata'] %}
+ports.{{ port['direction']|lower }}.{{ port['name']|lower }}.metadata.{{ metafield['name']|lower }}.bit_width  = {{ metafield['bit_width'] }};
+ports.{{ port['direction']|lower }}.{{ port['name']|lower }}.metadata.{{ metafield['name']|lower }}.is_complex = {{ metafield['is_complex']|lower }};
+ports.{{ port['direction']|lower }}.{{ port['name']|lower }}.metadata.{{ metafield['name']|lower }}.is_signed  = {{ metafield['is_signed']|lower }};
+{%- endfor %}
+{%- endif %}
+{%- endfor %}
+{% endif %}

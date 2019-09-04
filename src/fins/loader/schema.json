@@ -66,34 +66,81 @@
         }
       }
     },
-    "streams":{
+    "ports":{
       "is_required":false,
-      "types":["list"],
-      "list_types":["dict"],
+      "types":["dict"],
       "fields":{
-        "name":{
+        "ports":{
           "is_required":true,
-          "types":["str"]
-        },
-        "mode":{
-          "is_required":true,
-          "types":["str"]
-        },
-        "bit_width":{
-          "is_required":true,
-          "types":["int","str"]
-        },
-        "is_complex":{
-          "is_required":true,
-          "types":["bool","str"]
-        },
-        "is_signed":{
-          "is_required":true,
-          "types":["bool","str"]
-        },
-        "packet_size":{
-          "is_required":true,
-          "types":["int","str"]
+          "types":["list"],
+          "list_types":["dict"],
+          "fields":{
+            "name":{
+              "is_required":true,
+              "types":["str"]
+            },
+            "direction":{
+              "is_required":true,
+              "types":["str"]
+            },
+            "supports_backpressure":{
+              "is_required":false,
+              "types":["bool"]
+            },
+            "streaming_metadata":{
+              "is_required":false,
+              "types":["bool"]
+            },
+            "data":{
+              "is_required":false,
+              "types":["dict"],
+              "fields":{
+                "bit_width":{
+                  "is_required":false,
+                  "types":["int","str"]
+                },
+                "is_complex":{
+                  "is_required":false,
+                  "types":["bool","str"]
+                },
+                "is_signed":{
+                  "is_required":false,
+                  "types":["bool","str"]
+                },
+                "num_samples":{
+                  "is_required":false,
+                  "types":["int","str"]
+                },
+                "num_channels":{
+                  "is_required":false,
+                  "types":["int","str"]
+                }
+              }
+            },
+            "metadata":{
+              "is_required":false,
+              "types":["list"],
+              "list_types":["dict"],
+              "fields":{
+                "name":{
+                  "is_required":true,
+                  "types":["str"]
+                },
+                "bit_width":{
+                  "is_required":false,
+                  "types":["int","str"]
+                },
+                "is_complex":{
+                  "is_required":false,
+                  "types":["bool","str"]
+                },
+                "is_signed":{
+                  "is_required":false,
+                  "types":["bool","str"]
+                }
+              }
+            }
+          }
         }
       }
     },

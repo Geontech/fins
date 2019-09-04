@@ -1,6 +1,0 @@
-
-
-
-[submodule "finspy/streams/mcode/hex"]
-	path = finspy/streams/mcode/hex
-	url = git@curiosity.office.geontech.com:firmware/models/hex.git

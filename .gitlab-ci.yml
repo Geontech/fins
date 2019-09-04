@@ -1,0 +1,26 @@
+variables:
+    VIVADO_VERSION: '2019.1'
+    QUARTUS_VERSION: '19.1'
+stages:
+    - test
+image: centos:7
+test:
+    stage: test
+    before_script:
+        - 'yum install -y epel-release'
+        - 'yum install -y python36 python36-pip python-jinja2 octave make gcc glibc.i686'
+        - 'python3 -m pip install --upgrade pip setuptools'
+        - 'python3 -m pip install .'
+        - 'python3 -m pip install ./vivado'
+        - 'python3 -m pip install ./quartus'
+    script:
+        - 'source /opt/fpga/Xilinx/Vivado/$VIVADO_VERSION/settings64.sh'
+        - 'cd test'
+        - 'fins -b vivado zynq_no_matlab.json'
+        - 'make sim'
+        - 'make clean-all'
+        - 'export PATH=$PATH:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/quartus/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/modelsim_ase/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/qsys/bin'
+        - 'fins -b quartus cycloneV_no_matlab.json'
+        - 'make sim'
+    tags:
+        - fpga

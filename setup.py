@@ -8,10 +8,9 @@ Copyright:
     prohibited unless prior written permission is obtained from Geon Technologies, LLC.
 '''
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 
-# For a single point of maintenance, the canonical package version is in the
-# version module
+# For a single point of maintenance, the canonical package version is in the version module
 version = {}
 with open('src/fins/version.py') as fp:
     exec(fp.read(), version)
@@ -20,7 +19,7 @@ setup(
     name='fins',
     description='The Firmware IP Node Specification is an automation tool for modular programmable logic design',
     version=version['__version__'],
-    packages=find_packages('src'),
+    packages=find_namespace_packages(where='src'),
     package_dir={'':'src'},
     python_requires='>= 3.6',
     url='http://geon.tech',

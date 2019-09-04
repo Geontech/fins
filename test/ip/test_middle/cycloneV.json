@@ -17,8 +17,8 @@
     { "name":"TEST_FIFO_DEPTH",            "value":16,          "description":"This is a parameter to set the depth of the test FIFO" },
     { "name":"TEST_RAM_DEPTH",             "value":16,          "description":"This is a parameter to set the depth of the test RAM" },
     { "name":"PORTS_WIDTH",                "value":16,          "description":"The data width of the input and output ports" },
-    { "name":"PORTS_IS_COMPLEX",           "value":true,        "description":"A flag indicating if the data is complex" },
-    { "name":"PORTS_IS_SIGNED",            "value":true,        "description":"A flag indicating if the data is signed" },
+    { "name":"PORTS_IS_COMPLEX",           "value":false,       "description":"A flag indicating if the data is complex" },
+    { "name":"PORTS_IS_SIGNED",            "value":false,       "description":"A flag indicating if the data is signed" },
     { "name":"PORTS_PACKET_SIZE",          "value":8,           "description":"The packet size of the data inputs and outputs" },
     { "name":"PROPS_DATA_WIDTH",           "value":32,          "description":"The data width of the properties bus" },
     { "name":"PROPS_ADDR_WIDTH",           "value":16,          "description":"The address width of the properties bus" },
@@ -26,10 +26,63 @@
     { "name":"USE_XILINX",                 "value":false,                "description":"A flag indicating the toolset to use when generating this IP" },
     { "name":"SIM_FILE_PATH",              "value":"../../../sim_data/", "description":"The directory path to where the simulation input and output data is stored" }
   ],
-  "streams" : [
-    { "name":"myinput",  "mode":"slave",  "bit_width":"PORTS_WIDTH", "is_complex":"PORTS_IS_COMPLEX", "is_signed":"PORTS_IS_SIGNED", "packet_size":"PORTS_PACKET_SIZE"},
-    { "name":"myoutput", "mode":"master", "bit_width":"PORTS_WIDTH", "is_complex":"PORTS_IS_COMPLEX", "is_signed":"PORTS_IS_SIGNED", "packet_size":"PORTS_PACKET_SIZE"}
-  ],
+  "ports":{
+    "ports":[
+      {
+        "name":"myinput",
+        "direction":"in",
+        "supports_backpressure":false,
+        "data":{
+          "bit_width":"PORTS_WIDTH",
+          "is_complex":"PORTS_IS_COMPLEX",
+          "is_signed":"PORTS_IS_SIGNED",
+          "num_samples":1,
+          "num_channels":1
+        }
+      },
+      {
+        "name":"myoutput",
+        "direction":"out",
+        "data":{
+          "bit_width":"PORTS_WIDTH",
+          "is_complex":"PORTS_IS_COMPLEX",
+          "is_signed":"PORTS_IS_SIGNED"
+        }
+      },
+      {
+        "name":"test_in",
+        "direction":"in",
+        "supports_backpressure":true,
+        "data":{
+          "bit_width":8,
+          "is_complex":true,
+          "is_signed":true,
+          "num_samples":4,
+          "num_channels":5
+        },
+        "metadata":[
+          { "name":"timestamp",        "bit_width":64 },
+          { "name":"sample_step_size", "bit_width":64, "is_complex":false, "is_signed":true }
+        ]
+      },
+      {
+        "name":"test_out",
+        "direction":"out",
+        "supports_backpressure":true,
+        "data":{
+          "bit_width":8,
+          "is_complex":true,
+          "is_signed":true,
+          "num_samples":4,
+          "num_channels":5
+        },
+        "metadata":[
+          { "name":"timestamp",        "bit_width":64 },
+          { "name":"sample_step_size", "bit_width":64, "is_complex":false, "is_signed":true }
+        ]
+      }
+    ]
+  },
   "properties": {
     "addr_width":"PROPS_ADDR_WIDTH",
     "data_width":"PROPS_DATA_WIDTH",
@@ -89,13 +142,14 @@
   "filesets":{
     "source":[
       { "path":"gen/core/test_middle_pkg.vhd", "type":"vhdl"    },
+      { "path":"gen/core/test_middle_axis.vhd"                  },
       { "path":"gen/core/test_middle_axilite.vhd"               },
       { "path":"hdl/test_middle.vhd",          "type":"VHDL"    }
     ],
     "sim":[
       { "path":"ip/test_bottom/gen/core/test_bottom_swconfig_verify.vhd" },
+      { "path":"./gen/core/test_middle_axis_verify.vhd",    "type":"VHDL" },
       { "path":"./gen/core/test_middle_axilite_verify.vhd", "type":"Vhdl" },
-      { "path":"./gen/core/test_middle_streams.vhd", "type":"VHDL" },
       { "path":"./hdl/test_middle_tb.vhd" }
     ],
     "constraints":[

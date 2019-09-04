@@ -6,13 +6,21 @@ Firmware Intellectual Property (IP) Node Specification (FINS) is an innovative s
 2. **Rapid Reconfiguration.** FINS consolidates parameterization of IP into a single location and distributes these parameters across design tools with code generation of header-like package files.
 3. **Properties and Ports Interfaces.** FINS generates HDL source code for a properties interface that enables repeatable software control of firmware and for a ports interface that standardizes firmware to firmware movement of data.
 
+Additional detailed documentation is referenced here and is available at the following links:
+
+* [Parameters](./docs/parameters.md)
+* [Properties](./docs/properties.md)
+* [Ports](./docs/ports.md)
+* [Filesets](./docs/filesets.md)
+* [Sub-IP](./docs/sub-ip.md)
+
 ## Prerequisites
 
 The software packages required to use FINS are:
 
 * Xilinx Vivado (Tested with 2018.2, 2018.3) and/or Intel Quartus Prime Pro (Tested with 19.1)
 * GNU Make
-* Python 3.6
+* Python 3.6 with setuptools 41.2.0
 * Jinja2
 * GNU Octave and/or Mathworks MATLAB
 
@@ -29,9 +37,11 @@ $ sudo python3 -m pip install ./vivado
 $ sudo python3 -m pip install ./quartus
 ```
 
-To uninstall FINS, run the following command:
+To uninstall FINS, run the following commands:
 
 ```bash
+$ sudo python3 -m pip uninstall fins-quartus
+$ sudo python3 -m pip uninstall fins-vivado
 $ sudo python3 -m pip uninstall fins
 ```
 
@@ -81,7 +91,12 @@ By only using the "core" backend, a developer can take advantage of the paramete
 
 ![](./docs/ip_architecture.png)
 
-However, to use FINS to its full potential by automating the build and simulation, a developer should first use the "quartus" or "vivado" backends and then execute the `make` command with the following targets:
+Within the "core" backend, FINS generates code stubs for both the top-level testbench and the top-level source file. These code stubs give developers a starting point for the top-level design of their IP, and filenames of these code generation outputs are listed below.
+
+* `name`_top.vhd
+* `name`_top_tb.vhd
+
+To use FINS to its full potential by automating the build and simulation, a developer should first use the "quartus" or "vivado" backends and then execute the `make` command with the following targets:
 
 > NOTE: When running the `make` command, you have the option of viewing the console output and watching the GUI-based tools execute the scripts. To use this mode in the IP build and simulation process, set the "UseGui" make variable to 1 like this: `make sim UseGui=1`. Note that in this mode the developer will need to close the GUI-based tool windows to proceed at different steps during the process.
 
@@ -117,14 +132,6 @@ The JSON schema for FINS is composed of the following top-level fields:
 | ports           | dict   | NO       |               | A dictionary of ports definitions. See the ports documentation [here](./docs/ports.md). |
 | properties      | dict   | NO       |               | A dictionary of properties definitions. See the properties documentation [here](./docs/properties.md). |
 
-As mentioned in the table above, additional detailed documentation is available:
-
-* [Parameters](./docs/parameters.md)
-* [Properties](./docs/properties.md)
-* [Ports](./docs/ports.md)
-* [Filesets](./docs/filesets.md)
-* [Sub-IP](./docs/sub-ip.md)
-
 ## Notes
 
 Here are few things to keep in mind when developing FINS IP:
@@ -133,6 +140,12 @@ Here are few things to keep in mind when developing FINS IP:
 * Xilinx's AXI Interconnect creates slave AXI4-Lite byte-indexed buses, whereas Intel's AXI Interconnect creates slave AXI4-Lite word-indexed buses.
 * FINS currently generates only VHDL for all HDL code. Verilog user code may require a translation layer of properties and ports records.
 * When switching between vendors, you will need to change the part specified in the FINS JSON file. You may also find it convenient to specify a top-level FINS parameter to define the vendor that can be used in the HDL in "generate" statements.
+* The "quartus" backend does not support a Verilog file as its top-level source file.
+
+The AXI4-Lite buses and AXI4-Stream buses used in the top-level source file have strict requirements for their signals used and their naming. Every bus must have both clock and reset with signal names `aclk` and `aresetn`, respectively. The naming conventions are listed below.
+
+* AXI4-Lite: `["m" or "s"][OPTIONAL_DECIMAL_NUMBER]_axi_[OPTIONAL_BUS_NAME]_[SIGNAL_NAME]`
+* AXI4-Stream: `["m" or "s"][OPTIONAL_DECIMAL_NUMBER]_axis_[PORT_NAME]_[SIGNAL_NAME]`
 
 ## Contributing to FINS
 

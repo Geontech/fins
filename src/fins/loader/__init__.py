@@ -1,6 +1,11 @@
 '''
-Main package for FINS JSON data loading.
+Company: Geon Technologies, LLC
+Copyright:
+    (c) 2019 Geon Technologies, LLC. All rights reserved.
+    Dissemination of this information or reproduction of this material is strictly
+    prohibited unless prior written permission is obtained from Geon Technologies, LLC.
 '''
+
 import os
 import sys
 import math
@@ -28,6 +33,7 @@ PROPERTY_TYPES = [
     'read-write-external',
     'read-write-memmap'
 ]
+PORT_DIRECTIONS = ['in', 'out']
 DESIGN_FILE_TYPES = ['vhdl', 'verilog']
 SCRIPT_FILE_TYPES = ['matlab', 'octave', 'python', 'tcl']
 CONSTRAINT_FILE_TYPES = ['xdc', 'sdc']
@@ -425,15 +431,27 @@ def validate_properties(fins_data,verbose):
         print('ERROR: Duplicate property names detected')
         sys.exit(1)
 
-def validate_streams(fins_data,verbose):
-    # Iterate through all streams
-    stream_names = []
-    for stream in fins_data['streams']:
-        stream_names.append(stream['name'])
+def validate_ports(fins_data,verbose):
+    # Iterate through all ports
+    port_names = []
+    for port in fins_data['ports']['ports']:
+        # Add to the list of names
+        port_names.append(port['name'])
+        # Check the direction
+        if not port['direction'] in PORT_DIRECTIONS:
+            print('ERROR: Port',port['name'],'direction',port['direction'],'is invalid')
+            sys.exit(1)
+        # Neither data nor metadata are required, but we must have at least one
+        if not 'data' in port and not 'metadata' in port:
+            print('ERROR: Port',port['name'],'must have either metadata or data')
+            sys.exit(1)
+        # Notify of success
+        if verbose:
+            print('PASS: Port',port['name'],'with direction',port['direction'])
 
     # Check for name duplicates
-    if (len(stream_names) != len(set(stream_names))):
-        print('ERROR: Duplicate stream names detected')
+    if (len(port_names) != len(set(port_names))):
+        print('ERROR: Duplicate port names detected')
         sys.exit(1)
 
 def get_param_value(params,key_or_value):
@@ -453,19 +471,21 @@ def convert_parameters_to_literal(fins_data,verbose):
     if 'params' in fins_data:
         params = fins_data['params']
 
-    # Convert all non-string fields of streams to literals
-    if 'streams' in fins_data:
-        for stream in fins_data['streams']:
-            for key, value in stream.items():
-                # Don't convert string typed fields
-                if (key.lower() == 'name'):
-                    continue
-                if (key.lower() == 'description'):
-                    continue
-                if (key.lower() == 'mode'):
-                    continue
-                # Convert value
-                stream[key] = get_param_value(params, value)
+    # Convert all non-string fields of ports to literals
+    if 'ports' in fins_data:
+        for port in fins_data['ports']['ports']:
+            if 'data' in port:
+                for key, value in port['data'].items():
+                    # Convert value
+                    port['data'][key] = get_param_value(params, value)
+            if 'metadata' in port:
+                for metafield in port['metadata']:
+                    for key, value in metafield.items():
+                        # Don't convert string typed fields
+                        if (key.lower() == 'name'):
+                            continue
+                        # Convert value
+                        metafield[key] = get_param_value(params, value)
 
     # Convert all non-string fields of properties
     if 'properties' in fins_data:
@@ -550,7 +570,7 @@ def populate_properties(fins_data,base_offset,verbose):
 
     # Calculate offsets
     current_offset = base_offset
-    for reg_ix, prop in enumerate(fins_data['properties']['properties']):
+    for prop in fins_data['properties']['properties']:
         # Add the offset field to the register
         prop['offset'] = current_offset
         # Update the offset for the next register
@@ -565,6 +585,45 @@ def populate_properties(fins_data,base_offset,verbose):
     if current_offset > largest_possible_offset:
         print('ERROR: The specified address width {} is not large enough to accomodate all the properties'.format(fins_data['properties']['addr_width']))
         sys.exit(1)
+
+    # Return the modified dictionary
+    return fins_data
+
+def populate_ports(fins_data,verbose):
+    # Make sure there are ports first
+    if not 'ports' in fins_data:
+        return fins_data
+
+    # Set defaults
+    for port in fins_data['ports']['ports']:
+        if not 'supports_backpressure' in port:
+            port['supports_backpressure'] = False
+        if not 'streaming_metadata' in port:
+            port['streaming_metadata'] = False
+        if 'data' in port:
+            if not 'bit_width' in port['data']:
+                port['data']['bit_width'] = 16
+            if not 'is_complex' in port['data']:
+                port['data']['is_complex'] = False
+            if not 'is_signed' in port['data']:
+                port['data']['is_signed'] = False
+            if not 'num_samples' in port['data']:
+                port['data']['num_samples'] = 1
+            if not 'num_channels' in port['data']:
+                port['data']['num_channels'] = 1
+        if 'metadata' in port:
+            current_offset = 0
+            for metafield in port['metadata']:
+                # Set and update the bit offset
+                metafield['offset'] = current_offset
+                current_offset = metafield['offset'] + metafield['bit_width']
+                # Set defaults for non-populated fields
+                if not 'bit_width' in metafield:
+                    metafield['bit_width'] = 16
+                if not 'is_complex' in metafield:
+                    metafield['is_complex'] = False
+                if not 'is_signed' in metafield:
+                    metafield['is_signed'] = False
 
     # Return the modified dictionary
     return fins_data
@@ -636,7 +695,7 @@ def populate_ip(fins_data,verbose):
             with open(ip['fins_path']) as sub_ip_fins_file:
                 sub_ip_fins_data = json.load(sub_ip_fins_file)
         else:
-            print('ERROR: No sub-ip file',filename,'exists')
+            print('ERROR: No sub-ip file',ip['fins_path'],'exists')
             sys.exit(1)
 
         # Populate the sub-ip's properties
@@ -722,12 +781,10 @@ def populate_hdl_inferences(fins_data,verbose):
         sys.exit(1)
 
     # Initialize the fins_data dictionary
-    if not 'ports' in fins_data:
-        fins_data['ports'] = {}
-    fins_data['ports']['hdl'] = []
-    if not 'generics' in fins_data:
-        fins_data['generics'] = {}
-    fins_data['generics']['hdl'] = []
+    fins_data['hdl'] = {}
+    fins_data['hdl']['ports'] = []
+    fins_data['hdl']['generics'] = []
+    fins_data['hdl']['interfaces'] = []
 
     # Read the file
     with open(top_file_descriptor['path'], 'r') as top_file:
@@ -738,7 +795,7 @@ def populate_hdl_inferences(fins_data,verbose):
     # Parse the ports and the generics
     if 'vhdl' in top_file_descriptor['type'].lower():
         # Find the entity
-        vhdl_entity_find = re.findall(r'\s+entity\s+\w+\s+is.+end\s+entity\s+\w+\s*;',top_file_contents,flags=re.IGNORECASE|re.DOTALL)
+        vhdl_entity_find = re.findall(r'\s+entity\s+\w+\s+is.+?\s+end[\s;]',top_file_contents,flags=re.IGNORECASE|re.DOTALL)
         if not vhdl_entity_find:
             print('ERROR: No entity found in VHDL file',top_file_descriptor['path'])
             sys.exit(1)
@@ -779,7 +836,7 @@ def populate_hdl_inferences(fins_data,verbose):
                 new_port_descriptor['type'] = vhdl_port_type[0].strip()
                 vhdl_port_width = vhdl_port_type[2].strip().partition('downto')
                 new_port_descriptor['width'] = vhdl_port_width[0].strip()+'+1'
-            fins_data['ports']['hdl'].append(new_port_descriptor)
+            fins_data['hdl']['ports'].append(new_port_descriptor)
 
         # Find the generics
         vhdl_generics = re.findall(r'\w+\s*:\s*\w+\s*:=\s*[\w"\']+',vhdl_entity,flags=re.IGNORECASE)
@@ -808,7 +865,7 @@ def populate_hdl_inferences(fins_data,verbose):
                     print('ERROR: Unable to parse the width specification of std_logic_vector generic. Problem string:',vhdl_generic_width[0].strip())
                     sys.exit(1)
             new_generic_descriptor['value'] = vhdl_generic_definition[2].strip()
-            fins_data['generics']['hdl'].append(new_generic_descriptor)
+            fins_data['hdl']['generics'].append(new_generic_descriptor)
     else:
         print('ERROR: Verilog top-level file not yet supported.')
         sys.exit(1)
@@ -935,9 +992,7 @@ def populate_hdl_inferences(fins_data,verbose):
 
     # Collect the interfaces
     unique_interface_ids = []
-    if not 'interfaces' in fins_data['ports']:
-        fins_data['ports']['interfaces'] = []
-    for hdl_port in fins_data['ports']['hdl']:
+    for hdl_port in fins_data['hdl']['ports']:
         # Loop through the interface port inference dictionary
         for interface_type, signal_defs in INTERFACE_PORT_INFERENCE.items():
             for signal_def in signal_defs:
@@ -961,7 +1016,7 @@ def populate_hdl_inferences(fins_data,verbose):
                     interface_id = interface_name+'::'+interface_mode
                     if interface_id in unique_interface_ids:
                         # Insert hdl_port into existing interface
-                        for existing_interface in fins_data['ports']['interfaces']:
+                        for existing_interface in fins_data['hdl']['interfaces']:
                             if interface_id == existing_interface['id']:
                                 existing_interface['hdl_ports'].append(hdl_port)
                     else:
@@ -974,7 +1029,7 @@ def populate_hdl_inferences(fins_data,verbose):
                         new_interface['hdl_ports'] = []
                         new_interface['hdl_ports'].append(hdl_port)
                         unique_interface_ids.append(interface_id)
-                        fins_data['ports']['interfaces'].append(new_interface)
+                        fins_data['hdl']['interfaces'].append(new_interface)
                     if verbose:
                         print('INFO: Port',hdl_port['name'],'was associated to interface',interface_name,'with type',interface_type)
     if verbose:
@@ -1062,11 +1117,11 @@ def validate_fins_data(fins_data,filename,verbose):
         if verbose:
             print('+++++ Done.')
 
-    # Validate streams
-    if 'streams' in fins_data:
+    # Validate ports
+    if 'ports' in fins_data:
         if verbose:
-            print('+++++ Validating streams of {} ...'.format(filename))
-        validate_streams(fins_data,verbose)
+            print('+++++ Validating ports of {} ...'.format(filename))
+        validate_ports(fins_data,verbose)
         if verbose:
             print('+++++ Done.')
 
@@ -1096,6 +1151,9 @@ def load_fins_data(filename, verbose):
 
     # Apply property defaults and calculate offsets
     fins_data = populate_properties(fins_data,0,verbose)
+
+    # Apply port defaults
+    fins_data = populate_ports(fins_data,verbose)
 
     # Auto-detect file types
     fins_data = populate_filesets(fins_data,verbose)
