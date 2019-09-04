@@ -7,7 +7,7 @@
 # Description: Auto-generated Python parameter script
 # Generated:   {{ now }}
 #===============================================================================
-
+{% if 'params' in fins %}
 # Parameters
 params = {}
 {% for param in fins['params'] -%}
@@ -17,15 +17,29 @@ params['{{ param['name'] }}'] =
 {% else %} {{ param['value']|capitalize }}
 {% endif -%}
 {% endfor %}
+{% endif %}
 
-# Streams
-streams = {}
-streams['in'] = {}
-streams['out'] = {}
-{% for stream in fins['streams'] -%}
-streams{% if stream['mode'] == "slave" %}['in']{%- else -%}['out']{%- endif -%}['{{ stream['name'] }}'] = {}
-streams['{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}']['{{ stream['name'] }}']['bit_width']  = {{ stream['bit_width'] }}
-streams['{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}']['{{ stream['name'] }}']['is_complex'] = {{ stream['is_complex']|capitalize }}
-streams['{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}']['{{ stream['name'] }}']['is_signed']  = {{ stream['is_signed']|capitalize }}
-streams['{%- if stream['mode'] == "slave" -%}in{%- else -%}out{%- endif -%}']['{{ stream['name'] }}']['frame_size'] = {{ stream['packet_size'] }}
-{% endfor %}
+{% if 'ports' in fins %}
+# Ports
+ports = {}
+ports['in'] = {}
+ports['out'] = {}
+{%- for port in fins['ports']['ports'] %}
+ports['{{ port['direction']|lower }}']['{{ port['name']|lower }}'] = {}
+ports['{{ port['direction']|lower }}']['{{ port['name']|lower }}']['data'] = {}
+ports['{{ port['direction']|lower }}']['{{ port['name']|lower }}']['data']['bit_width']    = {{ port['data']['bit_width'] }}
+ports['{{ port['direction']|lower }}']['{{ port['name']|lower }}']['data']['is_complex']   = {{ port['data']['is_complex']|capitalize }}
+ports['{{ port['direction']|lower }}']['{{ port['name']|lower }}']['data']['is_signed']    = {{ port['data']['is_signed']|capitalize }}
+ports['{{ port['direction']|lower }}']['{{ port['name']|lower }}']['data']['num_samples']  = {{ port['data']['num_samples'] }}
+ports['{{ port['direction']|lower }}']['{{ port['name']|lower }}']['data']['num_channels'] = {{ port['data']['num_channels'] }}
+{%- if 'metadata' in port %}
+ports['{{ port['direction']|lower }}']['{{ port['name']|lower }}']['metadata'] = {}
+{%- for metafield in port['metadata'] %}
+ports['{{ port['direction']|lower }}']['{{ port['name']|lower }}']['metadata']['{{ metafield['name']|lower }}'] = {}
+ports['{{ port['direction']|lower }}']['{{ port['name']|lower }}']['metadata']['{{ metafield['name']|lower }}']['bit_width']  = {{ metafield['bit_width'] }}
+ports['{{ port['direction']|lower }}']['{{ port['name']|lower }}']['metadata']['{{ metafield['name']|lower }}']['is_complex'] = {{ metafield['is_complex']|capitalize }}
+ports['{{ port['direction']|lower }}']['{{ port['name']|lower }}']['metadata']['{{ metafield['name']|lower }}']['is_signed']  = {{ metafield['is_signed']|capitalize }}
+{%- endfor %}
+{%- endif %}
+{%- endfor %}
+{% endif %}

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="33cm" height="35cm" viewBox="937 211 645 691" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" x="940" y="240" width="640" height="300"/>
+  <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" x="940" y="600" width="640" height="300"/>
+  <text font-size="16.9333" style="fill: #005596;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1260" y="485.875">
+    <tspan x="1260" y="485.875">if supports_backpressure</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="969.736" y1="520" x2="1560" y2="520"/>
+    <polygon style="fill: #000000" points="962.236,520 972.236,515 969.736,520 972.236,525 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="962.236,520 972.236,515 969.736,520 972.236,525 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="960" y1="280" x2="1550.26" y2="280"/>
+    <polygon style="fill: #000000" points="1557.76,280 1547.76,285 1550.26,280 1547.76,275 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1557.76,280 1547.76,285 1550.26,280 1547.76,275 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1520" y="276.95">
+    <tspan x="1520" y="276.95">ports_in.&lt;name&gt;.valid</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="600" y="400">
+    <tspan x="600" y="400"></tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="960" y1="300" x2="1550.26" y2="300"/>
+    <polygon style="fill: #000000" points="1557.76,300 1547.76,305 1550.26,300 1547.76,295 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1557.76,300 1547.76,305 1550.26,300 1547.76,295 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1520" y="296.95">
+    <tspan x="1520" y="296.95">ports_in.&lt;name&gt;.last</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="360" x2="1550.26" y2="360"/>
+    <polygon style="fill: #000000" points="1557.76,360 1547.76,365 1550.26,360 1547.76,355 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1557.76,360 1547.76,365 1550.26,360 1547.76,355 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1520" y="356.95">
+    <tspan x="1520" y="356.95">ports_in.&lt;name&gt;.data</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1280" y1="440" x2="1550.26" y2="440"/>
+    <polygon style="fill: #000000" points="1557.76,440 1547.76,445 1550.26,440 1547.76,435 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1557.76,440 1547.76,445 1550.26,440 1547.76,435 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1520" y="436.95">
+    <tspan x="1520" y="436.95">ports_in.&lt;name&gt;.metadata</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1520" y="516.95">
+    <tspan x="1520" y="516.95">ports_out.&lt;name&gt;.ready</tspan>
+  </text>
+  <text font-size="16.9333" style="fill: #005596;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1260" y="325.628">
+    <tspan x="1260" y="325.628">if data exists</tspan>
+  </text>
+  <text font-size="16.9333" style="fill: #005596;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1260" y="405.628">
+    <tspan x="1260" y="405.628">if metadata exists</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="969.736" y1="640" x2="1560" y2="640"/>
+    <polygon style="fill: #000000" points="962.236,640 972.236,635 969.736,640 972.236,645 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="962.236,640 972.236,635 969.736,640 972.236,645 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1520" y="636.95">
+    <tspan x="1520" y="636.95">ports_out.&lt;name&gt;.valid</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="969.736" y1="660" x2="1560" y2="660"/>
+    <polygon style="fill: #000000" points="962.236,660 972.236,655 969.736,660 972.236,665 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="962.236,660 972.236,655 969.736,660 972.236,665 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1520" y="656.95">
+    <tspan x="1520" y="656.95">ports_out.&lt;name&gt;.last</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1289.74" y1="720" x2="1560" y2="720"/>
+    <polygon style="fill: #000000" points="1282.24,720 1292.24,715 1289.74,720 1292.24,725 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1282.24,720 1292.24,715 1289.74,720 1292.24,725 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1520" y="716.95">
+    <tspan x="1520" y="716.95">ports_out.&lt;name&gt;.data</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1289.74" y1="800" x2="1560" y2="800"/>
+    <polygon style="fill: #000000" points="1282.24,800 1292.24,795 1289.74,800 1292.24,805 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1282.24,800 1292.24,795 1289.74,800 1292.24,805 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1520" y="796.95">
+    <tspan x="1520" y="796.95">ports_out.&lt;name&gt;.metadata</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:end;font-family:sans-serif;font-style:normal;font-weight:normal" x="1520" y="876.95">
+    <tspan x="1520" y="876.95">ports_in.&lt;name&gt;.ready</tspan>
+  </text>
+  <text font-size="22.5778" style="fill: #7f7f7f;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1260" y="593.333">
+    <tspan x="1260" y="593.333">if direction == out</tspan>
+  </text>
+  <text font-size="22.5778" style="fill: #7f7f7f;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1260" y="233.332">
+    <tspan x="1260" y="233.332">if direction == in</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1000" y="276.95">
+    <tspan x="1000" y="276.95">s_axis_&lt;name&gt;_tvalid</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1000" y="296.95">
+    <tspan x="1000" y="296.95">s_axis_&lt;name&gt;_tlast</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="960" y1="360" x2="1170.26" y2="360"/>
+    <polygon style="fill: #000000" points="1177.76,360 1167.76,365 1170.26,360 1167.76,355 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1177.76,360 1167.76,365 1170.26,360 1167.76,355 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1000" y="356.95">
+    <tspan x="1000" y="356.95">s_axis_&lt;name&gt;_tdata</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="960" y1="440" x2="1170.26" y2="440"/>
+    <polygon style="fill: #000000" points="1177.76,440 1167.76,445 1170.26,440 1167.76,435 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1177.76,440 1167.76,445 1170.26,440 1167.76,435 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1000" y="436.95">
+    <tspan x="1000" y="436.95">s_axis_&lt;name&gt;_tuser</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1000" y="516.95">
+    <tspan x="1000" y="516.95">s_axis_&lt;name&gt;_tready</tspan>
+  </text>
+  <g>
+    <polygon style="fill: #ffffff" points="1194.56,340 1280,340 1265.44,380 1180,380 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1194.56,340 1280,340 1265.44,380 1180,380 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1230" y="363.9">
+      <tspan x="1230" y="363.9">unserialize</tspan>
+    </text>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="1194.56,420 1280,420 1265.44,460 1180,460 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1194.56,420 1280,420 1265.44,460 1180,460 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1230" y="443.9">
+      <tspan x="1230" y="443.9">unserialize</tspan>
+    </text>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1000" y="636.95">
+    <tspan x="1000" y="636.95">s_axis_&lt;name&gt;_tvalid</tspan>
+  </text>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1000" y="656.95">
+    <tspan x="1000" y="656.95">s_axis_&lt;name&gt;_tlast</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="969.736" y1="720" x2="1180" y2="720"/>
+    <polygon style="fill: #000000" points="962.236,720 972.236,715 969.736,720 972.236,725 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="962.236,720 972.236,715 969.736,720 972.236,725 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1000" y="716.95">
+    <tspan x="1000" y="716.95">s_axis_&lt;name&gt;_tdata</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="969.736" y1="800" x2="1180" y2="800"/>
+    <polygon style="fill: #000000" points="962.236,800 972.236,795 969.736,800 972.236,805 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="962.236,800 972.236,795 969.736,800 972.236,805 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1000" y="796.95">
+    <tspan x="1000" y="796.95">s_axis_&lt;name&gt;_tuser</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="960" y1="880" x2="1550.26" y2="880"/>
+    <polygon style="fill: #000000" points="1557.76,880 1547.76,885 1550.26,880 1547.76,875 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1557.76,880 1547.76,885 1550.26,880 1547.76,875 "/>
+  </g>
+  <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1000" y="876.95">
+    <tspan x="1000" y="876.95">s_axis_&lt;name&gt;_tready</tspan>
+  </text>
+  <g>
+    <polygon style="fill: #ffffff" points="1194.56,700 1280,700 1265.44,740 1180,740 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1194.56,700 1280,700 1265.44,740 1180,740 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1230" y="723.9">
+      <tspan x="1230" y="723.9">serialize</tspan>
+    </text>
+  </g>
+  <g>
+    <polygon style="fill: #ffffff" points="1194.56,780 1280,780 1265.44,820 1180,820 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1194.56,780 1280,780 1265.44,820 1180,820 "/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="1230" y="803.9">
+      <tspan x="1230" y="803.9">serialize</tspan>
+    </text>
+  </g>
+  <text font-size="16.9333" style="fill: #005596;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1260" y="845.875">
+    <tspan x="1260" y="845.875">if supports_backpressure</tspan>
+  </text>
+  <text font-size="16.9333" style="fill: #005596;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1260" y="685.875">
+    <tspan x="1260" y="685.875">if data exists</tspan>
+  </text>
+  <text font-size="16.9333" style="fill: #005596;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1260" y="765.875">
+    <tspan x="1260" y="765.875">if metadata exists</tspan>
+  </text>
+</svg>

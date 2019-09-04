@@ -43,6 +43,20 @@ architecture rtl of test_top_tb is
   signal m_axis_myoutput_tvalid  : std_logic;
   signal m_axis_myoutput_tlast   : std_logic;
   signal m_axis_myoutput_tdata   : std_logic_vector(PORTS_WIDTH-1 downto 0);
+  signal s_axis_test_in_aclk     : std_logic;
+  signal s_axis_test_in_aresetn  : std_logic;
+  signal s_axis_test_in_tready   : std_logic;
+  signal s_axis_test_in_tdata    : std_logic_vector(160-1 downto 0);
+  signal s_axis_test_in_tuser    : std_logic_vector(128-1 downto 0);
+  signal s_axis_test_in_tvalid   : std_logic;
+  signal s_axis_test_in_tlast    : std_logic;
+  signal m_axis_test_out_aclk    : std_logic;
+  signal m_axis_test_out_aresetn : std_logic;
+  signal m_axis_test_out_tready  : std_logic;
+  signal m_axis_test_out_tdata   : std_logic_vector(160-1 downto 0);
+  signal m_axis_test_out_tuser   : std_logic_vector(128-1 downto 0);
+  signal m_axis_test_out_tvalid  : std_logic;
+  signal m_axis_test_out_tlast   : std_logic;
   signal S_AXI_ACLK              : std_logic;
   signal S_AXI_ARESETN           : std_logic;
   signal S_AXI_AWADDR            : std_logic_vector(PROPS_ADDR_WIDTH-1 downto 0);
@@ -95,9 +109,10 @@ architecture rtl of test_top_tb is
   signal s_swconfig_rd_data      : std_logic_vector(PROPS_DATA_WIDTH-1 downto 0);
 
   -- Testbench
-  signal simulation_done  : boolean := false;
-  constant AXI_CLK_PERIOD : time := 5 ns;
-  signal myinput_enable   : std_logic := '0';
+  signal simulation_done       : boolean := false;
+  constant AXI_CLK_PERIOD      : time := 5 ns;
+  signal s_axis_myinput_enable : std_logic := '0';
+  signal s_axis_test_in_enable : std_logic := '0';
 
 begin
 
@@ -114,6 +129,20 @@ begin
       m_axis_myoutput_tvalid  => m_axis_myoutput_tvalid  ,
       m_axis_myoutput_tlast   => m_axis_myoutput_tlast   ,
       m_axis_myoutput_tdata   => m_axis_myoutput_tdata   ,
+      s_axis_test_in_aclk     => s_axis_test_in_aclk     ,
+      s_axis_test_in_aresetn  => s_axis_test_in_aresetn  ,
+      s_axis_test_in_tready   => s_axis_test_in_tready   ,
+      s_axis_test_in_tdata    => s_axis_test_in_tdata    ,
+      s_axis_test_in_tuser    => s_axis_test_in_tuser    ,
+      s_axis_test_in_tvalid   => s_axis_test_in_tvalid   ,
+      s_axis_test_in_tlast    => s_axis_test_in_tlast    ,
+      m_axis_test_out_aclk    => m_axis_test_out_aclk    ,
+      m_axis_test_out_aresetn => m_axis_test_out_aresetn ,
+      m_axis_test_out_tready  => m_axis_test_out_tready  ,
+      m_axis_test_out_tdata   => m_axis_test_out_tdata   ,
+      m_axis_test_out_tuser   => m_axis_test_out_tuser   ,
+      m_axis_test_out_tvalid  => m_axis_test_out_tvalid  ,
+      m_axis_test_out_tlast   => m_axis_test_out_tlast   ,
       S_AXI_ACLK              => S_AXI_ACLK              ,
       S_AXI_ARESETN           => S_AXI_ARESETN           ,
       S_AXI_AWADDR            => S_AXI_AWADDR            ,
@@ -168,24 +197,37 @@ begin
 
   -- File input/output streams
   -- NOTE: The source/sink filepaths are relative to where the simulation is executed
-  u_file_io : entity work.test_top_streams
+  u_file_io : entity work.test_top_axis_verify
     generic map (
       G_MYINPUT_SOURCE_FILEPATH => SIM_FILE_PATH & "sim_source_myinput.txt",
-      G_MYOUTPUT_SINK_FILEPATH  => SIM_FILE_PATH & "sim_sink_myoutput.txt"
+      G_MYOUTPUT_SINK_FILEPATH  => SIM_FILE_PATH & "sim_sink_myoutput.txt",
+      G_TEST_IN_SOURCE_FILEPATH => SIM_FILE_PATH & "sim_source_test_in.txt",
+      G_TEST_OUT_SINK_FILEPATH  => SIM_FILE_PATH & "sim_sink_test_out.txt"
     )
     port map (
-      simulation_done        => simulation_done,
-      m_axis_myinput_clk     => S_AXI_ACLK,
-      m_axis_myinput_enable  => myinput_enable,
-      m_axis_myinput_tdata   => s_axis_myinput_tdata,
-      m_axis_myinput_tvalid  => s_axis_myinput_tvalid,
-      m_axis_myinput_tlast   => s_axis_myinput_tlast,
-      m_axis_myinput_tready  => '1',
-      s_axis_myoutput_clk    => S_AXI_ACLK,
-      s_axis_myoutput_tdata  => m_axis_myoutput_tdata,
-      s_axis_myoutput_tvalid => m_axis_myoutput_tvalid,
-      s_axis_myoutput_tlast  => m_axis_myoutput_tlast,
-      s_axis_myoutput_tready => open
+      simulation_done         => simulation_done        ,
+      m_axis_myinput_aclk     => s_axis_myinput_aclk    ,
+      m_axis_myinput_enable   => s_axis_myinput_enable  ,
+      m_axis_myinput_tdata    => s_axis_myinput_tdata   ,
+      m_axis_myinput_tvalid   => s_axis_myinput_tvalid  ,
+      m_axis_myinput_tlast    => s_axis_myinput_tlast   ,
+      s_axis_myoutput_aclk    => m_axis_myoutput_aclk   ,
+      s_axis_myoutput_tdata   => m_axis_myoutput_tdata  ,
+      s_axis_myoutput_tvalid  => m_axis_myoutput_tvalid ,
+      s_axis_myoutput_tlast   => m_axis_myoutput_tlast  ,
+      m_axis_test_in_aclk     => s_axis_test_in_aclk    ,
+      m_axis_test_in_enable   => s_axis_test_in_enable  ,
+      m_axis_test_in_tready   => s_axis_test_in_tready  ,
+      m_axis_test_in_tdata    => s_axis_test_in_tdata   ,
+      m_axis_test_in_tuser    => s_axis_test_in_tuser   ,
+      m_axis_test_in_tvalid   => s_axis_test_in_tvalid  ,
+      m_axis_test_in_tlast    => s_axis_test_in_tlast   ,
+      s_axis_test_out_aclk    => m_axis_test_out_aclk   ,
+      s_axis_test_out_tready  => m_axis_test_out_tready ,
+      s_axis_test_out_tdata   => m_axis_test_out_tdata  ,
+      s_axis_test_out_tuser   => m_axis_test_out_tuser  ,
+      s_axis_test_out_tvalid  => m_axis_test_out_tvalid ,
+      s_axis_test_out_tlast   => m_axis_test_out_tlast  
     );
 
   -- AXI Clock
@@ -193,21 +235,27 @@ begin
   begin
     if (simulation_done = false) then
       S_AXI_ACLK <= '0';
-      s_swconfig_clk <= '0';
       wait for AXI_CLK_PERIOD/2;
       S_AXI_ACLK <= '1';
-      s_swconfig_clk <= '1';
       wait for AXI_CLK_PERIOD/2;
     else
       wait;
     end if;
   end process w_axi_clk;
+
+  -- Copy the clocks and resets
+  s_swconfig_clk          <= S_AXI_ACLK;
+  s_swconfig_reset        <= NOT S_AXI_ARESETN;
   S_AXI_MIDDLE_ACLK       <= S_AXI_ACLK;
   S_AXI_MIDDLE_ARESETN    <= S_AXI_ARESETN;
   s_axis_myinput_aclk     <= S_AXI_ACLK;
   s_axis_myinput_aresetn  <= S_AXI_ARESETN;
   m_axis_myoutput_aclk    <= S_AXI_ACLK;
   m_axis_myoutput_aresetn <= S_AXI_ARESETN;
+  s_axis_test_in_aclk     <= S_AXI_ACLK;
+  s_axis_test_in_aresetn  <= S_AXI_ARESETN;
+  m_axis_test_out_aclk    <= S_AXI_ACLK;
+  m_axis_test_out_aresetn <= S_AXI_ARESETN;
 
   w_test_procedure : process
     variable my_line : line;
@@ -217,10 +265,8 @@ begin
     -- Reset
     --**************************************************
     S_AXI_ARESETN <= '0';
-    s_swconfig_reset <= '1';
     wait for AXI_CLK_PERIOD*10;
     S_AXI_ARESETN <= '1';
-    s_swconfig_reset <= '0';
     if (S_AXI_ARESETN = '0') then
       wait until (S_AXI_ARESETN = '1');
     end if;
@@ -296,7 +342,8 @@ begin
     --**************************************************
     -- Process data
     --**************************************************
-    myinput_enable <= '1';
+    s_axis_myinput_enable <= '1';
+    s_axis_test_in_enable <= '1';
     wait until falling_edge(m_axis_myoutput_tlast);
 
     --**************************************************

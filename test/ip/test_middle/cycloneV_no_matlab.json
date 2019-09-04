@@ -1,14 +1,14 @@
 {
-  "name":"test_top",
+  "name":"test_middle",
   "description":"Top level IP for testing",
   "version":"0.0",
   "company_name":"Geon Technologies",
   "company_url":"geon.tech",
   "company_logo":"docs/geontech_logo.png",
   "library":"user",
-  "part":"xc7z020clg484-1",
-  "top_source":"test_top",
-  "top_sim":"test_top_tb",
+  "part":"10CX220YF780I5G",
+  "top_source":"test_middle",
+  "top_sim":"test_middle_tb",
   "params" : [
     { "name":"TEST_PARAM_BOOLEAN",         "value":true,        "description":"This is a test parameter excercising a boolean type" },
     { "name":"TEST_PARAM_INTEGER",         "value":4,           "description":"This is a test parameter excercising an integer type" },
@@ -23,8 +23,8 @@
     { "name":"PROPS_DATA_WIDTH",           "value":32,          "description":"The data width of the properties bus" },
     { "name":"PROPS_ADDR_WIDTH",           "value":16,          "description":"The address width of the properties bus" },
     { "name":"PROPS_IS_ADDR_BYTE_INDEXED", "value":true,        "description":"A flag indicating if the address of the properties bus is byte indexed" },
-    { "name":"USE_XILINX",                 "value":true,        "description":"A flag indicating the toolset to use when generating this IP" },
-    { "name":"SIM_FILE_PATH",              "value":"../../../../../../sim_data/", "description":"The directory path to where the simulation input and output data is stored" }
+    { "name":"USE_XILINX",                 "value":false,                "description":"A flag indicating the toolset to use when generating this IP" },
+    { "name":"SIM_FILE_PATH",              "value":"../../../sim_data/", "description":"The directory path to where the simulation input and output data is stored" }
   ],
   "ports":{
     "ports":[
@@ -141,22 +141,21 @@
   },
   "filesets":{
     "source":[
-      { "path":"gen/core/test_top_pkg.vhd", "type":"vhdl"    },
-      { "path":"gen/core/test_top_axis.vhd"                  },
-      { "path":"gen/core/test_top_axilite.vhd"               },
-      { "path":"hdl/test_top.vhd",          "type":"VHDL"    }
+      { "path":"gen/core/test_middle_pkg.vhd", "type":"vhdl"    },
+      { "path":"gen/core/test_middle_axis.vhd"                  },
+      { "path":"gen/core/test_middle_axilite.vhd"               },
+      { "path":"hdl/test_middle.vhd",          "type":"VHDL"    }
     ],
     "sim":[
-      { "path":"./ip/test_middle/ip/test_bottom/gen/core/test_bottom_swconfig_verify.vhd" },
-      { "path":"./ip/test_middle/gen/core/test_middle_axilite_verify.vhd" },
-      { "path":"./gen/core/test_top_axilite_verify.vhd", "type":"Vhdl" },
-      { "path":"./gen/core/test_top_axis_verify.vhd", "type":"VHDL" },
-      { "path":"./hdl/test_top_tb.vhd" }
+      { "path":"ip/test_bottom/gen/core/test_bottom_swconfig_verify.vhd" },
+      { "path":"./gen/core/test_middle_axis_verify.vhd",    "type":"VHDL" },
+      { "path":"./gen/core/test_middle_axilite_verify.vhd", "type":"Vhdl" },
+      { "path":"./hdl/test_middle_tb.vhd" }
     ],
     "constraints":[
-      { "path":"constraints/test_top.xdc", "type":"XDC" },
-      { "path":"constraints/test_top.sdc", "type":"sdc" },
-      { "path":"constraints/test_top.xdc"               }
+      { "path":"constraints/test_middle.xdc", "type":"XDC" },
+      { "path":"constraints/test_middle.sdc", "type":"sdc" },
+      { "path":"constraints/test_middle.xdc"               }
     ],
     "scripts":{
       "presim":[
@@ -191,7 +190,7 @@
   },
   "ip":[
     {
-      "fins_path":"ip/test_middle/zynq_no_matlab.json",
+      "fins_path":"ip/test_bottom/cycloneV_no_matlab.json",
       "params":[
         { "name":"TEST_PARAM_BOOLEAN",         "parent":"TEST_PARAM_BOOLEAN"         },
         { "name":"TEST_PARAM_INTEGER",         "parent":"TEST_PARAM_INTEGER"         },
@@ -205,10 +204,12 @@
         { "name":"PORTS_PACKET_SIZE",          "parent":"PORTS_PACKET_SIZE"          },
         { "name":"PROPS_DATA_WIDTH",           "parent":"PROPS_DATA_WIDTH"           },
         { "name":"PROPS_ADDR_WIDTH",           "parent":"PROPS_ADDR_WIDTH"           },
-        { "name":"PROPS_IS_ADDR_BYTE_INDEXED", "parent":"PROPS_IS_ADDR_BYTE_INDEXED" }
+        { "name":"PROPS_IS_ADDR_BYTE_INDEXED", "parent":"PROPS_IS_ADDR_BYTE_INDEXED" },
+        { "name":"USE_XILINX",                 "parent":"USE_XILINX"                 },
+        { "name":"SIM_FILE_PATH",              "parent":"SIM_FILE_PATH"              }
       ],
       "instances":[
-        { "module_name":"test_middle_0" }
+        { "module_name":"test_bottom_0" }
       ]
     }
   ]

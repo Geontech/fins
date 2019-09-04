@@ -1,3 +1,11 @@
+'''
+Company: Geon Technologies, LLC
+Copyright:
+    (c) 2019 Geon Technologies, LLC. All rights reserved.
+    Dissemination of this information or reproduction of this material is strictly
+    prohibited unless prior written permission is obtained from Geon Technologies, LLC.
+'''
+
 import os
 import json
 import datetime
@@ -73,8 +81,6 @@ class Generator:
         if not os.path.exists(root_directory+'.gitignore'):
             # Only auto-generate .gitignore if the repository doesn't have one
             self.render_jinja_template(jinja_env, '.gitignore', root_directory+'.gitignore', fins_data)
-        if 'streams' in fins_data:
-            self.render_jinja_template(jinja_env, 'streams.vhd', output_directory+fins_data['name']+'_streams.vhd', fins_data)
         if 'ip' in fins_data:
             # Generate fins_edit.json files for each Sub-IP
             for ip in fins_data['ip']:
@@ -87,6 +93,9 @@ class Generator:
                     if 'part' in fins_data:
                         override_data['part'] = fins_data['part']
                     json.dump(override_data, override_file, sort_keys=True, indent=2)
+        if 'ports' in fins_data:
+            self.render_jinja_template(jinja_env, 'axis.vhd', output_directory+fins_data['name']+'_axis.vhd', fins_data)
+            self.render_jinja_template(jinja_env, 'axis_verify.vhd', output_directory+fins_data['name']+'_axis_verify.vhd', fins_data)
         if 'properties' in fins_data:
             # Documentation
             self.render_jinja_template(jinja_env, 'properties.md', output_directory+fins_data['name']+'_properties.md', fins_data)
@@ -96,7 +105,12 @@ class Generator:
             # Software Configuration bus code
             self.render_jinja_template(jinja_env, 'swconfig.vhd', output_directory+fins_data['name']+'_swconfig.vhd', fins_data)
             self.render_jinja_template(jinja_env, 'swconfig_verify.vhd', output_directory+fins_data['name']+'_swconfig_verify.vhd', fins_data)
-        if ('streams' in fins_data) or ('params' in fins_data) or ('properties' in fins_data):
+        if ('ports' in fins_data) or ('properties' in fins_data):
+            # Top-level stubbed out code
+            self.render_jinja_template(jinja_env, 'top.vhd', output_directory+fins_data['name']+'_top.vhd', fins_data)
+            self.render_jinja_template(jinja_env, 'top_tb.vhd', output_directory+fins_data['name']+'_top_tb.vhd', fins_data)
+        if ('ports' in fins_data) or ('params' in fins_data) or ('properties' in fins_data):
+            # HDL Source Package, Octave/Python Simulation Packages
             self.render_jinja_template(jinja_env, 'pkg.vhd', output_directory+fins_data['name']+'_pkg.vhd', fins_data)
             self.render_jinja_template(jinja_env, 'pkg.m', output_directory+fins_data['name']+'_pkg.m', fins_data)
             self.render_jinja_template(jinja_env, 'pkg.py', output_directory+fins_data['name']+'_pkg.py', fins_data)

@@ -1,4 +1,4 @@
 """
-Version information for vrtgen.
+Version information for fins.
 """
-__version__ = '0.1'
+__version__ = '0.9'
