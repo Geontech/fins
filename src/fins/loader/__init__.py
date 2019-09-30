@@ -1,10 +1,21 @@
-'''
-Company: Geon Technologies, LLC
-Copyright:
-    (c) 2019 Geon Technologies, LLC. All rights reserved.
-    Dissemination of this information or reproduction of this material is strictly
-    prohibited unless prior written permission is obtained from Geon Technologies, LLC.
-'''
+#
+# Copyright (C) 2019 Geon Technologies, LLC
+#
+# This file is part of FINS.
+#
+# FINS is free software: you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your option)
+# any later version.
+#
+# FINS is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+# more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see http://www.gnu.org/licenses/.
+#
 
 import os
 import sys
@@ -12,6 +23,7 @@ import math
 import logging
 import json
 import re
+import xml.etree.ElementTree as ET
 
 __all__ = (
     'load_fins_data'
@@ -530,8 +542,18 @@ def populate_properties(fins_data,base_offset,verbose):
     if not 'properties' in fins_data:
         return fins_data
 
-    # Set defaults
+    # Loop through the properties to set defaults and validate values
     for prop in fins_data['properties']['properties']:
+        # Make sure is_signed is not present and set to True
+        # TODO: Implement is_signed
+        if 'is_signed' in prop:
+            if prop['is_signed']:
+                print('ERROR: The is_signed field defined for property {} is not implemented yet'.format(prop['name']))
+                sys.exit(1)
+
+        # Set defaults
+        if not 'description' in prop:
+            prop['description'] = ''
         if not 'width' in prop:
             prop['width'] = fins_data['properties']['data_width']
         if not 'length' in prop:
@@ -551,8 +573,7 @@ def populate_properties(fins_data,base_offset,verbose):
             else:
                 prop['range_max'] = 2**prop['width'] - 1
 
-    # Add additional fields based on the register type
-    for prop in fins_data['properties']['properties']:
+        # Add additional fields based on the property type
         if 'read-only' in prop['type'].lower():
             prop['is_readable'] = True
             prop['is_writable'] = False
@@ -563,10 +584,36 @@ def populate_properties(fins_data,base_offset,verbose):
             prop['is_readable'] = True
             prop['is_writable'] = True
 
-    # If default_values is not a list, make it one
-    for prop in fins_data['properties']['properties']:
+        # Validate that the length is >=1
+        if prop['length'] < 1:
+            print('ERROR: The length of property {} is < 1'.format(prop['name']))
+            sys.exit(1)
+
+        # Validate that the ranges are within valid widths
+        if prop['is_signed']:
+            if prop['range_max'] > 2**(prop['width']-1)-1:
+                print('ERROR: The range_max of property {} is larger than is possible for the signed bit width'.format(prop['name']))
+                sys.exit(1)
+            if prop['range_min'] < -(2**(prop['width']-1)):
+                print('ERROR: The range_min of property {} is smaller than is possible for the signed bit width'.format(prop['name']))
+                sys.exit(1)
+        else:
+            if prop['range_max'] > 2**prop['width']-1:
+                print('ERROR: The range_max of property {} is larger than is possible for the unsigned bit width'.format(prop['name']))
+                sys.exit(1)
+            if prop['range_min'] < 0:
+                print('ERROR: The range_min of property {} is smaller than is possible for the unsigned bit width'.format(prop['name']))
+                sys.exit(1)
+
+        # If default_values is not a list, make it one
         if not isinstance(prop['default_values'], list):
             prop['default_values'] = [prop['default_values']]
+        if len(prop['default_values']) != prop['length']:
+            if len(prop['default_values']) == 1:
+                prop['default_values'] = prop['default_values'] * prop['length']
+            else:
+                print('ERROR: The number of elements in default_values of property {} does not match the property length'.format(prop['name']))
+                sys.exit(1)
 
     # Calculate offsets
     current_offset = base_offset
@@ -594,8 +641,9 @@ def populate_ports(fins_data,verbose):
     if not 'ports' in fins_data:
         return fins_data
 
-    # Set defaults
+    # Loop through ports
     for port in fins_data['ports']['ports']:
+        # Set defaults
         if not 'supports_backpressure' in port:
             port['supports_backpressure'] = False
         if not 'streaming_metadata' in port:
@@ -624,6 +672,15 @@ def populate_ports(fins_data,verbose):
                     metafield['is_complex'] = False
                 if not 'is_signed' in metafield:
                     metafield['is_signed'] = False
+
+        # Check the data bit_width for limits
+        if 'data' in port:
+            if port['data']['bit_width'] < 8:
+                print('ERROR: Port',port['name'],'data bit_width is smaller than the minimum value of 8')
+                sys.exit(1)
+            elif port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] > 4096:
+                print('ERROR: Port',port['name'],'total data width (bit_width*num_samples*num_channels) is larger than the maximum value of 4096')
+                sys.exit(1)
 
     # Return the modified dictionary
     return fins_data
@@ -781,10 +838,7 @@ def populate_hdl_inferences(fins_data,verbose):
         sys.exit(1)
 
     # Initialize the fins_data dictionary
-    fins_data['hdl'] = {}
-    fins_data['hdl']['ports'] = []
-    fins_data['hdl']['generics'] = []
-    fins_data['hdl']['interfaces'] = []
+    fins_data['hdl'] = {'ports':[], 'generics':[], 'interfaces':[]}
 
     # Read the file
     with open(top_file_descriptor['path'], 'r') as top_file:
@@ -813,16 +867,35 @@ def populate_hdl_inferences(fins_data,verbose):
             if verbose:
                 print('INFO: Comment deleted',vhdl_entity_comment)
 
+        # Find the keywords to use for parsing
+        vhdl_entity_generic_keyword = re.findall(r'\s+generic\s*\(',vhdl_entity,flags=re.IGNORECASE)
+        if len(vhdl_entity_generic_keyword) > 1:
+            print('ERROR: The top level source file',top_file_descriptor['path'],'can not be read because it has multiple generics lists')
+            sys.exit(1)
+        if vhdl_entity_generic_keyword:
+            vhdl_entity_generic_keyword = vhdl_entity_generic_keyword[0]
+        vhdl_entity_port_keyword = re.findall(r'\s+port\s*\(',vhdl_entity,flags=re.IGNORECASE)
+        if len(vhdl_entity_port_keyword) > 1:
+            print('ERROR: The top level source file',top_file_descriptor['path'],'can not be read because it has multiple ports lists')
+            sys.exit(1)
+        if vhdl_entity_port_keyword:
+            vhdl_entity_port_keyword = vhdl_entity_port_keyword[0]
+        else:
+            print('ERROR: A port list was not detected in the top level source file',top_file_descriptor['path'])
+            sys.exit(1)
+
         # Find the ports
-        vhdl_ports = re.findall(r'\w+\s*:\s*\w+\s+\w+[ \w)(-/*+]*',vhdl_entity,flags=re.IGNORECASE)
+        # NOTE: Only ports of type "in", "out", and "inout" are supported
+        vhdl_ports = re.findall(r'\w+\s*:\s*in\s+\w+[ \w)(-/*+]*',vhdl_entity,flags=re.IGNORECASE)
+        vhdl_ports = vhdl_ports + re.findall(r'\w+\s*:\s*out\s+\w+[ \w)(-/*+]*',vhdl_entity,flags=re.IGNORECASE)
+        vhdl_ports = vhdl_ports + re.findall(r'\w+\s*:\s*inout\s+\w+[ \w)(-/*+]*',vhdl_entity,flags=re.IGNORECASE)
         if verbose:
             print('INFO: Inferred ports from',top_file_descriptor['path'])
             for vhdl_port in vhdl_ports:
                 print(vhdl_port)
-
-        # Collect the HDL ports
-        # NOTE: Only 'downto' syntax is supported
         for vhdl_port in vhdl_ports:
+            # Parse the port into dictionary
+            # NOTE: Only 'downto' syntax is supported for std_logic_vector
             new_port_descriptor = {}
             vhdl_port_parts = vhdl_port.partition(':')
             new_port_descriptor['name'] = vhdl_port_parts[0].strip()
@@ -836,36 +909,56 @@ def populate_hdl_inferences(fins_data,verbose):
                 new_port_descriptor['type'] = vhdl_port_type[0].strip()
                 vhdl_port_width = vhdl_port_type[2].strip().partition('downto')
                 new_port_descriptor['width'] = vhdl_port_width[0].strip()+'+1'
+            # Add to array of ports
             fins_data['hdl']['ports'].append(new_port_descriptor)
 
         # Find the generics
-        vhdl_generics = re.findall(r'\w+\s*:\s*\w+\s*:=\s*[\w"\']+',vhdl_entity,flags=re.IGNORECASE)
-        vhdl_generics = vhdl_generics + re.findall(r'\w+\s*:\s*std_logic_vector[ \w)(-/*+]*:=\s*[\w"\']+',vhdl_entity,flags=re.IGNORECASE)
-        if verbose:
-            print('INFO: Inferred generics from',top_file_descriptor['path'])
-            for vhdl_generic in vhdl_generics:
-                print(vhdl_generic)
+        if vhdl_entity_generic_keyword:
+            # Isolate the generics list
+            generic_keyword_partition = vhdl_entity.partition(vhdl_entity_generic_keyword)
+            port_keyword_partition = generic_keyword_partition[2].strip().partition(vhdl_entity_port_keyword)
+            vhdl_entity_generics = port_keyword_partition[0].strip()
+            # Loop on string until empty
+            while vhdl_entity_generics:
+                # Find the current generic to parse and update the looping string
+                current_generic_partition = vhdl_entity_generics.partition(';')
+                current_generic = current_generic_partition[0].strip()
+                vhdl_entity_generics = current_generic_partition[2].strip()
+                if not vhdl_entity_generics:
+                    # This is the last generic, need to remove the trailing );
+                    last_generic_partition = current_generic.rpartition(')')
+                    current_generic = last_generic_partition[0].strip()
+                # Parse the generic
+                # 1. Split into name and type+value
+                # 2. Determine if type+value or just type
+                # 3. Parse the value if applicable
+                # 4. Determine if the type is std_logic_vector
+                # 5. Parse the type and/or width
+                # NOTE: Only "downto" syntax is supported for std_logic_vector
+                new_generic_def = {}
+                generic_partition = current_generic.partition(':')
+                new_generic_def['name'] = generic_partition[0].strip()
+                current_type_and_value = generic_partition[2].strip()
+                if ':=' in current_type_and_value:
+                    type_and_value_partition = current_type_and_value.partition(':=')
+                    new_generic_def['value'] = type_and_value_partition[2].strip()
+                    current_type = type_and_value_partition[0].strip()
+                else:
+                    current_type = current_type_and_value
+                if not '(' in current_type:
+                    new_generic_def['type'] = current_type.strip()
+                else:
+                    type_partition = current_type.partition('(')
+                    new_generic_def['type'] = type_partition[0].strip()
+                    width_partition = type_partition[2].strip().partition('downto')
+                    try:
+                        new_generic_def['width'] = int(width_partition[0].strip())+1
+                    except ValueError:
+                        print('ERROR: Unable to parse the width specification of std_logic_vector generic. Problem string:',width_partition[0].strip())
+                        sys.exit(1)
+                # Add the generics array
+                fins_data['hdl']['generics'].append(new_generic_def)
 
-        # Collect the HDL generics
-        # NOTE: Only 'downto' syntax is supported for std_logic_vector
-        for vhdl_generic in vhdl_generics:
-            new_generic_descriptor = {}
-            vhdl_generic_parts = vhdl_generic.partition(':')
-            new_generic_descriptor['name'] = vhdl_generic_parts[0].strip()
-            vhdl_generic_definition = vhdl_generic_parts[2].strip().partition(':=')
-            if not '(' in vhdl_generic_definition[0]:
-                new_generic_descriptor['type'] = vhdl_generic_definition[0].strip()
-            else:
-                vhdl_generic_type = vhdl_generic_definition[0].strip().partition('(')
-                new_generic_descriptor['type'] = vhdl_generic_type[0].strip()
-                vhdl_generic_width = vhdl_generic_type[2].strip().partition('downto')
-                try:
-                    new_generic_descriptor['width'] = int(vhdl_generic_width[0].strip())+1
-                except ValueError:
-                    print('ERROR: Unable to parse the width specification of std_logic_vector generic. Problem string:',vhdl_generic_width[0].strip())
-                    sys.exit(1)
-            new_generic_descriptor['value'] = vhdl_generic_definition[2].strip()
-            fins_data['hdl']['generics'].append(new_generic_descriptor)
     else:
         print('ERROR: Verilog top-level file not yet supported.')
         sys.exit(1)
@@ -892,6 +985,9 @@ def populate_hdl_inferences(fins_data,verbose):
         # Figure out if the module has a parameter list (2001 ANSI-style)
         # NOTE: Parameters must have a default value
         verilog_module_parameters = re.findall(r'#\s*(.)',verilog_module,flags=re.IGNORECASE|re.DOTALL)
+        if len(verilog_module_parameters) > 1:
+            print('ERROR: The top level source file',top_file_descriptor['path'],'can not be read because it has multiple parameter lists')
+            sys.exit(1)
         if verilog_module_parameters:
             # Find the ports string
             verilog_module_parameters = verilog_module_parameters[0]
@@ -1094,7 +1190,7 @@ def validate_fins_data(fins_data,filename,verbose):
     if verbose:
         print('+++++ Done.')
 
-    # Validate the FINS JSON file with the schema
+    # Validate the FINS Node JSON file with the schema
     if verbose:
         print('+++++ Validating {} ...'.format(filename))
     validate_fins('fins',fins_data,fins_schema,verbose)
@@ -1125,23 +1221,132 @@ def validate_fins_data(fins_data,filename,verbose):
         if verbose:
             print('+++++ Done.')
 
-def load_fins_data(filename, verbose):
+def load_json_file(filename,verbose):
     """
-    Loads data from a Firmware IP Node Specification JSON file
+    Loads data from a JSON file
     """
-    # Load JSON Firmware IP Node Specification
+    # Load JSON
     if os.path.exists(filename):
         with open(filename) as fins_file:
-            fins_data = json.load(fins_file)
+            json_data = json.load(fins_file)
     else:
         print('ERROR: No file',filename,'exists')
         sys.exit(1)
 
-    # Validate the FINS JSON using the schema.json file
+    # Return
+    return json_data
+
+def find_base_address_from_qsys(filename, module_name, interface_name):
+    # Assemble the name of the connection end where the address space is mapped
+    connection_end = module_name + '.' + interface_name
+
+    # Parse the Qsys XML file
+    tree = ET.parse(filename)
+    root = tree.getroot()
+
+    # Loop through all connections in the design
+    for connection in root.findall('connection'):
+        # Initialize to the attributes
+        connection_def = connection.attrib
+
+        # Only collect avalon memory-mapped connections
+        if connection_def['kind'].lower() != 'avalon':
+            continue
+
+        # Check for connection match against connection end module_name.interface syntax
+        if connection_def['end'].lower() != connection_end.lower():
+            continue
+
+        # Find the base_address
+        for parameter in connection.findall('parameter'):
+            if parameter.get('name') == 'baseAddress':
+                try:
+                    base_address = int(parameter.get('value'), 16)
+                    return base_address
+                except ValueError:
+                    print('ERROR: Unable to convert the base address from hex to int. Problem string:',parameter.get('value'))
+                    sys.exit(1)
+
+        # If we haven't returned, it is an error
+        print('ERROR: Unable to find baseAddress parameter in qsys file',filename)
+        sys.exit(1)
+
+    # If we haven't returned, it is an error
+    print('ERROR: Unable to find memory-mapped connection that matches',connection_end)
+    sys.exit(1)
+
+def find_base_address_from_bd(filename, module_name, interface_name):
+    # Open and load the vivado file
+    with open(filename) as bd_file:
+        bd_data = json.load(bd_file)
+
+    # Find the base address
+    for master_module in bd_data['design']['addressing'].values():
+        for address_space in master_module['address_spaces'].values():
+            for segment in address_space['segments'].values():
+                if (module_name + '/' + interface_name) in segment['address_block']:
+                    try:
+                        base_address = int(segment['offset'], 16)
+                        return base_address
+                    except ValueError:
+                        print('ERROR: Unable to convert the base address from hex to int. Problem string:',segment['offset'])
+                        sys.exit(1)
+
+    # If we haven't returned, it is an error
+    print('ERROR: Unable to find address space for',interface_name,'of',module_name,'in',filename)
+    sys.exit(1)
+
+def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
+    """
+    Validates and converts data from a Firmware IP Node Specification JSON build file
+    """
+    if not 'base_offset' in fins_data:
+        fins_data['base_offset'] = 0
+    ports_producer_defined = False
+    ports_consumer_defined = False
+    for node in fins_data['nodes']:
+        # Convert dictionary to uint
+        if isinstance(node['properties_offset'], dict):
+            _, bd_extension = os.path.splitext(node['properties_offset']['block_design'])
+            if bd_extension.lower() == '.qsys':
+                base_address = find_base_address_from_qsys(node['properties_offset']['block_design'],node['properties_offset']['module_name'],node['properties_offset']['interface'])
+            elif bd_extension.lower() == '.bd':
+                base_address = find_base_address_from_bd(node['properties_offset']['block_design'],node['properties_offset']['module_name'],node['properties_offset']['interface'])
+            else:
+                print('ERROR: Unknown block design extension in FINS build:',bd_extension)
+                sys.exit(1)
+            node['properties_offset'] = base_address
+        # Load FINS Node JSON for each node
+        node['fins'] = load_json_file(node['fins_path'],verbose)
+        # Set defaults
+        if 'ports_producer' in node:
+            if ports_producer_defined:
+                print('ERROR: ports_producer can only be defined in one node')
+                sys.exit(1)
+            ports_producer_defined = True
+        else:
+            node['ports_producer'] = ''
+        if 'ports_consumer' in node:
+            if ports_consumer_defined:
+                print('ERROR: ports_consumer can only be defined in one node')
+                sys.exit(1)
+            ports_consumer_defined = True
+        else:
+            node['ports_consumer'] = ''
+    return fins_data
+
+def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
+    """
+    Validates and converts data from a Firmware IP Node Specification JSON file
+    """
+    # Validate the FINS Node JSON using the schema.json file
     validate_fins_data(fins_data,filename,verbose)
 
-    # Override the FINS JSON data with a .override file if it exists
-    fins_data = override_fins_data(fins_data,os.path.dirname(filename)+'.override',verbose)
+    # Set the backend used for generation
+    fins_data['backend'] = backend
+
+    # Override the FINS Node JSON data with a .override file if it exists
+    fins_data = override_fins_data(fins_data,os.path.basename(filename)+'.override',verbose)
 
     # Replace any linked parameters with their literal values
     fins_data = convert_parameters_to_literal(fins_data,verbose)

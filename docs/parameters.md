@@ -1,12 +1,12 @@
-# FINS Parameters
+# FINS Node Parameters
 
 **[RETURN TO TOP LEVEL README](../README.md)**
 
-Parameters are used to genericize programmable logic IP cores. Unlike a Verilog "parameter" or a VHDL "generic", a FINS "parameter" is a constant definition that distributed through both the FINS JSON and code generation of HDL package files and other header-like files.
+Parameters are used to genericize programmable logic IP cores. Unlike a Verilog "parameter" or a VHDL "generic", a FINS "parameter" is a constant definition that distributed through both the FINS Node JSON and code generation of HDL package files and other header-like files.
 
 ## JSON Schema
 
-The top-level `params` field of the FINS JSON Schema is an array of dictionaries that define each parameter. These parameter dictionaries in turn have several fields listed in the table below:
+The top-level `params` field of the FINS Node JSON Schema is an array of dictionaries that define each parameter. These parameter dictionaries in turn have several fields listed in the table below:
 
 > NOTE: Each element within the `params` dictionary array must have a unique `name` field.
 
@@ -16,7 +16,9 @@ The top-level `params` field of the FINS JSON Schema is an array of dictionaries
 | value       | string, bool, int, int[] | YES      | The value of the parameter. |
 | description | string                   | NO       | The description of the parameter. |
 
-Once defined, parameters may be used in place of literal values in two locations in the FINS JSON schema: [properties](properties.md) and [ports](ports.md). Where the `params['name']` is used for "Type" in these documentation pages is where a parameter can be used to set the value of a field. Parameters may also be linked to sub-ip to propagate the customization down the hierarchy. See the [Sub IP](sub-ip.md) documentation for more details on how this process works.
+Once defined, parameters may be used in place of literal values in two locations in the FINS Node JSON schema: [properties](properties.md) and [ports](ports.md). Where the `params['name']` is used for "Type" in these documentation pages is where a parameter can be used to set the value of a field. Parameters may also be linked to sub-ip to propagate the customization down the hierarchy. See the [Sub IP](sub-ip.md) documentation for more details on how this process works.
+
+Other than the parameters that are defined within the JSON Schema, there is an additional special parameter defined in all code generated outputs called `FINS_BACKEND`. This parameter contains a string with the backend name used when the FINS code generation was executed. This special parameter is useful for knowing which vendor's tools will be used to build and simulate the design.
 
 ## Code Generation
 

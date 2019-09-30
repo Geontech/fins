@@ -1,11 +1,31 @@
+{#-
+--
+-- Copyright (C) 2019 Geon Technologies, LLC
+--
+-- This file is part of FINS.
+--
+-- FINS is free software: you can redistribute it and/or modify it under the
+-- terms of the GNU Lesser General Public License as published by the Free
+-- Software Foundation, either version 3 of the License, or (at your option)
+-- any later version.
+--
+-- FINS is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+-- FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+-- more details.
+--
+-- You should have received a copy of the GNU Lesser General Public License
+-- along with this program.  If not, see http://www.gnu.org/licenses/.
+--
+-#}
 --==============================================================================
--- Company:     Geon Technologies, LLC
--- Copyright:   (c) 2019 Geon Technologies, LLC. All rights reserved.
---              Dissemination of this information or reproduction of this
---              material is strictly prohibited unless prior written
---              permission is obtained from Geon Technologies, LLC
--- Description: Auto-generated Software Configuration Bus register decode
+-- Firmware IP Node Specification (FINS) Auto-Generated File
+-- ---------------------------------------------------------
+-- Template:    swconfig.vhd
+-- Backend:     {{ fins['backend'] }}
 -- Generated:   {{ now }}
+-- ---------------------------------------------------------
+-- Description: Software Configuration bus register decode for FINS properties
 -- Reset Type:  Synchronous
 --==============================================================================
 
@@ -93,16 +113,18 @@ architecture rtl of {{ fins['name']|lower }}_swconfig is
     {%- for prop in fins['properties']['properties']|list %}
     {%- set outer_loop = loop %}
     {%- for n in range(prop['length']) %}
-    {{ outer_loop.index0 }}{% if not (loop.last and outer_loop.last) %},{% endif %}
+    {{ outer_loop.index0 }},
     {%- endfor %}
     {%- endfor %}
+    others => 0
   );
 
   -- Constant array of the property offsets
   constant PROPERTIES_OFFSETS : t_properties_offsets := (
     {%- for prop in fins['properties']['properties'] %}
-    to_unsigned({{ prop['offset'] }}, G_ADDR_WIDTH){% if not loop.last %},{% endif %}
+    to_unsigned({{ prop['offset'] }}, G_ADDR_WIDTH),
     {%- endfor %}
+    others => (others => '0')
   );
 
   ------------------------------------------------------------------------------
@@ -111,16 +133,15 @@ architecture rtl of {{ fins['name']|lower }}_swconfig is
   -- Default for Local Registers
   constant REG_DEFAULT_FOREACH_ADDR : t_reg_array(0 to NUM_ADDRESSES-1) := (
     {%- for prop in fins['properties']['properties'] %}
-    {%- set outer_loop = loop %}
     {%- for default_value in prop['default_values'] %}
     {%- if prop['is_signed'] %}
-    std_logic_vector(resize(to_signed({{ default_value }}, {{ prop['width'] }}), G_DATA_WIDTH))
+    std_logic_vector(resize(to_signed({{ default_value }}, {{ prop['width'] }}), G_DATA_WIDTH)),
     {%- else %}
-    std_logic_vector(resize(to_unsigned({{ default_value }}, {{ prop['width'] }}), G_DATA_WIDTH))
+    std_logic_vector(resize(to_unsigned({{ default_value }}, {{ prop['width'] }}), G_DATA_WIDTH)),
     {%- endif %}
-    {%- if not (loop.last and outer_loop.last) %},{% endif %}
     {%- endfor %}
     {%- endfor %}
+    others => (others => '0')
   );
 
   -- The Bit Mask for Writable Local Register Values
@@ -129,16 +150,15 @@ architecture rtl of {{ fins['name']|lower }}_swconfig is
   --       since the write is happing in a remote location
   constant REG_WR_MASK_FOREACH_ADDR : t_reg_array(0 to NUM_ADDRESSES-1) := (
     {%- for prop in fins['properties']['properties'] %}
-    {%- set outer_loop = loop %}
     {%- for n in range(prop['length']) %}
     {%- if (prop['type']|lower == 'read-write-internal') or (prop['type']|lower == 'read-write-data') %}
-    "{% for b in range(fins['properties']['data_width']-prop['width']) %}0{% endfor %}{% for b in range(prop['width']) %}1{% endfor %}"
+    "{% for b in range(fins['properties']['data_width']-prop['width']) %}0{% endfor %}{% for b in range(prop['width']) %}1{% endfor %}",
     {%- else %}
-    std_logic_vector(to_unsigned(0, G_DATA_WIDTH))
+    std_logic_vector(to_unsigned(0, G_DATA_WIDTH)),
     {%- endif %}
-    {%- if not (loop.last and outer_loop.last) %},{% endif %}
     {%- endfor %}
     {%- endfor %}
+    others => (others => '0')
   );
 
   ------------------------------------------------------------------------------

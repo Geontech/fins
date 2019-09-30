@@ -1,13 +1,21 @@
---==============================================================================
--- Company:     Geon Technologies, LLC
--- Author:      Josh Schindehette
--- Copyright:   (c) 2019 Geon Technologies, LLC. All rights reserved.
---              Dissemination of this information or reproduction of this
---              material is strictly prohibited unless prior written
---              permission is obtained from Geon Technologies, LLC
--- Description: This is the top level of the FINS test module
--- Reset Type:  Synchronous
---==============================================================================
+--
+-- Copyright (C) 2019 Geon Technologies, LLC
+--
+-- This file is part of FINS.
+--
+-- FINS is free software: you can redistribute it and/or modify it under the
+-- terms of the GNU Lesser General Public License as published by the Free
+-- Software Foundation, either version 3 of the License, or (at your option)
+-- any later version.
+--
+-- FINS is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+-- FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+-- more details.
+--
+-- You should have received a copy of the GNU Lesser General Public License
+-- along with this program.  If not, see http://www.gnu.org/licenses/.
+--
 
 -- Standard Libraries
 library ieee;
@@ -24,69 +32,69 @@ entity test_middle is
   generic (
     G_TEST_GENERIC_NATURAL:natural:=10;
     G_TEST_GENERIC_INTEGER : integer := 100 ;
-    G_TEST_GENERIC_STRING  :  string  :=   "my_string"  ;
+    G_TEST_GENERIC_STRING  :  string  :=   "./my_string"  ;
     G_TEST_GENERIC_BOOLEAN : boolean := false;
-    G_TEST_GENERIC_POSITIVE : positive := 50;
+    G_TEST_GENERIC_POSITIVE : positive;
     G_TEST_GENERIC_STD_LOGIC : std_logic := '1';
     G_TEST_GENERIC_STD_LOGIC_VECTOR : std_logic_vector(3 downto 0) := "0000"
   );
   port (
     -- AXI-Stream Bus for Ports
-    s_axis_myinput_aclk     : in  std_logic;
-    s_axis_myinput_aresetn  : in  std_logic;
-    s_axis_myinput_tvalid   : in  std_logic := '0';
-    s_axis_myinput_tlast    : in  std_logic;
-    s_axis_myinput_tdata    : in  std_logic_vector(PORTS_WIDTH-1 downto 0);
-    m_axis_myoutput_aclk    : in  std_logic;
-    m_axis_myoutput_aresetn : in  std_logic;
-    m_axis_myoutput_tvalid  : out std_logic;
-    m_axis_myoutput_tlast   : out std_logic;
-    m_axis_myoutput_tdata   : out std_logic_vector(PORTS_WIDTH-1 downto 0);
-    s_axis_test_in_aclk     : in  std_logic;
-    s_axis_test_in_aresetn  : in  std_logic;
-    s_axis_test_in_tready   : out std_logic;
-    s_axis_test_in_tdata    : in  std_logic_vector(160-1 downto 0);
-    s_axis_test_in_tuser    : in  std_logic_vector(128-1 downto 0);
-    s_axis_test_in_tvalid   : in  std_logic;
-    s_axis_test_in_tlast    : in  std_logic;
-    m_axis_test_out_aclk    : in  std_logic;
-    m_axis_test_out_aresetn : in  std_logic;
-    m_axis_test_out_tready  : in  std_logic;
-    m_axis_test_out_tdata   : out std_logic_vector(160-1 downto 0);
-    m_axis_test_out_tuser   : out std_logic_vector(128-1 downto 0);
-    m_axis_test_out_tvalid  : out std_logic;
-    m_axis_test_out_tlast   : out std_logic;
+    s_axis_myinput_aclk              : in  std_logic;
+    s_axis_myinput_aresetn           : in  std_logic;
+    s_axis_myinput_tvalid            : in  std_logic := '0';
+    s_axis_myinput_tlast             : in  std_logic;
+    s_axis_myinput_tdata             : in  std_logic_vector(PORTS_WIDTH-1 downto 0);
+    m_axis_myoutput_aclk             : in  std_logic;
+    m_axis_myoutput_aresetn          : in  std_logic;
+    m_axis_myoutput_tvalid           : out std_logic;
+    m_axis_myoutput_tlast            : out std_logic;
+    m_axis_myoutput_tdata            : out std_logic_vector(PORTS_WIDTH-1 downto 0);
+    s_axis_test_in_aclk              : in  std_logic;
+    s_axis_test_in_aresetn           : in  std_logic;
+    s_axis_test_in_tready            : out std_logic;
+    s_axis_test_in_tdata             : in  std_logic_vector(160-1 downto 0);
+    s_axis_test_in_tuser             : in  std_logic_vector(128-1 downto 0);
+    s_axis_test_in_tvalid            : in  std_logic;
+    s_axis_test_in_tlast             : in  std_logic;
+    m_axis_test_out_aclk             : in  std_logic;
+    m_axis_test_out_aresetn          : in  std_logic;
+    m_axis_test_out_tready           : in  std_logic;
+    m_axis_test_out_tdata            : out std_logic_vector(160-1 downto 0);
+    m_axis_test_out_tuser            : out std_logic_vector(128-1 downto 0);
+    m_axis_test_out_tvalid           : out std_logic;
+    m_axis_test_out_tlast            : out std_logic;
     -- AXI4-Lite Bus for Properties
-    S_AXI_ACLK             : in  std_logic;
-    S_AXI_ARESETN          : in  std_logic;
-    S_AXI_AWADDR           : in  std_logic_vector(PROPS_ADDR_WIDTH-1 downto 0);
-    S_AXI_AWPROT           : in  std_logic_vector(2 downto 0);
-    S_AXI_AWVALID          : in  std_logic;
-    S_AXI_AWREADY          : out std_logic;
-    S_AXI_WDATA            : in  std_logic_vector(PROPS_DATA_WIDTH-1 downto 0);
-    S_AXI_WSTRB            : in  std_logic_vector((PROPS_DATA_WIDTH/8)-1 downto 0);
-    S_AXI_WVALID           : in  std_logic;
-    S_AXI_WREADY           : out std_logic;
-    S_AXI_BRESP            : out std_logic_vector(1 downto 0);
-    S_AXI_BVALID           : out std_logic;
-    S_AXI_BREADY           : in  std_logic;
-    S_AXI_ARADDR           : in  std_logic_vector(PROPS_ADDR_WIDTH-1 downto 0);
-    S_AXI_ARPROT           : in  std_logic_vector(2 downto 0);
-    S_AXI_ARVALID          : in  std_logic;
-    S_AXI_ARREADY          : out std_logic;
-    S_AXI_RDATA            : out std_logic_vector(PROPS_DATA_WIDTH-1 downto 0);
-    S_AXI_RRESP            : out std_logic_vector(1 downto 0);
-    S_AXI_RVALID           : out std_logic;
-    S_AXI_RREADY           : in  std_logic;
+    S_AXI_ACLK                       : in  std_logic;
+    S_AXI_ARESETN                    : in  std_logic;
+    S_AXI_AWADDR                     : in  std_logic_vector(PROPS_ADDR_WIDTH-1 downto 0);
+    S_AXI_AWPROT                     : in  std_logic_vector(2 downto 0);
+    S_AXI_AWVALID                    : in  std_logic;
+    S_AXI_AWREADY                    : out std_logic;
+    S_AXI_WDATA                      : in  std_logic_vector(PROPS_DATA_WIDTH-1 downto 0);
+    S_AXI_WSTRB                      : in  std_logic_vector((PROPS_DATA_WIDTH/8)-1 downto 0);
+    S_AXI_WVALID                     : in  std_logic;
+    S_AXI_WREADY                     : out std_logic;
+    S_AXI_BRESP                      : out std_logic_vector(1 downto 0);
+    S_AXI_BVALID                     : out std_logic;
+    S_AXI_BREADY                     : in  std_logic;
+    S_AXI_ARADDR                     : in  std_logic_vector(PROPS_ADDR_WIDTH-1 downto 0);
+    S_AXI_ARPROT                     : in  std_logic_vector(2 downto 0);
+    S_AXI_ARVALID                    : in  std_logic;
+    S_AXI_ARREADY                    : out std_logic;
+    S_AXI_RDATA                      : out std_logic_vector(PROPS_DATA_WIDTH-1 downto 0);
+    S_AXI_RRESP                      : out std_logic_vector(1 downto 0);
+    S_AXI_RVALID                     : out std_logic;
+    S_AXI_RREADY                     : in  std_logic;
     -- Sub-ip Software Configuration Bus
-    s_swconfig_clk         : in  std_logic;
-    s_swconfig_reset       : in  std_logic;
-    s_swconfig_address     : in  std_logic_vector(PROPS_ADDR_WIDTH-1 downto 0);
-    s_swconfig_wr_enable   : in  std_logic;
-    s_swconfig_wr_data     : in  std_logic_vector(PROPS_DATA_WIDTH-1 downto 0);
-    s_swconfig_rd_enable   : in  std_logic;
-    s_swconfig_rd_valid    : out std_logic;
-    s_swconfig_rd_data     : out std_logic_vector(PROPS_DATA_WIDTH-1 downto 0)
+    s_swconfig_test_bottom_clk       : in  std_logic;
+    s_swconfig_test_bottom_reset     : in  std_logic;
+    s_swconfig_test_bottom_address   : in  std_logic_vector(PROPS_ADDR_WIDTH-1 downto 0);
+    s_swconfig_test_bottom_wr_enable : in  std_logic;
+    s_swconfig_test_bottom_wr_data   : in  std_logic_vector(PROPS_DATA_WIDTH-1 downto 0);
+    s_swconfig_test_bottom_rd_enable : in  std_logic;
+    s_swconfig_test_bottom_rd_valid  : out std_logic;
+    s_swconfig_test_bottom_rd_data   : out std_logic_vector(PROPS_DATA_WIDTH-1 downto 0)
   );
 end test_middle;
 
@@ -389,14 +397,14 @@ begin
       m_axis_test_out_tuser   => test_out_tuser,
       m_axis_test_out_tvalid  => test_out_tvalid,
       m_axis_test_out_tlast   => test_out_tlast,
-      s_swconfig_clk          => s_swconfig_clk,
-      s_swconfig_reset        => s_swconfig_reset,
-      s_swconfig_address      => s_swconfig_address,
-      s_swconfig_wr_enable    => s_swconfig_wr_enable,
-      s_swconfig_wr_data      => s_swconfig_wr_data,
-      s_swconfig_rd_enable    => s_swconfig_rd_enable,
-      s_swconfig_rd_valid     => s_swconfig_rd_valid,
-      s_swconfig_rd_data      => s_swconfig_rd_data
+      s_swconfig_clk          => s_swconfig_test_bottom_clk,
+      s_swconfig_reset        => s_swconfig_test_bottom_reset,
+      s_swconfig_address      => s_swconfig_test_bottom_address,
+      s_swconfig_wr_enable    => s_swconfig_test_bottom_wr_enable,
+      s_swconfig_wr_data      => s_swconfig_test_bottom_wr_data,
+      s_swconfig_rd_enable    => s_swconfig_test_bottom_rd_enable,
+      s_swconfig_rd_valid     => s_swconfig_test_bottom_rd_valid,
+      s_swconfig_rd_data      => s_swconfig_test_bottom_rd_data
     );
 
   -- Assign output ports
@@ -444,11 +452,11 @@ begin
   -- Testing elements for "read-write-external"
   --------------------------------------------------------------------------------
   -- FWFT FIFO instantitation for test
-  u_gen_xilinx_external_property_fifo : if (USE_XILINX) generate
+  u_gen_xilinx_external_property_fifo : if (FINS_BACKEND = "vivado") generate
     u_external_property_fifo : xilinx_external_property_fifo
       port map (
-        clk   => s_swconfig_clk,
-        srst  => s_swconfig_reset,
+        clk   => S_AXI_ACLK,
+        srst  => S_AXI_ARESET,
         din   => props_control.test_prop_read_write_external.wr_data,
         wr_en => props_control.test_prop_read_write_external.wr_en,
         rd_en => external_property_fifo_rd_en,
@@ -457,10 +465,10 @@ begin
         empty => open
       );
   end generate u_gen_xilinx_external_property_fifo;
-  u_gen_intel_external_property_fifo : if (not USE_XILINX) generate
+  u_gen_intel_external_property_fifo : if (FINS_BACKEND = "quartus") generate
     u_external_property_fifo : intel_external_property_fifo
       port map (
-        clock   => s_swconfig_clk,
+        clock   => S_AXI_ACLK,
         data    => props_control.test_prop_read_write_external.wr_data,
         wrreq   => props_control.test_prop_read_write_external.wr_en,
         rdreq   => external_property_fifo_rd_en,
@@ -471,10 +479,10 @@ begin
   end generate u_gen_intel_external_property_fifo;
 
   -- Synchronous process to delay the fifo read enable one clock just due to this FIFO's timing
-  s_external_property_fifo : process(s_swconfig_clk)
+  s_external_property_fifo : process(S_AXI_ACLK)
   begin
-    if (rising_edge(s_swconfig_clk)) then
-      if (s_swconfig_reset = '1') then
+    if (rising_edge(S_AXI_ACLK)) then
+      if (S_AXI_ARESETN = '0') then
         external_property_fifo_rd_en <= '0';
       else
         external_property_fifo_rd_en <= props_control.test_prop_read_write_external.rd_en;
@@ -510,24 +518,24 @@ begin
   -- Testing elements for "read-write-memmap"
   --------------------------------------------------------------------------------
   -- Simple Dual Port RAM for test
-  u_gen_xilinx_memmap_property_ram : if (USE_XILINX) generate
+  u_gen_xilinx_memmap_property_ram : if (FINS_BACKEND = "vivado") generate
     u_memmap_property_ram : xilinx_memmap_property_ram
       port map (
-        clka  => s_swconfig_clk,
+        clka  => S_AXI_ACLK,
         ena   => '1',
         wea   => memmap_property_ram_wr_en,
         addra => props_control.test_prop_read_write_memmap.wr_addr,
         dina  => props_control.test_prop_read_write_memmap.wr_data,
-        clkb  => s_swconfig_clk,
+        clkb  => S_AXI_ACLK,
         enb   => '1',
         addrb => props_control.test_prop_read_write_memmap.rd_addr,
         doutb => props_status.test_prop_read_write_memmap.rd_data
       );
   end generate u_gen_xilinx_memmap_property_ram;
-  u_gen_intel_memmap_property_ram : if (not USE_XILINX) generate
+  u_gen_intel_memmap_property_ram : if (FINS_BACKEND = "quartus") generate
     u_memmap_property_ram : intel_memmap_property_ram
       port map (
-        clock     => s_swconfig_clk,
+        clock     => S_AXI_ACLK,
         wren      => props_control.test_prop_read_write_memmap.wr_en,
         wraddress => props_control.test_prop_read_write_memmap.wr_addr,
         data      => props_control.test_prop_read_write_memmap.wr_data,

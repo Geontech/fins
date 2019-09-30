@@ -1,13 +1,21 @@
---==============================================================================
--- Company:     Geon Technologies, LLC
--- Author:      Josh Schindehette
--- Copyright:   (c) 2019 Geon Technologies, LLC. All rights reserved.
---              Dissemination of this information or reproduction of this
---              material is strictly prohibited unless prior written
---              permission is obtained from Geon Technologies, LLC
--- Description: This is the top level of the FINS test module
--- Reset Type:  Synchronous
---==============================================================================
+--
+-- Copyright (C) 2019 Geon Technologies, LLC
+--
+-- This file is part of FINS.
+--
+-- FINS is free software: you can redistribute it and/or modify it under the
+-- terms of the GNU Lesser General Public License as published by the Free
+-- Software Foundation, either version 3 of the License, or (at your option)
+-- any later version.
+--
+-- FINS is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+-- FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+-- more details.
+--
+-- You should have received a copy of the GNU Lesser General Public License
+-- along with this program.  If not, see http://www.gnu.org/licenses/.
+--
 
 -- Standard Libraries
 library ieee;
@@ -299,7 +307,7 @@ begin
   -- Testing elements for "read-write-external"
   --------------------------------------------------------------------------------
   -- FWFT FIFO instantitation for test
-  u_gen_xilinx_external_property_fifo : if (USE_XILINX) generate
+  u_gen_xilinx_external_property_fifo : if (FINS_BACKEND = "vivado") generate
     u_external_property_fifo : xilinx_external_property_fifo
       port map (
         clk   => s_swconfig_clk,
@@ -312,7 +320,7 @@ begin
         empty => open
       );
   end generate u_gen_xilinx_external_property_fifo;
-  u_gen_intel_external_property_fifo : if (not USE_XILINX) generate
+  u_gen_intel_external_property_fifo : if (FINS_BACKEND = "quartus") generate
     u_external_property_fifo : intel_external_property_fifo
       port map (
         clock   => s_swconfig_clk,
@@ -365,7 +373,7 @@ begin
   -- Testing elements for "read-write-memmap"
   --------------------------------------------------------------------------------
   -- Simple Dual Port RAM for test
-  u_gen_xilinx_memmap_property_ram : if (USE_XILINX) generate
+  u_gen_xilinx_memmap_property_ram : if (FINS_BACKEND = "vivado") generate
     u_memmap_property_ram : xilinx_memmap_property_ram
       port map (
         clka  => s_swconfig_clk,
@@ -379,7 +387,7 @@ begin
         doutb => props_status.test_prop_read_write_memmap.rd_data
       );
   end generate u_gen_xilinx_memmap_property_ram;
-  u_gen_intel_memmap_property_ram : if (not USE_XILINX) generate
+  u_gen_intel_memmap_property_ram : if (FINS_BACKEND = "quartus") generate
     u_memmap_property_ram : intel_memmap_property_ram
       port map (
         clock     => s_swconfig_clk,

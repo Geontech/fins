@@ -1,0 +1,47 @@
+{
+  "name":"power_converter",
+  "params":[
+    { "name":"IQ_DATA_WIDTH",    "value":32 },
+    { "name":"POWER_DATA_WIDTH", "value":16 }
+  ],
+  "properties":{
+    "addr_width":16,
+    "data_width":32,
+    "is_addr_byte_indexed":false,
+    "properties":[
+      { "name":"gain", "type":"read-write-data", "width":16, "default_values":1 }
+    ]
+  },
+  "ports":{
+    "ports":[
+      {
+        "name":"iq",
+        "direction":"in",
+        "data":{ "bit_width":"IQ_DATA_WIDTH", "is_complex":true, "is_signed":true }
+      },
+      {
+        "name":"power",
+        "direction":"out",
+        "data":{ "bit_width":"POWER_DATA_WIDTH", "is_signed":true }
+      }
+    ]
+  },
+  "filesets":{
+    "source":[
+      { "path":"gen/core/power_converter_pkg.vhd" },
+      { "path":"gen/core/power_converter_axis.vhd" },
+      { "path":"gen/core/power_converter_axilite.vhd" },
+      { "path":"hdl/power_converter.vhd" }
+    ],
+    "sim":[
+      { "path":"gen/core/power_converter_axilite_verify.vhd" },
+      { "path":"gen/core/power_converter_axis_verify.vhd" },
+      { "path":"gen/core/power_converter_tb.vhd" }
+    ],
+    "scripts":{
+      "postsim":[
+        { "path":"scripts/verify_sim.py" }
+      ]
+    }
+  }
+}

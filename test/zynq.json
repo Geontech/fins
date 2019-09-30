@@ -22,9 +22,7 @@
     { "name":"PORTS_PACKET_SIZE",          "value":8,           "description":"The packet size of the data inputs and outputs" },
     { "name":"PROPS_DATA_WIDTH",           "value":32,          "description":"The data width of the properties bus" },
     { "name":"PROPS_ADDR_WIDTH",           "value":16,          "description":"The address width of the properties bus" },
-    { "name":"PROPS_IS_ADDR_BYTE_INDEXED", "value":true,        "description":"A flag indicating if the address of the properties bus is byte indexed" },
-    { "name":"USE_XILINX",                 "value":true,        "description":"A flag indicating the toolset to use when generating this IP" },
-    { "name":"SIM_FILE_PATH",              "value":"../../../../../../sim_data/", "description":"The directory path to where the simulation input and output data is stored" }
+    { "name":"PROPS_IS_ADDR_BYTE_INDEXED", "value":true,        "description":"A flag indicating if the address of the properties bus is byte indexed" }
   ],
   "ports":{
     "ports":[
@@ -144,10 +142,11 @@
       { "path":"gen/core/test_top_pkg.vhd", "type":"vhdl"    },
       { "path":"gen/core/test_top_axis.vhd"                  },
       { "path":"gen/core/test_top_axilite.vhd"               },
+      { "path":"hdl/axilite_to_swconfig.vhd"                 },
       { "path":"hdl/test_top.vhd",          "type":"VHDL"    }
     ],
     "sim":[
-      { "path":"./ip/test_middle/ip/test_bottom/gen/core/test_bottom_swconfig_verify.vhd" },
+      { "path":"./ip/test_middle/ip/test_bottom/gen/core/test_bottom_axilite_verify.vhd" },
       { "path":"./ip/test_middle/gen/core/test_middle_axilite_verify.vhd" },
       { "path":"./gen/core/test_top_axilite_verify.vhd", "type":"Vhdl" },
       { "path":"./gen/core/test_top_axis_verify.vhd", "type":"VHDL" },
@@ -208,9 +207,13 @@
         { "name":"PROPS_IS_ADDR_BYTE_INDEXED", "parent":"PROPS_IS_ADDR_BYTE_INDEXED" }
       ],
       "instances":[
-        { "module_name":"test_middle_0" }
+        {
+          "module_name":"test_middle_0",
+          "generics":[
+            { "name":"G_TEST_GENERIC_POSITIVE", "value":100 }
+          ]
+        }
       ]
     }
   ]
 }
-

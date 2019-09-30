@@ -1,12 +1,35 @@
+{#-
+ #
+ # Copyright (C) 2019 Geon Technologies, LLC
+ #
+ # This file is part of FINS.
+ #
+ # FINS is free software: you can redistribute it and/or modify it under the
+ # terms of the GNU Lesser General Public License as published by the Free
+ # Software Foundation, either version 3 of the License, or (at your option)
+ # any later version.
+ #
+ # FINS is distributed in the hope that it will be useful, but WITHOUT ANY
+ # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ # FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ # more details.
+ #
+ # You should have received a copy of the GNU Lesser General Public License
+ # along with this program.  If not, see http://www.gnu.org/licenses/.
+ #
+-#}
 #===============================================================================
-# Company:     Geon Technologies, LLC
-# Copyright:   (c) 2019 Geon Technologies, LLC. All rights reserved.
-#              Dissemination of this information or reproduction of this
-#              material is strictly prohibited unless prior written
-#              permission is obtained from Geon Technologies, LLC
-# Description: Auto-generated IP generation Makefile
+# Firmware IP Node Specification (FINS) Auto-Generated File
+# ---------------------------------------------------------
+# Template:    Makefile
+# Backend:     {{ fins['backend'] }}
 # Generated:   {{ now }}
+# ---------------------------------------------------------
+# Description: Makefile to build and simulate the FINS "quartus" backend
+# Versions:    Tested with:
+#              * Intel Quartus Prime Pro 19.1
 #===============================================================================
+
 #-------------------------------------------------------------------------------
 # Make Variables
 #-------------------------------------------------------------------------------
@@ -17,6 +40,9 @@
 
 # Inverse of UseGui
 UseBatch:=$(if $(UseGui),,1)
+
+# Check if matlab exists
+MatlabExists:=$(shell command -v matlab 2> /dev/null)
 
 #-------------------------------------------------------------------------------
 # File paths
@@ -163,7 +189,11 @@ $(IP_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES)
 	{%- if 'prebuild' in fins['filesets']['scripts'] %}
 	{%- for script in fins['filesets']['scripts']['prebuild'] %}
 	{%- if script['type']|lower == 'matlab' %}
+ifdef MatlabExists
 	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+else
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+endif
 	{%- elif script['type']|lower == 'octave' %}
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
@@ -180,7 +210,11 @@ $(IP_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES)
 	{%- if 'postbuild' in fins['filesets']['scripts'] %}
 	{%- for script in fins['filesets']['scripts']['postbuild'] %}
 	{%- if script['type']|lower == 'matlab' %}
+ifdef MatlabExists
 	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+else
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+endif
 	{%- elif script['type']|lower == 'octave' %}
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
@@ -198,7 +232,11 @@ sim : all
 	{%- if 'presim' in fins['filesets']['scripts'] %}
 	{%- for script in fins['filesets']['scripts']['presim'] %}
 	{%- if script['type']|lower == 'matlab' %}
+ifdef MatlabExists
 	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+else
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+endif
 	{%- elif script['type']|lower == 'octave' %}
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
@@ -215,7 +253,11 @@ sim : all
 	{%- if 'postsim' in fins['filesets']['scripts'] %}
 	{%- for script in fins['filesets']['scripts']['postsim'] %}
 	{%- if script['type']|lower == 'matlab' %}
+ifdef MatlabExists
 	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+else
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+endif
 	{%- elif script['type']|lower == 'octave' %}
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}

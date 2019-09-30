@@ -1,4 +1,4 @@
-# FINS Ports
+# FINS Node Ports
 
 **[RETURN TO TOP LEVEL README](../README.md)**
 
@@ -6,7 +6,7 @@ Ports are a way to standardize data and metadata communication within the progra
 
 ## JSON Schema
 
-The top-level `ports` field of the FINS JSON Schema in turn has a single `ports` field. See the table below for the details of this single field:
+The top-level `ports` field of the FINS Node JSON Schema in turn has a single `ports` field. See the table below for the details of this single field:
 
 > NOTE: In the tables below, `param['name']` is used for "Type" for some fields. This indicates that a string containing the name of a FINS parameter can be used in place of the value. However, ensure the FINS parameter has the same type as expected by the field!
 
@@ -29,13 +29,15 @@ Each dictionary element of the `ports` dictionary array field has the following 
 
 The `data` dictionary field has the following fields:
 
-| Key          | Type                    | Required | Default Value | Value Restrictions | Description |
-| ------------ | ----------------------- | -------- | ------------- | ------------------ | ----------- |
-| bit_width    | uint or `param['name']` | NO       | 16            | >= 1               | The bit width of a single sample of data. If `is_complex` is true, then this value is the bit width for BOTH real and imaginary components. Since this value is for a single sample, it should not change when `num_samples` or `num_channels` change. |
-| is_complex   | bool or `param['name']` | NO       | false         |                    | A flag indicating if a sample of data has real and imaginary parts. The real and imaginary parts MUST have the same bit width, and their summed bit widths should be put in the `bit_width` field. If this value is true, then real data is packed in the LSBs of the sample. |
-| is_signed    | bool or `param['name']` | NO       | false         |                    | A flag indicating if a sample of data is interpreted as a signed 2's complement value; otherwise, it is interpreted as an unsigned value. This value applies to the individual real and imaginary components when `is_complex` is true. |
-| num_samples  | uint or `param['name']` | NO       | 1             | >= 1               | The number of simultaneous samples that are communicated through the data bus per transaction for a single channel. When `num_samples` is > 1, the first sample is packed in the LSBs and the last sample is packed in the MSBs. |
-| num_channels | uint or `param['name']` | NO       | 1             | >= 1               | The number of parallel channels that are communicated through the data bus. When `num_channels` is > 1, the first channel is packed in the LSBs and the last channel is packed in the MSBs.  |
+| Key          | Type                    | Required | Default Value | Value Restrictions    | Description |
+| ------------ | ----------------------- | -------- | ------------- | --------------------- | ----------- |
+| bit_width    | uint or `param['name']` | NO       | 16            | >= 8, <= 4096<b>*</b> | The bit width of a single sample of data. If `is_complex` is true, then this value is the bit width for BOTH real and imaginary components. Since this value is for a single sample, it should not change when `num_samples` or `num_channels` change. |
+| is_complex   | bool or `param['name']` | NO       | false         |                       | A flag indicating if a sample of data has real and imaginary parts. The real and imaginary parts MUST have the same bit width, and their summed bit widths should be put in the `bit_width` field. If this value is true, then real data is packed in the LSBs of the sample. |
+| is_signed    | bool or `param['name']` | NO       | false         |                       | A flag indicating if a sample of data is interpreted as a signed 2's complement value; otherwise, it is interpreted as an unsigned value. This value applies to the individual real and imaginary components when `is_complex` is true. |
+| num_samples  | uint or `param['name']` | NO       | 1             | >= 1                  | The number of simultaneous samples that are communicated through the data bus per transaction for a single channel. When `num_samples` is > 1, the first sample is packed in the LSBs and the last sample is packed in the MSBs. |
+| num_channels | uint or `param['name']` | NO       | 1             | >= 1                  | The number of parallel channels that are communicated through the data bus. When `num_channels` is > 1, the first channel is packed in the LSBs and the last channel is packed in the MSBs.  |
+
+> **\*** The maximum `bit_width` for `num_samples`=1 and `num_channels`=1 is 4096. The maximum `bit_width` is divided by the `num_samples` and/or `num_channels` since the total data width is capped at 4096. For example, when `num_samples`=2 and `num_channels`=4, the maximum `bit_width` is 4096/2/4=512.
 
 Each dictionary element of the `metadata` dictionary array field has the following fields:
 
@@ -50,7 +52,7 @@ Each dictionary element of the `metadata` dictionary array field has the followi
 
 ## Ports Records
 
-Ports in a FINS JSON file autogenerate into an intepreter module that uses records defined in the VHDL package file. This module interacts with user HDL through the `ports_in` and `ports_out` record interfaces which are defined in the auto-generated VHDL package file. `ports_in` contains the signals that go from the bus interpreter decode module to user HDL, and `ports_out` contains the signals that go from user HDL to the bus interpreter decode module. These top-level records have a field for each property that can interact with other HDL. Each port in turn has fields that specify the interface with the user HDL. The fields of each port record depend on the direction and if backpressure is supported. The table below shows all available combinations:
+Ports in a FINS Node JSON file autogenerate into an intepreter module that uses records defined in the VHDL package file. This module interacts with user HDL through the `ports_in` and `ports_out` record interfaces which are defined in the auto-generated VHDL package file. `ports_in` contains the signals that go from the bus interpreter decode module to user HDL, and `ports_out` contains the signals that go from user HDL to the bus interpreter decode module. These top-level records have a field for each property that can interact with other HDL. Each port in turn has fields that specify the interface with the user HDL. The fields of each port record depend on the direction and if backpressure is supported. The table below shows all available combinations:
 
 | `direction` | `supports_backpressure` | `data` exists | `metadata` exists | ports_in Record Fields                  | ports_out Record Fields                 |
 | ----------- | ----------------------- | ------------- | ----------------- | --------------------------------------- | --------------------------------------- |
@@ -103,7 +105,7 @@ The type of the "metadata" field of `ports_in` and `ports_out` records depends o
 
 ## Code Generation
 
-Code generation is performed in two steps. The ports schema is analyzed and populated with default values and additional fields, and then the transformed schema is passed to Jinja2 templates for code generation. When the `ports` top-level field exists in the FINS JSON file, the following output files are generated:
+Code generation is performed in two steps. The ports schema is analyzed and populated with default values and additional fields, and then the transformed schema is passed to Jinja2 templates for code generation. When the `ports` top-level field exists in the FINS Node JSON file, the following output files are generated:
 
 ### `name`_pkg.vhd
 

@@ -1,12 +1,31 @@
+{#-
+--
+-- Copyright (C) 2019 Geon Technologies, LLC
+--
+-- This file is part of FINS.
+--
+-- FINS is free software: you can redistribute it and/or modify it under the
+-- terms of the GNU Lesser General Public License as published by the Free
+-- Software Foundation, either version 3 of the License, or (at your option)
+-- any later version.
+--
+-- FINS is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+-- FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+-- more details.
+--
+-- You should have received a copy of the GNU Lesser General Public License
+-- along with this program.  If not, see http://www.gnu.org/licenses/.
+--
+-#}
 --==============================================================================
--- Company:     Geon Technologies, LLC
--- Copyright:   (c) 2019 Geon Technologies, LLC. All rights reserved.
---              Dissemination of this information or reproduction of this
---              material is strictly prohibited unless prior written
---              permission is obtained from Geon Technologies, LLC
--- Description: Auto-generated top-level testbench for a FINS module
+-- Firmware IP Node Specification (FINS) Auto-Generated File
+-- ---------------------------------------------------------
+-- Template:    top_tb.vhd
+-- Backend:     {{ fins['backend'] }}
 -- Generated:   {{ now }}
--- Reset Type:  Synchronous
+-- ---------------------------------------------------------
+-- Description: Top-level testbench code stub for a FINS IP
 --==============================================================================
 
 -- Standard Libraries
@@ -27,6 +46,20 @@ use work.{{ fins['name']|lower }}_axilite_verify.all;
 
 -- Entity
 entity {{ fins['name']|lower }}_tb is
+  generic (
+    {%- if 'ports' in fins %}
+    {%- for port in fins['ports']['ports'] %}
+    {%- if port['direction']|lower == 'out' %}
+    G_NUM_PACKETS_EXPECTED_FOR_{{ port['name']|upper }} : natural := 1;
+    {%- endif %}
+    {%- endfor %}
+    {%- endif %}
+    {%- if fins['backend']|lower == 'quartus' %}
+    G_RELATIVE_PATH_TO_SIM_FILES : string := "../../../sim_data/"
+    {%- else %}
+    G_RELATIVE_PATH_TO_SIM_FILES : string := "../../../../../../sim_data/"
+    {%- endif %}
+  );
 end entity {{ fins['name']|lower }}_tb;
 
 -- Architecture
@@ -38,22 +71,22 @@ architecture behav of {{ fins['name']|lower }}_tb is
   -- AXI4-Lite Properties Bus
   signal S_AXI_ACLK    : std_logic;
   signal S_AXI_ARESETN : std_logic;
-  signal S_AXI_AWADDR  : std_logic_vector(G_AXI_ADDR_WIDTH-1 downto 0);
+  signal S_AXI_AWADDR  : std_logic_vector({{ fins['properties']['addr_width'] }}-1 downto 0);
   signal S_AXI_AWPROT  : std_logic_vector(2 downto 0);
   signal S_AXI_AWVALID : std_logic;
   signal S_AXI_AWREADY : std_logic;
-  signal S_AXI_WDATA   : std_logic_vector(G_AXI_DATA_WIDTH-1 downto 0);
-  signal S_AXI_WSTRB   : std_logic_vector((G_AXI_DATA_WIDTH/8)-1 downto 0);
+  signal S_AXI_WDATA   : std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
+  signal S_AXI_WSTRB   : std_logic_vector(({{ fins['properties']['data_width'] }}/8)-1 downto 0);
   signal S_AXI_WVALID  : std_logic;
   signal S_AXI_WREADY  : std_logic;
   signal S_AXI_BRESP   : std_logic_vector(1 downto 0);
   signal S_AXI_BVALID  : std_logic;
   signal S_AXI_BREADY  : std_logic;
-  signal S_AXI_ARADDR  : std_logic_vector(G_AXI_ADDR_WIDTH-1 downto 0);
+  signal S_AXI_ARADDR  : std_logic_vector({{ fins['properties']['addr_width'] }}-1 downto 0);
   signal S_AXI_ARPROT  : std_logic_vector(2 downto 0);
   signal S_AXI_ARVALID : std_logic;
   signal S_AXI_ARREADY : std_logic;
-  signal S_AXI_RDATA   : std_logic_vector(G_AXI_DATA_WIDTH-1 downto 0);
+  signal S_AXI_RDATA   : std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
   signal S_AXI_RRESP   : std_logic_vector(1 downto 0);
   signal S_AXI_RVALID  : std_logic;
   signal S_AXI_RREADY  : std_logic;
@@ -95,9 +128,12 @@ architecture behav of {{ fins['name']|lower }}_tb is
   {%- endif %}
 
   --------------------------------------------------------------------------------
-  -- Testbench Signals
+  -- Testbench
   --------------------------------------------------------------------------------
+  -- Constants
   constant CLOCK_PERIOD  : time := 5 ns; -- 200MHz
+
+  -- Signals
   signal simulation_done : boolean := false;
   signal clock           : std_logic := '0';
   signal resetn          : std_logic := '1';
@@ -186,9 +222,9 @@ begin
       {%- for port in fins['ports']['ports'] %}
       {%- if port['direction'] == "in" %}
       G_{{ port['name']|upper }}_SOURCE_SAMPLE_PERIOD => 1, -- Number of clocks per sample
-      G_{{ port['name']|upper }}_SOURCE_FILEPATH => "../../../../sim_source_{{ port['name']|lower }}.txt"{% if not loop.last %},{% endif %}
+      G_{{ port['name']|upper }}_SOURCE_FILEPATH => G_RELATIVE_PATH_TO_SIM_FILES & "sim_source_{{ port['name']|lower }}.txt"{% if not loop.last %},{% endif %}
       {%- else %}
-      G_{{ port['name']|upper }}_SINK_FILEPATH => "../../../../sim_sink_{{ port['name']|lower }}.txt"{% if not loop.last %},{% endif %}
+      G_{{ port['name']|upper }}_SINK_FILEPATH => G_RELATIVE_PATH_TO_SIM_FILES & "sim_sink_{{ port['name']|lower }}.txt"{% if not loop.last %},{% endif %}
       {%- endif %}
       {%- endfor %}
     )
@@ -269,14 +305,13 @@ begin
   -- Waveform process to wait for packets on the {{ port['name']|lower }} output port
   w_{{ port['name']|lower }}_verify : process
     variable my_line : line;
-    variable num_packets_expected : natural := 1;
   begin
     -- Wait for global reset to complete
     if (resetn = '0') then
       wait until (resetn = '1');
     end if;
-    -- Wait for the falling edge of TLAST num_packets_expected times
-    for packet in 0 to num_packets_expected-1 loop
+    -- Wait for the falling edge of TLAST
+    for packet in 0 to G_NUM_PACKETS_EXPECTED_FOR_{{ port['name']|upper }}-1 loop
       wait until falling_edge(m_axis_{{ port['name']|lower }}_tlast);
     end loop;
     -- End this process

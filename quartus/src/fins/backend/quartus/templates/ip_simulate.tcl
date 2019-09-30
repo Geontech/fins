@@ -1,17 +1,42 @@
+{#-
+ #
+ # Copyright (C) 2019 Geon Technologies, LLC
+ #
+ # This file is part of FINS.
+ #
+ # FINS is free software: you can redistribute it and/or modify it under the
+ # terms of the GNU Lesser General Public License as published by the Free
+ # Software Foundation, either version 3 of the License, or (at your option)
+ # any later version.
+ #
+ # FINS is distributed in the hope that it will be useful, but WITHOUT ANY
+ # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ # FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ # more details.
+ #
+ # You should have received a copy of the GNU Lesser General Public License
+ # along with this program.  If not, see http://www.gnu.org/licenses/.
+ #
+-#}
 #===============================================================================
-# Company:     Geon Technologies, LLC
-# Author:      Josh Schindehette
-# Copyright:   (c) 2019 Geon Technologies, LLC. All rights reserved.
-#              Dissemination of this information or reproduction of this
-#              material is strictly prohibited unless prior written
-#              permission is obtained from Geon Technologies, LLC
-# Description: This is a generic TCL script to run an IP simulation
+# Firmware IP Node Specification (FINS) Auto-Generated File
+# ---------------------------------------------------------
+# Template:    ip_simulate.tcl
+# Backend:     {{ fins['backend'] }}
+# Generated:   {{ now }}
+# ---------------------------------------------------------
+# Description: TCL script to generate a simulation with Intel Quartus
+#              and run it with Intel ModelSim
+# Versions:    Tested with:
+#              * Intel Quartus Prime Pro 19.1
 #===============================================================================
 
 # Set the relative path back to the IP root directory
 set IP_ROOT_RELATIVE_TO_PROJ "../../.."
 
 # Parameters
+set FINS_BACKEND "{{ fins['backend'] }}"
+{% if 'params' in fins %}
 {% for param in fins['params'] -%}
 set {{ param['name'] }}
 {%- if param['value'] is iterable and param['value'] is not string %} [list {{ param['value']|join(' ') }}]
@@ -19,6 +44,7 @@ set {{ param['name'] }}
 {% else %} {{ param['value'] }}
 {% endif -%}
 {% endfor %}
+{% endif %}
 
 # Run Pre-Sim TCL Scripts
 # Note: These scripts can use parameters defined above since they are sourced by this script
@@ -34,9 +60,13 @@ source ${IP_ROOT_RELATIVE_TO_PROJ}/{{ presim_script['path'] }}
 {%- endif %}
 {%- endif %}
 
+# Find the Quartus-generated library name
+set UNIT_SIM_LIBRARY [glob -tails -path ../{{ fins['name'] }}/ {{ fins['name'] }}_??]
+
+# Run the simulation
 source msim_setup.tcl
 ld
-vsim {{ fins['name'] }}_00.{{ fins['top_sim'] }}
+vsim ${UNIT_SIM_LIBRARY}.{{ fins['top_sim'] }}
 run -all
 
 # Run Post-Sim TCL Scripts
