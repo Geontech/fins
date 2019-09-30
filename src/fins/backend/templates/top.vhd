@@ -1,11 +1,31 @@
+{#-
+--
+-- Copyright (C) 2019 Geon Technologies, LLC
+--
+-- This file is part of FINS.
+--
+-- FINS is free software: you can redistribute it and/or modify it under the
+-- terms of the GNU Lesser General Public License as published by the Free
+-- Software Foundation, either version 3 of the License, or (at your option)
+-- any later version.
+--
+-- FINS is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+-- FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+-- more details.
+--
+-- You should have received a copy of the GNU Lesser General Public License
+-- along with this program.  If not, see http://www.gnu.org/licenses/.
+--
+-#}
 --==============================================================================
--- Company:     Geon Technologies, LLC
--- Copyright:   (c) 2019 Geon Technologies, LLC. All rights reserved.
---              Dissemination of this information or reproduction of this
---              material is strictly prohibited unless prior written
---              permission is obtained from Geon Technologies, LLC
--- Description: Auto-generated top-level wrapper for a FINS module
+-- Firmware IP Node Specification (FINS) Auto-Generated File
+-- ---------------------------------------------------------
+-- Template:    top.vhd
+-- Backend:     {{ fins['backend'] }}
 -- Generated:   {{ now }}
+-- ---------------------------------------------------------
+-- Description: Top-level source code stub for a FINS IP
 -- Reset Type:  Synchronous
 --==============================================================================
 
@@ -20,28 +40,28 @@ library work;
 use work.{{ fins['name']|lower }}_pkg.all;
 
 -- Entity
-entity {{ fins['name']|lower }}_top is
+entity {{ fins['name']|lower }} is
   port (
     {%- if 'properties' in fins %}
     -- AXI4-Lite Properties Bus
     S_AXI_ACLK    : in  std_logic;
     S_AXI_ARESETN : in  std_logic;
-    S_AXI_AWADDR  : in  std_logic_vector(G_AXI_ADDR_WIDTH-1 downto 0);
+    S_AXI_AWADDR  : in  std_logic_vector({{ fins['properties']['addr_width'] }}-1 downto 0);
     S_AXI_AWPROT  : in  std_logic_vector(2 downto 0);
     S_AXI_AWVALID : in  std_logic;
     S_AXI_AWREADY : out std_logic;
-    S_AXI_WDATA   : in  std_logic_vector(G_AXI_DATA_WIDTH-1 downto 0);
-    S_AXI_WSTRB   : in  std_logic_vector((G_AXI_DATA_WIDTH/8)-1 downto 0);
+    S_AXI_WDATA   : in  std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
+    S_AXI_WSTRB   : in  std_logic_vector(({{ fins['properties']['data_width'] }}/8)-1 downto 0);
     S_AXI_WVALID  : in  std_logic;
     S_AXI_WREADY  : out std_logic;
     S_AXI_BRESP   : out std_logic_vector(1 downto 0);
     S_AXI_BVALID  : out std_logic;
     S_AXI_BREADY  : in  std_logic;
-    S_AXI_ARADDR  : in  std_logic_vector(G_AXI_ADDR_WIDTH-1 downto 0);
+    S_AXI_ARADDR  : in  std_logic_vector({{ fins['properties']['addr_width'] }}-1 downto 0);
     S_AXI_ARPROT  : in  std_logic_vector(2 downto 0);
     S_AXI_ARVALID : in  std_logic;
     S_AXI_ARREADY : out std_logic;
-    S_AXI_RDATA   : out std_logic_vector(G_AXI_DATA_WIDTH-1 downto 0);
+    S_AXI_RDATA   : out std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
     S_AXI_RRESP   : out std_logic_vector(1 downto 0);
     S_AXI_RVALID  : out std_logic;
     S_AXI_RREADY  : in  std_logic;
@@ -82,10 +102,10 @@ entity {{ fins['name']|lower }}_top is
     {%- endfor %}
     {%- endif %}
   );
-end {{ fins['name']|lower }}_top;
+end {{ fins['name']|lower }};
 
 -- Architecture
-architecture struct of {{ fins['name']|lower }}_top is
+architecture struct of {{ fins['name']|lower }} is
 
   --------------------------------------------------------------------------------
   -- Components

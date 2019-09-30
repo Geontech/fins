@@ -1,6 +1,22 @@
-"""
-Command-line interface for fins.
-"""
+#
+# Copyright (C) 2019 Geon Technologies, LLC
+#
+# This file is part of FINS.
+#
+# FINS is free software: you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your option)
+# any later version.
+#
+# FINS is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+# more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see http://www.gnu.org/licenses/.
+#
+
 import os
 import glob
 import logging
@@ -36,7 +52,7 @@ def load_generator(name):
 
     raise KeyError(name)
 
-def run_generator(generator, filepath, verbose):
+def run_generator(generator,filepath,backend,verbose):
     # Change execution directory to where json file is located
     if os.path.dirname(filepath):
         os.chdir(os.path.dirname(filepath))
@@ -47,9 +63,20 @@ def run_generator(generator, filepath, verbose):
 
     # Load the fins_data and generate the backend
     generator.start_file(filename)
-    fins_data = loader.load_fins_data(filename,verbose)
+    fins_data = loader.load_json_file(filename,verbose)
+    if 'nodes' in fins_data:
+        # This is a FINS nodeset file
+        is_nodeset = True
+        fins_data = loader.validate_and_convert_fins_nodeset(fins_data,filename,verbose)
+        if backend != 'core':
+            print('INFO: The',backend,'backend provided is ignored since this is a FINS build file')
+            generator = load_generator('core')
+    else:
+        # This is a FINS file
+        is_nodeset = False
+        fins_data = loader.validate_and_convert_fins_data(fins_data,filename,backend,verbose)
     try:
-        generator.generate(fins_data,filename)
+        generator.generate(fins_data,filename,is_nodeset)
     except RuntimeError as exc:
         logging.error('Generator error: %s', exc)
     generator.end_file()
@@ -57,7 +84,7 @@ def run_generator(generator, filepath, verbose):
     # Recursively call function on all sub-ip
     if 'ip' in fins_data:
         for ip in fins_data['ip']:
-            run_generator(generator, ip['fins_path'], verbose)
+            run_generator(generator,ip['fins_path'],backend,verbose)
 
     # Reset working directory to the one used by this level of recursion
     os.chdir(working_directory)
@@ -104,4 +131,4 @@ def main():
             raise SystemExit(str(exc))
 
     for filepath in args.filepath:
-        run_generator(generator, filepath, args.verbose)
+        run_generator(generator, filepath, args.backend, args.verbose)

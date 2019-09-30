@@ -1,4 +1,23 @@
 #!/usr/bin/env python3
+#
+# Copyright (C) 2019 Geon Technologies, LLC
+#
+# This file is part of FINS.
+#
+# FINS is free software: you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your option)
+# any later version.
+#
+# FINS is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+# more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see http://www.gnu.org/licenses/.
+#
+
 import sys
 
 # Import auto-generated parameters file
@@ -13,16 +32,16 @@ sim_source_data = {'last':[], 'data':[]}
 with open('sim_data/sim_source_myinput.txt', 'r') as sim_source_file:
     for sim_source_line in sim_source_file:
         line_data = sim_source_line.split(' ')
-        sim_source_data['last'].append(int(line_data[0]))
-        sim_source_data['data'].append(int(line_data[1], test_middle_pkg.ports['in']['myinput']['data']['bit_width']))
+        sim_source_data['last'].append(int(line_data[0], 16))
+        sim_source_data['data'].append(int(line_data[1], 16))
 
 # Open our simulation output
 sim_sink_data = {'last':[], 'data':[]}
 with open('sim_data/sim_sink_myoutput.txt', 'r') as sim_sink_file:
     for sim_sink_line in sim_sink_file:
         line_data = sim_sink_line.split(' ')
-        sim_sink_data['last'].append(int(line_data[0]))
-        sim_sink_data['data'].append(int(line_data[1], test_middle_pkg.ports['out']['myoutput']['data']['bit_width']))
+        sim_sink_data['last'].append(int(line_data[0], 16))
+        sim_sink_data['data'].append(int(line_data[1], 16))
 
 # Implement the algorithm
 sim_expected_data = []

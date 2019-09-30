@@ -1,13 +1,21 @@
---==============================================================================
--- Company:     Geon Technologies, LLC
--- Author:      Josh Schindehette
--- Copyright:   (c) 2019 Geon Technologies, LLC. All rights reserved.
---              Dissemination of this information or reproduction of this
---              material is strictly prohibited unless prior written
---              permission is obtained from Geon Technologies, LLC
--- Description: This is the top level testbench of the FINS test module
--- Reset Type:  Synchronous
---==============================================================================
+--
+-- Copyright (C) 2019 Geon Technologies, LLC
+--
+-- This file is part of FINS.
+--
+-- FINS is free software: you can redistribute it and/or modify it under the
+-- terms of the GNU Lesser General Public License as published by the Free
+-- Software Foundation, either version 3 of the License, or (at your option)
+-- any later version.
+--
+-- FINS is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+-- FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+-- more details.
+--
+-- You should have received a copy of the GNU Lesser General Public License
+-- along with this program.  If not, see http://www.gnu.org/licenses/.
+--
 
 -- Standard Libraries
 library ieee;
@@ -70,6 +78,16 @@ architecture rtl of test_bottom_tb is
   signal s_axis_myinput_enable : std_logic := '0';
   signal s_axis_test_in_enable : std_logic := '0';
 
+  -- Function
+  function f_get_sim_file_path return string is
+  begin
+    if (FINS_BACKEND = "vivado") then
+      return "../../../../../../sim_data/";
+    else
+      return "../../../sim_data/";
+    end if;
+  end function f_get_sim_file_path;
+
 begin
 
   -- Device Under Test
@@ -113,10 +131,10 @@ begin
   -- NOTE: The source/sink filepaths are relative to where the simulation is executed
   u_file_io : entity work.test_bottom_axis_verify
     generic map (
-      G_MYINPUT_SOURCE_FILEPATH => SIM_FILE_PATH & "sim_source_myinput.txt",
-      G_MYOUTPUT_SINK_FILEPATH  => SIM_FILE_PATH & "sim_sink_myoutput.txt",
-      G_TEST_IN_SOURCE_FILEPATH => SIM_FILE_PATH & "sim_source_test_in.txt",
-      G_TEST_OUT_SINK_FILEPATH  => SIM_FILE_PATH & "sim_sink_test_out.txt"
+      G_MYINPUT_SOURCE_FILEPATH => f_get_sim_file_path & "sim_source_myinput.txt",
+      G_MYOUTPUT_SINK_FILEPATH  => f_get_sim_file_path & "sim_sink_myoutput.txt",
+      G_TEST_IN_SOURCE_FILEPATH => f_get_sim_file_path & "sim_source_test_in.txt",
+      G_TEST_OUT_SINK_FILEPATH  => f_get_sim_file_path & "sim_sink_test_out.txt"
     )
     port map (
       simulation_done         => simulation_done        ,

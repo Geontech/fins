@@ -1,4 +1,4 @@
-# FINS Properties
+# FINS Node Properties
 
 **[RETURN TO TOP LEVEL README](../README.md)**
 
@@ -6,7 +6,7 @@ Properties are a way to describe software-controllable registers within the prog
 
 ## JSON Schema
 
-The top-level `properties` field of the FINS JSON Schema in turn has several fields. Most of these child fields define the underlying memory-mapped bus, but the last child field contains the properties definitions. See the table below for the details of all the fields:
+The top-level `properties` field of the FINS Node JSON Schema in turn has several fields. Most of these child fields define the underlying memory-mapped bus, but the last child field contains the properties definitions. See the table below for the details of all the fields:
 
 > NOTE: In the tables below, `param['name']` is used for "Type" for some fields. This indicates that a string containing the name of a FINS parameter can be used in place of the value. However, ensure the FINS parameter has the same type as expected by the field!
 
@@ -25,7 +25,7 @@ Each dictionary element of the `properties` dictionary array field has the follo
 | -------------- | ------------------------- | -------- | ------------- | ---------------------------- | ----------- |
 | name           | string                    | YES      |               |                              | The name of the register. It must be unique from other registers within the IP. |
 | type           | string                    | YES      |               | read-only-constant<br />read-only-data<br />read-only-external<br />read-only-memmap<br />write-only-external<br />write-only-memmap<br />read-write-internal<br />read-write-data<br />read-write-external<br />read-write-memmap | The type of the property. The enumerations of the property are described in detail in the "Property Records" section below. |
-| description    | string                    | NO       |               |                              | The description of the register. It should contain information about how to use the register and any limitations. |
+| description    | string                    | NO       | ""            |                              | The description of the register. It should contain information about how to use the register and any limitations. |
 | width          | uint or `param['name']`   | NO       | `data_width`  | 1 to `data_width`            | The number of bits used to represent the property. If `width` is less than `data_width`, the bits of the property are physically located in the LSBs of the `data_width` register. |
 | length         | uint or `param['name']`   | NO       | 1             | 1 to Available Address Space | The number of addresses to use for this property. When `length` is greater than 1, the property is considered a "sequence" property. Each item of the sequence is identical in definition and is represented by a single address. |
 | default_values | uint[] or `param['name']` | NO       | 0             | 0 to 2^`data_width`-1        | The default setting after power-on or reset. The length of this array MUST match the `length` key. |
@@ -35,7 +35,7 @@ Each dictionary element of the `properties` dictionary array field has the follo
 
 ## Property Records
 
-Properties in a FINS JSON file autogenerate into a decode module that uses records defined in the VHDL package file. This module interacts with user HDL through the `props_control` and `props_status` record interfaces which are defined in the auto-generated VHDL package file. `props_control` contains the signals that go from the memory-mapped bus decode module to user HDL, and `props_status` contains the signals that go from user HDL to the memory-mapped bus decode module. These top-level records have a field for each property that can interact with other HDL (all but the `read-only-constant` and `read-write-internal` property types). Each property in turn has fields that specify the interface with the user HDL. The accessibility of the property and the fields of the records are set based on the type. The table below has additional information on the property types and the available fields for each type.
+Properties in a FINS Node JSON file autogenerate into a decode module that uses records defined in the VHDL package file. This module interacts with user HDL through the `props_control` and `props_status` record interfaces which are defined in the auto-generated VHDL package file. `props_control` contains the signals that go from the memory-mapped bus decode module to user HDL, and `props_status` contains the signals that go from user HDL to the memory-mapped bus decode module. These top-level records have a field for each property that can interact with other HDL (all but the `read-only-constant` and `read-write-internal` property types). Each property in turn has fields that specify the interface with the user HDL. The accessibility of the property and the fields of the records are set based on the type. The table below has additional information on the property types and the available fields for each type.
 
 | type                | props_control Record Fields                             | props_status Record Fields | Description |
 | ------------------- | --------------------------------------------------------| -------------------------- | ----------- |
@@ -56,7 +56,7 @@ A visualization of the property records generated by the different types is loca
 
 ## Code Generation
 
-Code generation is performed in two steps. The properties schema is analyzed and populated with default values and additional fields, and then the transformed schema is passed to Jinja2 templates for code generation. When the `properties` top-level field exists in the FINS JSON file, the following output files are generated:
+Code generation is performed in two steps. The properties schema is analyzed and populated with default values and additional fields, and then the transformed schema is passed to Jinja2 templates for code generation. When the `properties` top-level field exists in the FINS Node JSON file, the following output files are generated:
 
 ### `name`_pkg.vhd
 

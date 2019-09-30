@@ -1,19 +1,42 @@
+{#-
+ #
+ # Copyright (C) 2019 Geon Technologies, LLC
+ #
+ # This file is part of FINS.
+ #
+ # FINS is free software: you can redistribute it and/or modify it under the
+ # terms of the GNU Lesser General Public License as published by the Free
+ # Software Foundation, either version 3 of the License, or (at your option)
+ # any later version.
+ #
+ # FINS is distributed in the hope that it will be useful, but WITHOUT ANY
+ # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ # FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ # more details.
+ #
+ # You should have received a copy of the GNU Lesser General Public License
+ # along with this program.  If not, see http://www.gnu.org/licenses/.
+ #
+-#}
 #===============================================================================
-# Company:     Geon Technologies, LLC
-# Author:      Josh Schindehette
-# Copyright:   (c) 2019 Geon Technologies, LLC. All rights reserved.
-#              Dissemination of this information or reproduction of this
-#              material is strictly prohibited unless prior written
-#              permission is obtained from Geon Technologies, LLC
-# Description: This is an auto-generated TCL script for creating an IP
-#              that is compatible with Vivado IP Integrator
+# Firmware IP Node Specification (FINS) Auto-Generated File
+# ---------------------------------------------------------
+# Template:    ip_create.tcl
+# Backend:     {{ fins['backend'] }}
 # Generated:   {{ now }}
+# ---------------------------------------------------------
+# Description: TCL script for creating an IP compatible with
+#              Xilinx Vivado IP Integrator
+# Versions:    Tested with:
+#              * Xilinx Vivado 2019.1
 #===============================================================================
 
 # Setup paths
 set PROJECT_VIVADO_DIR "./project/vivado"
 
 # Parameters
+set FINS_BACKEND "{{ fins['backend'] }}"
+{%- if 'params' in fins %}
 {% for param in fins['params'] -%}
 set {{ param['name'] }}
 {%- if param['value'] is iterable and param['value'] is not string %} [list {{ param['value']|join(' ') }}]
@@ -21,6 +44,7 @@ set {{ param['name'] }}
 {% else %} {{ param['value'] }}
 {% endif -%}
 {% endfor %}
+{% endif %}
 
 # Run Pre-Build TCL Scripts
 # Note: These scripts can use parameters defined above since they are sourced by this script

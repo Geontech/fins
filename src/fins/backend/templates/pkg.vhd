@@ -1,11 +1,32 @@
+{#-
+--
+-- Copyright (C) 2019 Geon Technologies, LLC
+--
+-- This file is part of FINS.
+--
+-- FINS is free software: you can redistribute it and/or modify it under the
+-- terms of the GNU Lesser General Public License as published by the Free
+-- Software Foundation, either version 3 of the License, or (at your option)
+-- any later version.
+--
+-- FINS is distributed in the hope that it will be useful, but WITHOUT ANY
+-- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+-- FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+-- more details.
+--
+-- You should have received a copy of the GNU Lesser General Public License
+-- along with this program.  If not, see http://www.gnu.org/licenses/.
+--
+-#}
 --==============================================================================
--- Company:     Geon Technologies, LLC
--- Copyright:   (c) 2019 Geon Technologies, LLC. All rights reserved.
---              Dissemination of this information or reproduction of this 
---              material is strictly prohibited unless prior written
---              permission is obtained from Geon Technologies, LLC
--- Description: Auto-generated VHDL package file
+-- Firmware IP Node Specification (FINS) Auto-Generated File
+-- ---------------------------------------------------------
+-- Template:    pkg.vhd
+-- Backend:     {{ fins['backend'] }}
 -- Generated:   {{ now }}
+-- ---------------------------------------------------------
+-- Description: VHDL package file for definition of FINS parameters, ports,
+--              and properties
 --==============================================================================
 
 -- Standard Libraries
@@ -16,10 +37,12 @@ use ieee.math_real.all;
 
 -- Package
 package {{ fins['name']|lower }}_pkg is
-{%- if 'params' in fins %}
+
 --------------------------------------------------------------------------------
 -- Parameters
 --------------------------------------------------------------------------------
+constant FINS_BACKEND : string := "{{ fins['backend'] }}";
+{% if 'params' in fins %}
 {% for param in fins['params'] -%}
 {%- if param['value'] is iterable and param['value'] is not string and not 'hdl_type' in param %}
 type t_{{ param['name'] }} is array (0 to {{ param['value']|length-1 }}) of integer;
@@ -32,8 +55,7 @@ constant {{ param['name'] }} :
 {% else %} integer := {{ param['value'] }};
 {% endif -%}
 {% endfor %}
-
-{%- endif %}{#### if 'params' in fins ####}
+{% endif %}
 
 {%- if 'properties' in fins %}
 --------------------------------------------------------------------------------
@@ -121,8 +143,16 @@ subtype t_{{ fins['name']|lower }}_{{ prop['name'] }}_status is t_{{ fins['name'
 -- Top Level Properties CONTROL Record
 type t_{{ fins['name']|lower }}_props_control is record
 {%- for prop in fins['properties']['properties'] %}
-{%- if (prop['type'] == 'read-only-external') or (prop['type'] == 'read-only-memmap') or (prop['type'] == 'write-only-external') or (prop['type'] == 'write-only-memmap') or (prop['type'] == 'read-write-data') or (prop['type'] == 'read-write-external') or (prop['type'] == 'read-write-memmap') %}
+{%- if (prop['type'] == 'read-only-external') or
+       (prop['type'] == 'read-only-memmap') or
+       (prop['type'] == 'write-only-external') or
+       (prop['type'] == 'write-only-memmap') or
+       (prop['type'] == 'read-write-data') or
+       (prop['type'] == 'read-write-external') or
+       (prop['type'] == 'read-write-memmap') %}
   {{ prop['name'] }} : t_{{ fins['name']|lower }}_{{ prop['name'] }}_control;
+{%- else %}
+  {{ prop['name'] }} : boolean; -- Null placeholder
 {%- endif %}
 {%- endfor %}
 end record t_{{ fins['name']|lower }}_props_control;
@@ -130,8 +160,14 @@ end record t_{{ fins['name']|lower }}_props_control;
 -- Top Level Properties STATUS Record
 type t_{{ fins['name']|lower }}_props_status is record
 {%- for prop in fins['properties']['properties'] %}
-{%- if (prop['type'] == 'read-only-data') or (prop['type'] == 'read-only-external') or (prop['type'] == 'read-only-memmap') or (prop['type'] == 'read-write-external') or (prop['type'] == 'read-write-memmap') %}
+{%- if (prop['type'] == 'read-only-data') or
+       (prop['type'] == 'read-only-external') or
+       (prop['type'] == 'read-only-memmap') or
+       (prop['type'] == 'read-write-external') or
+       (prop['type'] == 'read-write-memmap') %}
   {{ prop['name'] }} : t_{{ fins['name']|lower }}_{{ prop['name'] }}_status;
+{%- else %}
+  {{ prop['name'] }} : boolean; -- Null placeholder
 {%- endif %}
 {%- endfor %}
 end record t_{{ fins['name']|lower }}_props_status;
@@ -210,10 +246,10 @@ type t_{{ fins['name']|lower }}_ports_in is record
   {%- for port in fins['ports']['ports'] %}
   {%- if port['direction']|lower == 'in' %}
   {{ port['name']|lower }} : t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward;
-  {%- else %}
-  {%- if port['supports_backpressure'] %}
+  {%- elif port['supports_backpressure'] %}
   {{ port['name']|lower }} : t_{{ fins['name']|lower }}_{{ port['name']|lower }}_backward;
-  {%- endif %}
+  {%- else %}
+  {{ port['name']|lower }} : boolean; -- Null placeholder
   {%- endif %}
   {%- endfor %}
 end record t_{{ fins['name']|lower }}_ports_in;
@@ -223,10 +259,10 @@ type t_{{ fins['name']|lower }}_ports_out is record
   {%- for port in fins['ports']['ports'] %}
   {%- if port['direction']|lower == 'out' %}
   {{ port['name']|lower }} : t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward;
-  {%- else %}
-  {%- if port['supports_backpressure'] %}
+  {%- elif port['supports_backpressure'] %}
   {{ port['name']|lower }} : t_{{ fins['name']|lower }}_{{ port['name']|lower }}_backward;
-  {%- endif %}
+  {%- else %}
+  {{ port['name']|lower }} : boolean; -- Null placeholder
   {%- endif %}
   {%- endfor %}
 end record t_{{ fins['name']|lower }}_ports_out;

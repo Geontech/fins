@@ -1,12 +1,36 @@
+{#-
+ #
+ # Copyright (C) 2019 Geon Technologies, LLC
+ #
+ # This file is part of FINS.
+ #
+ # FINS is free software: you can redistribute it and/or modify it under the
+ # terms of the GNU Lesser General Public License as published by the Free
+ # Software Foundation, either version 3 of the License, or (at your option)
+ # any later version.
+ #
+ # FINS is distributed in the hope that it will be useful, but WITHOUT ANY
+ # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ # FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
+ # more details.
+ #
+ # You should have received a copy of the GNU Lesser General Public License
+ # along with this program.  If not, see http://www.gnu.org/licenses/.
+ #
+-#}
 #===============================================================================
-# Company:     Geon Technologies, LLC
-# Copyright:   (c) 2019 Geon Technologies, LLC. All rights reserved.
-#              Dissemination of this information or reproduction of this 
-#              material is strictly prohibited unless prior written
-#              permission is obtained from Geon Technologies, LLC
-# Description: Auto-generated Intel HW Component TCL script
+# Firmware IP Node Specification (FINS) Auto-Generated File
+# ---------------------------------------------------------
+# Template:    ip_hw.tcl
+# Backend:     {{ fins['backend'] }}
 # Generated:   {{ now }}
+# ---------------------------------------------------------
+# Description: Intel Quartus Platform Designer Hardware Component
+#              Definition TCL Script
+# Versions:    Tested with:
+#              * Intel Quartus Prime Pro 19.1
 #===============================================================================
+
 package require qsys
 package require quartus::device
 
@@ -37,14 +61,23 @@ set_module_property ELABORATION_CALLBACK "{{ fins['name'] }}_create_sub_ip"
 
 # Define Inferred Generics
 {%- for generic in fins['hdl']['generics'] %}
-add_parameter {{ generic['name'] }} {{ generic['type']|upper }} {{ generic['value'] }}
+add_parameter {{ generic['name'] }} {{ generic['type']|upper }}
 set_parameter_property {{ generic['name'] }} HDL_PARAMETER true
 {%- if 'width' in generic %}
 set_parameter_property {{ generic['name'] }} WIDTH {{ generic['width'] }}
 {%- endif %}
+{%- if 'value' in generic %}
+set_parameter_property {{ generic['name'] }} DEFAULT_VALUE {{ generic['value'] }}
+{%- else %}
+{#- #### This if statement is a workaround to a Quartus issue that sets the default value of a positive type to 0 #### #}
+{%- if generic['type']|upper == 'POSITIVE' %}
+set_parameter_property {{ generic['name'] }} DEFAULT_VALUE 1
+{%- endif %}
+{%- endif %}
 {%- endfor %}
 
 # Define FINS Parameters
+{%- if 'params' in fins %}
 {%- for param in fins['params'] %}
 add_parameter {{ param['name'] }}
 {%- if param['value'] is iterable and param['value'] is not string %} INTEGER_LIST [list {{ param['value']|join(' ') }}]
@@ -53,6 +86,7 @@ add_parameter {{ param['name'] }}
 {%- else %} INTEGER {{ param['value'] }}
 {%- endif %} {% if 'description' in param %}"{{ param['description'] }}"{% endif %}
 {%- endfor %}
+{%- endif %}
 
 # Source Fileset
 add_fileset QUARTUS_SYNTH QUARTUS_SYNTH "" ""
@@ -122,10 +156,13 @@ proc {{ fins['name'] }}_create_sub_ip {} {
     set IP_DEVICE "10CX220YF780I5G"
     {%- endif %}
     set IP_DEVICE_FAMILY [regsub -all {[\{\}]} [quartus::device::get_part_info -family $IP_DEVICE] ""]
-    # Retrieve parameters
+    # Set parameters for sub-IP
+    set FINS_BACKEND "{{ fins['backend'] }}"
+    {%- if 'params' in fins %}
     {%- for param in fins['params'] %}
     set {{ param['name'] }} [get_parameter_value "{{ param['name'] }}"]
     {%- endfor %}
+    {%- endif %}
     {%- for ip in fins['ip'] %}
     {%- for instance in ip['instances'] %}
     # FINS Path: {{ ip['fins_path'] }}
@@ -134,7 +171,7 @@ proc {{ fins['name'] }}_create_sub_ip {} {
     add_hdl_instance {{ instance['module_name'] }} {{ ip['name'] }} {{ ip['version'] }}
     {%- if 'generics' in instance %}
     {%- for generic in instance['generics'] %}
-    set_instance_parameter_value instance['module_name'] {{ generic['name'] }} {{ generic['value'] }}
+    set_instance_parameter_value {{ instance['module_name'] }} {{ generic['name'] }} {{ generic['value'] }}
     {%- endfor %}
     {%- endif %}
     {%- endfor %}
