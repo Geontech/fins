@@ -38,7 +38,8 @@ setup(
     ],
     package_data={
         'fins':[
-            'loader/schema.json',
+            'loader/node.json',
+            'loader/nodeset.json',
             'backend/templates/*',
             'backend/templates/.gitignore'
         ]

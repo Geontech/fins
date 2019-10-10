@@ -22,12 +22,12 @@ from setuptools import setup, find_namespace_packages
 
 setup(
     name='fins-quartus',
-    version='1.0',
+    version='0.11',
     packages=find_namespace_packages(where='src'),
     package_dir={'':'src'},
     python_requires='>= 3.6',
     install_requires=[
-        'fins == 1.0',
+        'fins == 0.11',
         'Jinja2 ~= 2.8',
     ],
     package_data={

@@ -57,7 +57,7 @@ To run an example of a FINS IP, execute the following commands to build and simu
 
 ```bash
 # Enter the test IP directory
-$ cd ./test/
+$ cd ./test/node/
 # Run the fins executable to generate the Vivado backend
 $ fins -b vivado zynq.json
 # Run the simulation in command line mode
@@ -117,10 +117,17 @@ Any new code must be able to build and simulate the test IP for both Vivado and 
 > NOTE: These tests require both Octave and MATLAB. Make sure Quartus is in your `$PATH` environmental variable and the Vivado "settings64.sh" script is sourced!
 
 ```bash
-$ cd ./test/
+$ cd ./test/node/
 $ fins -b vivado zynq.json
 $ make sim
 $ make clean-all
 $ fins -b quartus cycloneV.json
 $ make sim
+```
+
+New code must also be able to parse FINS Nodeset JSON files. To run the nodeset test, execute the following commands:
+
+```bash
+$ cd ./test/nodeset/
+$ fins nodeset.json
 ```

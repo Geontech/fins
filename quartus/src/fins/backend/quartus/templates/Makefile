@@ -183,7 +183,7 @@ clean-all:
 # Vivado project target
 $(IP_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES)
 	$(if $(UseBatch),mkdir -p $(LOGS_DIR))
-	mkdir -p $(QUARTUS_DIR)
+	rm -rf $(QUARTUS_DIR) && mkdir -p $(QUARTUS_DIR)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
 	{%- if 'prebuild' in fins['filesets']['scripts'] %}
