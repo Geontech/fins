@@ -29,7 +29,8 @@ __all__ = (
     'load_fins_data'
 )
 
-SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/schema.json'
+SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/node.json'
+NODESET_SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/nodeset.json'
 SCHEMA_TYPES = ['int', 'bool', 'str', 'list', 'dict']
 SCHEMA_LIST_TYPES = ['int', 'bool', 'str', 'dict']
 SCHEMA_KEYS = ['is_required', 'types', 'list_types', 'fields']
@@ -1177,7 +1178,7 @@ def validate_filesets(fins_data,filename,verbose):
 
 def validate_fins_data(fins_data,filename,verbose):
     if verbose:
-        print('+++++ Loading schema.json ...')
+        print('+++++ Loading node.json ...')
     with open(SCHEMA_FILENAME) as schema_data:
         fins_schema = json.load(schema_data)
     if verbose:
@@ -1185,7 +1186,7 @@ def validate_fins_data(fins_data,filename,verbose):
 
     # Validate the schema itself
     if verbose:
-        print('+++++ Validating schema.json ...')
+        print('+++++ Validating node.json ...')
     validate_schema('schema',fins_schema,verbose)
     if verbose:
         print('+++++ Done.')
@@ -1193,7 +1194,7 @@ def validate_fins_data(fins_data,filename,verbose):
     # Validate the FINS Node JSON file with the schema
     if verbose:
         print('+++++ Validating {} ...'.format(filename))
-    validate_fins('fins',fins_data,fins_schema,verbose)
+    validate_fins('node',fins_data,fins_schema,verbose)
     if verbose:
         print('+++++ Done.')
 
@@ -1241,6 +1242,9 @@ def find_base_address_from_qsys(filename, module_name, interface_name):
     connection_end = module_name + '.' + interface_name
 
     # Parse the Qsys XML file
+    if not os.path.exists(filename):
+        print('ERROR: No file',filename,'exists')
+        sys.exit(1)
     tree = ET.parse(filename)
     root = tree.getroot()
 
@@ -1300,24 +1304,43 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
     """
     Validates and converts data from a Firmware IP Node Specification JSON build file
     """
+    # Read the nodeset schema data
+    if verbose:
+        print('+++++ Loading nodeset.json ...')
+    with open(NODESET_SCHEMA_FILENAME) as schema_data:
+        fins_schema = json.load(schema_data)
+    if verbose:
+        print('+++++ Done.')
+
+    # Validate the FINS Node JSON file with the schema
+    if verbose:
+        print('+++++ Validating {} ...'.format(filename))
+    validate_fins('nodeset',fins_data,fins_schema,verbose)
+    if verbose:
+        print('+++++ Done.')
+    
+    # Set defaults
     if not 'base_offset' in fins_data:
         fins_data['base_offset'] = 0
     ports_producer_defined = False
     ports_consumer_defined = False
     for node in fins_data['nodes']:
         # Convert dictionary to uint
-        if isinstance(node['properties_offset'], dict):
-            _, bd_extension = os.path.splitext(node['properties_offset']['block_design'])
+        if isinstance(node['properties_offset'], str):
+            _, bd_extension = os.path.splitext(node['properties_offset'])
             if bd_extension.lower() == '.qsys':
-                base_address = find_base_address_from_qsys(node['properties_offset']['block_design'],node['properties_offset']['module_name'],node['properties_offset']['interface'])
+                base_address = find_base_address_from_qsys(node['properties_offset'],node['module_name'],node['interface_name'])
             elif bd_extension.lower() == '.bd':
-                base_address = find_base_address_from_bd(node['properties_offset']['block_design'],node['properties_offset']['module_name'],node['properties_offset']['interface'])
+                base_address = find_base_address_from_bd(node['properties_offset'],node['module_name'],node['interface_name'])
             else:
-                print('ERROR: Unknown block design extension in FINS build:',bd_extension)
+                print('ERROR: Unknown block design extension in FINS nodeset:',bd_extension)
                 sys.exit(1)
             node['properties_offset'] = base_address
         # Load FINS Node JSON for each node
-        node['fins'] = load_json_file(node['fins_path'],verbose)
+        node_fins_data = load_json_file(node['fins_path'],verbose)
+        node['properties'] = node_fins_data['properties']['properties']
+        node['node_name'] = node_fins_data['name']
+        node['node_id'] = node['node_name'] + '::' + node['module_name'] + '::' + node['interface_name']
         # Set defaults
         if 'ports_producer' in node:
             if ports_producer_defined:
@@ -1339,7 +1362,7 @@ def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
     """
     Validates and converts data from a Firmware IP Node Specification JSON file
     """
-    # Validate the FINS Node JSON using the schema.json file
+    # Validate the FINS Node JSON using the node.json file
     validate_fins_data(fins_data,filename,verbose)
 
     # Set the backend used for generation

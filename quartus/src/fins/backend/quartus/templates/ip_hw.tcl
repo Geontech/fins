@@ -60,6 +60,8 @@ set_module_property GROUP "{{ fins['library'] }}"
 set_module_property ELABORATION_CALLBACK "{{ fins['name'] }}_create_sub_ip"
 
 # Define Inferred Generics
+{%- if 'filesets' in fins %}
+{%- if 'source' in fins['filesets'] %}
 {%- for generic in fins['hdl']['generics'] %}
 add_parameter {{ generic['name'] }} {{ generic['type']|upper }}
 set_parameter_property {{ generic['name'] }} HDL_PARAMETER true
@@ -75,6 +77,8 @@ set_parameter_property {{ generic['name'] }} DEFAULT_VALUE 1
 {%- endif %}
 {%- endif %}
 {%- endfor %}
+{%- endif %}
+{%- endif %}
 
 # Define FINS Parameters
 {%- if 'params' in fins %}
@@ -88,7 +92,10 @@ add_parameter {{ param['name'] }}
 {%- endfor %}
 {%- endif %}
 
+{%- if 'filesets' in fins %}
+
 # Source Fileset
+{%- if 'source' in fins['filesets'] %}
 add_fileset QUARTUS_SYNTH QUARTUS_SYNTH "" ""
 set_fileset_property QUARTUS_SYNTH TOP_LEVEL {{ fins['top_source'] }}
 {%- for source_file in fins['filesets']['source'] %}
@@ -99,19 +106,17 @@ add_fileset_file {{ source_file['path']|basename }} {{ source_file['type']|upper
 add_fileset_file {{ constraints_file['path']|basename }} {{ constraints_file['type']|upper }} PATH ${IP_ROOT_RELATIVE_TO_COREGEN}/{{ constraints_file['path'] }}
 {%- endif %}
 {%- endfor %}
+{%- endif %}
 
 # Simulation Fileset
-set SIMULATION_FILESET "SIM_VERILOG"
-{%- if 'filesets' in fins %}
 {%- if 'sim' in fins['filesets'] %}
+set SIMULATION_FILESET "SIM_VERILOG"
 {%- for sim_file in fins['filesets']['sim'] %}
 {%- if '%s.vhd'|format(fins['top_sim']) in sim_file['path']|lower %}
 # Redefine the simulation fileset to VHDL
 set SIMULATION_FILESET "SIM_VHDL"
 {%- endif %}
 {%- endfor %}
-{%- endif %}
-{%- endif %}
 add_fileset $SIMULATION_FILESET $SIMULATION_FILESET "" ""
 set_fileset_property $SIMULATION_FILESET TOP_LEVEL {{ fins['top_source'] }}
 {%- for source_file in fins['filesets']['source'] %}
@@ -120,8 +125,10 @@ add_fileset_file {{ source_file['path']|basename }} {{ source_file['type']|upper
 {%- for sim_file in fins['filesets']['sim'] %}
 add_fileset_file {{ sim_file['path']|basename }} {{ sim_file['type']|upper }} PATH ${IP_ROOT_RELATIVE_TO_COREGEN}/{{ sim_file['path'] }}
 {%- endfor %}
+{%- endif %}
 
 # Create Interfaces
+{%- if 'source' in fins['filesets'] %}
 {%- for interface in fins['hdl']['interfaces'] %}
 add_interface {{ interface['name'] }} {{ interface['type'] }} {{ interface['mode'] }}
 {%- if 'reset' in interface['type']|lower %}
@@ -135,14 +142,19 @@ add_interface_port {{ interface['name'] }} {{ hdl_port['name'] }} {{ hdl_port['i
 {%- endif %}
 {%- endfor %}
 {%- endfor %}
+{%- endif %}
 
 # Create Conduits for the non-interface ports
+{%- if 'source' in fins['filesets'] %}
 {%- for hdl_port in fins['hdl']['ports'] %}
 {%- if not 'interface_signal' in hdl_port %}
 add_interface {{ hdl_port['name'] }} conduit end
 add_interface_port {{ hdl_port['name'] }} {{ hdl_port['name'] }} {{ hdl_port['type'] }} {% if hdl_port['direction']|lower == 'in' %}Input{% elif hdl_port['direction']|lower == 'out' %}Output{% else %}Bidir{% endif %} "{{ hdl_port['width'] }}"
 {%- endif %}
 {%- endfor %}
+{%- endif %}
+
+{%- endif %}{#### if 'filesets' in fins ####}
 
 # Elaboration Callback
 # Note: Used to instantiate sub-ip
@@ -178,11 +190,13 @@ proc {{ fins['name'] }}_create_sub_ip {} {
     {%- endfor %}
     # Run TCL Scripts that Create Vendor IP
     # Note: These scripts can use parameters defined above since they are sourced by this script
+    {%- if 'filesets' in fins %}
     {%- if 'scripts' in fins['filesets'] %}
     {%- if 'vendor_ip' in fins['filesets']['scripts'] %}
     {%- for ip_script in fins['filesets']['scripts']['vendor_ip'] %}
     source ${IP_ROOT_RELATIVE_TO_COREGEN}/{{ ip_script['path'] }}
     {%- endfor %}
+    {%- endif %}
     {%- endif %}
     {%- endif %}
 }

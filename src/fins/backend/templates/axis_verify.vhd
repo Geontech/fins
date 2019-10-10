@@ -128,6 +128,10 @@ begin
         --******************************************
         -- Calculate the values for the variables
         --******************************************
+        -- Initialize control signals, "hold" behavior for tdata and tuser is more appropriate
+        axis_tvalid := '0';
+        axis_tlast  := '0';
+        -- Determine the values
         if (file_done) then
           -- When the file is done and a transaction occurs, reset signals to 0
           -- (This is the last AXIS for the file)
@@ -268,12 +272,12 @@ begin
         current_tuser    := s_axis_{{ port['name'] }}_tuser;
         {%- endif %}
         hwrite(current_line, current_tlast);
-        write(current_line, string'(" "));
         {%- if 'data' in port %}
-        hwrite(current_line, current_tdata);
         write(current_line, string'(" "));
+        hwrite(current_line, current_tdata);
         {%- endif %}
         {%- if 'metadata' in port %}
+        write(current_line, string'(" "));
         hwrite(current_line, current_tuser);
         {%- endif %}
         writeline(write_file, current_line);

@@ -16,15 +16,14 @@ A Nodeset has its own schema to enable integration with software. See the table 
 
 Each dictionary element of the `nodes` dictionary array field has the following fields:
 
-| Key                                   | Type            | Required | Default Value | Description |
-| ------------------------------------- | --------------- | -------- | ------------- | ----------- |
-| fins_path                             | string          | YES      |               | The path to the *generated* FINS Node JSON file of the IP node. |
-| properties_offset                     | uint -OR- dict  | YES      |               | The base offset of the address region used to access this node. If a dictionary type, the child fields are used to infer the value from the design sources. |
-| &nbsp;&nbsp;&nbsp;&nbsp;-block_design | string          | YES      |               | If `properties_offset` is a dictionary, this field is used to infer the offset. A path to the block design in which the decode of the properties interface is located. |
-| &nbsp;&nbsp;&nbsp;&nbsp;-module_name  | string          | YES      |               | If `properties_offset` is a dictionary, this field is used to infer the offset. The name of the instantiated IP in the block design defined above. |
-| &nbsp;&nbsp;&nbsp;&nbsp;-interface    | string          | YES      |               | If `properties_offset` is a dictionary, this field is used to infer the offset. The name of the bus interface used to control and status the properties. |
-| ports_producer                        | string          | NO       |               | NOT IMPLEMENTED YET. |
-| ports_consumer                        | string          | NO       |               | NOT IMPLEMENTED YET. |
+| Key               | Type              | Required | Default Value | Description |
+| ----------------- | ----------------- | -------- | ------------- | ----------- |
+| fins_path         | string            | YES      |               | The path to the *generated* FINS Node JSON file of the IP node. |
+| module_name       | string            | YES      |               | If `properties_offset` is a dictionary, this field is used to infer the offset. The name of the instantiated IP in the block design defined above. |
+| interface_name    | string            | YES      |               | If `properties_offset` is a dictionary, this field is used to infer the offset. The name of the bus interface used to control and status the properties. |
+| properties_offset | uint -OR- string  | YES      |               | The base offset of the address region used to access this node. If a string type, this field is a path to the block design in which the decode of the properties interface is located. This path must end in `.qsys` for Intel Platform Designer or `.bd` for Vivado IP Integrator, and it used to infer the offset. |
+| ports_producer    | string            | NO       |               | NOT IMPLEMENTED YET. |
+| ports_consumer    | string            | NO       |               | NOT IMPLEMENTED YET. |
 
 ## Code Generation
 
