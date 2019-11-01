@@ -25,7 +25,7 @@
 -- Backend:     {{ fins['backend'] }}
 -- Generated:   {{ now }}
 -- ---------------------------------------------------------
--- Description: Top-level source code stub for a FINS IP
+-- Description: Top-level interface wrapper for a FINS IP
 -- Reset Type:  Synchronous
 --==============================================================================
 
@@ -64,41 +64,27 @@ entity {{ fins['name']|lower }} is
     S_AXI_RDATA   : out std_logic_vector({{ fins['properties']['data_width'] }}-1 downto 0);
     S_AXI_RRESP   : out std_logic_vector(1 downto 0);
     S_AXI_RVALID  : out std_logic;
-    S_AXI_RREADY  : in  std_logic;
+    S_AXI_RREADY  : in  std_logic{% if 'ports' in fins %};{% endif %}
     {%- endif %}
     {%- if 'ports' in fins %}
     {%- for port in fins['ports']['ports'] %}
-    {%- if port['direction']|lower == 'in' %}
-    -- AXI4-Stream Input Port: {{ port['name']|lower }}
-    s_axis_{{ port['name']|lower }}_aclk    : in  std_logic;
-    s_axis_{{ port['name']|lower }}_aresetn : in  std_logic;
+    {%- set outer_loop = loop %}
+    -- AXI4-Stream Port {{ port['direction']|upper }}: {{ port['name']|lower }}
+    {%- for i in range(port['num_instances']) %}
+    {{ port|axisprefix(i) }}_aclk    : in  std_logic;
+    {{ port|axisprefix(i) }}_aresetn : in  std_logic;
     {%- if port['supports_backpressure'] %}
-    s_axis_{{ port['name']|lower }}_tready  : out std_logic;
+    {{ port|axisprefix(i) }}_tready  : {% if port['direction']|lower == 'in' %}out{% else %}in {% endif %} std_logic;
     {%- endif %}
     {%- if 'data' in port %}
-    s_axis_{{ port['name']|lower }}_tdata   : in  std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
+    {{ port|axisprefix(i) }}_tdata   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- endif %}
     {%- if 'metadata' in port %}
-    s_axis_{{ port['name']|lower }}_tuser   : in  std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
+    {{ port|axisprefix(i) }}_tuser   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
-    s_axis_{{ port['name']|lower }}_tvalid  : in  std_logic;
-    s_axis_{{ port['name']|lower }}_tlast   : in  std_logic{% if not loop.last %};{% endif %}
-    {%- else %}
-    -- AXI4-Stream Output Port: {{ port['name']|lower }}
-    m_axis_{{ port['name']|lower }}_aclk    : in  std_logic;
-    m_axis_{{ port['name']|lower }}_aresetn : in  std_logic;
-    {%- if port['supports_backpressure'] %}
-    m_axis_{{ port['name']|lower }}_tready  : in  std_logic;
-    {%- endif %}
-    {%- if 'data' in port %}
-    m_axis_{{ port['name']|lower }}_tdata   : out std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
-    {%- endif %}
-    {%- if 'metadata' in port %}
-    m_axis_{{ port['name']|lower }}_tuser   : out std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
-    {%- endif %}
-    m_axis_{{ port['name']|lower }}_tvalid  : out std_logic;
-    m_axis_{{ port['name']|lower }}_tlast   : out std_logic{% if not loop.last %};{% endif %}
-    {%- endif %}
+    {{ port|axisprefix(i) }}_tvalid  : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic;
+    {{ port|axisprefix(i) }}_tlast   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic{% if not (outer_loop.last and loop.last) %};{% endif %}
+    {%- endfor %}
     {%- endfor %}
     {%- endif %}
   );
@@ -151,43 +137,42 @@ architecture struct of {{ fins['name']|lower }} is
   component {{ fins['name']|lower }}_axis is
     port (
       {%- for port in fins['ports']['ports'] %}
-      {%- if port['direction']|lower == 'in' %}
-      -- AXI4-Stream Input Port: {{ port['name']|lower }}
-      s_axis_{{ port['name']|lower }}_aclk    : in  std_logic;
-      s_axis_{{ port['name']|lower }}_aresetn : in  std_logic;
+      -- AXI4-Stream Port {{ port['direction']|upper }}: {{ port['name']|lower }}
+      {%- for i in range(port['num_instances']) %}
+      {{ port|axisprefix(i) }}_aclk    : in  std_logic;
+      {{ port|axisprefix(i) }}_aresetn : in  std_logic;
       {%- if port['supports_backpressure'] %}
-      s_axis_{{ port['name']|lower }}_tready  : out std_logic;
+      {{ port|axisprefix(i) }}_tready  : {% if port['direction']|lower == 'in' %}out{% else %}in {% endif %} std_logic;
       {%- endif %}
       {%- if 'data' in port %}
-      s_axis_{{ port['name']|lower }}_tdata   : in  std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
+      {{ port|axisprefix(i) }}_tdata   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
       {%- endif %}
       {%- if 'metadata' in port %}
-      s_axis_{{ port['name']|lower }}_tuser   : in  std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
+      {{ port|axisprefix(i) }}_tuser   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %}  std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
       {%- endif %}
-      s_axis_{{ port['name']|lower }}_tvalid  : in  std_logic;
-      s_axis_{{ port['name']|lower }}_tlast   : in  std_logic;
-      {%- else %}
-      -- AXI4-Stream Output Port: {{ port['name']|lower }}
-      m_axis_{{ port['name']|lower }}_aclk    : in  std_logic;
-      m_axis_{{ port['name']|lower }}_aresetn : in  std_logic;
-      {%- if port['supports_backpressure'] %}
-      m_axis_{{ port['name']|lower }}_tready  : in  std_logic;
-      {%- endif %}
-      {%- if 'data' in port %}
-      m_axis_{{ port['name']|lower }}_tdata   : out std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
-      {%- endif %}
-      {%- if 'metadata' in port %}
-      m_axis_{{ port['name']|lower }}_tuser   : out std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
-      {%- endif %}
-      m_axis_{{ port['name']|lower }}_tvalid  : out std_logic;
-      m_axis_{{ port['name']|lower }}_tlast   : out std_logic;
-      {%- endif %}
+      {{ port|axisprefix(i) }}_tvalid  : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %}  std_logic;
+      {{ port|axisprefix(i) }}_tlast   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %}  std_logic;
+      {%- endfor %}
       {%- endfor %}
       ports_in  : out t_{{ fins['name']|lower }}_ports_in;
       ports_out : in  t_{{ fins['name']|lower }}_ports_out
     );
   end component;
   {%- endif %}
+
+  -- Auto-generated User Core Code
+  component {{ fins['name']|lower }}_core is
+    port (
+      {%- if 'properties' in fins %}
+      props_control : in  t_{{ fins['name']|lower }}_props_control;
+      props_status  : out t_{{ fins['name']|lower }}_props_status{% if 'ports' in fins %};{% endif %}
+      {%- endif %}
+      {%- if 'ports' in fins %}
+      ports_in      : in  t_{{ fins['name']|lower }}_ports_in;
+      ports_out     : out t_{{ fins['name']|lower }}_ports_out
+      {%- endif %}
+    );
+  end component;
 
   --------------------------------------------------------------------------------
   -- Signals
@@ -242,35 +227,21 @@ begin
   u_ports : {{ fins['name']|lower }}_axis
     port map (
       {%- for port in fins['ports']['ports'] %}
-      {%- if port['direction']|lower == 'in' %}
-      s_axis_{{ port['name']|lower }}_aclk    => s_axis_{{ port['name']|lower }}_aclk,
-      s_axis_{{ port['name']|lower }}_aresetn => s_axis_{{ port['name']|lower }}_aresetn,
+      {%- for i in range(port['num_instances']) %}
+      {{ port|axisprefix(i) }}_aclk    => {{ port|axisprefix(i) }}_aclk,
+      {{ port|axisprefix(i) }}_aresetn => {{ port|axisprefix(i) }}_aresetn,
       {%- if port['supports_backpressure'] %}
-      s_axis_{{ port['name']|lower }}_tready  => s_axis_{{ port['name']|lower }}_tready,
+      {{ port|axisprefix(i) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%- endif %}
       {%- if 'data' in port %}
-      s_axis_{{ port['name']|lower }}_tdata   => s_axis_{{ port['name']|lower }}_tdata,
+      {{ port|axisprefix(i) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
       {%- endif %}
       {%- if 'metadata' in port %}
-      s_axis_{{ port['name']|lower }}_tuser   => s_axis_{{ port['name']|lower }}_tuser,
+      {{ port|axisprefix(i) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
       {%- endif %}
-      s_axis_{{ port['name']|lower }}_tvalid  => s_axis_{{ port['name']|lower }}_tvalid,
-      s_axis_{{ port['name']|lower }}_tlast   => s_axis_{{ port['name']|lower }}_tlast,
-      {%- else %}
-      m_axis_{{ port['name']|lower }}_aclk    => m_axis_{{ port['name']|lower }}_aclk,
-      m_axis_{{ port['name']|lower }}_aresetn => m_axis_{{ port['name']|lower }}_aresetn,
-      {%- if port['supports_backpressure'] %}
-      m_axis_{{ port['name']|lower }}_tready  => m_axis_{{ port['name']|lower }}_tready,
-      {%- endif %}
-      {%- if 'data' in port %}
-      m_axis_{{ port['name']|lower }}_tdata   => m_axis_{{ port['name']|lower }}_tdata,
-      {%- endif %}
-      {%- if 'metadata' in port %}
-      m_axis_{{ port['name']|lower }}_tuser   => m_axis_{{ port['name']|lower }}_tuser,
-      {%- endif %}
-      m_axis_{{ port['name']|lower }}_tvalid  => m_axis_{{ port['name']|lower }}_tvalid,
-      m_axis_{{ port['name']|lower }}_tlast   => m_axis_{{ port['name']|lower }}_tlast,
-      {%- endif %}
+      {{ port|axisprefix(i) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
+      {{ port|axisprefix(i) }}_tlast   => {{ port|axisprefix(i) }}_tlast,
+      {%- endfor %}
       {%- endfor %}
       ports_in  => ports_in,
       ports_out => ports_out
@@ -278,138 +249,18 @@ begin
   {%- endif %}
 
   --------------------------------------------------------------------------------
-  -- User Code
+  -- User Core
   --------------------------------------------------------------------------------
-  {%- if 'properties' in fins %}
-  -- To use the software-controllable FINS "Properties" interface, use the
-  -- fields of the following record signals:
-  --
-  --   * props_control : t_{{ fins['name']|lower }}_props_control;
-  --   * props_status  : t_{{ fins['name']|lower }}_props_status;
-  --
-  -- The fields of props_control and props_status record signals above are the
-  -- property names. A property name field is in turn a record of access signal
-  -- records. If a property has a "length" > 1, then its property name field
-  -- is an array of access signal records. An access signal record has different
-  -- fields depending on the property "type". The access signal record fields are
-  -- listed below for each property "type":
-  -- 
-  --   | type                | props_control Record Fields             | props_status Record Fields |
-  --   | ------------------- | ----------------------------------------| -------------------------- |
-  --   | read-only-constant  | None                                    | None                       |
-  --   | read-only-data      | None                                    | rd_data                    |
-  --   | read-only-external  | rd_en                                   | rd_data, rd_valid          |
-  --   | read-only-memmap    | rd_en, rd_addr                          | rd_data, rd_valid          |
-  --   | write-only-external | wr_en, wr_data                          | None                       |
-  --   | write-only-memmap   | wr_en, wr_data, wr_addr                 | None                       |
-  --   | read-write-internal | None                                    | None                       |
-  --   | read-write-data     | wr_data                                 | None                       |
-  --   | read-write-external | rd_en, wr_en, wr_data                   | rd_data, rd_valid          |
-  --   | read-write-memmap   | rd_en, rd_addr, wr_en, wr_data, wr_addr | rd_data, rd_valid          |
-  --
-  -- The only property types that instantiate a physical storage register
-  -- inside the {{ fins['name']|lower }}_axilite module are the "read-write-data"
-  -- and the "read-write-internal". The most common property type used is
-  -- "read-write-data", and its value can be used directly since it doesn't
-  -- have any of the other access signals. An example of the usage of a property
-  -- with name "gain" and type "read-write-data" is below:
-  --
-  --   signal_magnitude_out <= signed(props_control.gain.wr_data) * signal_magnitude_in;
-  --
-  -- All other types assume that the user will handle the storage and retrieval
-  -- of data. Below is an example of using a property with name "coefficient"
-  -- and type "read-write-external":
-  --
-  --   s_coefficient_property : process(S_AXI_ACLK)
-  --   begin
-  --     if (rising_edge(S_AXI_ACLK)) then
-  --       if (S_AXI_ARESETN = '0') then
-  --         coefficient_register <= (others => '0');
-  --       else
-  --         if (props_control.coefficient.wr_en = '1') then
-  --           coefficient_register <= props_control.coefficient.wr_data;
-  --         end if;
-  --       end if;
-  --     end if;
-  --   end process s_coefficient_property;
-  --   props_status.coefficient.rd_valid <= props_control.coefficient.rd_en;
-  --   props_status.coefficient.rd_data  <= coefficient_register;
-  --
-  --------------------------------------------------------------------------------
-  {%- endif %}
-  {%- if 'ports' in fins %}
-  -- To use the standardized FINS "Ports" interfaces, use the
-  -- fields of the following record signals:
-  --
-  --   * ports_in  : t_{{ fins['name']|lower }}_ports_in;
-  --   * ports_out : t_{{ fins['name']|lower }}_ports_out;
-  --
-  -- The fields of ports_in and ports_out record signals above are the port names.
-  -- A port name field is in turn a record of access signal records. The fields
-  -- of the port name records are dependent on the port characteristics and are
-  -- listed in the table below:
-  --
-  --   | `direction` | `supports_backpressure` | `data` exists | `metadata` exists | ports_in Record Fields      | ports_out Record Fields     |
-  --   | ----------- | ----------------------- | ------------- | ----------------- | --------------------------- | --------------------------- |
-  --   | in          | true                    | true          | false             | valid, last, data           | ready                       |
-  --   | in          | true                    | false         | true              | valid, last, metadata       | ready                       |
-  --   | in          | true                    | true          | true              | valid, last, data, metadata | ready                       |
-  --   | in          | false                   | true          | false             | valid, last, data           |                             |
-  --   | in          | false                   | false         | true              | valid, last, metadata       |                             |
-  --   | in          | false                   | true          | true              | valid, last, data, metadata |                             |
-  --   | out         | true                    | true          | false             | ready                       | valid, last, data           |
-  --   | out         | true                    | false         | true              | ready                       | valid, last, metadata       |
-  --   | out         | true                    | true          | true              | ready                       | valid, last, data, metadata |
-  --   | out         | false                   | true          | false             |                             | valid, last, data           |
-  --   | out         | false                   | false         | true              |                             | valid, last, metadata       |
-  --   | out         | false                   | true          | true              |                             | valid, last, data, metadata |
-  --
-  -- At the lowest level, the data or metadata values have either signed or
-  -- unsigned types (indicated by the "is_signed" field). However, the data field
-  -- may itself be a more complex type when:
-  --
-  --   * (num_channels > 1) AND (num_samples > 1): The data field is a
-  --     two-dimensional array of either complex records or signed/unsigned
-  --     values. The first index is for channels, and the second is for samples.
-  --     Example code for real-only output port "power":
-  --         ports_out.power.data(channel)(sample) <= data_i*data_i+data_q*data_q;
-  --   * (num_channels > 1) XOR (num_samples > 1): The data field is a
-  --     one-dimensional array of either complex records or signed/unsigned
-  --     values.
-  --   * (is_complex = true): The data field is a complex record with fields
-  --     "i" (real) and "q" (imaginary). "i" and "q" are either signed or
-  --     unsigned types.
-  --
-  -- Similar to the data field, the metadata field may also be a more complex
-  -- type than just signed or unsigned when:
-  --
-  --   * (is_complex = true): The metadata field is a complex record with fields
-  --     "i" (real) and "q" (imaginary). "i" and "q" are either signed or
-  --     unsigned types.
-  --
-  -- For ease of use, four conversion functions are provided in the pkg file
-  -- for each port's data and metadata. These functions convert between the
-  -- custom record types and std_logic_vector's, and their naming conventions
-  -- are listed below:
-  --
-  --   * f_serialize_[IP_NAME]_[PORT_NAME]_data()
-  --   * f_unserialize_[IP_NAME]_[PORT_NAME]_data()
-  --   * f_serialize_[IP_NAME]_[PORT_NAME]_metadata()
-  --   * f_unserialize_[IP_NAME]_[PORT_NAME]_metadata()
-  --
-  -- Example code of a "powconv" module using an input port "adc" and output
-  -- port "power" that both have metadata and support backpressure is shown below:
-  --
-  --   ports_out.power.data     <= (ports_in.adc.i * ports_in.adc.i) + (ports_in.adc.q * ports_in.adc.q);
-  --   ports_out.power.metadata <= f_unserialize_powconv_power_metadata(f_serialize_powconv_adc_metadata(ports_in.adc.metadata));
-  --   ports_out.power.valid    <= ports_in.adc.valid;
-  --   ports_out.power.last     <= ports_in.adc.last;
-  --   ports_out.adc.ready      <= ports_in.power.ready;
-  --
-  -- Notice how the metadata is passed through, using the conversion functions
-  -- from the package file to make the assignment with incongruous types.
-  --
-  --------------------------------------------------------------------------------
-  {%- endif %}
+  u_core : {{ fins['name']|lower }}_core
+    port map (
+      {%- if 'properties' in fins %}
+      props_control => props_control,
+      props_status  => props_status{% if 'ports' in fins %},{% endif %}
+      {%- endif %}
+      {%- if 'ports' in fins %}
+      ports_in      => ports_in,
+      ports_out     => ports_out
+      {%- endif %}
+    );
 
 end struct;

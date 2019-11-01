@@ -1,14 +1,13 @@
 {
-  "name":"test_middle",
+  "name":"test_top",
   "description":"Top level IP for testing",
   "version":"0.0",
   "company_name":"Geon Technologies",
   "company_url":"geon.tech",
   "company_logo":"docs/geontech_logo.png",
   "library":"user",
-  "part":"xc7z020clg484-1",
-  "top_source":"test_middle",
-  "top_sim":"test_middle_tb",
+  "top_source":"test_top",
+  "top_sim":"test_top_tb",
   "params" : [
     { "name":"TEST_PARAM_BOOLEAN",         "value":true,        "description":"This is a test parameter excercising a boolean type" },
     { "name":"TEST_PARAM_INTEGER",         "value":4,           "description":"This is a test parameter excercising an integer type" },
@@ -51,6 +50,8 @@
         "name":"test_in",
         "direction":"in",
         "supports_backpressure":true,
+        "num_instances":2,
+        "use_pipeline":false,
         "data":{
           "bit_width":8,
           "is_complex":true,
@@ -67,6 +68,8 @@
         "name":"test_out",
         "direction":"out",
         "supports_backpressure":true,
+        "num_instances":2,
+        "use_pipeline":false,
         "data":{
           "bit_width":8,
           "is_complex":true,
@@ -139,21 +142,23 @@
   },
   "filesets":{
     "source":[
-      { "path":"gen/core/test_middle_pkg.vhd", "type":"vhdl"    },
-      { "path":"gen/core/test_middle_axis.vhd"                  },
-      { "path":"gen/core/test_middle_axilite.vhd"               },
-      { "path":"hdl/test_middle.vhd",          "type":"VHDL"    }
+      { "path":"gen/core/test_top_pkg.vhd", "type":"vhdl"    },
+      { "path":"gen/core/test_top_axis.vhd"                  },
+      { "path":"gen/core/test_top_axilite.vhd"               },
+      { "path":"hdl/axilite_to_swconfig.vhd"                 },
+      { "path":"hdl/test_top.vhd",          "type":"VHDL"    }
     ],
     "sim":[
-      { "path":"ip/test_bottom/gen/core/test_bottom_swconfig_verify.vhd" },
-      { "path":"./gen/core/test_middle_axilite_verify.vhd", "type":"Vhdl" },
-      { "path":"./gen/core/test_middle_axis_verify.vhd", "type":"VHDL" },
-      { "path":"./hdl/test_middle_tb.vhd" }
+      { "path":"./ip/test_middle/ip/test_bottom/gen/core/test_bottom_axilite_verify.vhd" },
+      { "path":"./ip/test_middle/gen/core/test_middle_axilite_verify.vhd" },
+      { "path":"./gen/core/test_top_axilite_verify.vhd", "type":"Vhdl" },
+      { "path":"./gen/core/test_top_axis_verify.vhd", "type":"VHDL" },
+      { "path":"./hdl/test_top_tb.vhd" }
     ],
     "constraints":[
-      { "path":"constraints/test_middle.xdc", "type":"XDC" },
-      { "path":"constraints/test_middle.sdc", "type":"sdc" },
-      { "path":"constraints/test_middle.xdc"               }
+      { "path":"constraints/test_top.xdc", "type":"XDC" },
+      { "path":"constraints/test_top.sdc", "type":"sdc" },
+      { "path":"constraints/test_top.xdc"               }
     ],
     "scripts":{
       "presim":[
@@ -188,7 +193,7 @@
   },
   "ip":[
     {
-      "fins_path":"ip/test_bottom/zynq.json",
+      "fins_path":"ip/test_middle/fins.json",
       "params":[
         { "name":"TEST_PARAM_BOOLEAN",         "parent":"TEST_PARAM_BOOLEAN"         },
         { "name":"TEST_PARAM_INTEGER",         "parent":"TEST_PARAM_INTEGER"         },
@@ -205,9 +210,13 @@
         { "name":"PROPS_IS_ADDR_BYTE_INDEXED", "parent":"PROPS_IS_ADDR_BYTE_INDEXED" }
       ],
       "instances":[
-        { "module_name":"test_bottom_0" }
+        {
+          "module_name":"test_middle_0",
+          "generics":[
+            { "name":"G_TEST_GENERIC_POSITIVE", "value":100 }
+          ]
+        }
       ]
     }
   ]
 }
-

@@ -188,6 +188,12 @@ architecture rtl of {{ fins['name']|lower }}_swconfig is
 begin
 
   ------------------------------------------------------------------------------
+  -- Clock and Reset Assignments
+  ------------------------------------------------------------------------------
+  props_control.clk    <= s_swconfig_clk;
+  props_control.resetn <= NOT s_swconfig_reset;
+
+  ------------------------------------------------------------------------------
   -- Register Decode, Read, and Write
   ------------------------------------------------------------------------------
   -- Combinatorial process to convert address to word indexed

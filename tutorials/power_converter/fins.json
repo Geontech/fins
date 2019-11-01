@@ -31,7 +31,8 @@
       { "path":"gen/core/power_converter_pkg.vhd" },
       { "path":"gen/core/power_converter_axis.vhd" },
       { "path":"gen/core/power_converter_axilite.vhd" },
-      { "path":"hdl/power_converter.vhd" }
+      { "path":"hdl/power_converter_core.vhd" },
+      { "path":"gen/core/power_converter.vhd" }
     ],
     "sim":[
       { "path":"gen/core/power_converter_axilite_verify.vhd" },

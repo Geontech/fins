@@ -6,7 +6,6 @@
   "company_url":"geon.tech",
   "company_logo":"docs/geontech_logo.png",
   "library":"user",
-  "part":"10CX220YF780I5G",
   "top_source":"test_bottom",
   "top_sim":"test_bottom_tb",
   "params" : [
@@ -51,6 +50,7 @@
         "name":"test_in",
         "direction":"in",
         "supports_backpressure":true,
+        "num_instances":2,
         "data":{
           "bit_width":8,
           "is_complex":true,
@@ -67,6 +67,7 @@
         "name":"test_out",
         "direction":"out",
         "supports_backpressure":true,
+        "num_instances":2,
         "data":{
           "bit_width":8,
           "is_complex":true,
@@ -142,6 +143,7 @@
       { "path":"gen/core/test_bottom_pkg.vhd", "type":"vhdl"    },
       { "path":"gen/core/test_bottom_axis.vhd"                  },
       { "path":"gen/core/test_bottom_swconfig.vhd"              },
+      { "path":"hdl/test_bottom_core.vhd",     "type":"VHDL"    },
       { "path":"hdl/test_bottom.vhd",          "type":"VHDL"    }
     ],
     "sim":[

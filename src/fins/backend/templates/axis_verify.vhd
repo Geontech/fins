@@ -41,47 +41,67 @@ use std.textio.all;
 entity {{ fins['name'] }}_axis_verify is
   generic (
     {%- for port in fins['ports']['ports'] %}
+    {%- set outer_loop = loop %}
+    {%- for i in range(port['num_instances']) %}
     {%- if port['direction'] == "in" %}
-    G_{{ port['name']|upper }}_SOURCE_SAMPLE_PERIOD : natural := 1; -- Number of clocks per sample
-    G_{{ port['name']|upper }}_SOURCE_FILEPATH : string := "../../../../sim_source_{{ port['name']|lower }}.txt"{% if not loop.last %};{% endif %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_SAMPLE_PERIOD : positive := 1;
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_RANDOMIZE_BUS : boolean := false;
+    {%- if fins['backend']|lower == 'quartus' %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH : string := "../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%- else %}
-    G_{{ port['name']|upper }}_SINK_FILEPATH : string := "../../../../sim_sink_{{ port['name']|lower }}.txt"{% if not loop.last %};{% endif %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH : string := "../../../../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%- endif %}
+    {%- else %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_SAMPLE_PERIOD : positive := 1;
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_RANDOMIZE_BUS : boolean := false;
+    {%- if fins['backend']|lower == 'quartus' %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH : string := "../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
+    {%- else %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH : string := "../../../../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
+    {%- endif %}
+    {%- endif %}
+    {%- endfor %}
     {%- endfor %}
   );
   port (
     simulation_done : in boolean;
     {%- for port in fins['ports']['ports'] %}
     {%- if port['direction']|lower == 'out' %}
-    -- Sinks from AXI4-Stream Output Port: {{ port['name']|lower }}
-    s_axis_{{ port['name']|lower }}_aclk    : in  std_logic;
-    {%- if port['supports_backpressure'] %}
-    s_axis_{{ port['name']|lower }}_tready  : out std_logic;
-    {%- endif %}
-    {%- if 'data' in port %}
-    s_axis_{{ port['name']|lower }}_tdata   : in  std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
-    {%- endif %}
-    {%- if 'metadata' in port %}
-    s_axis_{{ port['name']|lower }}_tuser   : in  std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
-    {%- endif %}
-    s_axis_{{ port['name']|lower }}_tvalid  : in  std_logic;
-    s_axis_{{ port['name']|lower }}_tlast   : in  std_logic{% if not loop.last %};{% endif %}
+    -- File Sink for AXI4-Stream Output Port: {{ port['name']|lower }}
     {%- else %}
-    -- Sources for AXI4-Stream Input Port: {{ port['name']|lower }}
-    m_axis_{{ port['name']|lower }}_aclk    : in  std_logic;
-    m_axis_{{ port['name']|lower }}_enable  : in  std_logic;
+    -- File Source for AXI4-Stream Input Port: {{ port['name']|lower }}
+    {%- endif %}
+    {%- set outer_loop = loop %}
+    {%- for i in range(port['num_instances']) %}
+    {%- if port['direction']|lower == 'out' %}
+    {{ port|axisprefix(i,True) }}_aclk    : in  std_logic;
     {%- if port['supports_backpressure'] %}
-    m_axis_{{ port['name']|lower }}_tready  : in  std_logic;
+    {{ port|axisprefix(i,True) }}_tready  : out std_logic;
     {%- endif %}
     {%- if 'data' in port %}
-    m_axis_{{ port['name']|lower }}_tdata   : out std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
+    {{ port|axisprefix(i,True) }}_tdata   : in  std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- endif %}
     {%- if 'metadata' in port %}
-    m_axis_{{ port['name']|lower }}_tuser   : out std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
+    {{ port|axisprefix(i,True) }}_tuser   : in  std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
-    m_axis_{{ port['name']|lower }}_tvalid  : out std_logic;
-    m_axis_{{ port['name']|lower }}_tlast   : out std_logic{% if not loop.last %};{% endif %}
+    {{ port|axisprefix(i,True) }}_tvalid  : in  std_logic;
+    {{ port|axisprefix(i,True) }}_tlast   : in  std_logic{% if not (outer_loop.last and loop.last) %};{% endif %}
+    {%- else %}
+    {{ port|axisprefix(i,True) }}_aclk    : in  std_logic;
+    {{ port|axisprefix(i,True) }}_enable  : in  std_logic;
+    {%- if port['supports_backpressure'] %}
+    {{ port|axisprefix(i,True) }}_tready  : in  std_logic;
     {%- endif %}
+    {%- if 'data' in port %}
+    {{ port|axisprefix(i,True) }}_tdata   : out std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
+    {%- endif %}
+    {%- if 'metadata' in port %}
+    {{ port|axisprefix(i,True) }}_tuser   : out std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
+    {%- endif %}
+    {{ port|axisprefix(i,True) }}_tvalid  : out std_logic;
+    {{ port|axisprefix(i,True) }}_tlast   : out std_logic{% if not (outer_loop.last and loop.last) %};{% endif %}
+    {%- endif %}
+    {%- endfor %}
     {%- endfor %}
   );
 end {{ fins['name'] }}_axis_verify;
@@ -90,39 +110,46 @@ end {{ fins['name'] }}_axis_verify;
 architecture struct of {{ fins['name'] }}_axis_verify is
 begin
 {%- for port in fins['ports']['ports'] %}
+{%- for i in range(port['num_instances']) %}
   {%- if port['direction'] == "in" %}
   -- Input from file
-  w_file_source_{{ port['name'] }} : process
-    variable file_status    : file_open_status := NAME_ERROR;
-    variable file_done      : boolean := false;
-    file     read_file      : text;
-    variable current_line   : line;
-    variable current_tlast  : std_logic_vector(3 downto 0);
-    variable period_counter : integer := 0;
-    variable axis_tvalid    : std_logic := '0';
-    variable axis_tlast     : std_logic := '0';
+  w_file_source_{{ port['name'] }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %} : process
+    -- File reading variables
+    variable file_status           : file_open_status := NAME_ERROR;
+    variable file_done             : boolean := false;
+    file     read_file             : text;
+    variable current_line          : line;
+    variable current_tlast         : std_logic_vector(3 downto 0);
+    -- Variables to determine bus activity
+    variable sample_period_counter : natural := 0;
+    variable sample_active         : boolean := false;
+    variable seed1, seed2          : positive;
+    variable rand                  : real;
+    -- Intermediate variables to assign to signals
+    variable axis_tvalid           : std_logic := '0';
+    variable axis_tlast            : std_logic := '0';
     {%- if 'data' in port %}
-    variable axis_tdata     : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0) := (others => '0');
-    variable current_tdata  : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
+    variable axis_tdata            : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0) := (others => '0');
+    variable current_tdata         : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- endif %}
     {%- if 'metadata' in port %}
-    variable axis_tuser     : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0) := (others => '0');
-    variable current_tuser  : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
+    variable axis_tuser            : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0) := (others => '0');
+    variable current_tuser         : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
   begin
     -- Use "simulation_done" to suspend operations
     if (NOT simulation_done) then
       -- Start to read at the rising edge of the clock
-      wait until rising_edge(m_axis_{{ port['name'] }}_aclk);
-      if (m_axis_{{ port['name'] }}_enable = '0') then
+      wait until rising_edge({{ port|axisprefix(i,True) }}_aclk);
+      if ({{ port|axisprefix(i,True) }}_enable = '0') then
         -- When disabled, set output signals low
-        m_axis_{{ port['name'] }}_tvalid <= '0';
-        m_axis_{{ port['name'] }}_tlast  <= '0';
+        {{ port|axisprefix(i,True) }}_tvalid <= '0';
+        {{ port|axisprefix(i,True) }}_tlast  <= '0';
         {%- if 'data' in port %}
-        m_axis_{{ port['name'] }}_tdata  <= (others => '0');
+        {{ port|axisprefix(i,True) }}_tdata  <= (others => '0');
         {%- endif %}
         {%- if 'metadata' in port %}
-        m_axis_{{ port['name'] }}_tuser  <= (others => '0');
+        {{ port|axisprefix(i,True) }}_tuser  <= (others => '0');
         {%- endif %}
       else
         --******************************************
@@ -134,9 +161,9 @@ begin
         -- Determine the values
         if (file_done) then
           -- When the file is done and a transaction occurs, reset signals to 0
-          -- (This is the last AXIS for the file)
+          -- (This is the last AXIS transaction for the file)
           {%- if port['supports_backpressure'] %}
-          if (axis_tvalid = '1' AND m_axis_{{ port['name'] }}_tready = '1') then
+          if (axis_tvalid = '1' AND {{ port|axisprefix(i,True) }}_tready = '1') then
           {%- else %}
           if (axis_tvalid = '1') then
           {%- endif %}
@@ -155,15 +182,33 @@ begin
           -- occurs during that cycle or a later cycle, the data is done being consumed and AXIS
           -- signals can be reset to 0.
         else
-          {%- if port['supports_backpressure'] %}
-          -- When we get a TREADY, read the next value
-          if (m_axis_{{ port['name'] }}_tready = '1') then
-          {%- endif %}
-            -- Respect the sample period
-            if ((period_counter rem G_{{ port['name']|upper }}_SOURCE_SAMPLE_PERIOD) = 0) then
+          -- Calculate if this sample is active based upon the sample period
+          if (G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_RANDOMIZE_BUS) then
+            -- Randomize the transaction activity based upon a duty cycle calculated from the sample period
+            uniform(seed1, seed2, rand);
+            if (rand <= 1.0/real(G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_SAMPLE_PERIOD)) then
+              sample_active := true;
+            else
+              sample_active := false;
+            end if;
+          else
+            -- Create the transaction activity based upon the sample period counter
+            if (sample_period_counter = 0) then
+              sample_active := true;
+            else
+              sample_active := false;
+            end if;
+          end if;
+
+          -- Respect the sample period
+          if (sample_active) then
+            {%- if port['supports_backpressure'] %}
+            -- When we get a TREADY, read the next value
+            if ({{ port|axisprefix(i,True) }}_tready = '1') then
+            {%- endif %}
               -- Open the file if it's not open already
               if (file_status /= OPEN_OK) then
-                file_open(file_status, read_file, G_{{ port['name']|upper }}_SOURCE_FILEPATH, READ_MODE);
+                file_open(file_status, read_file, G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH, READ_MODE);
               end if;
               -- Grab a valid value from the file if we haven't reached the EOF
               if (NOT endfile(read_file)) then
@@ -209,23 +254,28 @@ begin
                 -- Set the file_done flag for reference during next cycle
                 file_done := true;
               end if;
+            {%- if port['supports_backpressure'] %}
             end if;
-          {%- if port['supports_backpressure'] %}
+            {%- endif %}
           end if;
-          {%- endif %}
-          -- Increment the period counter
-          period_counter := period_counter + 1;
+
+          -- Increment the sample period counter
+          if (sample_period_counter >= G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_SAMPLE_PERIOD-1) then
+            sample_period_counter := 0;
+          else
+            sample_period_counter := sample_period_counter + 1;
+          end if;
         end if;
         --******************************************
         -- Set outputs to the variables
         --******************************************
-        m_axis_{{ port['name'] }}_tvalid <= axis_tvalid;
-        m_axis_{{ port['name'] }}_tlast  <= axis_tlast;
+        {{ port|axisprefix(i,True) }}_tvalid <= axis_tvalid;
+        {{ port|axisprefix(i,True) }}_tlast  <= axis_tlast;
         {%- if 'data' in port %}
-        m_axis_{{ port['name'] }}_tdata  <= axis_tdata;
+        {{ port|axisprefix(i,True) }}_tdata  <= axis_tdata;
         {%- endif %}
         {%- if 'metadata' in port %}
-        m_axis_{{ port['name'] }}_tuser  <= axis_tuser;
+        {{ port|axisprefix(i,True) }}_tuser  <= axis_tuser;
         {%- endif %}
       end if;
     else
@@ -234,42 +284,53 @@ begin
       -- Suspend operations when simulation is done
       wait;
     end if;
-  end process w_file_source_{{ port['name'] }};
+  end process w_file_source_{{ port['name'] }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %};
   {%- else %}
   -- Output to file
-  w_file_sink_{{ port['name'] }} : process
-    variable file_status   : file_open_status := NAME_ERROR;
-    file     write_file    : text;
-    variable current_line  : line;
-    variable current_tlast : std_logic_vector(3 downto 0) := (others => '0');
+  w_file_sink_{{ port['name'] }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %} : process
+    -- Variables to write to file
+    variable file_status           : file_open_status := NAME_ERROR;
+    file     write_file            : text;
+    variable current_line          : line;
+    -- Variables for intermediate signals
+    variable current_tlast         : std_logic_vector(3 downto 0) := (others => '0');
+    {%- if port['supports_backpressure'] %}
+    variable current_tready        : std_logic;
+    {%- endif %}
     {%- if 'data' in port %}
-    variable current_tdata : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
+    variable current_tdata         : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- endif %}
     {%- if 'metadata' in port %}
-    variable current_tuser : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
+    variable current_tuser         : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
+    -- Variables to determine bus activity
+    variable sample_period_counter : natural := 0;
+    variable sample_active         : boolean := false;
+    variable seed1, seed2          : positive;
+    variable rand                  : real;
   begin
     -- Use "simulation_done" to suspend operations
     if (simulation_done = false) then
-      -- Read at the rising edge of the clock
-      wait until rising_edge(s_axis_{{ port['name'] }}_aclk);
+      -- Perform operations at the rising edge of the clock
+      wait until rising_edge({{ port|axisprefix(i,True) }}_aclk);
+
+      -- Write valid transactions
       {%- if port['supports_backpressure'] %}
-      -- Hold TREADY high (this module is always ready to accept data)
-      s_axis_{{ port['name'] }}_tready <= '1';
+      if (({{ port|axisprefix(i,True) }}_tvalid = '1') AND (current_tready = '1')) then
+      {%- else %}
+      if ({{ port|axisprefix(i,True) }}_tvalid = '1') then
       {%- endif %}
-      -- When we get a TVALID, write the next value
-      if (s_axis_{{ port['name'] }}_tvalid = '1') then
         -- Open the file if it's not open already
         if (file_status /= OPEN_OK) then
-          file_open(file_status, write_file, G_{{ port['name']|upper }}_SINK_FILEPATH, WRITE_MODE);
+          file_open(file_status, write_file, G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH, WRITE_MODE);
         end if;
         -- Write the value to the file in hexadecimal format
-        current_tlast(0) := s_axis_{{ port['name'] }}_tlast;
+        current_tlast(0) := {{ port|axisprefix(i,True) }}_tlast;
         {%- if 'data' in port %}
-        current_tdata    := s_axis_{{ port['name'] }}_tdata;
+        current_tdata    := {{ port|axisprefix(i,True) }}_tdata;
         {%- endif %}
         {%- if 'metadata' in port %}
-        current_tuser    := s_axis_{{ port['name'] }}_tuser;
+        current_tuser    := {{ port|axisprefix(i,True) }}_tuser;
         {%- endif %}
         hwrite(current_line, current_tlast);
         {%- if 'data' in port %}
@@ -282,13 +343,44 @@ begin
         {%- endif %}
         writeline(write_file, current_line);
       end if;
+
+      {%- if port['supports_backpressure'] %}
+      -- Determine the TREADY activity
+      if (G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_RANDOMIZE_BUS) then
+        -- Randomize the transaction activity based upon a duty cycle calculated from the sample period
+        uniform(seed1, seed2, rand);
+        if (rand <= 1.0/real(G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_SAMPLE_PERIOD)) then
+          current_tready := '1';
+        else
+          current_tready := '0';
+        end if;
+      else
+        -- Create the transaction activity based upon the sample period counter
+        if (sample_period_counter = 0) then
+          current_tready := '1';
+        else
+          current_tready := '0';
+        end if;
+      end if;
+      {{ port|axisprefix(i,True) }}_tready <= current_tready;
+      
+
+      -- Increment the sample period counter for the TREADY operation
+      if (sample_period_counter >= G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_SAMPLE_PERIOD-1) then
+        sample_period_counter := 0;
+      else
+        sample_period_counter := sample_period_counter + 1;
+      end if;
+      {%- endif %}{#### if port['supports_backpressure'] ####}
+
     else
       -- Close File
       file_close(write_file);
       -- Suspend operations when simulation is done
       wait;
     end if;
-  end process w_file_sink_{{ port['name'] }};
+  end process w_file_sink_{{ port['name'] }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %};
   {% endif %}
+{% endfor %}
 {% endfor %}
 end struct;

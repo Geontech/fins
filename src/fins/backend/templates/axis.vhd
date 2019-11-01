@@ -43,37 +43,22 @@ use work.{{ fins['name']|lower }}_pkg.all;
 entity {{ fins['name']|lower }}_axis is
   port (
     {%- for port in fins['ports']['ports'] %}
-    {%- if port['direction']|lower == 'in' %}
-    -- AXI4-Stream Input Port: {{ port['name']|lower }}
-    s_axis_{{ port['name']|lower }}_aclk    : in  std_logic;
-    s_axis_{{ port['name']|lower }}_aresetn : in  std_logic;
+    -- AXI4-Stream Port {{ port['direction']|upper }}: {{ port['name']|lower }}
+    {%- for i in range(port['num_instances']) %}
+    {{ port|axisprefix(i) }}_aclk    : in  std_logic;
+    {{ port|axisprefix(i) }}_aresetn : in  std_logic;
     {%- if port['supports_backpressure'] %}
-    s_axis_{{ port['name']|lower }}_tready  : out std_logic;
+    {{ port|axisprefix(i) }}_tready  : {% if port['direction']|lower == 'in' %}out{% else %}in {% endif %} std_logic;
     {%- endif %}
     {%- if 'data' in port %}
-    s_axis_{{ port['name']|lower }}_tdata   : in  std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
+    {{ port|axisprefix(i) }}_tdata   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- endif %}
     {%- if 'metadata' in port %}
-    s_axis_{{ port['name']|lower }}_tuser   : in  std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
+    {{ port|axisprefix(i) }}_tuser   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %}  std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
-    s_axis_{{ port['name']|lower }}_tvalid  : in  std_logic;
-    s_axis_{{ port['name']|lower }}_tlast   : in  std_logic;
-    {%- else %}
-    -- AXI4-Stream Output Port: {{ port['name']|lower }}
-    m_axis_{{ port['name']|lower }}_aclk    : in  std_logic;
-    m_axis_{{ port['name']|lower }}_aresetn : in  std_logic;
-    {%- if port['supports_backpressure'] %}
-    m_axis_{{ port['name']|lower }}_tready  : in  std_logic;
-    {%- endif %}
-    {%- if 'data' in port %}
-    m_axis_{{ port['name']|lower }}_tdata   : out std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
-    {%- endif %}
-    {%- if 'metadata' in port %}
-    m_axis_{{ port['name']|lower }}_tuser   : out std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
-    {%- endif %}
-    m_axis_{{ port['name']|lower }}_tvalid  : out std_logic;
-    m_axis_{{ port['name']|lower }}_tlast   : out std_logic;
-    {%- endif %}
+    {{ port|axisprefix(i) }}_tvalid  : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %}  std_logic;
+    {{ port|axisprefix(i) }}_tlast   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %}  std_logic;
+    {%- endfor %}
     {%- endfor %}
     ports_in  : out t_{{ fins['name']|lower }}_ports_in;
     ports_out : in  t_{{ fins['name']|lower }}_ports_out
@@ -87,136 +72,321 @@ architecture rtl of {{ fins['name']|lower }}_axis is
   -- Signals
   ------------------------------------------------------------------------------
   {%- for port in fins['ports']['ports'] %}
-  {%- if port['direction']|lower == 'in' %}
+  {%- for i in range(port['num_instances']) %}
+  {%- if port['use_pipeline'] %}
+  -- Port {{ port['name'] }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %} Signals
+  signal {{ port|axisprefix(i) }}_tlast_q       : std_logic;
   {%- if 'data' in port %}
-  signal s_axis_{{ port['name']|lower }}_tdata_q  : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
+  signal {{ port|axisprefix(i) }}_tdata_q       : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
   {%- endif %}
   {%- if 'metadata' in port %}
-  signal s_axis_{{ port['name']|lower }}_tuser_q  : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
+  signal {{ port|axisprefix(i) }}_tuser_q       : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
   {%- endif %}
-  signal s_axis_{{ port['name']|lower }}_tvalid_q : std_logic;
-  signal s_axis_{{ port['name']|lower }}_tlast_q  : std_logic;
-  signal s_axis_{{ port['name']|lower }}_tfirst   : std_logic := '1'; -- Value on power-up must be 1
+  signal {{ port|axisprefix(i) }}_tvalid_q      : std_logic;
+  {%- if port['supports_backpressure'] %}
+  signal {{ port|axisprefix(i) }}_tready_q      : std_logic;
+  signal {{ port|axisprefix(i) }}_tlast_stored  : std_logic;
+  {%- if 'data' in port %}
+  signal {{ port|axisprefix(i) }}_tdata_stored  : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
   {%- endif %}
-  {%- endfor %}
+  {%- if 'metadata' in port %}
+  signal {{ port|axisprefix(i) }}_tuser_stored  : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
+  {%- endif %}
+  signal {{ port|axisprefix(i) }}_tvalid_stored : std_logic;
+  {%- endif  %}{#### if port['supports_backpressure'] ####}
+  {%- endif  %}{#### if port['use_pipeline'] ####}
+  {%- endfor %}{#### for i in range(port['num_instances']) ####}
+  {%- endfor %}{#### for port in fins['ports']['ports'] ####}
 
 begin
+
+  ------------------------------------------------------------------------------
+  -- Clock and Reset
+  ------------------------------------------------------------------------------
+  {%- for port in fins['ports']['ports'] %}
+  {%- for i in range(port['num_instances']) %}
+  ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.clk    <= {{ port|axisprefix(i) }}_aclk;
+  ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.resetn <= {{ port|axisprefix(i) }}_aresetn;
+  {%- endfor %}
+  {%- endfor %}
 
   ------------------------------------------------------------------------------
   -- Inputs
   ------------------------------------------------------------------------------
   {%- for port in fins['ports']['ports'] %}
   {%- if port['direction']|lower == 'in' %}
+  {%- for i in range(port['num_instances']) %}
+  {%- if port['use_pipeline'] %}
   --*****************************************
-  -- Input Port: {{ port['name']|lower }}
+  -- Input Port: {{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}
   --*****************************************
-  s_input_pipeline_{{ port['name']|lower }} : process (s_axis_{{ port['name']|lower }}_aclk)
+  -- Synchronous Process for Input Pipeline
+  s_input_pipeline_{{ port['name']|lower }}{{ '%0#2d'|format(i) }} : process ({{ port|axisprefix(i) }}_aclk)
   begin
-    if (rising_edge(s_axis_{{ port['name']|lower }}_aclk)) then
+    if (rising_edge({{ port|axisprefix(i) }}_aclk)) then
+      ---------------------
       -- Data registers
+      ---------------------
       {%- if port['supports_backpressure'] %}
-      if (ports_out.{{ port['name']|lower }}.ready = '1') then
-      {%- endif %}
+      -- AXI4-Stream Pipeline
+      if (((ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready = '1') OR ({{ port|axisprefix(i) }}_tvalid_q = '0')) AND ({{ port|axisprefix(i) }}_tready_q = '1')) then
+        -- Output gets input
+        {{ port|axisprefix(i) }}_tlast_q <= {{ port|axisprefix(i) }}_tlast;
         {%- if 'data' in port %}
-        s_axis_{{ port['name']|lower }}_tdata_q <= s_axis_{{ port['name']|lower }}_tdata;
+        {{ port|axisprefix(i) }}_tdata_q <= {{ port|axisprefix(i) }}_tdata;
         {%- endif %}
         {%- if 'metadata' in port %}
-        {%- if port['streaming_metadata'] %}
-        -- Streaming: Metadata is valid for each AXI4-Stream transaction
-        s_axis_{{ port['name']|lower }}_tuser_q <= s_axis_{{ port['name']|lower }}_tuser;
-        {%- else %}
-        -- Not Streaming: Metadata is only valid on the first transaction of each AXI4-Stream packet
-        if ((s_axis_{{ port['name']|lower }}_tvalid = '1') AND (s_axis_{{ port['name']|lower }}_tfirst = '1')) then
-          -- Capture and hold the metadata
-          s_axis_{{ port['name']|lower }}_tuser_q <= s_axis_{{ port['name']|lower }}_tuser;
-        end if;
+        {{ port|axisprefix(i) }}_tuser_q <= {{ port|axisprefix(i) }}_tuser;
         {%- endif %}
+      elsif ((ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready = '1') AND ({{ port|axisprefix(i) }}_tready_q = '0')) then
+        -- Stored is sent to output
+        {{ port|axisprefix(i) }}_tlast_q <= {{ port|axisprefix(i) }}_tlast_stored;
+        {%- if 'data' in port %}
+        {{ port|axisprefix(i) }}_tdata_q <= {{ port|axisprefix(i) }}_tdata_stored;
         {%- endif %}
-      {%- if port['supports_backpressure'] %}
+        {%- if 'metadata' in port %}
+        {{ port|axisprefix(i) }}_tuser_q <= {{ port|axisprefix(i) }}_tuser_stored;
+        {%- endif %}
       end if;
+      if (((ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready = '0') AND ({{ port|axisprefix(i) }}_tvalid_q = '1')) AND ({{ port|axisprefix(i) }}_tready_q = '1')) then
+        -- Input is stored
+        {{ port|axisprefix(i) }}_tlast_stored <= {{ port|axisprefix(i) }}_tlast;
+        {%- if 'data' in port %}
+        {{ port|axisprefix(i) }}_tdata_stored <= {{ port|axisprefix(i) }}_tdata;
+        {%- endif %}
+        {%- if 'metadata' in port %}
+        {{ port|axisprefix(i) }}_tuser_stored <= {{ port|axisprefix(i) }}_tuser;
+        {%- endif %}
+      end if;
+      {%- else %}
+      -- Simple Pipeline
+      {{ port|axisprefix(i) }}_tlast_q <= {{ port|axisprefix(i) }}_tlast;
+      {%- if 'data' in port %}
+      {{ port|axisprefix(i) }}_tdata_q <= {{ port|axisprefix(i) }}_tdata;
       {%- endif %}
+      {%- if 'metadata' in port %}
+      {{ port|axisprefix(i) }}_tuser_q <= {{ port|axisprefix(i) }}_tuser;
+      {%- endif %}
+      {%- endif %}
+      ---------------------
       -- Control registers
-      if (s_axis_{{ port['name']|lower }}_aresetn = '0') then
-        s_axis_{{ port['name']|lower }}_tvalid_q <= '0';
-        s_axis_{{ port['name']|lower }}_tlast_q  <= '0';
-        s_axis_{{ port['name']|lower }}_tfirst   <= '1'; -- Value on reset must be 1
+      ---------------------
+      if ({{ port|axisprefix(i) }}_aresetn = '0') then
+        {%- if port['supports_backpressure'] %}
+        {{ port|axisprefix(i) }}_tready_q <= '0';
+        {{ port|axisprefix(i) }}_tvalid_stored <= '0';
+        {%- endif %}
+        {{ port|axisprefix(i) }}_tvalid_q <= '0';
       else
         {%- if port['supports_backpressure'] %}
-        if (ports_out.{{ port['name']|lower }}.ready = '1') then
-        {%- endif %}
-          -- Pipeline the control signals
-          s_axis_{{ port['name']|lower }}_tvalid_q <= s_axis_{{ port['name']|lower }}_tvalid;
-          s_axis_{{ port['name']|lower }}_tlast_q  <= s_axis_{{ port['name']|lower }}_tlast;
-          -- Create a signal for detecting the first word of a packet
-          if (s_axis_{{ port['name']|lower }}_tlast = '1') then
-            s_axis_{{ port['name']|lower }}_tfirst <= '1';
-          elsif (s_axis_{{ port['name']|lower }}_tvalid = '1') then
-            s_axis_{{ port['name']|lower }}_tfirst <= '0';
-          end if;
-        {%- if port['supports_backpressure'] %}
+        -- AXI4-Stream Pipeline
+        if (((ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready = '1') OR ({{ port|axisprefix(i) }}_tvalid_q = '0')) AND ({{ port|axisprefix(i) }}_tready_q = '1')) then
+          -- Output gets input
+          {{ port|axisprefix(i) }}_tvalid_q <= {{ port|axisprefix(i) }}_tvalid;
+        elsif ((ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready = '1') AND ({{ port|axisprefix(i) }}_tready_q = '0')) then
+          -- Stored is sent to output
+          {{ port|axisprefix(i) }}_tvalid_q <= {{ port|axisprefix(i) }}_tvalid_stored;
+        else
+          -- Hold
+          {{ port|axisprefix(i) }}_tvalid_q <= {{ port|axisprefix(i) }}_tvalid_q;
         end if;
+        if (((ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready = '0') AND ({{ port|axisprefix(i) }}_tvalid_q = '1')) AND ({{ port|axisprefix(i) }}_tready_q = '1')) then
+          -- Input is stored
+          {{ port|axisprefix(i) }}_tvalid_stored <= {{ port|axisprefix(i) }}_tvalid;
+        elsif ((ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready = '1') AND ({{ port|axisprefix(i) }}_tready_q = '0')) then
+          -- Stored is sent to output, clear stored valid
+          {{ port|axisprefix(i) }}_tvalid_stored <= '0';
+        else
+          -- Hold
+          {{ port|axisprefix(i) }}_tvalid_stored <= {{ port|axisprefix(i) }}_tvalid_stored;
+        end if;
+        if ((({{ port|axisprefix(i) }}_tvalid_q = '0') OR ({{ port|axisprefix(i) }}_tvalid = '0')) AND ({{ port|axisprefix(i) }}_tvalid_stored = '0')) then
+          -- Since our storage is clear and either input or output are clear, we are ready to accept data
+          {{ port|axisprefix(i) }}_tready_q <= '1';
+        elsif (ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready = '1') then
+          -- When the output is ready we are ready to accept data
+          {{ port|axisprefix(i) }}_tready_q <= '1';
+        else
+          -- Not ready
+          {{ port|axisprefix(i) }}_tready_q <= '0';
+        end if;
+        {%- else %}
+        -- Simple Pipeline
+        {{ port|axisprefix(i) }}_tvalid_q <= {{ port|axisprefix(i) }}_tvalid;
         {%- endif %}
       end if;
     end if;
-  end process s_input_pipeline_{{ port['name']|lower }};
-  {%- if port['supports_backpressure'] %}
-  s_axis_{{ port['name']|lower }}_tready <= ports_out.{{ port['name']|lower }}.ready;
-  {%- endif %}
+  end process s_input_pipeline_{{ port['name']|lower }}{{ '%0#2d'|format(i) }};
+
+  -- Assign the record interfaces and outputs
+  ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.last  <= {{ port|axisprefix(i) }}_tlast_q;
   {%- if 'data' in port %}
-  ports_in.{{ port['name']|lower }}.data <= f_unserialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_data(s_axis_{{ port['name']|lower }}_tdata_q);
+  ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.data <= f_unserialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_data({{ port|axisprefix(i) }}_tdata_q);
   {%- endif %}
   {%- if 'metadata' in port %}
-  ports_in.{{ port['name']|lower }}.metadata <= f_unserialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata(s_axis_{{ port['name']|lower }}_tuser_q);
+  ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.metadata <= f_unserialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata({{ port|axisprefix(i) }}_tuser_q);
   {%- endif %}
-  ports_in.{{ port['name']|lower }}.valid <= s_axis_{{ port['name']|lower }}_tvalid_q;
-  ports_in.{{ port['name']|lower }}.last  <= s_axis_{{ port['name']|lower }}_tlast_q;
+  {%- if port['supports_backpressure'] %}
+  {{ port|axisprefix(i) }}_tready <= {{ port|axisprefix(i) }}_tready_q;
   {%- endif %}
-  {%- endfor %}
+  ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.valid <= {{ port|axisprefix(i) }}_tvalid_q;
+
+  {%- else  %}{#### if port['use_pipeline'] ####}
+  -- Reinterpret AXI4-Stream port only
+  ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.last  <= {{ port|axisprefix(i) }}_tlast;
+  {%- if 'data' in port %}
+  ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.data <= f_unserialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_data({{ port|axisprefix(i) }}_tdata);
+  {%- endif %}
+  {%- if 'metadata' in port %}
+  ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.metadata <= f_unserialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata({{ port|axisprefix(i) }}_tuser);
+  {%- endif %}
+  {%- if port['supports_backpressure'] %}
+  {{ port|axisprefix(i) }}_tready <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready;
+  {%- endif %}
+  ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.valid <= {{ port|axisprefix(i) }}_tvalid;
+
+  {%- endif  %}{#### if port['use_pipeline'] ####}
+  {%- endfor %}{#### for i in range(port['num_instances']) ####}
+  {%- endif  %}{#### if port['direction']|lower == 'in' ####}
+  {%- endfor %}{#### for port in fins['ports']['ports'] ####}
 
   ------------------------------------------------------------------------------
   -- Outputs
   ------------------------------------------------------------------------------
   {%- for port in fins['ports']['ports'] %}
   {%- if port['direction']|lower == 'out' %}
+  {%- for i in range(port['num_instances']) %}
+  {%- if port['use_pipeline'] %}
   --*****************************************
-  -- Output Port: {{ port['name']|lower }}
+  -- Output Port: {{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}
   --*****************************************
-  s_output_pipeline_{{ port['name']|lower }} : process (m_axis_{{ port['name']|lower }}_aclk)
+  s_output_pipeline_{{ port['name']|lower }}{{ '%0#2d'|format(i) }} : process ({{ port|axisprefix(i) }}_aclk)
   begin
-    if (rising_edge(m_axis_{{ port['name']|lower }}_aclk)) then
+    if (rising_edge({{ port|axisprefix(i) }}_aclk)) then
+      ---------------------
       -- Data registers
+      ---------------------
       {%- if port['supports_backpressure'] %}
-      if (m_axis_{{ port['name']|lower }}_tready = '1') then
-      {%- endif %}
+      -- AXI4-Stream Pipeline
+      if ((({{ port|axisprefix(i) }}_tready = '1') OR ({{ port|axisprefix(i) }}_tvalid_q = '0')) AND ({{ port|axisprefix(i) }}_tready_q = '1')) then
+        -- Output gets input
+        {{ port|axisprefix(i) }}_tlast_q <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.last;
         {%- if 'data' in port %}
-        m_axis_{{ port['name']|lower }}_tdata <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_data(ports_out.{{ port['name']|lower }}.data);
+        {{ port|axisprefix(i) }}_tdata_q <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_data(ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.data);
         {%- endif %}
         {%- if 'metadata' in port %}
-        m_axis_{{ port['name']|lower }}_tuser <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata(ports_out.{{ port['name']|lower }}.metadata);
+        {{ port|axisprefix(i) }}_tuser_q <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata(ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.metadata);
         {%- endif %}
-      {%- if port['supports_backpressure'] %}
+      elsif (({{ port|axisprefix(i) }}_tready = '1') AND ({{ port|axisprefix(i) }}_tready_q = '0')) then
+        -- Stored is sent to output
+        {{ port|axisprefix(i) }}_tlast_q <= {{ port|axisprefix(i) }}_tlast_stored;
+        {%- if 'data' in port %}
+        {{ port|axisprefix(i) }}_tdata_q <= {{ port|axisprefix(i) }}_tdata_stored;
+        {%- endif %}
+        {%- if 'metadata' in port %}
+        {{ port|axisprefix(i) }}_tuser_q <= {{ port|axisprefix(i) }}_tuser_stored;
+        {%- endif %}
       end if;
+      if ((({{ port|axisprefix(i) }}_tready = '0') AND ({{ port|axisprefix(i) }}_tvalid_q = '1')) AND ({{ port|axisprefix(i) }}_tready_q = '1')) then
+        -- Input is stored
+        {{ port|axisprefix(i) }}_tlast_stored <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.last;
+        {%- if 'data' in port %}
+        {{ port|axisprefix(i) }}_tdata_stored <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_data(ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.data);
+        {%- endif %}
+        {%- if 'metadata' in port %}
+        {{ port|axisprefix(i) }}_tuser_stored <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata(ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.metadata);
+        {%- endif %}
+      end if;
+      {%- else %}
+      -- Simple Pipeline
+      {{ port|axisprefix(i) }}_tlast_q <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.last;
+      {%- if 'data' in port %}
+      {{ port|axisprefix(i) }}_tdata_q <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_data(ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.data);
       {%- endif %}
+      {%- if 'metadata' in port %}
+      {{ port|axisprefix(i) }}_tuser_q <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata(ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.metadata);
+      {%- endif %}
+      {%- endif %}
+      ---------------------
       -- Control registers
-      if (m_axis_{{ port['name']|lower }}_aresetn = '0') then
-        m_axis_{{ port['name']|lower }}_tvalid <= '0';
-        m_axis_{{ port['name']|lower }}_tlast  <= '0';
+      ---------------------
+      if ({{ port|axisprefix(i) }}_aresetn = '0') then
+        {%- if port['supports_backpressure'] %}
+        {{ port|axisprefix(i) }}_tready_q       <= '0';
+        {{ port|axisprefix(i) }}_tvalid_stored <= '0';
+        {%- endif %}
+        {{ port|axisprefix(i) }}_tvalid_q      <= '0';
       else
         {%- if port['supports_backpressure'] %}
-        if (m_axis_{{ port['name']|lower }}_tready = '1') then
-        {%- endif %}
-          m_axis_{{ port['name']|lower }}_tvalid <= ports_out.{{ port['name']|lower }}.valid;
-          m_axis_{{ port['name']|lower }}_tlast  <= ports_out.{{ port['name']|lower }}.last;
-        {%- if port['supports_backpressure'] %}
+        -- AXI4-Stream Pipeline
+        if ((({{ port|axisprefix(i) }}_tready = '1') OR ({{ port|axisprefix(i) }}_tvalid_q = '0')) AND ({{ port|axisprefix(i) }}_tready_q = '1')) then
+          -- Output gets input
+          {{ port|axisprefix(i) }}_tvalid_q <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.valid;
+        elsif (({{ port|axisprefix(i) }}_tready = '1') AND ({{ port|axisprefix(i) }}_tready_q = '0')) then
+          -- Stored is sent to output
+          {{ port|axisprefix(i) }}_tvalid_q <= {{ port|axisprefix(i) }}_tvalid_stored;
+        else
+          -- Hold
+          {{ port|axisprefix(i) }}_tvalid_q <= {{ port|axisprefix(i) }}_tvalid_q;
         end if;
+        if ((({{ port|axisprefix(i) }}_tready = '0') AND ({{ port|axisprefix(i) }}_tvalid_q = '1')) AND ({{ port|axisprefix(i) }}_tready_q = '1')) then
+          -- Input is stored
+          {{ port|axisprefix(i) }}_tvalid_stored <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.valid;
+        elsif (({{ port|axisprefix(i) }}_tready = '1') AND ({{ port|axisprefix(i) }}_tready_q = '0')) then
+          -- Stored is sent to output, clear stored valid
+          {{ port|axisprefix(i) }}_tvalid_stored <= '0';
+        else
+          -- Hold
+          {{ port|axisprefix(i) }}_tvalid_stored <= {{ port|axisprefix(i) }}_tvalid_stored;
+        end if;
+        if ((({{ port|axisprefix(i) }}_tvalid_q = '0') OR (ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.valid = '0')) AND ({{ port|axisprefix(i) }}_tvalid_stored = '0')) then
+          -- Since our storage is clear and either input or output are clear, we are ready to accept data
+          {{ port|axisprefix(i) }}_tready_q <= '1';
+        elsif ({{ port|axisprefix(i) }}_tready = '1') then
+          -- When the output is ready we are ready to accept data
+          {{ port|axisprefix(i) }}_tready_q <= '1';
+        else
+          -- Not ready
+          {{ port|axisprefix(i) }}_tready_q <= '0';
+        end if;
+        {%- else %}
+        -- Simple Pipeline
+        {{ port|axisprefix(i) }}_tvalid_q <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.valid;
         {%- endif %}
       end if;
     end if;
-  end process s_output_pipeline_{{ port['name']|lower }};
+  end process s_output_pipeline_{{ port['name']|lower }}{{ '%0#2d'|format(i) }};
+
+  -- Assign the record interfaces and outputs
+  {{ port|axisprefix(i) }}_tlast  <= {{ port|axisprefix(i) }}_tlast_q;
+  {%- if 'data' in port %}
+  {{ port|axisprefix(i) }}_tdata  <= {{ port|axisprefix(i) }}_tdata_q;
+  {%- endif %}
+  {%- if 'metadata' in port %}
+  {{ port|axisprefix(i) }}_tuser  <= {{ port|axisprefix(i) }}_tuser_q;
+  {%- endif %}
+  {{ port|axisprefix(i) }}_tvalid <= {{ port|axisprefix(i) }}_tvalid_q;
   {%- if port['supports_backpressure'] %}
-  ports_in.{{ port['name']|lower }}.ready <= m_axis_{{ port['name']|lower }}_tready;
+  ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready <= {{ port|axisprefix(i) }}_tready_q;
   {%- endif %}
+
+  {%- else  %}{#### if port['use_pipeline'] ####}
+  -- Reinterpret AXI4-Stream port only
+  {{ port|axisprefix(i) }}_tlast  <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.last;
+  {%- if 'data' in port %}
+  {{ port|axisprefix(i) }}_tdata  <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_data(ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.data);
   {%- endif %}
-  {%- endfor %}
+  {%- if 'metadata' in port %}
+  {{ port|axisprefix(i) }}_tuser  <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata(ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.metadata);
+  {%- endif %}
+  {{ port|axisprefix(i) }}_tvalid <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.valid;
+  {%- if port['supports_backpressure'] %}
+  ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready <= {{ port|axisprefix(i) }}_tready;
+  {%- endif %}
+
+  {%- endif  %}{#### if port['use_pipeline'] ####}
+  {%- endfor %}{#### for i in range(port['num_instances']) ####}
+  {%- endif  %}{#### if port['direction']|lower == 'out' ####}
+  {%- endfor %}{#### for port in fins['ports']['ports'] ####}
 
 end rtl;

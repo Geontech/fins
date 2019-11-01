@@ -47,16 +47,32 @@ class Generator:
         """
 
     def create_jinja_env(self, directory):
-        # Create custom Jinja2 filters for basename and dirname
+        # Create custom Jinja2 filters
         def basename(path):
             return os.path.basename(path)
         def dirname(path):
             return os.path.dirname(path)
+        def axisprefix(port, instance_index, reverse=False):
+            prefix = ''
+            if port['direction'].lower() == 'in':
+                if not reverse:
+                    prefix += 's'
+                else:
+                    prefix += 'm'
+            else:
+                if not reverse:
+                    prefix += 'm'
+                else:
+                    prefix += 's'
+            if port['num_instances'] > 1:
+                prefix += '{0:02d}'.format(instance_index)
+            return prefix + '_axis_' + port['name'].lower()
 
         # Create the Jinja Environment and load templates
         env = Environment(loader=FileSystemLoader(directory))
         env.filters['basename'] = basename
         env.filters['dirname'] = dirname
+        env.filters['axisprefix'] = axisprefix
 
         return env
 
@@ -124,6 +140,7 @@ class Generator:
                 self.render_jinja_template(jinja_env, 'swconfig_verify.vhd', output_directory+fins_data['name']+'_swconfig_verify.vhd', fins_data)
             if ('ports' in fins_data) or ('properties' in fins_data):
                 # Top-level stubbed out code
+                self.render_jinja_template(jinja_env, 'core.vhd', output_directory+fins_data['name']+'_core.vhd', fins_data)
                 self.render_jinja_template(jinja_env, 'top.vhd', output_directory+fins_data['name']+'.vhd', fins_data)
                 self.render_jinja_template(jinja_env, 'top_tb.vhd', output_directory+fins_data['name']+'_tb.vhd', fins_data)
             if ('ports' in fins_data) or ('params' in fins_data) or ('properties' in fins_data):

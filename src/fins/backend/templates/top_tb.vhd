@@ -49,16 +49,29 @@ entity {{ fins['name']|lower }}_tb is
   generic (
     {%- if 'ports' in fins %}
     {%- for port in fins['ports']['ports'] %}
-    {%- if port['direction']|lower == 'out' %}
-    G_NUM_PACKETS_EXPECTED_FOR_{{ port['name']|upper }} : natural := 1;
-    {%- endif %}
-    {%- endfor %}
-    {%- endif %}
+    {%- set outer_loop = loop %}
+    {%- for i in range(port['num_instances']) %}
+    {%- if port['direction'] == "in" %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_SAMPLE_PERIOD : positive := 1;
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_RANDOMIZE_BUS : boolean := false;
     {%- if fins['backend']|lower == 'quartus' %}
-    G_RELATIVE_PATH_TO_SIM_FILES : string := "../../../sim_data/"
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      : string := "../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%- else %}
-    G_RELATIVE_PATH_TO_SIM_FILES : string := "../../../../../../sim_data/"
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      : string := "../../../../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%- endif %}
+    {%- else %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_NUM_PACKETS_EXPECTED : natural := 1;
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_SAMPLE_PERIOD   : positive := 1;
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_RANDOMIZE_BUS   : boolean := false;
+    {%- if fins['backend']|lower == 'quartus' %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH        : string := "../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
+    {%- else %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH        : string := "../../../../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
+    {%- endif %}
+    {%- endif  %}{#### if port['direction'] == "in" ####}
+    {%- endfor %}{#### for i in range(port['num_instances']) ####}
+    {%- endfor %}{#### for port in fins['ports']['ports'] ####}
+    {%- endif  %}{#### if 'ports' in fins ####}
   );
 end entity {{ fins['name']|lower }}_tb;
 
@@ -93,37 +106,22 @@ architecture behav of {{ fins['name']|lower }}_tb is
   {%- endif %}
   {%- if 'ports' in fins %}
   {%- for port in fins['ports']['ports'] %}
-  {%- if port['direction']|lower == 'in' %}
-  -- AXI4-Stream Input Port: {{ port['name']|lower }}
-  signal s_axis_{{ port['name']|lower }}_aclk    : std_logic;
-  signal s_axis_{{ port['name']|lower }}_aresetn : std_logic;
+  -- AXI4-Stream Port {{ port['direction']|upper }}: {{ port['name']|lower }}
+  {%- for i in range(port['num_instances']) %}
+  signal {{ port|axisprefix(i) }}_aclk    : std_logic;
+  signal {{ port|axisprefix(i) }}_aresetn : std_logic;
   {%- if port['supports_backpressure'] %}
-  signal s_axis_{{ port['name']|lower }}_tready  : std_logic;
+  signal {{ port|axisprefix(i) }}_tready  : std_logic;
   {%- endif %}
   {%- if 'data' in port %}
-  signal s_axis_{{ port['name']|lower }}_tdata   : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
+  signal {{ port|axisprefix(i) }}_tdata   : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
   {%- endif %}
   {%- if 'metadata' in port %}
-  signal s_axis_{{ port['name']|lower }}_tuser   : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
+  signal {{ port|axisprefix(i) }}_tuser   : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
   {%- endif %}
-  signal s_axis_{{ port['name']|lower }}_tvalid  : std_logic;
-  signal s_axis_{{ port['name']|lower }}_tlast   : std_logic;
-  {%- else %}
-  -- AXI4-Stream Output Port: {{ port['name']|lower }}
-  signal m_axis_{{ port['name']|lower }}_aclk    : std_logic;
-  signal m_axis_{{ port['name']|lower }}_aresetn : std_logic;
-  {%- if port['supports_backpressure'] %}
-  signal m_axis_{{ port['name']|lower }}_tready  : std_logic;
-  {%- endif %}
-  {%- if 'data' in port %}
-  signal m_axis_{{ port['name']|lower }}_tdata   : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
-  {%- endif %}
-  {%- if 'metadata' in port %}
-  signal m_axis_{{ port['name']|lower }}_tuser   : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
-  {%- endif %}
-  signal m_axis_{{ port['name']|lower }}_tvalid  : std_logic;
-  signal m_axis_{{ port['name']|lower }}_tlast   : std_logic;
-  {%- endif %}
+  signal {{ port|axisprefix(i) }}_tvalid  : std_logic;
+  signal {{ port|axisprefix(i) }}_tlast   : std_logic;
+  {%- endfor %}
   {%- endfor %}
   {%- endif %}
 
@@ -139,11 +137,13 @@ architecture behav of {{ fins['name']|lower }}_tb is
   signal resetn          : std_logic := '1';
   {%- if 'ports' in fins %}
   {%- for port in fins['ports']['ports'] %}
+  {%- for i in range(port['num_instances']) %}
   {%- if port['direction']|lower == 'in' %}
-  signal s_axis_{{ port['name']|lower }}_enable : std_logic := '0';
+  signal {{ port|axisprefix(i) }}_enable : std_logic := '0';
   {%- else %}
-  signal {{ port['name']|lower }}_verify_done : boolean := false;
+  signal {{ port|axisprefix(i) }}_verify_done : boolean := false;
   {%- endif %}
+  {%- endfor %}
   {%- endfor %}
   {%- endif %}
 
@@ -175,39 +175,26 @@ begin
       S_AXI_RDATA   => S_AXI_RDATA,
       S_AXI_RRESP   => S_AXI_RRESP,
       S_AXI_RVALID  => S_AXI_RVALID,
-      S_AXI_RREADY  => S_AXI_RREADY,
+      S_AXI_RREADY  => S_AXI_RREADY{% if 'ports' in fins %},{% endif %}
       {%- endif %}
       {%- if 'ports' in fins %}
       {%- for port in fins['ports']['ports'] %}
-      {%- if port['direction']|lower == 'in' %}
-      s_axis_{{ port['name']|lower }}_aclk    => s_axis_{{ port['name']|lower }}_aclk,
-      s_axis_{{ port['name']|lower }}_aresetn => s_axis_{{ port['name']|lower }}_aresetn,
+      {%- set outer_loop = loop %}
+      {%- for i in range(port['num_instances']) %}
+      {{ port|axisprefix(i) }}_aclk    => {{ port|axisprefix(i) }}_aclk,
+      {{ port|axisprefix(i) }}_aresetn => {{ port|axisprefix(i) }}_aresetn,
       {%- if port['supports_backpressure'] %}
-      s_axis_{{ port['name']|lower }}_tready  => s_axis_{{ port['name']|lower }}_tready,
+      {{ port|axisprefix(i) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%- endif %}
       {%- if 'data' in port %}
-      s_axis_{{ port['name']|lower }}_tdata   => s_axis_{{ port['name']|lower }}_tdata,
+      {{ port|axisprefix(i) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
       {%- endif %}
       {%- if 'metadata' in port %}
-      s_axis_{{ port['name']|lower }}_tuser   => s_axis_{{ port['name']|lower }}_tuser,
+      {{ port|axisprefix(i) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
       {%- endif %}
-      s_axis_{{ port['name']|lower }}_tvalid  => s_axis_{{ port['name']|lower }}_tvalid,
-      s_axis_{{ port['name']|lower }}_tlast   => s_axis_{{ port['name']|lower }}_tlast{% if not loop.last %},{% endif %}
-      {%- else %}
-      m_axis_{{ port['name']|lower }}_aclk    => m_axis_{{ port['name']|lower }}_aclk,
-      m_axis_{{ port['name']|lower }}_aresetn => m_axis_{{ port['name']|lower }}_aresetn,
-      {%- if port['supports_backpressure'] %}
-      m_axis_{{ port['name']|lower }}_tready  => m_axis_{{ port['name']|lower }}_tready,
-      {%- endif %}
-      {%- if 'data' in port %}
-      m_axis_{{ port['name']|lower }}_tdata   => m_axis_{{ port['name']|lower }}_tdata,
-      {%- endif %}
-      {%- if 'metadata' in port %}
-      m_axis_{{ port['name']|lower }}_tuser   => m_axis_{{ port['name']|lower }}_tuser,
-      {%- endif %}
-      m_axis_{{ port['name']|lower }}_tvalid  => m_axis_{{ port['name']|lower }}_tvalid,
-      m_axis_{{ port['name']|lower }}_tlast   => m_axis_{{ port['name']|lower }}_tlast{% if not loop.last %},{% endif %}
-      {%- endif %}
+      {{ port|axisprefix(i) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
+      {{ port|axisprefix(i) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
+      {%- endfor %}
       {%- endfor %}
       {%- endif %}
     );
@@ -220,45 +207,54 @@ begin
   u_file_io : entity work.{{ fins['name']|lower }}_axis_verify
     generic map (
       {%- for port in fins['ports']['ports'] %}
+      {%- set outer_loop = loop %}
+      {%- for i in range(port['num_instances']) %}
       {%- if port['direction'] == "in" %}
-      G_{{ port['name']|upper }}_SOURCE_SAMPLE_PERIOD => 1, -- Number of clocks per sample
-      G_{{ port['name']|upper }}_SOURCE_FILEPATH => G_RELATIVE_PATH_TO_SIM_FILES & "sim_source_{{ port['name']|lower }}.txt"{% if not loop.last %},{% endif %}
+      G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_SAMPLE_PERIOD => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_SAMPLE_PERIOD,
+      G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_RANDOMIZE_BUS => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_RANDOMIZE_BUS,
+      G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%- else %}
-      G_{{ port['name']|upper }}_SINK_FILEPATH => G_RELATIVE_PATH_TO_SIM_FILES & "sim_sink_{{ port['name']|lower }}.txt"{% if not loop.last %},{% endif %}
+      G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_SAMPLE_PERIOD => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_SAMPLE_PERIOD,
+      G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_RANDOMIZE_BUS => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_RANDOMIZE_BUS,
+      G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH      => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%- endif %}
+      {%- endfor %}
       {%- endfor %}
     )
     port map (
       simulation_done => simulation_done,
       {%- for port in fins['ports']['ports'] %}
+      {%- set outer_loop = loop %}
+      {%- for i in range(port['num_instances']) %}
       {%- if port['direction']|lower == 'out' %}
-      s_axis_{{ port['name']|lower }}_aclk    => m_axis_{{ port['name']|lower }}_aclk,
+      {{ port|axisprefix(i,True) }}_aclk    => {{ port|axisprefix(i) }}_aclk,
       {%- if port['supports_backpressure'] %}
-      s_axis_{{ port['name']|lower }}_tready  => m_axis_{{ port['name']|lower }}_tready,
+      {{ port|axisprefix(i,True) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%- endif %}
       {%- if 'data' in port %}
-      s_axis_{{ port['name']|lower }}_tdata   => m_axis_{{ port['name']|lower }}_tdata,
+      {{ port|axisprefix(i,True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
       {%- endif %}
       {%- if 'metadata' in port %}
-      s_axis_{{ port['name']|lower }}_tuser   => m_axis_{{ port['name']|lower }}_tuser,
+      {{ port|axisprefix(i,True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
       {%- endif %}
-      s_axis_{{ port['name']|lower }}_tvalid  => m_axis_{{ port['name']|lower }}_tvalid,
-      s_axis_{{ port['name']|lower }}_tlast   => m_axis_{{ port['name']|lower }}_tlast{% if not loop.last %},{% endif %}
+      {{ port|axisprefix(i,True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
+      {{ port|axisprefix(i,True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%- else %}
-      m_axis_{{ port['name']|lower }}_aclk    => s_axis_{{ port['name']|lower }}_aclk,
-      m_axis_{{ port['name']|lower }}_enable  => s_axis_{{ port['name']|lower }}_enable,
+      {{ port|axisprefix(i,True) }}_aclk    => {{ port|axisprefix(i) }}_aclk,
+      {{ port|axisprefix(i,True) }}_enable  => {{ port|axisprefix(i) }}_enable,
       {%- if port['supports_backpressure'] %}
-      m_axis_{{ port['name']|lower }}_tready  => s_axis_{{ port['name']|lower }}_tready,
+      {{ port|axisprefix(i,True) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%- endif %}
       {%- if 'data' in port %}
-      m_axis_{{ port['name']|lower }}_tdata   => s_axis_{{ port['name']|lower }}_tdata,
+      {{ port|axisprefix(i,True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
       {%- endif %}
       {%- if 'metadata' in port %}
-      m_axis_{{ port['name']|lower }}_tuser   => s_axis_{{ port['name']|lower }}_tuser,
+      {{ port|axisprefix(i,True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
       {%- endif %}
-      m_axis_{{ port['name']|lower }}_tvalid  => s_axis_{{ port['name']|lower }}_tvalid,
-      m_axis_{{ port['name']|lower }}_tlast   => s_axis_{{ port['name']|lower }}_tlast{% if not loop.last %},{% endif %}
+      {{ port|axisprefix(i,True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
+      {{ port|axisprefix(i,True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%- endif %}
+      {%- endfor %}
       {%- endfor %}
     );
   {%- endif %}{#### if 'ports' in fins ####}
@@ -286,13 +282,15 @@ begin
   {%- endif %}
   {%- if 'ports' in fins %}
   {%- for port in fins['ports']['ports'] %}
+  {%- for i in range(port['num_instances']) %}
   {%- if port['direction']|lower == 'in' %}
-  s_axis_{{ port['name']|lower }}_aclk    <= clock;
-  s_axis_{{ port['name']|lower }}_aresetn <= resetn;
+  {{ port|axisprefix(i) }}_aclk    <= clock;
+  {{ port|axisprefix(i) }}_aresetn <= resetn;
   {%- else %}
-  m_axis_{{ port['name']|lower }}_aclk    <= clock;
-  m_axis_{{ port['name']|lower }}_aresetn <= resetn;
+  {{ port|axisprefix(i) }}_aclk    <= clock;
+  {{ port|axisprefix(i) }}_aresetn <= resetn;
   {%- endif %}
+  {%- endfor %}
   {%- endfor %}
   {%- endif %}
 
@@ -302,27 +300,37 @@ begin
   --------------------------------------------------------------------------------
   {%- for port in fins['ports']['ports'] %}
   {%- if port['direction']|lower == 'out' %}
-  -- Waveform process to wait for packets on the {{ port['name']|lower }} output port
-  w_{{ port['name']|lower }}_verify : process
-    variable my_line : line;
+  {%- for i in range(port['num_instances']) %}
+  -- Waveform process to wait for packets on the {{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %} output port
+  w_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_verify : process
+    variable my_line          : line;
+    variable packets_received : natural := 0;
   begin
     -- Wait for global reset to complete
     if (resetn = '0') then
       wait until (resetn = '1');
     end if;
-    -- Wait for the falling edge of TLAST
-    for packet in 0 to G_NUM_PACKETS_EXPECTED_FOR_{{ port['name']|upper }}-1 loop
-      wait until falling_edge(m_axis_{{ port['name']|lower }}_tlast);
+    -- Wait for all expected packets using the TLAST signal
+    while (packets_received < G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_NUM_PACKETS_EXPECTED) loop
+      wait until falling_edge({{ port|axisprefix(i) }}_aclk);
+      {%- if port['supports_backpressure'] %}
+      if (({{ port|axisprefix(i) }}_tvalid = '1') AND ({{ port|axisprefix(i) }}_tlast = '1') AND ({{ port|axisprefix(i) }}_tready = '1')) then
+      {%- else %}
+      if (({{ port|axisprefix(i) }}_tvalid = '1') AND ({{ port|axisprefix(i) }}_tlast = '1')) then
+      {%- endif %}
+        packets_received := packets_received + 1;
+      end if;
     end loop;
     -- End this process
-    write(my_line, string'("PASS: Data received from Port {{ port['name']|lower }}"));
+    write(my_line, string'("PASS: Data received from Port {{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}"));
     writeline(output, my_line);
-    {{ port['name']|lower }}_verify_done <= true;
+    {{ port|axisprefix(i) }}_verify_done <= true;
     wait;
-  end process w_{{ port['name']|lower }}_verify;
-  {%- endif %}
+  end process w_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_verify;
   {%- endfor %}
   {%- endif %}
+  {%- endfor %}
+  {%- endif %}{#### if 'ports' in fins ####}
 
   --------------------------------------------------------------------------------
   -- Main Test Procedure
@@ -351,7 +359,8 @@ begin
       S_AXI_ARADDR, S_AXI_ARPROT, S_AXI_ARVALID, S_AXI_ARREADY,
       S_AXI_RDATA,  S_AXI_RRESP,  S_AXI_RVALID,  S_AXI_RREADY
     );
-    {%- endif %}
+
+    {%- endif %}{#### if 'properties' in fins ####}
 
     {%- if 'ports' in fins %}
     --**************************************************
@@ -360,19 +369,24 @@ begin
     -- Enable the inputs
     {%- for port in fins['ports']['ports'] %}
     {%- if port['direction']|lower == 'in' %}
-    s_axis_{{ port['name']|lower }}_enable <= '1';
+    {%- for i in range(port['num_instances']) %}
+    {{ port|axisprefix(i) }}_enable <= '1';
+    {%- endfor %}
     {%- endif %}
     {%- endfor %}
 
     -- Wait for the output verification processes to complete
     {%- for port in fins['ports']['ports'] %}
     {%- if port['direction']|lower == 'out' %}
-    if (not {{ port['name']|lower }}_verify_done) then
-      wait until ({{ port['name']|lower }}_verify_done);
+    {%- for i in range(port['num_instances']) %}
+    if (not {{ port|axisprefix(i) }}_verify_done) then
+      wait until ({{ port|axisprefix(i) }}_verify_done);
     end if;
-    {%- endif %}
     {%- endfor %}
     {%- endif %}
+    {%- endfor %}
+
+    {%- endif %}{#### if 'ports' in fins ####}
 
     --**************************************************
     -- End Simulation

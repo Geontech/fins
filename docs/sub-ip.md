@@ -10,17 +10,17 @@ The top-level `ip` field of the FINS Node JSON schema is an array of dictionarie
 
 > NOTES: Each instance within the `ip` dictionary array must have a unique `module_name` field which matches the "component" name in the HDL. The indentations indicate another level of hierarchy for the dictionary. For example, the `name` and `parent` keys are child fields of the `params` key.
 
-| Key                                                    | Type              | Required | Description |
-| ------------------------------------------------------ | ----------------- | -------- | ----------- |
-| fins_path                                              | string            | YES      | The relative filepath of the sub-IP's FINS Node JSON file. |
-| params                                                 | dict[]            | NO       | An array of parameters of the sub-IP to link to the parameters in the current IP. |
-| &nbsp;&nbsp;&nbsp;&nbsp;-name                          | string            | YES      | The name of the sub-IP's parameter. |
-| &nbsp;&nbsp;&nbsp;&nbsp;-parent                        | string            | YES      | The name of the current IP's parameter to link. |
-| instances                                              | dict[]            | YES      | An array of instances of this sub-IP to create |
-| &nbsp;&nbsp;&nbsp;&nbsp;-module_name                   | string            | YES      | The name of the generated instance. |
-| &nbsp;&nbsp;&nbsp;&nbsp;-generics                      | dict[]            | YES      | The list of VHDL generics or Verilog parameters to set for this instance. |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+name  | string            | YES      | The name of the generic/parameter. |
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+value | string, int, bool | YES      | The value of the generic/parameter. Using a parameter for the value of this field is unsupported. |
+| Key           | Type              | Required | Description |
+| --------------| ----------------- | -------- | ----------- |
+| fins_path     | string            | YES      | The relative filepath of the sub-IP's FINS Node JSON file. |
+| params        | dict[]            | NO       | An array of parameters of the sub-IP to link to the parameters in the current IP. |
+| --name        | string            | YES      | The name of the sub-IP's parameter. |
+| --parent      | string            | YES      | The name of the current IP's parameter to link. |
+| instances     | dict[]            | YES      | An array of instances of this sub-IP to create |
+| --module_name | string            | YES      | The name of the generated instance. |
+| --generics    | dict[]            | YES      | The list of VHDL generics or Verilog parameters to set for this instance. |
+| --++name      | string            | YES      | The name of the generic/parameter. |
+| --++value     | string, int, bool | YES      | The value of the generic/parameter. Using a parameter for the value of this field is unsupported. |
 
 ## Parameter Propagation and Generics Propagation
 
