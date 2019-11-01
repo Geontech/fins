@@ -6,7 +6,6 @@
   "company_url":"geon.tech",
   "company_logo":"docs/geontech_logo.png",
   "library":"user",
-  "part":"10CX220YF780I5G",
   "top_source":"test_middle",
   "top_sim":"test_middle_tb",
   "params" : [
@@ -51,6 +50,7 @@
         "name":"test_in",
         "direction":"in",
         "supports_backpressure":true,
+        "num_instances":2,
         "data":{
           "bit_width":8,
           "is_complex":true,
@@ -67,6 +67,7 @@
         "name":"test_out",
         "direction":"out",
         "supports_backpressure":true,
+        "num_instances":2,
         "data":{
           "bit_width":8,
           "is_complex":true,
@@ -146,8 +147,8 @@
     ],
     "sim":[
       { "path":"ip/test_bottom/gen/core/test_bottom_swconfig_verify.vhd" },
-      { "path":"./gen/core/test_middle_axis_verify.vhd",    "type":"VHDL" },
       { "path":"./gen/core/test_middle_axilite_verify.vhd", "type":"Vhdl" },
+      { "path":"./gen/core/test_middle_axis_verify.vhd", "type":"VHDL" },
       { "path":"./hdl/test_middle_tb.vhd" }
     ],
     "constraints":[
@@ -188,7 +189,7 @@
   },
   "ip":[
     {
-      "fins_path":"ip/test_bottom/cycloneV.json",
+      "fins_path":"ip/test_bottom/fins.json",
       "params":[
         { "name":"TEST_PARAM_BOOLEAN",         "parent":"TEST_PARAM_BOOLEAN"         },
         { "name":"TEST_PARAM_INTEGER",         "parent":"TEST_PARAM_INTEGER"         },

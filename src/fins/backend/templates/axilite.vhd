@@ -206,6 +206,10 @@ begin
   ------------------------------------------------------------------------------
   -- AXI4-Lite: Output Assignments
   ------------------------------------------------------------------------------
+  -- Clock and reset assignments
+  props_control.clk    <= S_AXI_ACLK;
+  props_control.resetn <= S_AXI_ARESETN;
+
   -- I/O Connections assignments
   S_AXI_AWREADY <= axi_awready;
   S_AXI_WREADY  <= axi_wready;

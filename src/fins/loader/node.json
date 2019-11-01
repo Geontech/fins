@@ -87,7 +87,11 @@
               "is_required":false,
               "types":["bool"]
             },
-            "streaming_metadata":{
+            "num_instances":{
+              "is_required":false,
+              "types":["int"]
+            },
+            "use_pipeline":{
               "is_required":false,
               "types":["bool"]
             },

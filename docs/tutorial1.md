@@ -2,7 +2,7 @@
 
 **[RETURN TO TOP LEVEL README](../README.md)**
 
-In this tutorial, we will create a simple power conversion firmware IP module using FINS, Intel Quartus Prime Pro 19.1, and Xilinx Vivado 2019.1. Make sure you have installed `fins`, the `fins-quartus` backend, and the `fins-vivado` backend!
+In this tutorial, we will create a simple power conversion firmware IP Node using FINS, Intel Quartus Prime Pro 19.1, and Xilinx Vivado 2019.1. Make sure you have installed `fins`, the `fins-quartus` backend, and the `fins-vivado` backend!
 
 ## Step 1: Creating the Firmware IP Node Specification JSON File
 
@@ -18,7 +18,7 @@ Using your favorite text editor, create a file called **fins.json** in the **pow
 ```json
 {
   "name":"power_converter",
-  "params":[
+    "params":[
     { "name":"IQ_DATA_WIDTH",    "value":32 },
     { "name":"POWER_DATA_WIDTH", "value":16 }
   ],
@@ -75,25 +75,25 @@ Once that operation completes, inspect the **./gen/core** directory to find the 
 * **power_converter_axilite_verify.vhd**: This is a testbench package that contains procedures for reading/writing properties and verifying the address space.
 * **power_converter_swconfig.vhd**: This is a properties decode module to convert the Software Configuration memory-mapped bus into property records.
 * **power_converter_swconfig_verify.vhd**: This is a testbench package that contains procedures for reading/writing properties and verifying the address space.
-* **power_converter.vhd**: This is a top-level code stub that instantiates the ports and properties interfaces to give a starting point for the top-level source file.
-* **power_converter_tb.vhd**: This is a top-level code stub that provides a simple testbench for testing the ports and properties interfaces.
+* **power_converter_core.vhd**: This is a User core code stub that has ports and properties records as HDL ports and provides a place to insert user code.
+* **power_converter.vhd**: This is a top-level code wrapper that instantiates the ports, properties, and User core modules as a default top-level source file.
+* **power_converter_tb.vhd**: This is a simple default testbench that verifies the ports and properties interfaces.
 * **power_converter_pkg.vhd**: This is the source package file that defines parameters, property records, and port records.
 * **power_converter_pkg.m**: This is an Octave script that defines parameters and port structures for usage in simulation source generation and sink validation.
 * **power_converter_pkg.py**: This is a Python script that defines parameters and port structures for usage in simulation source generation and sink validation.
 
-Next, copy the top-level code stubs to a new folder at the IP root.
+Next, copy the user core code stub to a new folder in the IP root directory.
 
 ```bash
 $ mkdir hdl
-$ cp gen/core/power_converter.vhd hdl/
+$ cp gen/core/power_converter_core.vhd hdl/
 ```
 
 ## Step 3: Adding the functional code
 
-Now we want to add the power conversion functional code to the top-level source file stub. Add the following code to the "Signals" section of **hdl/power_converter.vhd**.
+Now we want to add the power conversion functional code to the user core source file stub. In **hdl/power_converter_core.vhd**, add the following code between the architecture definition (`architecture rtl of power_converter_core is`) and the `begin` statement.
 
 ```vhdl
-  -- Data processing
   constant MODULE_LATENCY  : natural := 4;
   signal input_i           : signed(IQ_DATA_WIDTH/2-1 downto 0);
   signal input_q           : signed(IQ_DATA_WIDTH/2-1 downto 0);
@@ -103,15 +103,20 @@ Now we want to add the power conversion functional code to the top-level source 
   signal power             : signed(POWER_DATA_WIDTH-1 downto 0);
   signal valid_delay_chain : std_logic_vector(MODULE_LATENCY-1 downto 0);
   signal last_delay_chain  : std_logic_vector(MODULE_LATENCY-1 downto 0);
+  signal cdc_gain_q        : std_logic_vector(16-1 downto 0);
+  signal cdc_gain_qq       : std_logic_vector(16-1 downto 0);
 ```
 
-Add the following code to the "User Code" section of **hdl/power_converter.vhd**.
+Again in **hdl/power_converter_core.vhd**, add the following code after the `begin` statement and before the `end rtl;` statement.
 
 ```vhdl
   -- Synchronous process for the user code of the power conversion function
-  s_user_code : process (s_axis_iq_aclk)
+  s_user_code : process (ports_in.iq.clk)
   begin
-    if (rising_edge(s_axis_iq_aclk)) then
+    if (rising_edge(ports_in.iq.clk)) then
+      -- Clock Domain Crossing: Properties -> IQ Port
+      cdc_gain_q  <= props_control.gain.wr_data;
+      cdc_gain_qq <= cdc_gain_q;
       -- Data Registers
       input_i          <= ports_in.iq.data.i;
       input_q          <= ports_in.iq.data.q;
@@ -122,11 +127,11 @@ Add the following code to the "User Code" section of **hdl/power_converter.vhd**
         power_full_scale'length
       ); -- Resize drops extra signed bit from previous multiplication operation
       power <= resize(
-        power_full_scale(power_full_scale'length-1 downto power_full_scale'length-POWER_DATA_WIDTH) * signed(props_control.gain.wr_data),
+        resize(power_full_scale, power'length) * signed(cdc_gain_qq),
         power'length
       );
       -- Control Registers
-      if (s_axis_iq_aresetn = '0') then
+      if (ports_in.iq.resetn = '0') then
         valid_delay_chain <= (others => '0');
         last_delay_chain  <= (others => '0');
       else
@@ -148,7 +153,7 @@ Add the following code to the "User Code" section of **hdl/power_converter.vhd**
 
 Save the file.
 
-## Step 4: Building the IP with Vivado and Quartus
+## Step 4: Adding the Filesets
 
 Modify your **fins.json** file to add the following code after the `ports` top-level key. Remember to use a comma after the closing curly brace (`}`) of `ports`!
 
@@ -158,53 +163,73 @@ Modify your **fins.json** file to add the following code after the `ports` top-l
       { "path":"gen/core/power_converter_pkg.vhd" },
       { "path":"gen/core/power_converter_axis.vhd" },
       { "path":"gen/core/power_converter_axilite.vhd" },
-      { "path":"hdl/power_converter.vhd" }
+      { "path":"hdl/power_converter_core.vhd" },
+      { "path":"gen/core/power_converter.vhd" }
     ],
     "sim":[
       { "path":"gen/core/power_converter_axilite_verify.vhd" },
       { "path":"gen/core/power_converter_axis_verify.vhd" },
       { "path":"gen/core/power_converter_tb.vhd" }
-    ]
+    ],
+    "scripts":{
+      "postsim":[
+        { "path":"scripts/verify_sim.py" }
+      ]
+    }
   }
 ```
 
-The `filesets` top-level key indicates which files are used in the HDL project. Notice that most of the files are located in the **gen/core/** directory. These files are auto-generated and accordingly updated with the `fins` code generator executable. Since FINS manages these files, the burden of creating and maintaining these files is removed from the developer! The `filesets` key also contains references to scripts that are executed at different points in the build and simulation process (there is an example below).
+The `filesets` top-level key indicates which files are used in the HDL project. Notice that most of the files are located in the **gen/core/** directory. These files are auto-generated and accordingly updated with the `fins` code generator executable. Since FINS manages these files, the burden of creating and maintaining these files is removed from the developer! The `filesets` key also contains references to scripts that are executed at different points in the build and simulation process (the `scripts/verify_sim.py` example is described later in the tutorial).
 
-To auto-generate scripts and a **Makefile** and then build the IP with Xilinx Vivado, execute the following commands.
+## Step 5: Building the IP with Xilinx Vivado
+
+To auto-generate Xilinx Vivado TCL scripts and a **Makefile**, execute the following commands.
+
+```bash
+$ fins -b vivado fins.json
+```
+
+Inspect the **./gen/vivado** directory to find the auto-generated Xilinx Vivado TCL scripts listed below.
+
+* **ip_create.tcl**: This is the script that the **Makefile** will use to create a Vivado project with the source and simulation files and to package the IP.
+* **ip_simulate.tcl**: This is the script that will run the simulation in the next step of this tutorial.
+
+To package and build the IP with Xilinx Vivado, execute the following commands.
 
 > NOTE: Make sure you have sourced the **settings64.sh** script for the version of Xilinx Vivado that you want to use.
 
 ```bash
-$ fins -b vivado fins.json
 $ make UseGui=1
 ```
 
 The `UseGui=1` make variable tells FINS to launch the Vivado GUI to perform the operations. Once the operations have completed, check the "TCL Console" to make sure that there were no errors. Take a moment to look at the project hierarchy and the IP packaging details, and then close Vivado. Look inside the **./project/vivado** directory and you will find the **power_converter.xpr** IP project file that we just closed.
 
-Next, inspect the **./gen/vivado** directory to find the files listed below.
+## Step 6: Building the IP with Intel Quartus Prime Pro
 
-* **ip_create.tcl**: This is the script that the **Makefile** used to create a Vivado project with the source and simulation files and to package the IP.
+To auto-generate Intel Quartus Prime Pro TCL scripts and a **Makefile**, execute the following commands.
+
+```bash
+$ fins -b quartus fins.json
+```
+
+Inspect the **./gen/quartus** directory to find the auto-generated Intel Quartus Prime Pro TCL scripts listed below.
+
+* **ip_hw.tcl**: This a Platform Designer IP definition file that is used when adding an IP to a Platform Designer System.
+* **ip_create.tcl**: This is the script that the **Makefile** will use to create a Quartus project with the source and simulation files and to package the IP.
 * **ip_simulate.tcl**: This is the script that will run the simulation in the next step of this tutorial.
 
-To auto-generate scripts and a **Makefile** and then build the IP with Intel Quartus Prime Pro, execute the following commands.
+To package and build the IP with Intel Quartus Prime Pro, execute the following commands.
 
 > NOTE: Make sure you have the path to the `quartus` executable on your `PATH` environmental variable for the version of Intel Quartus that you want to use.
 
 ```bash
 $ make clean
-$ fins -b quartus fins.json
 $ make UseGui=1
 ```
 
 The `UseGui=1` make variable tells FINS to display the Quartus messages to the command window. Since Quartus has a more command-line flow, the Quartus GUI is not opened. Once the operations have completed, check the command line console output to make sure that there were no errors. Look inside the **./project/quartus** directory and you will find the **power_converter.qpf** IP project file that was created and the **power_converter.ip** IP definition file.
 
-Next, inspect the **./gen/quartus** directory to find the files listed below.
-
-* **ip_hw.tcl**: This a Platform Designer IP definition file that is used when adding an IP to a Platform Designer System.
-* **ip_create.tcl**: This is the script that the **Makefile** used to create a Quartus project with the source and simulation files and to package the IP.
-* **ip_simulate.tcl**: This is the script that will run the simulation in the next step of this tutorial.
-
-## Step 5: Simulating the IP with ModelSim and Vivado
+## Step 7: Simulating the IP with ModelSim and Vivado
 
 First we need to create a simulation source file for the "iq" input port. Create a directory **./sim_data** in the IP root to contain our simulation files. **./sim_data** is the default simulation file source/sink location of the generated testbench **gen/core/power_converter_tb.vhd**.
 

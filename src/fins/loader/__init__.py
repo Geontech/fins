@@ -647,8 +647,10 @@ def populate_ports(fins_data,verbose):
         # Set defaults
         if not 'supports_backpressure' in port:
             port['supports_backpressure'] = False
-        if not 'streaming_metadata' in port:
-            port['streaming_metadata'] = False
+        if not 'use_pipeline' in port:
+            port['use_pipeline'] = True
+        if not 'num_instances' in port:
+            port['num_instances'] = 1
         if 'data' in port:
             if not 'bit_width' in port['data']:
                 port['data']['bit_width'] = 16
@@ -673,6 +675,10 @@ def populate_ports(fins_data,verbose):
                     metafield['is_complex'] = False
                 if not 'is_signed' in metafield:
                     metafield['is_signed'] = False
+        # Validate values
+        if port['num_instances'] < 1:
+            print('ERROR: The num_instances of port {} is < 1'.format(port['name']))
+            sys.exit(1)
 
         # Check the data bit_width for limits
         if 'data' in port:
@@ -832,11 +838,11 @@ def populate_hdl_inferences(fins_data,verbose):
 
     # Make sure we found the top-level source file
     if not top_file_descriptor:
-        print('ERROR: No source file matches the top_source key',fins_data['top_source'])
-        sys.exit(1)
+        print('WARNING: HDL inference failed because no source file matches the top_source key',fins_data['top_source'])
+        return fins_data
     if not os.path.isfile(top_file_descriptor['path']):
-        print('ERROR: The top-level source file does not exist',top_file_descriptor['path'])
-        sys.exit(1)
+        print('WARNING: HDL inference failed because the top-level source file does not exist',top_file_descriptor['path'])
+        return fins_data
 
     # Initialize the fins_data dictionary
     fins_data['hdl'] = {'ports':[], 'generics':[], 'interfaces':[]}
@@ -852,11 +858,11 @@ def populate_hdl_inferences(fins_data,verbose):
         # Find the entity
         vhdl_entity_find = re.findall(r'\s+entity\s+\w+\s+is.+?\s+end[\s;]',top_file_contents,flags=re.IGNORECASE|re.DOTALL)
         if not vhdl_entity_find:
-            print('ERROR: No entity found in VHDL file',top_file_descriptor['path'])
-            sys.exit(1)
+            print('WARNING: HDL inference failed because no entity found in VHDL file',top_file_descriptor['path'])
+            return fins_data
         if len(vhdl_entity_find) > 1:
-            print('ERROR: The top level source file',top_file_descriptor['path'],'can not be read because has multiple entities')
-            sys.exit(1)
+            print('WARNING: HDL inference failed because the top level source file',top_file_descriptor['path'],'has multiple entities')
+            return fins_data
         vhdl_entity = vhdl_entity_find[0]
 
         # Remove comments from entity
@@ -871,19 +877,19 @@ def populate_hdl_inferences(fins_data,verbose):
         # Find the keywords to use for parsing
         vhdl_entity_generic_keyword = re.findall(r'\s+generic\s*\(',vhdl_entity,flags=re.IGNORECASE)
         if len(vhdl_entity_generic_keyword) > 1:
-            print('ERROR: The top level source file',top_file_descriptor['path'],'can not be read because it has multiple generics lists')
-            sys.exit(1)
+            print('WARNING: HDL inference failed because the top level source file',top_file_descriptor['path'],'has multiple generics lists')
+            return fins_data
         if vhdl_entity_generic_keyword:
             vhdl_entity_generic_keyword = vhdl_entity_generic_keyword[0]
         vhdl_entity_port_keyword = re.findall(r'\s+port\s*\(',vhdl_entity,flags=re.IGNORECASE)
         if len(vhdl_entity_port_keyword) > 1:
-            print('ERROR: The top level source file',top_file_descriptor['path'],'can not be read because it has multiple ports lists')
-            sys.exit(1)
+            print('WARNING: HDL inference failed because the top level source file',top_file_descriptor['path'],'has multiple ports lists')
+            return fins_data
         if vhdl_entity_port_keyword:
             vhdl_entity_port_keyword = vhdl_entity_port_keyword[0]
         else:
-            print('ERROR: A port list was not detected in the top level source file',top_file_descriptor['path'])
-            sys.exit(1)
+            print('WARNING: HDL inference failed because a port list was not detected in the top level source file',top_file_descriptor['path'])
+            return fins_data
 
         # Find the ports
         # NOTE: Only ports of type "in", "out", and "inout" are supported
@@ -955,14 +961,14 @@ def populate_hdl_inferences(fins_data,verbose):
                     try:
                         new_generic_def['width'] = int(width_partition[0].strip())+1
                     except ValueError:
-                        print('ERROR: Unable to parse the width specification of std_logic_vector generic. Problem string:',width_partition[0].strip())
-                        sys.exit(1)
+                        print('WARNING: HDL inference failed because parsing the width specification of std_logic_vector generic encountered an error. Problem string:',width_partition[0].strip())
+                        return fins_data
                 # Add the generics array
                 fins_data['hdl']['generics'].append(new_generic_def)
 
     else:
-        print('ERROR: Verilog top-level file not yet supported.')
-        sys.exit(1)
+        print('WARNING: HDL inference failed because verilog top-level file not yet supported.')
+        return fins_data
 
         # Find the module
         # NOTE: Verilog 2001 ANSI-style is assumed, i.e. `module foo #(PARAMETERS)(PORTS);`

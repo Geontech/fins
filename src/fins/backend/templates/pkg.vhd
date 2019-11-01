@@ -142,6 +142,8 @@ subtype t_{{ fins['name']|lower }}_{{ prop['name'] }}_status is t_{{ fins['name'
 
 -- Top Level Properties CONTROL Record
 type t_{{ fins['name']|lower }}_props_control is record
+  clk    : std_logic;
+  resetn : std_logic;
 {%- for prop in fins['properties']['properties'] %}
 {%- if (prop['type'] == 'read-only-external') or
        (prop['type'] == 'read-only-memmap') or
@@ -223,7 +225,11 @@ function f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata 
 function f_unserialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata (metadata : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0)) return t_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata;
 {%- endif %}
 -- {{ port['name']|lower }} Records
-type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward is record
+type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward_unit is record
+  {%- if port['direction']|lower == 'in' %}
+  clk      : std_logic;
+  resetn   : std_logic;
+  {%- endif %}
   {%- if 'data' in port %}
   data     : t_{{ fins['name']|lower }}_{{ port['name']|lower }}_data;
   {%- endif %}
@@ -232,11 +238,28 @@ type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward is record
   {%- endif %}
   valid    : std_logic;
   last     : std_logic;
-end record t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward;
-{%- if port['supports_backpressure'] %}
-type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_backward is record
-  ready    : std_logic;
-end record t_{{ fins['name']|lower }}_{{ port['name']|lower }}_backward;
+end record t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward_unit;
+{%- if port['supports_backpressure'] or (port['direction']|lower == 'out') %}
+type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_backward_unit is record
+  {%- if port['direction']|lower == 'out' %}
+  clk    : std_logic;
+  resetn : std_logic;
+  {%- endif %}
+  {%- if port['supports_backpressure'] %}
+  ready  : std_logic;
+  {%- endif %}
+end record t_{{ fins['name']|lower }}_{{ port['name']|lower }}_backward_unit;
+{%- endif %}
+{%- if port['num_instances'] > 1 %}
+type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward is array(0 to {{ port['num_instances'] }}-1) of t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward_unit;
+{%- if port['supports_backpressure'] or (port['direction']|lower == 'out') %}
+type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_backward is array(0 to {{ port['num_instances'] }}-1) of t_{{ fins['name']|lower }}_{{ port['name']|lower }}_backward_unit;
+{%- endif %}
+{%- else %}
+subtype t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward is t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward_unit;
+{%- if port['supports_backpressure'] or (port['direction']|lower == 'out') %}
+subtype t_{{ fins['name']|lower }}_{{ port['name']|lower }}_backward is t_{{ fins['name']|lower }}_{{ port['name']|lower }}_backward_unit;
+{%- endif %}
 {%- endif %}
 
 {%- endfor %}{#### for port in fins['ports']['ports'] ####}
@@ -246,10 +269,8 @@ type t_{{ fins['name']|lower }}_ports_in is record
   {%- for port in fins['ports']['ports'] %}
   {%- if port['direction']|lower == 'in' %}
   {{ port['name']|lower }} : t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward;
-  {%- elif port['supports_backpressure'] %}
-  {{ port['name']|lower }} : t_{{ fins['name']|lower }}_{{ port['name']|lower }}_backward;
   {%- else %}
-  {{ port['name']|lower }} : boolean; -- Null placeholder
+  {{ port['name']|lower }} : t_{{ fins['name']|lower }}_{{ port['name']|lower }}_backward;
   {%- endif %}
   {%- endfor %}
 end record t_{{ fins['name']|lower }}_ports_in;
@@ -273,6 +294,7 @@ end {{ fins['name']|lower }}_pkg;
 
 package body {{ fins['name']|lower }}_pkg is
 
+  {%- if 'ports' in fins %}
   {%- for port in fins['ports']['ports'] %}
   {%- if 'data' in port %}
   -- {{ port['name']|lower }} DATA Functions
@@ -447,5 +469,6 @@ package body {{ fins['name']|lower }}_pkg is
   end function f_unserialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata;
   {%- endif %}
   {%- endfor %}{#### for port in fins['ports']['ports'] ####}
+  {%- endif %}{#### if 'ports' in fins ####}
 
 end package body {{ fins['name']|lower }}_pkg;
