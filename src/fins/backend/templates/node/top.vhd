@@ -76,9 +76,7 @@ entity {{ fins['name']|lower }} is
     {%- if port['supports_backpressure'] %}
     {{ port|axisprefix(i) }}_tready  : {% if port['direction']|lower == 'in' %}out{% else %}in {% endif %} std_logic;
     {%- endif %}
-    {%- if 'data' in port %}
     {{ port|axisprefix(i) }}_tdata   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
-    {%- endif %}
     {%- if 'metadata' in port %}
     {{ port|axisprefix(i) }}_tuser   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
@@ -144,9 +142,7 @@ architecture struct of {{ fins['name']|lower }} is
       {%- if port['supports_backpressure'] %}
       {{ port|axisprefix(i) }}_tready  : {% if port['direction']|lower == 'in' %}out{% else %}in {% endif %} std_logic;
       {%- endif %}
-      {%- if 'data' in port %}
       {{ port|axisprefix(i) }}_tdata   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
-      {%- endif %}
       {%- if 'metadata' in port %}
       {{ port|axisprefix(i) }}_tuser   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %}  std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
       {%- endif %}
@@ -233,9 +229,7 @@ begin
       {%- if port['supports_backpressure'] %}
       {{ port|axisprefix(i) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%- endif %}
-      {%- if 'data' in port %}
       {{ port|axisprefix(i) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
-      {%- endif %}
       {%- if 'metadata' in port %}
       {{ port|axisprefix(i) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
       {%- endif %}

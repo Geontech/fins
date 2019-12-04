@@ -35,7 +35,11 @@
           "is_signed":"PORTS_IS_SIGNED",
           "num_samples":1,
           "num_channels":1
-        }
+        },
+        "metadata":[
+          { "name":"timestamp", "bit_width":64 },
+          { "name":"sample_period", "bit_width":64 }
+        ]
       },
       {
         "name":"myoutput",
@@ -44,7 +48,11 @@
           "bit_width":"PORTS_WIDTH",
           "is_complex":"PORTS_IS_COMPLEX",
           "is_signed":"PORTS_IS_SIGNED"
-        }
+        },
+        "metadata":[
+          { "name":"timestamp", "bit_width":64 },
+          { "name":"sample_period", "bit_width":64 }
+        ]
       },
       {
         "name":"test_in",
@@ -80,6 +88,44 @@
         "metadata":[
           { "name":"timestamp",        "bit_width":64 },
           { "name":"sample_step_size", "bit_width":64, "is_complex":false, "is_signed":true }
+        ]
+      },
+      {
+        "name":"sfix_cpx_in",
+        "direction":"in",
+        "supports_backpressure":true,
+        "data":{
+          "bit_width":32,
+          "is_complex":true,
+          "is_signed":true,
+          "num_samples":1,
+          "num_channels":1
+        },
+        "metadata":[
+          { "name":"flag",   "bit_width":1 },
+          { "name":"sfix8",  "is_signed":true, "bit_width":8 },
+          { "name":"sfix16", "is_signed":true, "bit_width":16 },
+          { "name":"sfix32", "is_signed":true, "bit_width":32 },
+          { "name":"sfix64", "is_signed":true, "bit_width":64 }
+        ]
+      },
+      {
+        "name":"sfix_cpx_out",
+        "direction":"out",
+        "supports_backpressure":true,
+        "data":{
+          "bit_width":32,
+          "is_complex":true,
+          "is_signed":true,
+          "num_samples":1,
+          "num_channels":1
+        },
+        "metadata":[
+          { "name":"flag",   "bit_width":1 },
+          { "name":"sfix8",  "is_signed":true, "bit_width":8 },
+          { "name":"sfix16", "is_signed":true, "bit_width":16 },
+          { "name":"sfix32", "is_signed":true, "bit_width":32 },
+          { "name":"sfix64", "is_signed":true, "bit_width":64 }
         ]
       }
     ]

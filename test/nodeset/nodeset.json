@@ -6,7 +6,9 @@
       "fins_path":"../node/gen/core/test_top.json",
       "module_name":"fins_test_ip",
       "interface_name":"S_AXI",
-      "properties_offset":0
+      "properties_offset":0,
+      "ports_consumer_name":"myinput",
+      "ports_producer_name":"myoutput"
     },
     {
       "fins_path":"../node/ip/test_middle/gen/core/test_middle.json",

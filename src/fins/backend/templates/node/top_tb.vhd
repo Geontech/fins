@@ -113,9 +113,7 @@ architecture behav of {{ fins['name']|lower }}_tb is
   {%- if port['supports_backpressure'] %}
   signal {{ port|axisprefix(i) }}_tready  : std_logic;
   {%- endif %}
-  {%- if 'data' in port %}
   signal {{ port|axisprefix(i) }}_tdata   : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
-  {%- endif %}
   {%- if 'metadata' in port %}
   signal {{ port|axisprefix(i) }}_tuser   : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
   {%- endif %}
@@ -186,9 +184,7 @@ begin
       {%- if port['supports_backpressure'] %}
       {{ port|axisprefix(i) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%- endif %}
-      {%- if 'data' in port %}
       {{ port|axisprefix(i) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
-      {%- endif %}
       {%- if 'metadata' in port %}
       {{ port|axisprefix(i) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
       {%- endif %}
@@ -231,9 +227,7 @@ begin
       {%- if port['supports_backpressure'] %}
       {{ port|axisprefix(i,True) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%- endif %}
-      {%- if 'data' in port %}
       {{ port|axisprefix(i,True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
-      {%- endif %}
       {%- if 'metadata' in port %}
       {{ port|axisprefix(i,True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
       {%- endif %}
@@ -245,9 +239,7 @@ begin
       {%- if port['supports_backpressure'] %}
       {{ port|axisprefix(i,True) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%- endif %}
-      {%- if 'data' in port %}
       {{ port|axisprefix(i,True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
-      {%- endif %}
       {%- if 'metadata' in port %}
       {{ port|axisprefix(i,True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
       {%- endif %}

@@ -40,8 +40,9 @@ setup(
         'fins':[
             'loader/node.json',
             'loader/nodeset.json',
-            'backend/templates/*',
-            'backend/templates/.gitignore'
+            'backend/templates/node/*',
+            'backend/templates/nodeset/*',
+            'backend/templates/node/.gitignore'
         ]
     },
     entry_points={

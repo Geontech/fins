@@ -115,12 +115,14 @@ architecture behav of test_top_tb is
   signal s_axis_myinput_aclk    : std_logic;
   signal s_axis_myinput_aresetn : std_logic;
   signal s_axis_myinput_tdata   : std_logic_vector(16-1 downto 0);
+  signal s_axis_myinput_tuser   : std_logic_vector(128-1 downto 0);
   signal s_axis_myinput_tvalid  : std_logic;
   signal s_axis_myinput_tlast   : std_logic;
   -- AXI4-Stream Port OUT: myoutput
   signal m_axis_myoutput_aclk    : std_logic;
   signal m_axis_myoutput_aresetn : std_logic;
   signal m_axis_myoutput_tdata   : std_logic_vector(16-1 downto 0);
+  signal m_axis_myoutput_tuser   : std_logic_vector(128-1 downto 0);
   signal m_axis_myoutput_tvalid  : std_logic;
   signal m_axis_myoutput_tlast   : std_logic;
   -- AXI4-Stream Port IN: test_in
@@ -153,6 +155,20 @@ architecture behav of test_top_tb is
   signal m01_axis_test_out_tuser   : std_logic_vector(128-1 downto 0);
   signal m01_axis_test_out_tvalid  : std_logic;
   signal m01_axis_test_out_tlast   : std_logic;
+  signal s_axis_sfix_cpx_in_aclk     : std_logic;
+  signal s_axis_sfix_cpx_in_aresetn  : std_logic;
+  signal s_axis_sfix_cpx_in_tready   : std_logic;
+  signal s_axis_sfix_cpx_in_tdata    : std_logic_vector(32-1 downto 0);
+  signal s_axis_sfix_cpx_in_tuser    : std_logic_vector(121-1 downto 0);
+  signal s_axis_sfix_cpx_in_tvalid   : std_logic;
+  signal s_axis_sfix_cpx_in_tlast    : std_logic;
+  signal m_axis_sfix_cpx_out_aclk    : std_logic;
+  signal m_axis_sfix_cpx_out_aresetn : std_logic;
+  signal m_axis_sfix_cpx_out_tready  : std_logic;
+  signal m_axis_sfix_cpx_out_tdata   : std_logic_vector(32-1 downto 0);
+  signal m_axis_sfix_cpx_out_tuser   : std_logic_vector(121-1 downto 0);
+  signal m_axis_sfix_cpx_out_tvalid  : std_logic;
+  signal m_axis_sfix_cpx_out_tlast   : std_logic;
 
   --------------------------------------------------------------------------------
   -- Testbench
@@ -170,6 +186,7 @@ architecture behav of test_top_tb is
   signal s01_axis_test_in_enable : std_logic := '0';
   signal m00_axis_test_out_verify_done : boolean := false;
   signal m01_axis_test_out_verify_done : boolean := false;
+  signal s_axis_sfix_cpx_in_enable : std_logic := '0';
 
 begin
 
@@ -244,11 +261,13 @@ begin
       s_axis_myinput_aclk    => s_axis_myinput_aclk,
       s_axis_myinput_aresetn => s_axis_myinput_aresetn,
       s_axis_myinput_tdata   => s_axis_myinput_tdata,
+      s_axis_myinput_tuser   => s_axis_myinput_tuser,
       s_axis_myinput_tvalid  => s_axis_myinput_tvalid,
       s_axis_myinput_tlast   => s_axis_myinput_tlast,
       m_axis_myoutput_aclk    => m_axis_myoutput_aclk,
       m_axis_myoutput_aresetn => m_axis_myoutput_aresetn,
       m_axis_myoutput_tdata   => m_axis_myoutput_tdata,
+      m_axis_myoutput_tuser   => m_axis_myoutput_tuser,
       m_axis_myoutput_tvalid  => m_axis_myoutput_tvalid,
       m_axis_myoutput_tlast   => m_axis_myoutput_tlast,
       s00_axis_test_in_aclk    => s00_axis_test_in_aclk,
@@ -278,7 +297,21 @@ begin
       m01_axis_test_out_tdata   => m01_axis_test_out_tdata,
       m01_axis_test_out_tuser   => m01_axis_test_out_tuser,
       m01_axis_test_out_tvalid  => m01_axis_test_out_tvalid,
-      m01_axis_test_out_tlast   => m01_axis_test_out_tlast
+      m01_axis_test_out_tlast   => m01_axis_test_out_tlast,
+      s_axis_sfix_cpx_in_aclk     => s_axis_sfix_cpx_in_aclk,
+      s_axis_sfix_cpx_in_aresetn  => s_axis_sfix_cpx_in_aresetn,
+      s_axis_sfix_cpx_in_tready   => s_axis_sfix_cpx_in_tready,
+      s_axis_sfix_cpx_in_tdata    => s_axis_sfix_cpx_in_tdata,
+      s_axis_sfix_cpx_in_tuser    => s_axis_sfix_cpx_in_tuser,
+      s_axis_sfix_cpx_in_tvalid   => s_axis_sfix_cpx_in_tvalid,
+      s_axis_sfix_cpx_in_tlast    => s_axis_sfix_cpx_in_tlast,
+      m_axis_sfix_cpx_out_aclk    => m_axis_sfix_cpx_out_aclk,
+      m_axis_sfix_cpx_out_aresetn => m_axis_sfix_cpx_out_aresetn,
+      m_axis_sfix_cpx_out_tready  => m_axis_sfix_cpx_out_tready,
+      m_axis_sfix_cpx_out_tdata   => m_axis_sfix_cpx_out_tdata,
+      m_axis_sfix_cpx_out_tuser   => m_axis_sfix_cpx_out_tuser,
+      m_axis_sfix_cpx_out_tvalid  => m_axis_sfix_cpx_out_tvalid,
+      m_axis_sfix_cpx_out_tlast   => m_axis_sfix_cpx_out_tlast
     );
   --------------------------------------------------------------------------------
   -- File Input/Output AXI4-Stream Port Verification
@@ -288,32 +321,40 @@ begin
     generic map (
       G_MYINPUT_SOURCE_SAMPLE_PERIOD => 15,
       G_MYINPUT_SOURCE_RANDOMIZE_BUS => true,
-      G_MYINPUT_SOURCE_FILEPATH => "../../../../../../sim_data/sim_source_myinput.txt",
+      --G_MYINPUT_SOURCE_FILEPATH => "../../../../../../sim_data/sim_source_myinput.txt",
       G_MYOUTPUT_SINK_SAMPLE_PERIOD => 2,
       G_MYOUTPUT_SINK_RANDOMIZE_BUS => true,
-      G_MYOUTPUT_SINK_FILEPATH => "../../../../../../sim_data/sim_sink_myoutput.txt",
+      --G_MYOUTPUT_SINK_FILEPATH => "../../../../../../sim_data/sim_sink_myoutput.txt",
       G_TEST_IN00_SOURCE_SAMPLE_PERIOD => 16,
       G_TEST_IN00_SOURCE_RANDOMIZE_BUS => false,
-      G_TEST_IN00_SOURCE_FILEPATH => "../../../../../../sim_data/sim_source_test_in00.txt",
+      --G_TEST_IN00_SOURCE_FILEPATH => "../../../../../../sim_data/sim_source_test_in00.txt",
       G_TEST_IN01_SOURCE_SAMPLE_PERIOD => 31,
       G_TEST_IN01_SOURCE_RANDOMIZE_BUS => true,
-      G_TEST_IN01_SOURCE_FILEPATH => "../../../../../../sim_data/sim_source_test_in01.txt",
+      --G_TEST_IN01_SOURCE_FILEPATH => "../../../../../../sim_data/sim_source_test_in01.txt",
       G_TEST_OUT00_SINK_SAMPLE_PERIOD => 31,
       G_TEST_OUT00_SINK_RANDOMIZE_BUS => true,
-      G_TEST_OUT00_SINK_FILEPATH => "../../../../../../sim_data/sim_sink_test_out00.txt",
+      --G_TEST_OUT00_SINK_FILEPATH => "../../../../../../sim_data/sim_sink_test_out00.txt",
       G_TEST_OUT01_SINK_SAMPLE_PERIOD => 16,
       G_TEST_OUT01_SINK_RANDOMIZE_BUS => false,
-      G_TEST_OUT01_SINK_FILEPATH => "../../../../../../sim_data/sim_sink_test_out01.txt"
+      --G_TEST_OUT01_SINK_FILEPATH => "../../../../../../sim_data/sim_sink_test_out01.txt",
+      G_SFIX_CPX_IN_SOURCE_SAMPLE_PERIOD => 1,
+      G_SFIX_CPX_IN_SOURCE_RANDOMIZE_BUS => false,
+      --G_SFIX_CPX_IN_SOURCE_FILEPATH => "../../../../../../sim_data/sim_source_sfix_cpx_in.txt",
+      G_SFIX_CPX_OUT_SINK_SAMPLE_PERIOD => 1,
+      G_SFIX_CPX_OUT_SINK_RANDOMIZE_BUS => false
+      --G_SFIX_CPX_OUT_SINK_FILEPATH => "../../../../../../sim_data/sim_sink_sfix_cpx_out.txt"
     )
     port map (
       simulation_done => simulation_done,
       m_axis_myinput_aclk    => s_axis_myinput_aclk,
       m_axis_myinput_enable  => s_axis_myinput_enable,
       m_axis_myinput_tdata   => s_axis_myinput_tdata,
+      m_axis_myinput_tuser   => s_axis_myinput_tuser,
       m_axis_myinput_tvalid  => s_axis_myinput_tvalid,
       m_axis_myinput_tlast   => s_axis_myinput_tlast,
       s_axis_myoutput_aclk    => m_axis_myoutput_aclk,
       s_axis_myoutput_tdata   => m_axis_myoutput_tdata,
+      s_axis_myoutput_tuser   => m_axis_myoutput_tuser,
       s_axis_myoutput_tvalid  => m_axis_myoutput_tvalid,
       s_axis_myoutput_tlast   => m_axis_myoutput_tlast,
       m00_axis_test_in_aclk    => s00_axis_test_in_aclk,
@@ -341,7 +382,20 @@ begin
       s01_axis_test_out_tdata   => m01_axis_test_out_tdata,
       s01_axis_test_out_tuser   => m01_axis_test_out_tuser,
       s01_axis_test_out_tvalid  => m01_axis_test_out_tvalid,
-      s01_axis_test_out_tlast   => m01_axis_test_out_tlast
+      s01_axis_test_out_tlast   => m01_axis_test_out_tlast,
+      m_axis_sfix_cpx_in_aclk    => s_axis_sfix_cpx_in_aclk,
+      m_axis_sfix_cpx_in_enable  => s_axis_sfix_cpx_in_enable,
+      m_axis_sfix_cpx_in_tready  => s_axis_sfix_cpx_in_tready,
+      m_axis_sfix_cpx_in_tdata   => s_axis_sfix_cpx_in_tdata,
+      m_axis_sfix_cpx_in_tuser   => s_axis_sfix_cpx_in_tuser,
+      m_axis_sfix_cpx_in_tvalid  => s_axis_sfix_cpx_in_tvalid,
+      m_axis_sfix_cpx_in_tlast   => s_axis_sfix_cpx_in_tlast,
+      s_axis_sfix_cpx_out_aclk   => m_axis_sfix_cpx_out_aclk,
+      s_axis_sfix_cpx_out_tready => m_axis_sfix_cpx_out_tready,
+      s_axis_sfix_cpx_out_tdata  => m_axis_sfix_cpx_out_tdata,
+      s_axis_sfix_cpx_out_tuser  => m_axis_sfix_cpx_out_tuser,
+      s_axis_sfix_cpx_out_tvalid => m_axis_sfix_cpx_out_tvalid,
+      s_axis_sfix_cpx_out_tlast  => m_axis_sfix_cpx_out_tlast
     );
 
   --------------------------------------------------------------------------------
@@ -379,6 +433,11 @@ begin
   m00_axis_test_out_aresetn <= resetn;
   m01_axis_test_out_aclk    <= clock;
   m01_axis_test_out_aresetn <= resetn;
+  s_axis_sfix_cpx_in_aclk    <= clock;
+  s_axis_sfix_cpx_in_aresetn <= resetn;
+  m_axis_sfix_cpx_out_aclk    <= clock;
+  m_axis_sfix_cpx_out_aresetn <= resetn;
+
   --------------------------------------------------------------------------------
   -- Port Verification Procedures
   --------------------------------------------------------------------------------
@@ -497,6 +556,7 @@ begin
     s_axis_myinput_enable <= '1';
     s00_axis_test_in_enable <= '1';
     s01_axis_test_in_enable <= '1';
+    s_axis_sfix_cpx_in_enable <= '1';
 
     -- Wait for the output verification processes to complete
     if (not m_axis_myoutput_verify_done) then

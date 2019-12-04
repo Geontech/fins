@@ -78,9 +78,7 @@ entity {{ fins['name'] }}_axis_verify is
     {%- if port['supports_backpressure'] %}
     {{ port|axisprefix(i,True) }}_tready  : out std_logic;
     {%- endif %}
-    {%- if 'data' in port %}
     {{ port|axisprefix(i,True) }}_tdata   : in  std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
-    {%- endif %}
     {%- if 'metadata' in port %}
     {{ port|axisprefix(i,True) }}_tuser   : in  std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
@@ -92,9 +90,7 @@ entity {{ fins['name'] }}_axis_verify is
     {%- if port['supports_backpressure'] %}
     {{ port|axisprefix(i,True) }}_tready  : in  std_logic;
     {%- endif %}
-    {%- if 'data' in port %}
     {{ port|axisprefix(i,True) }}_tdata   : out std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
-    {%- endif %}
     {%- if 'metadata' in port %}
     {{ port|axisprefix(i,True) }}_tuser   : out std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
@@ -128,10 +124,8 @@ begin
     -- Intermediate variables to assign to signals
     variable axis_tvalid           : std_logic := '0';
     variable axis_tlast            : std_logic := '0';
-    {%- if 'data' in port %}
     variable axis_tdata            : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0) := (others => '0');
     variable current_tdata         : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
-    {%- endif %}
     {%- if 'metadata' in port %}
     variable axis_tuser            : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0) := (others => '0');
     variable current_tuser         : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
@@ -145,9 +139,7 @@ begin
         -- When disabled, set output signals low
         {{ port|axisprefix(i,True) }}_tvalid <= '0';
         {{ port|axisprefix(i,True) }}_tlast  <= '0';
-        {%- if 'data' in port %}
         {{ port|axisprefix(i,True) }}_tdata  <= (others => '0');
-        {%- endif %}
         {%- if 'metadata' in port %}
         {{ port|axisprefix(i,True) }}_tuser  <= (others => '0');
         {%- endif %}
@@ -169,9 +161,7 @@ begin
           {%- endif %}
             axis_tvalid := '0';
             axis_tlast  := '0';
-            {%- if 'data' in port %}
             axis_tdata  := (others => '0');
-            {%- endif %}
             {%- if 'metadata' in port %}
             axis_tuser  := (others => '0');
             {%- endif %}
@@ -216,12 +206,9 @@ begin
                 -- NOTE: File format is one of the following
                 --       TLAST_HEX_STRING TDATA_HEX_STRING TUSER_HEX_STRING
                 --       TLAST_HEX_STRING TDATA_HEX_STRING
-                --       TLAST_HEX_STRING TUSER_HEX_STRING
                 readline(read_file, current_line);
                 hread(current_line, current_tlast);
-                {%- if 'data' in port %}
                 hread(current_line, current_tdata);
-                {%- endif %}
                 {%- if 'metadata' in port %}
                 hread(current_line, current_tuser);
                 {%- endif %}
@@ -232,9 +219,7 @@ begin
                 else
                   axis_tlast := '0';
                 end if;
-                {%- if 'data' in port %}
                 axis_tdata  := current_tdata;
-                {%- endif %}
                 {%- if 'metadata' in port %}
                 axis_tuser  := current_tuser;
                 {%- endif %}
@@ -244,9 +229,7 @@ begin
                 if (axis_tvalid = '1') then
                   axis_tvalid := '0';
                   axis_tlast  := '0';
-                  {%- if 'data' in port %}
                   axis_tdata  := (others => '0');
-                  {%- endif %}
                   {%- if 'metadata' in port %}
                   axis_tuser  := (others => '0');
                   {%- endif %}
@@ -271,9 +254,7 @@ begin
         --******************************************
         {{ port|axisprefix(i,True) }}_tvalid <= axis_tvalid;
         {{ port|axisprefix(i,True) }}_tlast  <= axis_tlast;
-        {%- if 'data' in port %}
         {{ port|axisprefix(i,True) }}_tdata  <= axis_tdata;
-        {%- endif %}
         {%- if 'metadata' in port %}
         {{ port|axisprefix(i,True) }}_tuser  <= axis_tuser;
         {%- endif %}
@@ -297,9 +278,7 @@ begin
     {%- if port['supports_backpressure'] %}
     variable current_tready        : std_logic;
     {%- endif %}
-    {%- if 'data' in port %}
     variable current_tdata         : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
-    {%- endif %}
     {%- if 'metadata' in port %}
     variable current_tuser         : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
@@ -326,17 +305,13 @@ begin
         end if;
         -- Write the value to the file in hexadecimal format
         current_tlast(0) := {{ port|axisprefix(i,True) }}_tlast;
-        {%- if 'data' in port %}
         current_tdata    := {{ port|axisprefix(i,True) }}_tdata;
-        {%- endif %}
         {%- if 'metadata' in port %}
         current_tuser    := {{ port|axisprefix(i,True) }}_tuser;
         {%- endif %}
         hwrite(current_line, current_tlast);
-        {%- if 'data' in port %}
         write(current_line, string'(" "));
         hwrite(current_line, current_tdata);
-        {%- endif %}
         {%- if 'metadata' in port %}
         write(current_line, string'(" "));
         hwrite(current_line, current_tuser);

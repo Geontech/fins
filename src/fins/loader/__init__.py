@@ -58,55 +58,62 @@ INTERFACE_PORT_INFERENCE = {
         { 'pattern':r'reset',        'regex':False,'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'\w+_reset',    'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'reset_\w+',    'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
-        { 'pattern':r'\w+_reset_\w+','regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'resetin',      'regex':False,'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'\w+_resetin',  'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
+        { 'pattern':r'resetin_\w+',  'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'resetn',       'regex':False,'properties':{'signal':'reset_n','polarity':'active_low' }},
         { 'pattern':r'\w+_resetn',   'regex':True, 'properties':{'signal':'reset_n','polarity':'active_low' }},
+        { 'pattern':r'resetn_\w+',   'regex':True, 'properties':{'signal':'reset_n','polarity':'active_low' }},
         { 'pattern':r'rst',          'regex':False,'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'\w+_rst',      'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
+        { 'pattern':r'rst_\w+',      'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'rstin',        'regex':False,'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'\w+_rstin',    'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
+        { 'pattern':r'rstin_\w+',    'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'aresetn',      'regex':False,'properties':{'signal':'reset_n','polarity':'active_low' }},
-        { 'pattern':r'\w+_aresetn',  'regex':True, 'properties':{'signal':'reset_n','polarity':'active_low' }}
+        { 'pattern':r'\w+_aresetn',  'regex':True, 'properties':{'signal':'reset_n','polarity':'active_low' }},
+        { 'pattern':r'aresetn_\w+',  'regex':True, 'properties':{'signal':'reset_n','polarity':'active_low' }}
     ],
     'clock':[
         { 'pattern':r'clock',        'regex':False,'properties':{'signal':'clk'}},
         { 'pattern':r'\w+_clock',    'regex':True, 'properties':{'signal':'clk'}},
         { 'pattern':r'clock_\w+',    'regex':True, 'properties':{'signal':'clk'}},
-        { 'pattern':r'\w+_clock_\w+','regex':True, 'properties':{'signal':'clk'}},
         { 'pattern':r'clk',          'regex':False,'properties':{'signal':'clk'}},
         { 'pattern':r'\w+_clk',      'regex':True, 'properties':{'signal':'clk'}},
+        { 'pattern':r'clk_\w+',      'regex':True, 'properties':{'signal':'clk'}},
         { 'pattern':r'clkin',        'regex':False,'properties':{'signal':'clk'}},
         { 'pattern':r'\w+_clkin',    'regex':True, 'properties':{'signal':'clk'}},
+        { 'pattern':r'clkin_\w+',    'regex':True, 'properties':{'signal':'clk'}},
         { 'pattern':r'aclk',         'regex':False,'properties':{'signal':'clk'}},
         { 'pattern':r'\w+_aclk',     'regex':True, 'properties':{'signal':'clk'}},
+        { 'pattern':r'aclk_\w+',     'regex':True, 'properties':{'signal':'clk'}},
         { 'pattern':r'aclkin',       'regex':False,'properties':{'signal':'clk'}},
-        { 'pattern':r'\w+_aclkin',   'regex':True, 'properties':{'signal':'clk'}}
+        { 'pattern':r'\w+_aclkin',   'regex':True, 'properties':{'signal':'clk'}},
+        { 'pattern':r'aclkin_\w+',   'regex':True, 'properties':{'signal':'clk'}}
     ],
     'axi4stream':[
-        { 'pattern':r's\d*_axis_\w*_aclk|s\d*_axis_\w*_aclk',      'regex':True,'properties':{'mode':'slave',  'signal':'clk'    }},
-        { 'pattern':r's\d*_axis_\w*_aresetn|s\d*_axis_\w*_aresetn','regex':True,'properties':{'mode':'slave',  'signal':'reset_n'}},
-        { 'pattern':r's\d*_axis_\w*_tdata|s\d*_axis_\w*_tdata',    'regex':True,'properties':{'mode':'slave',  'signal':'tdata'  }},
-        { 'pattern':r's\d*_axis_\w*_tvalid|s\d*_axis_\w*_tvalid',  'regex':True,'properties':{'mode':'slave',  'signal':'tvalid' }},
-        { 'pattern':r's\d*_axis_\w*_tready|s\d*_axis_\w*_tready',  'regex':True,'properties':{'mode':'slave',  'signal':'tready' }},
-        { 'pattern':r's\d*_axis_\w*_tstrb|s\d*_axis_\w*_tstrb',    'regex':True,'properties':{'mode':'slave',  'signal':'tstrb'  }},
-        { 'pattern':r's\d*_axis_\w*_tkeep|s\d*_axis_\w*_tkeep',    'regex':True,'properties':{'mode':'slave',  'signal':'tkeep'  }},
-        { 'pattern':r's\d*_axis_\w*_tlast|s\d*_axis_\w*_tlast',    'regex':True,'properties':{'mode':'slave',  'signal':'tlast'  }},
-        { 'pattern':r's\d*_axis_\w*_tid|s\d*_axis_\w*_tid',        'regex':True,'properties':{'mode':'slave',  'signal':'tid'    }},
-        { 'pattern':r's\d*_axis_\w*_tdest|s\d*_axis_\w*_tdest',    'regex':True,'properties':{'mode':'slave',  'signal':'tdest'  }},
-        { 'pattern':r's\d*_axis_\w*_tuser|s\d*_axis_\w*_tuser',    'regex':True,'properties':{'mode':'slave',  'signal':'tuser'  }},
-        { 'pattern':r'm\d*_axis_\w*_aclk|m\d*_axis_\w*_aclk',      'regex':True,'properties':{'mode':'master', 'signal':'clk'    }},
-        { 'pattern':r'm\d*_axis_\w*_aresetn|m\d*_axis_\w*_aresetn','regex':True,'properties':{'mode':'master', 'signal':'reset_n'}},
-        { 'pattern':r'm\d*_axis_\w*_tdata|m\d*_axis_\w*_tdata',    'regex':True,'properties':{'mode':'master', 'signal':'tdata'  }},
-        { 'pattern':r'm\d*_axis_\w*_tvalid|m\d*_axis_\w*_tvalid',  'regex':True,'properties':{'mode':'master', 'signal':'tvalid' }},
-        { 'pattern':r'm\d*_axis_\w*_tready|m\d*_axis_\w*_tready',  'regex':True,'properties':{'mode':'master', 'signal':'tready' }},
-        { 'pattern':r'm\d*_axis_\w*_tstrb|m\d*_axis_\w*_tstrb',    'regex':True,'properties':{'mode':'master', 'signal':'tstrb'  }},
-        { 'pattern':r'm\d*_axis_\w*_tkeep|m\d*_axis_\w*_tkeep',    'regex':True,'properties':{'mode':'master', 'signal':'tkeep'  }},
-        { 'pattern':r'm\d*_axis_\w*_tlast|m\d*_axis_\w*_tlast',    'regex':True,'properties':{'mode':'master', 'signal':'tlast'  }},
-        { 'pattern':r'm\d*_axis_\w*_tid|m\d*_axis_\w*_tid',        'regex':True,'properties':{'mode':'master', 'signal':'tid'    }},
-        { 'pattern':r'm\d*_axis_\w*_tdest|m\d*_axis_\w*_tdest',    'regex':True,'properties':{'mode':'master', 'signal':'tdest'  }},
-        { 'pattern':r'm\d*_axis_\w*_tuser|m\d*_axis_\w*_tuser',    'regex':True,'properties':{'mode':'master', 'signal':'tuser'  }}
+        { 'pattern':r's\d*_axis_aclk|s\d*_axis_\w*_aclk',      'regex':True,'properties':{'mode':'slave',  'signal':'clk'    }},
+        { 'pattern':r's\d*_axis_aresetn|s\d*_axis_\w*_aresetn','regex':True,'properties':{'mode':'slave',  'signal':'reset_n'}},
+        { 'pattern':r's\d*_axis_tdata|s\d*_axis_\w*_tdata',    'regex':True,'properties':{'mode':'slave',  'signal':'tdata'  }},
+        { 'pattern':r's\d*_axis_tvalid|s\d*_axis_\w*_tvalid',  'regex':True,'properties':{'mode':'slave',  'signal':'tvalid' }},
+        { 'pattern':r's\d*_axis_tready|s\d*_axis_\w*_tready',  'regex':True,'properties':{'mode':'slave',  'signal':'tready' }},
+        { 'pattern':r's\d*_axis_tstrb|s\d*_axis_\w*_tstrb',    'regex':True,'properties':{'mode':'slave',  'signal':'tstrb'  }},
+        { 'pattern':r's\d*_axis_tkeep|s\d*_axis_\w*_tkeep',    'regex':True,'properties':{'mode':'slave',  'signal':'tkeep'  }},
+        { 'pattern':r's\d*_axis_tlast|s\d*_axis_\w*_tlast',    'regex':True,'properties':{'mode':'slave',  'signal':'tlast'  }},
+        { 'pattern':r's\d*_axis_tid|s\d*_axis_\w*_tid',        'regex':True,'properties':{'mode':'slave',  'signal':'tid'    }},
+        { 'pattern':r's\d*_axis_tdest|s\d*_axis_\w*_tdest',    'regex':True,'properties':{'mode':'slave',  'signal':'tdest'  }},
+        { 'pattern':r's\d*_axis_tuser|s\d*_axis_\w*_tuser',    'regex':True,'properties':{'mode':'slave',  'signal':'tuser'  }},
+        { 'pattern':r'm\d*_axis_aclk|m\d*_axis_\w*_aclk',      'regex':True,'properties':{'mode':'master', 'signal':'clk'    }},
+        { 'pattern':r'm\d*_axis_aresetn|m\d*_axis_\w*_aresetn','regex':True,'properties':{'mode':'master', 'signal':'reset_n'}},
+        { 'pattern':r'm\d*_axis_tdata|m\d*_axis_\w*_tdata',    'regex':True,'properties':{'mode':'master', 'signal':'tdata'  }},
+        { 'pattern':r'm\d*_axis_tvalid|m\d*_axis_\w*_tvalid',  'regex':True,'properties':{'mode':'master', 'signal':'tvalid' }},
+        { 'pattern':r'm\d*_axis_tready|m\d*_axis_\w*_tready',  'regex':True,'properties':{'mode':'master', 'signal':'tready' }},
+        { 'pattern':r'm\d*_axis_tstrb|m\d*_axis_\w*_tstrb',    'regex':True,'properties':{'mode':'master', 'signal':'tstrb'  }},
+        { 'pattern':r'm\d*_axis_tkeep|m\d*_axis_\w*_tkeep',    'regex':True,'properties':{'mode':'master', 'signal':'tkeep'  }},
+        { 'pattern':r'm\d*_axis_tlast|m\d*_axis_\w*_tlast',    'regex':True,'properties':{'mode':'master', 'signal':'tlast'  }},
+        { 'pattern':r'm\d*_axis_tid|m\d*_axis_\w*_tid',        'regex':True,'properties':{'mode':'master', 'signal':'tid'    }},
+        { 'pattern':r'm\d*_axis_tdest|m\d*_axis_\w*_tdest',    'regex':True,'properties':{'mode':'master', 'signal':'tdest'  }},
+        { 'pattern':r'm\d*_axis_tuser|m\d*_axis_\w*_tuser',    'regex':True,'properties':{'mode':'master', 'signal':'tuser'  }}
     ],
     'axi4lite':[
         { 'pattern':r's\d*_axi_aclk|s\d*_axi_\w+_aclk',        'regex':True,'properties':{'mode':'slave',  'signal':'clk'     }},
@@ -487,10 +494,20 @@ def convert_parameters_to_literal(fins_data,verbose):
     # Convert all non-string fields of ports to literals
     if 'ports' in fins_data:
         for port in fins_data['ports']['ports']:
-            if 'data' in port:
-                for key, value in port['data'].items():
-                    # Convert value
-                    port['data'][key] = get_param_value(params, value)
+            # Convert port fields
+            for key, value in port['data'].items():
+                # Don't convert string/dictionary typed fields
+                if (key.lower() == 'name') or (key.lower() == 'direction') or (key.lower() == 'data') or (key.lower() == 'metadata'):
+                    continue
+                # Convert value
+                port[key] = get_param_value(params, value)
+
+            # Convert data fields
+            for key, value in port['data'].items():
+                # Convert value
+                port['data'][key] = get_param_value(params, value)
+
+            # Convert metadata fields
             if 'metadata' in port:
                 for metafield in port['metadata']:
                     for key, value in metafield.items():
@@ -644,30 +661,28 @@ def populate_ports(fins_data,verbose):
 
     # Loop through ports
     for port in fins_data['ports']['ports']:
-        # Set defaults
+        # Set defaults for port
         if not 'supports_backpressure' in port:
             port['supports_backpressure'] = False
         if not 'use_pipeline' in port:
             port['use_pipeline'] = True
         if not 'num_instances' in port:
             port['num_instances'] = 1
-        if 'data' in port:
-            if not 'bit_width' in port['data']:
-                port['data']['bit_width'] = 16
-            if not 'is_complex' in port['data']:
-                port['data']['is_complex'] = False
-            if not 'is_signed' in port['data']:
-                port['data']['is_signed'] = False
-            if not 'num_samples' in port['data']:
-                port['data']['num_samples'] = 1
-            if not 'num_channels' in port['data']:
-                port['data']['num_channels'] = 1
+        # Set defaults for data fields
+        if not 'bit_width' in port['data']:
+            port['data']['bit_width'] = 16
+        if not 'is_complex' in port['data']:
+            port['data']['is_complex'] = False
+        if not 'is_signed' in port['data']:
+            port['data']['is_signed'] = False
+        if not 'num_samples' in port['data']:
+            port['data']['num_samples'] = 1
+        if not 'num_channels' in port['data']:
+            port['data']['num_channels'] = 1
+        # Set defaults for metadata fields
         if 'metadata' in port:
             current_offset = 0
             for metafield in port['metadata']:
-                # Set and update the bit offset
-                metafield['offset'] = current_offset
-                current_offset = metafield['offset'] + metafield['bit_width']
                 # Set defaults for non-populated fields
                 if not 'bit_width' in metafield:
                     metafield['bit_width'] = 16
@@ -675,19 +690,21 @@ def populate_ports(fins_data,verbose):
                     metafield['is_complex'] = False
                 if not 'is_signed' in metafield:
                     metafield['is_signed'] = False
+                # Set and update the bit offset
+                metafield['offset'] = current_offset
+                current_offset = metafield['offset'] + metafield['bit_width']
         # Validate values
         if port['num_instances'] < 1:
             print('ERROR: The num_instances of port {} is < 1'.format(port['name']))
             sys.exit(1)
 
         # Check the data bit_width for limits
-        if 'data' in port:
-            if port['data']['bit_width'] < 8:
-                print('ERROR: Port',port['name'],'data bit_width is smaller than the minimum value of 8')
-                sys.exit(1)
-            elif port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] > 4096:
-                print('ERROR: Port',port['name'],'total data width (bit_width*num_samples*num_channels) is larger than the maximum value of 4096')
-                sys.exit(1)
+        if port['data']['bit_width'] < 8:
+            print('ERROR: Port',port['name'],'data bit_width is smaller than the minimum value of 8')
+            sys.exit(1)
+        elif port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] > 4096:
+            print('ERROR: Port',port['name'],'total data width (bit_width*num_samples*num_channels) is larger than the maximum value of 4096')
+            sys.exit(1)
 
     # Return the modified dictionary
     return fins_data
@@ -1328,8 +1345,8 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
     # Set defaults
     if not 'base_offset' in fins_data:
         fins_data['base_offset'] = 0
-    ports_producer_defined = False
-    ports_consumer_defined = False
+    ports_producer_name_defined = False
+    ports_consumer_name_defined = False
     for node in fins_data['nodes']:
         # Convert dictionary to uint
         if isinstance(node['properties_offset'], str):
@@ -1342,26 +1359,59 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
                 print('ERROR: Unknown block design extension in FINS nodeset:',bd_extension)
                 sys.exit(1)
             node['properties_offset'] = base_address
+
         # Load FINS Node JSON for each node
         node_fins_data = load_json_file(node['fins_path'],verbose)
         node['properties'] = node_fins_data['properties']['properties']
         node['node_name'] = node_fins_data['name']
         node['node_id'] = node['node_name'] + '::' + node['module_name'] + '::' + node['interface_name']
-        # Set defaults
-        if 'ports_producer' in node:
-            if ports_producer_defined:
-                print('ERROR: ports_producer can only be defined in one node')
+
+        # Find the port listed in ports_producer_name
+        if 'ports_producer_name' in node:
+            # Make sure ports_producer_name is in only one node
+            if ports_producer_name_defined:
+                print('ERROR: ports_producer_name can only be defined in one node')
                 sys.exit(1)
-            ports_producer_defined = True
-        else:
-            node['ports_producer'] = ''
-        if 'ports_consumer' in node:
-            if ports_consumer_defined:
-                print('ERROR: ports_consumer can only be defined in one node')
+            ports_producer_name_defined = True
+            # Find the port
+            ports_producer_found = False
+            for port in node_fins_data['ports']['ports']:
+                if node['ports_producer_name'].lower() == port['name'].lower():
+                    if port['direction'].lower() == 'in':
+                        print('ERROR: ports_producer was incorrectly assigned to an input port')
+                        sys.exit(1)
+                    node['ports_producer'] = port
+                    ports_producer_found = True
+            if not ports_producer_found:
+                print('ERROR: ports_producer_name',node['ports_producer_name'],'not found in node',node['node_name'])
                 sys.exit(1)
-            ports_consumer_defined = True
         else:
-            node['ports_consumer'] = ''
+            node['ports_producer_name'] = ''
+            node['ports_producer'] = {}
+
+        # Find the port listed in ports_consumer_name
+        if 'ports_consumer_name' in node:
+            # Make sure ports_consumer_name is in only one node
+            if ports_consumer_name_defined:
+                print('ERROR: ports_consumer_name can only be defined in one node')
+                sys.exit(1)
+            ports_consumer_name_defined = True
+            # Find the port
+            ports_consumer_found = False
+            for port in node_fins_data['ports']['ports']:
+                if node['ports_consumer_name'].lower() == port['name'].lower():
+                    if port['direction'].lower() == 'out':
+                        print('ERROR: ports_consumer was incorrectly assigned to an output port')
+                        sys.exit(1)
+                    node['ports_consumer'] = port
+                    ports_consumer_found = True
+            if not ports_consumer_found:
+                print('ERROR: ports_consumer_name',node['ports_consumer_name'],'not found in node',node['node_name'])
+                sys.exit(1)
+        else:
+            node['ports_consumer_name'] = ''
+            node['ports_consumer'] = {}
+
     return fins_data
 
 def validate_and_convert_fins_data(fins_data,filename,backend,verbose):

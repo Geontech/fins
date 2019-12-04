@@ -74,12 +74,14 @@ entity test_middle is
     s_axis_myinput_aclk    : in  std_logic;
     s_axis_myinput_aresetn : in  std_logic;
     s_axis_myinput_tdata   : in  std_logic_vector(16-1 downto 0);
+    s_axis_myinput_tuser   : in  std_logic_vector(128-1 downto 0);
     s_axis_myinput_tvalid  : in   std_logic;
     s_axis_myinput_tlast   : in   std_logic;
     -- AXI4-Stream Port OUT: myoutput
     m_axis_myoutput_aclk    : in  std_logic;
     m_axis_myoutput_aresetn : in  std_logic;
-    m_axis_myoutput_tdata   : out std_logic_vector(16-1 downto 0);
+    m_axis_myoutput_tdata   : out  std_logic_vector(16-1 downto 0);
+    m_axis_myoutput_tuser   : out  std_logic_vector(128-1 downto 0);
     m_axis_myoutput_tvalid  : out  std_logic;
     m_axis_myoutput_tlast   : out  std_logic;
     -- AXI4-Stream Port IN: test_in
@@ -168,12 +170,14 @@ architecture mixed of test_middle is
       s_axis_myinput_aclk    : in  std_logic;
       s_axis_myinput_aresetn : in  std_logic;
       s_axis_myinput_tdata   : in  std_logic_vector(16-1 downto 0);
+      s_axis_myinput_tuser   : in  std_logic_vector(128-1 downto 0);
       s_axis_myinput_tvalid  : in   std_logic;
       s_axis_myinput_tlast   : in   std_logic;
       -- AXI4-Stream Port OUT: myoutput
       m_axis_myoutput_aclk    : in  std_logic;
       m_axis_myoutput_aresetn : in  std_logic;
       m_axis_myoutput_tdata   : out std_logic_vector(16-1 downto 0);
+      m_axis_myoutput_tuser   : out std_logic_vector(128-1 downto 0);
       m_axis_myoutput_tvalid  : out  std_logic;
       m_axis_myoutput_tlast   : out  std_logic;
       -- AXI4-Stream Port IN: test_in
@@ -281,12 +285,14 @@ architecture mixed of test_middle is
       s_axis_myinput_aclk    : in  std_logic;
       s_axis_myinput_aresetn : in  std_logic;
       s_axis_myinput_tdata   : in  std_logic_vector(16-1 downto 0);
+      s_axis_myinput_tuser   : in  std_logic_vector(128-1 downto 0);
       s_axis_myinput_tvalid  : in   std_logic;
       s_axis_myinput_tlast   : in   std_logic;
       -- AXI4-Stream Port OUT: myoutput
       m_axis_myoutput_aclk    : in  std_logic;
       m_axis_myoutput_aresetn : in  std_logic;
       m_axis_myoutput_tdata   : out std_logic_vector(16-1 downto 0);
+      m_axis_myoutput_tuser   : out std_logic_vector(128-1 downto 0);
       m_axis_myoutput_tvalid  : out  std_logic;
       m_axis_myoutput_tlast   : out  std_logic;
       -- AXI4-Stream Port IN: test_in
@@ -341,12 +347,15 @@ architecture mixed of test_middle is
   signal myinput_valid                : std_logic;
   signal myinput_last                 : std_logic;
   signal myinput_data                 : unsigned(PORTS_WIDTH-1 downto 0);
+  signal myinput_metadata             : std_logic_vector(128-1 downto 0);
   signal myinput_valid_q              : std_logic;
   signal myinput_last_q               : std_logic;
   signal myinput_data_q               : unsigned(PORTS_WIDTH-1 downto 0);
+  signal myinput_metadata_q           : std_logic_vector(128-1 downto 0);
   signal myoutput_valid               : std_logic;
   signal myoutput_last                : std_logic;
   signal myoutput_data                : std_logic_vector(PORTS_WIDTH-1 downto 0);
+  signal myoutput_metadata            : std_logic_vector(128-1 downto 0);
   signal test_out00_tready            : std_logic;
   signal test_out00_tdata             : std_logic_vector(160-1 downto 0);
   signal test_out00_tuser             : std_logic_vector(128-1 downto 0);
@@ -369,11 +378,13 @@ begin
       s_axis_myinput_aclk    => s_axis_myinput_aclk,
       s_axis_myinput_aresetn => s_axis_myinput_aresetn,
       s_axis_myinput_tdata   => s_axis_myinput_tdata,
+      s_axis_myinput_tuser   => s_axis_myinput_tuser,
       s_axis_myinput_tvalid  => s_axis_myinput_tvalid,
       s_axis_myinput_tlast   => s_axis_myinput_tlast,
       m_axis_myoutput_aclk    => m_axis_myoutput_aclk,
       m_axis_myoutput_aresetn => m_axis_myoutput_aresetn,
       m_axis_myoutput_tdata   => m_axis_myoutput_tdata,
+      m_axis_myoutput_tuser   => m_axis_myoutput_tuser,
       m_axis_myoutput_tvalid  => m_axis_myoutput_tvalid,
       m_axis_myoutput_tlast   => m_axis_myoutput_tlast,
       s00_axis_test_in_aclk    => s00_axis_test_in_aclk,
@@ -416,6 +427,8 @@ begin
   begin
     if (rising_edge(ports_in.myinput.clk)) then
       -- Data pipelines
+      myinput_metadata <= f_serialize_test_middle_myinput_metadata(ports_in.myinput.metadata);
+      myinput_metadata_q <= myinput_metadata;
       myinput_data <= ports_in.myinput.data;
       myinput_data_q <= resize(
         unsigned(myinput_data) * to_unsigned(TEST_PARAM_INTEGER, myinput_data'length),
@@ -452,11 +465,13 @@ begin
       s_axis_myinput_tvalid     => myinput_valid_q,
       s_axis_myinput_tlast      => myinput_last_q,
       s_axis_myinput_tdata      => std_logic_vector(myinput_data_q),
+      s_axis_myinput_tuser      => myinput_metadata_q,
       m_axis_myoutput_aclk      => ports_in.myoutput.clk,
       m_axis_myoutput_aresetn   => ports_in.myoutput.resetn,
       m_axis_myoutput_tvalid    => myoutput_valid,
       m_axis_myoutput_tlast     => myoutput_last,
       m_axis_myoutput_tdata     => myoutput_data,
+      m_axis_myoutput_tuser     => myoutput_metadata,
       s00_axis_test_in_aclk     => ports_in.test_in(0).clk,
       s00_axis_test_in_aresetn  => ports_in.test_in(0).resetn,
       s00_axis_test_in_tready   => ports_out.test_in(0).ready,
@@ -491,6 +506,7 @@ begin
   ports_out.myoutput.valid       <= myoutput_valid;
   ports_out.myoutput.last        <= myoutput_last;
   ports_out.myoutput.data        <= f_unserialize_test_middle_myoutput_data(myoutput_data);
+  ports_out.myoutput.metadata    <= f_unserialize_test_middle_myoutput_metadata(myoutput_metadata);
   ports_out.test_out(0).data     <= f_unserialize_test_middle_test_out_data(test_out00_tdata);
   ports_out.test_out(0).metadata <= f_unserialize_test_middle_test_out_metadata(test_out00_tuser);
   ports_out.test_out(0).valid    <= test_out00_tvalid;

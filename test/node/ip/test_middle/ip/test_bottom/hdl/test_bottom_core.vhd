@@ -113,9 +113,11 @@ architecture rtl of test_bottom_core is
   signal myinput_valid                : std_logic;
   signal myinput_last                 : std_logic;
   signal myinput_data                 : unsigned(PORTS_WIDTH-1 downto 0);
+  signal myinput_metadata             : std_logic_vector(128-1 downto 0);
   signal myinput_valid_q              : std_logic;
   signal myinput_last_q               : std_logic;
   signal myinput_data_q               : unsigned(PORTS_WIDTH-1 downto 0);
+  signal myinput_metadata_q           : std_logic_vector(128-1 downto 0);
   signal external_property_fifo_rd_en : std_logic;
 
 begin
@@ -140,6 +142,8 @@ begin
   begin
     if (rising_edge(ports_in.myinput.clk)) then
       -- Data pipelines
+      myinput_metadata <= f_serialize_test_bottom_myinput_metadata(ports_in.myinput.metadata);
+      myinput_metadata_q <= myinput_metadata;
       myinput_data <= ports_in.myinput.data;
       myinput_data_q <= resize(
         unsigned(myinput_data) * to_unsigned(TEST_PARAM_INTEGER, myinput_data'length),
@@ -161,9 +165,10 @@ begin
   end process s_data_processing;
 
   -- Assign output ports
-  ports_out.myoutput.valid <= myinput_valid_q;
-  ports_out.myoutput.last  <= myinput_last_q;
-  ports_out.myoutput.data  <= myinput_data_q;
+  ports_out.myoutput.valid    <= myinput_valid_q;
+  ports_out.myoutput.last     <= myinput_last_q;
+  ports_out.myoutput.data     <= myinput_data_q;
+  ports_out.myoutput.metadata <= f_unserialize_test_bottom_myoutput_metadata(myinput_metadata_q);
 
   --------------------------------------------------------------------------------
   -- Testing elements for "read-write-external"
