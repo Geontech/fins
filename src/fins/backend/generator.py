@@ -23,7 +23,8 @@ import datetime
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
 
-CORE_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/'
+CORE_NODE_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/node/'
+CORE_NODESET_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/nodeset/'
 CORE_OUTPUT_DIR = 'gen/core/'
 
 class Generator:
@@ -102,18 +103,48 @@ class Generator:
             # Write the build data to a new json file
             with open(output_directory+filename, 'w') as fins_data_file:
                 json.dump(fins_data, fins_data_file, sort_keys=True, indent=2)
+
+            # Create the Jinja2 envjironment
+            jinja_env = self.create_jinja_env(CORE_NODESET_TEMPLATE_DIR)
+
+            # Generate FINS core files
+            for node in fins_data['nodes']:
+                if node['ports_producer']:
+                    ports_producer_directory = output_directory + node['ports_producer']['name'] + '_axis_parallel_to_tdm/'
+                    os.makedirs(ports_producer_directory, exist_ok=True)
+                    self.render_jinja_template(jinja_env, 'axis_parallel_to_tdm.vhd', ports_producer_directory+node['ports_producer']['name']+'_axis_parallel_to_tdm.vhd', node['ports_producer'])
+                    self.render_jinja_template(jinja_env, 'axis_parallel_to_tdm.json', ports_producer_directory+node['ports_producer']['name']+'_axis_parallel_to_tdm.json', node['ports_producer'])
+                    self.render_jinja_template(jinja_env, 'parallel_word_fifo.tcl', ports_producer_directory+node['ports_producer']['name']+'_parallel_word_fifo.tcl', node['ports_producer'])
+                    ports_producer_directory = output_directory + node['ports_producer']['name'] + '_avalonst_parallel_to_tdm/'
+                    os.makedirs(ports_producer_directory, exist_ok=True)
+                    self.render_jinja_template(jinja_env, 'avalonst_parallel_to_tdm.vhd', ports_producer_directory+node['ports_producer']['name']+'_avalonst_parallel_to_tdm.vhd', node['ports_producer'])
+                    self.render_jinja_template(jinja_env, 'avalonst_parallel_to_tdm.json', ports_producer_directory+node['ports_producer']['name']+'_avalonst_parallel_to_tdm.json', node['ports_producer'])
+                    self.render_jinja_template(jinja_env, 'parallel_word_fifo.tcl', ports_producer_directory+node['ports_producer']['name']+'_parallel_word_fifo.tcl', node['ports_producer'])
+                if node['ports_consumer']:
+                    ports_consumer_directory = output_directory + node['ports_consumer']['name'] + '_axis_tdm_to_parallel/'
+                    os.makedirs(ports_consumer_directory, exist_ok=True)
+                    self.render_jinja_template(jinja_env, 'axis_tdm_to_parallel.vhd', ports_consumer_directory+node['ports_consumer']['name']+'_axis_tdm_to_parallel.vhd', node['ports_consumer'])
+                    self.render_jinja_template(jinja_env, 'axis_tdm_to_parallel.json', ports_consumer_directory+node['ports_consumer']['name']+'_axis_tdm_to_parallel.json', node['ports_consumer'])
+                    ports_consumer_directory = output_directory + node['ports_consumer']['name'] + '_avalonst_tdm_to_parallel/'
+                    os.makedirs(ports_consumer_directory, exist_ok=True)
+                    self.render_jinja_template(jinja_env, 'avalonst_tdm_to_parallel.vhd', ports_consumer_directory+node['ports_consumer']['name']+'_avalonst_tdm_to_parallel.vhd', node['ports_consumer'])
+                    self.render_jinja_template(jinja_env, 'avalonst_tdm_to_parallel.json', ports_consumer_directory+node['ports_consumer']['name']+'_avalonst_tdm_to_parallel.json', node['ports_consumer'])
         else:
             # Write the FINS data model to file
             with open(output_directory+fins_data['name']+'.json', 'w') as fins_data_file:
                 json.dump(fins_data, fins_data_file, sort_keys=True, indent=2)
 
             # Create the Jinja2 envjironment
-            jinja_env = self.create_jinja_env(CORE_TEMPLATE_DIR)
+            jinja_env = self.create_jinja_env(CORE_NODE_TEMPLATE_DIR)
 
             # Generate FINS core files
             if not os.path.exists(root_directory+'.gitignore'):
                 # Only auto-generate .gitignore if the repository doesn't have one
                 self.render_jinja_template(jinja_env, '.gitignore', root_directory+'.gitignore', fins_data)
+            # HDL Source Package, Octave/Python Simulation Packages
+            self.render_jinja_template(jinja_env, 'pkg.vhd', output_directory+fins_data['name']+'_pkg.vhd', fins_data)
+            self.render_jinja_template(jinja_env, 'pkg.m', output_directory+fins_data['name']+'_pkg.m', fins_data)
+            self.render_jinja_template(jinja_env, 'pkg.py', output_directory+fins_data['name']+'_pkg.py', fins_data)
             if 'ip' in fins_data:
                 # Generate fins_edit.json files for each Sub-IP
                 for ip in fins_data['ip']:
@@ -143,11 +174,6 @@ class Generator:
                 self.render_jinja_template(jinja_env, 'core.vhd', output_directory+fins_data['name']+'_core.vhd', fins_data)
                 self.render_jinja_template(jinja_env, 'top.vhd', output_directory+fins_data['name']+'.vhd', fins_data)
                 self.render_jinja_template(jinja_env, 'top_tb.vhd', output_directory+fins_data['name']+'_tb.vhd', fins_data)
-            if ('ports' in fins_data) or ('params' in fins_data) or ('properties' in fins_data):
-                # HDL Source Package, Octave/Python Simulation Packages
-                self.render_jinja_template(jinja_env, 'pkg.vhd', output_directory+fins_data['name']+'_pkg.vhd', fins_data)
-                self.render_jinja_template(jinja_env, 'pkg.m', output_directory+fins_data['name']+'_pkg.m', fins_data)
-                self.render_jinja_template(jinja_env, 'pkg.py', output_directory+fins_data['name']+'_pkg.py', fins_data)
 
     def generate(self, fins_data, filename, is_nodeset):
         self.generate_core(fins_data, filename, is_nodeset)

@@ -96,7 +96,7 @@
               "types":["bool"]
             },
             "data":{
-              "is_required":false,
+              "is_required":true,
               "types":["dict"],
               "fields":{
                 "bit_width":{

@@ -35,7 +35,11 @@
           "is_signed":"PORTS_IS_SIGNED",
           "num_samples":1,
           "num_channels":1
-        }
+        },
+        "metadata":[
+          { "name":"timestamp", "bit_width":64 },
+          { "name":"sample_period", "bit_width":64 }
+        ]
       },
       {
         "name":"myoutput",
@@ -44,7 +48,11 @@
           "bit_width":"PORTS_WIDTH",
           "is_complex":"PORTS_IS_COMPLEX",
           "is_signed":"PORTS_IS_SIGNED"
-        }
+        },
+        "metadata":[
+          { "name":"timestamp", "bit_width":64 },
+          { "name":"sample_period", "bit_width":64 }
+        ]
       },
       {
         "name":"test_in",

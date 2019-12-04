@@ -181,7 +181,6 @@ end record t_{{ fins['name']|lower }}_props_status;
 -- Ports
 --------------------------------------------------------------------------------
 {%- for port in fins['ports']['ports'] %}
-{%- if 'data' in port %}
 -- {{ port['name']|lower }} DATA Records/Functions
 {%- if port['data']['is_complex'] %}
 type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_data_interface is record
@@ -203,7 +202,6 @@ subtype t_{{ fins['name']|lower }}_{{ port['name']|lower }}_data is t_{{ fins['n
 {%- endif %}
 function f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_data (data : t_{{ fins['name']|lower }}_{{ port['name']|lower }}_data) return std_logic_vector;
 function f_unserialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_data (data : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0)) return t_{{ fins['name']|lower }}_{{ port['name']|lower }}_data;
-{%- endif %}
 {%- if 'metadata' in port %}
 -- {{ port['name']|lower }} METADATA Records/Functions
 {%- for metafield in port['metadata'] %}
@@ -230,9 +228,7 @@ type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward_unit is record
   clk      : std_logic;
   resetn   : std_logic;
   {%- endif %}
-  {%- if 'data' in port %}
   data     : t_{{ fins['name']|lower }}_{{ port['name']|lower }}_data;
-  {%- endif %}
   {%- if 'metadata' in port %}
   metadata : t_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata;
   {%- endif %}
@@ -296,7 +292,6 @@ package body {{ fins['name']|lower }}_pkg is
 
   {%- if 'ports' in fins %}
   {%- for port in fins['ports']['ports'] %}
-  {%- if 'data' in port %}
   -- {{ port['name']|lower }} DATA Functions
   function f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_data (
     data : t_{{ fins['name']|lower }}_{{ port['name']|lower }}_data
@@ -426,7 +421,6 @@ package body {{ fins['name']|lower }}_pkg is
     {%- endif %}
     return result;
   end function f_unserialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_data;
-  {%- endif %}
   {%- if 'metadata' in port %}
   -- {{ port['name']|lower }} METADATA Functions
   function f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata (

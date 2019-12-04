@@ -89,12 +89,14 @@ architecture behav of test_middle_tb is
   signal s_axis_myinput_aclk    : std_logic;
   signal s_axis_myinput_aresetn : std_logic;
   signal s_axis_myinput_tdata   : std_logic_vector(16-1 downto 0);
+  signal s_axis_myinput_tuser   : std_logic_vector(128-1 downto 0);
   signal s_axis_myinput_tvalid  : std_logic;
   signal s_axis_myinput_tlast   : std_logic;
   -- AXI4-Stream Port OUT: myoutput
   signal m_axis_myoutput_aclk    : std_logic;
   signal m_axis_myoutput_aresetn : std_logic;
   signal m_axis_myoutput_tdata   : std_logic_vector(16-1 downto 0);
+  signal m_axis_myoutput_tuser   : std_logic_vector(128-1 downto 0);
   signal m_axis_myoutput_tvalid  : std_logic;
   signal m_axis_myoutput_tlast   : std_logic;
   -- AXI4-Stream Port IN: test_in
@@ -193,11 +195,13 @@ begin
       s_axis_myinput_aclk    => s_axis_myinput_aclk,
       s_axis_myinput_aresetn => s_axis_myinput_aresetn,
       s_axis_myinput_tdata   => s_axis_myinput_tdata,
+      s_axis_myinput_tuser   => s_axis_myinput_tuser,
       s_axis_myinput_tvalid  => s_axis_myinput_tvalid,
       s_axis_myinput_tlast   => s_axis_myinput_tlast,
       m_axis_myoutput_aclk    => m_axis_myoutput_aclk,
       m_axis_myoutput_aresetn => m_axis_myoutput_aresetn,
       m_axis_myoutput_tdata   => m_axis_myoutput_tdata,
+      m_axis_myoutput_tuser   => m_axis_myoutput_tuser,
       m_axis_myoutput_tvalid  => m_axis_myoutput_tvalid,
       m_axis_myoutput_tlast   => m_axis_myoutput_tlast,
       s00_axis_test_in_aclk    => s00_axis_test_in_aclk,
@@ -250,10 +254,12 @@ begin
       m_axis_myinput_aclk    => s_axis_myinput_aclk,
       m_axis_myinput_enable  => s_axis_myinput_enable,
       m_axis_myinput_tdata   => s_axis_myinput_tdata,
+      m_axis_myinput_tuser   => s_axis_myinput_tuser,
       m_axis_myinput_tvalid  => s_axis_myinput_tvalid,
       m_axis_myinput_tlast   => s_axis_myinput_tlast,
       s_axis_myoutput_aclk    => m_axis_myoutput_aclk,
       s_axis_myoutput_tdata   => m_axis_myoutput_tdata,
+      s_axis_myoutput_tuser   => m_axis_myoutput_tuser,
       s_axis_myoutput_tvalid  => m_axis_myoutput_tvalid,
       s_axis_myoutput_tlast   => m_axis_myoutput_tlast,
       m00_axis_test_in_aclk    => s00_axis_test_in_aclk,

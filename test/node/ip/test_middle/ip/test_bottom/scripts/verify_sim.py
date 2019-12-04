@@ -28,20 +28,22 @@ import test_bottom_pkg
 # Path: myinput --> myoutput
 ###################################################################################################
 # Open our simulation input
-sim_source_data = {'last':[], 'data':[]}
+sim_source_data = {'last':[], 'data':[], 'metadata':[]}
 with open('sim_data/sim_source_myinput.txt', 'r') as sim_source_file:
     for sim_source_line in sim_source_file:
         line_data = sim_source_line.split(' ')
         sim_source_data['last'].append(int(line_data[0], 16))
         sim_source_data['data'].append(int(line_data[1], 16))
+        sim_source_data['metadata'].append(line_data[2].strip())
 
 # Open our simulation output
-sim_sink_data = {'last':[], 'data':[]}
+sim_sink_data = {'last':[], 'data':[], 'metadata':[]}
 with open('sim_data/sim_sink_myoutput.txt', 'r') as sim_sink_file:
     for sim_sink_line in sim_sink_file:
         line_data = sim_sink_line.split(' ')
         sim_sink_data['last'].append(int(line_data[0], 16))
         sim_sink_data['data'].append(int(line_data[1], 16))
+        sim_sink_data['metadata'].append(line_data[2].strip())
 
 # Implement the algorithm
 sim_expected_data = []

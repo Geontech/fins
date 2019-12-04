@@ -26,7 +26,8 @@ Once you have a bitstream that integrates an Application and a Platform, you are
 1. The `name` key is only use for identification of the nodeset, and it can be set to any descriptive name that is useful.
 2. The `base_offset` key is the global offset for the bus that controls the AXI4-Lite Properties interface. For many architectures this is 0, but some specify this base address at the bus level.
 3. The `properties_offset` key is the offset for this particular node. It can be set manually or can be set to the filepath of the block design file to auto-infer the offset.
-4. `ports_consumer` and `ports_producer` are NOT IMPLEMENTED YET.
+4. The `ports_consumer_name` key is set for the element of the `nodes` array that consumes data from a processor through a DMA module. Only one element of the `nodes` array can have this key set.
+5. The `ports_producer_name` key is set for the element of the `nodes` array that produces data to a processor through a DMA module. Only one element of the `nodes` array can have this key set.
 
 The `fins` executable is used with the FINS Nodeset to run code generation. At the Nodeset level, however, the output is only a JSON file that appears at the standard "core" backend location **./gen/core/**. The `fins` executable automatically detects the difference in FINS Node and FINS Nodeset schemas. To generate the Nodeset, execute the following commands:
 
@@ -50,14 +51,14 @@ A Nodeset has its own schema to enable integration with software. See the table 
 
 Each dictionary element of the `nodes` dictionary array field has the following fields:
 
-| Key               | Type              | Required | Default Value | Description |
-| ----------------- | ----------------- | -------- | ------------- | ----------- |
-| fins_path         | string            | YES      |               | The path to the *generated* FINS Node JSON file of the IP node. |
-| module_name       | string            | YES      |               | If `properties_offset` is a dictionary, this field is used to infer the offset. The name of the instantiated IP in the block design defined above. |
-| interface_name    | string            | YES      |               | If `properties_offset` is a dictionary, this field is used to infer the offset. The name of the bus interface used to control and status the properties. |
-| properties_offset | uint -OR- string  | YES      |               | The base offset of the address region used to access this node. If a string type, this field is a path to the block design in which the decode of the properties interface is located. This path must end in `.qsys` for Intel Platform Designer or `.bd` for Vivado IP Integrator, and it used to infer the offset. |
-| ports_producer    | string            | NO       |               | NOT IMPLEMENTED YET. |
-| ports_consumer    | string            | NO       |               | NOT IMPLEMENTED YET. |
+| Key                 | Type              | Required | Default Value | Description |
+| ------------------- | ----------------- | -------- | ------------- | ----------- |
+| fins_path           | string            | YES      |               | The path to the *generated* FINS Node JSON file of the IP node. |
+| module_name         | string            | YES      |               | If `properties_offset` is a dictionary, this field is used to infer the offset. The name of the instantiated IP in the block design defined above. |
+| interface_name      | string            | YES      |               | If `properties_offset` is a dictionary, this field is used to infer the offset. The name of the AXI4-Lite bus interface used to control and status the properties. |
+| properties_offset   | uint -OR- string  | YES      |               | The base offset of the address region used to access this node. If a string type, this field is a path to the block design in which the decode of the properties interface is located. This path must end in `.qsys` for Intel Platform Designer or `.bd` for Vivado IP Integrator, and it used to infer the offset. |
+| ports_producer_name | string            | NO       |               | The name of the AXI4-Stream bus interface that sends data to the processor through a DMA module. |
+| ports_consumer_name | string            | NO       |               | The name of the AXI4-Stream bus interface that receives data from the processor through a DMA module. |
 
 ## Code Generation
 

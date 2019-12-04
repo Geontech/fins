@@ -100,7 +100,7 @@ IP_TARGET:=$(PROJECT_VIVADO_DIR)/{{ fins['name'] }}.xpr
 #-------------------------------------------------------------------------------
 # Makefile targets
 #-------------------------------------------------------------------------------
-.PHONY: all clean clean-all sim
+.PHONY: all clean clean-all {% if 'filesets' in fins %}{% if 'sim' in fins['filesets'] %}sim{% endif %}{% endif %}
 
 # All phony target to build the Vivado project
 all:
@@ -167,6 +167,8 @@ endif
 	{%- endif %}
 	{%- endif %}
 
+{%- if 'filesets' in fins %}
+{%- if 'sim' in fins['filesets'] %}
 # Simulation phony target
 sim : all
 	{%- if 'filesets' in fins %}
@@ -208,3 +210,5 @@ endif
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
+{%- endif %}
+{%- endif %}
