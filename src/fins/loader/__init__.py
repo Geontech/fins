@@ -495,7 +495,7 @@ def convert_parameters_to_literal(fins_data,verbose):
     if 'ports' in fins_data:
         for port in fins_data['ports']['ports']:
             # Convert port fields
-            for key, value in port['data'].items():
+            for key, value in port.items():
                 # Don't convert string/dictionary typed fields
                 if (key.lower() == 'name') or (key.lower() == 'direction') or (key.lower() == 'data') or (key.lower() == 'metadata'):
                     continue
