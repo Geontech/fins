@@ -42,6 +42,6 @@ test:
         - 'cd ../../tutorials/power_converter'
         #- 'fins -b vivado fins.json && make sim && make clean-all'
         - 'fins -b quartus fins.json && make sim && make clean-all'
-  tags:
-    - QuartusPrimePro
+    tags:
+        - QuartusPrimePro
 
