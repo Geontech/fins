@@ -172,26 +172,36 @@ begin
           -- occurs during that cycle or a later cycle, the data is done being consumed and AXIS
           -- signals can be reset to 0.
         else
-          -- Calculate if this sample is active based upon the sample period
-          if (G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_RANDOMIZE_BUS) then
-            -- Randomize the transaction activity based upon a duty cycle calculated from the sample period
-            uniform(seed1, seed2, rand);
-            if (rand <= 1.0/real(G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_SAMPLE_PERIOD)) then
-              sample_active := true;
+          -- Check if there is already an active sample
+          if(not sample_active) then
+            -- Calculate if this sample is active based upon the sample period
+            if (G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_RANDOMIZE_BUS) then
+              -- Randomize the transaction activity based upon a duty cycle calculated from the sample period
+              uniform(seed1, seed2, rand);
+              if (rand <= 1.0/real(G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_SAMPLE_PERIOD)) then
+                sample_active := true;
+              else
+                sample_active := false;
+              end if;
             else
-              sample_active := false;
-            end if;
-          else
-            -- Create the transaction activity based upon the sample period counter
-            if (sample_period_counter = 0) then
-              sample_active := true;
-            else
-              sample_active := false;
+              -- Create the transaction activity based upon the sample period counter
+              if (sample_period_counter = 0) then
+                sample_active := true;
+              else
+                sample_active := false;
+              end if;
+              -- Increment the sample period counter
+              if (sample_period_counter >= G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_SAMPLE_PERIOD-1) then
+                sample_period_counter := 0;
+              else
+                sample_period_counter := sample_period_counter + 1;
+              end if;
             end if;
           end if;
 
           -- Respect the sample period
           if (sample_active) then
+            axis_tvalid := '1';
             {%- if port['supports_backpressure'] %}
             -- When we get a TREADY, read the next value
             if ({{ port|axisprefix(i,True) }}_tready = '1') then
@@ -213,7 +223,6 @@ begin
                 hread(current_line, current_tuser);
                 {%- endif %}
                 -- Set the output values
-                axis_tvalid := '1';
                 if (unsigned(current_tlast) > 0) then
                   axis_tlast := '1';
                 else
@@ -237,16 +246,10 @@ begin
                 -- Set the file_done flag for reference during next cycle
                 file_done := true;
               end if;
+              sample_active := false;
             {%- if port['supports_backpressure'] %}
             end if;
             {%- endif %}
-          end if;
-
-          -- Increment the sample period counter
-          if (sample_period_counter >= G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_SAMPLE_PERIOD-1) then
-            sample_period_counter := 0;
-          else
-            sample_period_counter := sample_period_counter + 1;
           end if;
         end if;
         --******************************************
