@@ -128,6 +128,10 @@
           { "name":"sfix64", "is_signed":true, "bit_width":64 }
         ]
       }
+    ],
+    "hdl":[
+      { "name":"test_hdl_std_logic_vector", "direction":"in", "bit_width":16 },
+      { "name":"test_hdl_std_logic", "direction":"out", "bit_width":1 }
     ]
   },
   "properties": {
@@ -188,6 +192,8 @@
   },
   "filesets":{
     "source":[
+      { "path":"hdl/mif_file.mif" },
+      { "path":"hdl/text_file.txt" },
       { "path":"gen/core/test_top_pkg.vhd", "type":"vhdl"    },
       { "path":"gen/core/test_top_axis.vhd"                  },
       { "path":"gen/core/test_top_axilite.vhd"               },
@@ -211,12 +217,16 @@
         { "path":"./scripts/print.m",   "type":"matlab" },
         { "path":"./scripts/print.m",   "type":"Octave" },
         { "path":"./scripts/print.py", "type":"PYTHON" },
+        { "path":"./scripts/print.py", "type":"PYTHON3" },
+        { "path":"./scripts/print.sh", "type":"cmdline" },
         { "path":"./scripts/print.tcl",   "type":"tcl"    }
       ],
       "postsim":[
         { "path":"scripts/print.m"   },
         { "path":"scripts/print.m"   },
         { "path":"scripts/verify_sim.py" },
+        { "path":"./scripts/print.py" },
+        { "path":"./scripts/print.sh" },
         { "path":"scripts/simulation_done.tcl" }
       ],
       "vendor_ip":[
@@ -227,12 +237,16 @@
         { "path":"scripts/print.m",   "type":"matlab" },
         { "path":"scripts/print.m",   "type":"Octave" },
         { "path":"scripts/print.py", "type":"PYTHON" },
+        { "path":"./scripts/print.py", "type":"PYTHON3" },
+        { "path":"./scripts/print.sh", "type":"cmdline" },
         { "path":"scripts/print.tcl",   "type":"tcl"    }
       ],
       "postbuild":[
         { "path":"scripts/print.m",   "type":"matlab" },
         { "path":"scripts/print.m",   "type":"Octave" },
         { "path":"scripts/print.py", "type":"PYTHON" },
+        { "path":"./scripts/print.py", "type":"PYTHON3" },
+        { "path":"./scripts/print.sh", "type":"cmdline" },
         { "path":"scripts/print.tcl",   "type":"tcl"    }
       ]
     }

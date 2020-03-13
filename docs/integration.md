@@ -47,6 +47,7 @@ A Nodeset has its own schema to enable integration with software. See the table 
 | ----------- | ------ | -------- | ------------- | ----------- |
 | name        | string | YES      |               | The name of the Nodeset, only used for identification purposes. |
 | base_offset | uint   | NO       |             0 | The base address offset of the bus used to communicate with the FINS nodes. |
+| params      | dict[] | NO       |               | An array of parameter definitions. See the parameters documentation [here](parameters.md). |
 | nodes       | dict[] | YES      |               | A dictionary array that contains a description of each node. |
 
 Each dictionary element of the `nodes` dictionary array field has the following fields:

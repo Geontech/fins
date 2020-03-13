@@ -107,6 +107,9 @@ class Generator:
             # Create the Jinja2 envjironment
             jinja_env = self.create_jinja_env(CORE_NODESET_TEMPLATE_DIR)
 
+            # Create the parameters TCL script
+            self.render_jinja_template(jinja_env, 'params.tcl', output_directory+'params.tcl', fins_data)
+
             # Generate FINS core files
             for node in fins_data['nodes']:
                 if node['ports_producer']:
@@ -158,8 +161,10 @@ class Generator:
                             override_data['part'] = fins_data['part']
                         json.dump(override_data, override_file, sort_keys=True, indent=2)
             if 'ports' in fins_data:
-                self.render_jinja_template(jinja_env, 'axis.vhd', output_directory+fins_data['name']+'_axis.vhd', fins_data)
-                self.render_jinja_template(jinja_env, 'axis_verify.vhd', output_directory+fins_data['name']+'_axis_verify.vhd', fins_data)
+                # Only generate when we have FINS Ports not just HDL Ports
+                if 'ports' in fins_data['ports']:
+                    self.render_jinja_template(jinja_env, 'axis.vhd', output_directory+fins_data['name']+'_axis.vhd', fins_data)
+                    self.render_jinja_template(jinja_env, 'axis_verify.vhd', output_directory+fins_data['name']+'_axis_verify.vhd', fins_data)
             if 'properties' in fins_data:
                 # Documentation
                 self.render_jinja_template(jinja_env, 'properties.md', output_directory+fins_data['name']+'_properties.md', fins_data)

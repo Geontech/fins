@@ -43,6 +43,7 @@ params['{{ param['name'] }}'] =
 {% endif %}
 
 {% if 'ports' in fins %}
+{% if 'ports' in fins['ports'] %}
 # Ports
 ports = {}
 ports['in'] = {}
@@ -65,4 +66,5 @@ ports['{{ port['direction']|lower }}']['{{ port['name']|lower }}']['metadata']['
 {%- endfor %}
 {%- endif %}
 {%- endfor %}
+{% endif %}
 {% endif %}
