@@ -24,18 +24,28 @@ Run the following commands from the root of this repository to install the FINS 
 
 ```bash
 # Install the FINS software and "core" generator
-$ sudo python3 -m pip install .
+$ python3 -m pip install .
 # Install the "vivado" generator plugin
-$ sudo python3 -m pip install ./vivado
+$ python3 -m pip install ./vivado
 # Install the "quartus" generator plugin
-$ sudo python3 -m pip install ./quartus
+$ python3 -m pip install ./quartus
 ```
+---
+**NOTE**
+You may not have permissions to run these `python3 -m pip` commands. To resolve this you can either use a python virtual environment, the `--user` option (`python3 -m pip --user`), or `sudo`.
+
+---
 
 To uninstall FINS, run the following commands:
 
 ```bash
-$ sudo python3 -m pip uninstall fins fins-quartus fins-vivado
+$ python3 -m pip uninstall fins fins-quartus fins-vivado
 ```
+---
+**NOTE**
+Again, you may not have permissions to run these `python3 -m pip` commands. To resolve this you can either use a python virtual environment, the `--user` option (`python3 -m pip --user`), or `sudo`.
+
+---
 
 To verify your installation and run an example of a FINS Node, execute the following commands to build and simulate the test IP with Vivado:
 
@@ -98,13 +108,18 @@ The AXI4-Lite buses and AXI4-Stream buses used in the top-level source file have
 To develop FINS templates or Python code, it is strongly recommended to use a virtual environment with an "editable" install:
 
 ```bash
-$ sudo pip3 install virtualenv
+$ pip3 install virtualenv
 $ python3 -m venv env
 $ source env/bin/activate
 $ pip3 install -e .
 $ pip3 install -e ./vivado
 $ pip3 install -e ./quartus
 ```
+---
+**NOTE**
+You may not have permissions to run the first `pip3` command here. To resolve this you can use the `--user` option or `sudo`.
+
+---
 
 Any new code must be able to build and simulate the test IP for both Vivado and Quartus. To run both tests, execute the following commands:
 

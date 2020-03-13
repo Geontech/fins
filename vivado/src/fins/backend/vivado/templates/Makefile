@@ -141,6 +141,10 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
@@ -161,6 +165,10 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
@@ -185,6 +193,10 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
@@ -205,6 +217,10 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}

@@ -47,8 +47,9 @@ PROPERTY_TYPES = [
     'read-write-memmap'
 ]
 PORT_DIRECTIONS = ['in', 'out']
-DESIGN_FILE_TYPES = ['vhdl', 'verilog']
-SCRIPT_FILE_TYPES = ['matlab', 'octave', 'python', 'tcl']
+PORT_HDL_DIRECTIONS = ['in', 'out']
+QUARTUS_DESIGN_FILE_TYPES = ['dat', 'fli_library', 'hex', 'mif', 'other', 'pli_library', 'system_verilog', 'system_verilog_encrypt', 'system_verilog_include', 'verilog', 'verilog_encrypt', 'verilog_include', 'vhdl', 'vhdl_encrypt', 'vpi_library']
+SCRIPT_FILE_TYPES = ['matlab', 'octave', 'python', 'python3', 'tcl', 'cmdline']
 CONSTRAINT_FILE_TYPES = ['xdc', 'sdc']
 VENDOR_SCRIPT_FILE_TYPES = ['tcl']
 # Regular expression strings used with re.search() on port names
@@ -406,7 +407,7 @@ def validate_files(fins_name,filename,file_list,allowed_types,verbose):
         # Check the type
         if 'type' in fins_file:
             if not (fins_file['type'].lower() in [allowed_type.lower() for allowed_type in allowed_types]):
-                print('ERROR: Invalid type',fins_file['type'],'for file',filepath)
+                print('WARNING: Unknown type',fins_file['type'],'for file',filepath)
         # Notify of success
         if verbose:
             print('PASS:',filepath)
@@ -452,27 +453,52 @@ def validate_properties(fins_data,verbose):
         sys.exit(1)
 
 def validate_ports(fins_data,verbose):
-    # Iterate through all ports
-    port_names = []
-    for port in fins_data['ports']['ports']:
-        # Add to the list of names
-        port_names.append(port['name'])
-        # Check the direction
-        if not port['direction'] in PORT_DIRECTIONS:
-            print('ERROR: Port',port['name'],'direction',port['direction'],'is invalid')
-            sys.exit(1)
-        # Neither data nor metadata are required, but we must have at least one
-        if not 'data' in port and not 'metadata' in port:
-            print('ERROR: Port',port['name'],'must have either metadata or data')
-            sys.exit(1)
-        # Notify of success
-        if verbose:
-            print('PASS: Port',port['name'],'with direction',port['direction'])
+    # Iterate through all FINS ports
+    if 'ports' in fins_data['ports']:
+        port_names = []
+        for port in fins_data['ports']['ports']:
+            # Add to the list of names
+            port_names.append(port['name'])
+            # Check the direction
+            if not port['direction'] in PORT_DIRECTIONS:
+                print('ERROR: Port',port['name'],'direction',port['direction'],'is invalid')
+                sys.exit(1)
+            # Neither data nor metadata are required, but we must have at least one
+            if not 'data' in port and not 'metadata' in port:
+                print('ERROR: Port',port['name'],'must have either metadata or data')
+                sys.exit(1)
+            # Notify of success
+            if verbose:
+                print('PASS: Port',port['name'],'with direction',port['direction'])
 
-    # Check for name duplicates
-    if (len(port_names) != len(set(port_names))):
-        print('ERROR: Duplicate port names detected')
-        sys.exit(1)
+        # Check for name duplicates
+        if (len(port_names) != len(set(port_names))):
+            print('ERROR: Duplicate port names detected')
+            sys.exit(1)
+
+    # Iterate through all FINS ports HDL
+    if 'hdl' in fins_data['ports']:
+        port_hdl_names = []
+        for port_hdl in fins_data['ports']['hdl']:
+            # Add to the list of names
+            port_hdl_names.append(port_hdl['name'])
+            # Check the direction
+            if not port_hdl['direction'] in PORT_HDL_DIRECTIONS:
+                print('ERROR: Port HDL',port_hdl['name'],'direction',port_hdl['direction'],'is invalid')
+                sys.exit(1)
+            # Check that bit width is > 0
+            bit_width = get_param_value(fins_data['params'], port_hdl['bit_width'])
+            if bit_width < 1:
+                print('ERROR: Port HDL',port_hdl['name'],'must have a bit_width > 0')
+                sys.exit(1)
+            # Notify of success
+            if verbose:
+                print('PASS: Port HDL',port_hdl['name'],'with direction',port_hdl['direction'])
+
+        # Check for name duplicates
+        if (len(port_hdl_names) != len(set(port_hdl_names))):
+            print('ERROR: Duplicate port HDL names detected')
+            sys.exit(1)
 
 def get_param_value(params,key_or_value):
     if isinstance(key_or_value, str):
@@ -493,29 +519,41 @@ def convert_parameters_to_literal(fins_data,verbose):
 
     # Convert all non-string fields of ports to literals
     if 'ports' in fins_data:
-        for port in fins_data['ports']['ports']:
-            # Convert port fields
-            for key, value in port['data'].items():
-                # Don't convert string/dictionary typed fields
-                if (key.lower() == 'name') or (key.lower() == 'direction') or (key.lower() == 'data') or (key.lower() == 'metadata'):
-                    continue
-                # Convert value
-                port[key] = get_param_value(params, value)
+        # Loop through FINS Ports
+        if 'ports' in fins_data['ports']:
+            for port in fins_data['ports']['ports']:
+                # Convert port fields
+                for key, value in port.items():
+                    # Don't convert string/dictionary typed fields
+                    if (key.lower() == 'name') or (key.lower() == 'direction') or (key.lower() == 'data') or (key.lower() == 'metadata'):
+                        continue
+                    # Convert value
+                    port[key] = get_param_value(params, value)
 
-            # Convert data fields
-            for key, value in port['data'].items():
-                # Convert value
-                port['data'][key] = get_param_value(params, value)
+                # Convert data fields
+                for key, value in port['data'].items():
+                    # Convert value
+                    port['data'][key] = get_param_value(params, value)
 
-            # Convert metadata fields
-            if 'metadata' in port:
-                for metafield in port['metadata']:
-                    for key, value in metafield.items():
-                        # Don't convert string typed fields
-                        if (key.lower() == 'name'):
-                            continue
-                        # Convert value
-                        metafield[key] = get_param_value(params, value)
+                # Convert metadata fields
+                if 'metadata' in port:
+                    for metafield in port['metadata']:
+                        for key, value in metafield.items():
+                            # Don't convert string typed fields
+                            if (key.lower() == 'name'):
+                                continue
+                            # Convert value
+                            metafield[key] = get_param_value(params, value)
+        # Loop through FINS Ports HDL
+        if 'hdl' in fins_data['ports']:
+            for port_hdl in fins_data['ports']['hdl']:
+                # Convert port HDL fields
+                for key, value in port_hdl.items():
+                    # Don't convert string/dictionary typed fields
+                    if (key.lower() == 'name') or (key.lower() == 'direction'):
+                        continue
+                    # Convert value
+                    port_hdl[key] = get_param_value(params, value)
 
     # Convert all non-string fields of properties
     if 'properties' in fins_data:
@@ -655,56 +693,54 @@ def populate_properties(fins_data,base_offset,verbose):
     return fins_data
 
 def populate_ports(fins_data,verbose):
-    # Make sure there are ports first
-    if not 'ports' in fins_data:
-        return fins_data
-
     # Loop through ports
-    for port in fins_data['ports']['ports']:
-        # Set defaults for port
-        if not 'supports_backpressure' in port:
-            port['supports_backpressure'] = False
-        if not 'use_pipeline' in port:
-            port['use_pipeline'] = True
-        if not 'num_instances' in port:
-            port['num_instances'] = 1
-        # Set defaults for data fields
-        if not 'bit_width' in port['data']:
-            port['data']['bit_width'] = 16
-        if not 'is_complex' in port['data']:
-            port['data']['is_complex'] = False
-        if not 'is_signed' in port['data']:
-            port['data']['is_signed'] = False
-        if not 'num_samples' in port['data']:
-            port['data']['num_samples'] = 1
-        if not 'num_channels' in port['data']:
-            port['data']['num_channels'] = 1
-        # Set defaults for metadata fields
-        if 'metadata' in port:
-            current_offset = 0
-            for metafield in port['metadata']:
-                # Set defaults for non-populated fields
-                if not 'bit_width' in metafield:
-                    metafield['bit_width'] = 16
-                if not 'is_complex' in metafield:
-                    metafield['is_complex'] = False
-                if not 'is_signed' in metafield:
-                    metafield['is_signed'] = False
-                # Set and update the bit offset
-                metafield['offset'] = current_offset
-                current_offset = metafield['offset'] + metafield['bit_width']
-        # Validate values
-        if port['num_instances'] < 1:
-            print('ERROR: The num_instances of port {} is < 1'.format(port['name']))
-            sys.exit(1)
+    if 'ports' in fins_data:
+        if 'ports' in fins_data['ports']:
+            for port in fins_data['ports']['ports']:
+                # Set defaults for port
+                if not 'supports_backpressure' in port:
+                    port['supports_backpressure'] = False
+                if not 'use_pipeline' in port:
+                    port['use_pipeline'] = True
+                if not 'num_instances' in port:
+                    port['num_instances'] = 1
+                # Set defaults for data fields
+                if not 'bit_width' in port['data']:
+                    port['data']['bit_width'] = 16
+                if not 'is_complex' in port['data']:
+                    port['data']['is_complex'] = False
+                if not 'is_signed' in port['data']:
+                    port['data']['is_signed'] = False
+                if not 'num_samples' in port['data']:
+                    port['data']['num_samples'] = 1
+                if not 'num_channels' in port['data']:
+                    port['data']['num_channels'] = 1
+                # Set defaults for metadata fields
+                if 'metadata' in port:
+                    current_offset = 0
+                    for metafield in port['metadata']:
+                        # Set defaults for non-populated fields
+                        if not 'bit_width' in metafield:
+                            metafield['bit_width'] = 16
+                        if not 'is_complex' in metafield:
+                            metafield['is_complex'] = False
+                        if not 'is_signed' in metafield:
+                            metafield['is_signed'] = False
+                        # Set and update the bit offset
+                        metafield['offset'] = current_offset
+                        current_offset = metafield['offset'] + metafield['bit_width']
+                # Validate values
+                if port['num_instances'] < 1:
+                    print('ERROR: The num_instances of port {} is < 1'.format(port['name']))
+                    sys.exit(1)
 
-        # Check the data bit_width for limits
-        if port['data']['bit_width'] < 8:
-            print('ERROR: Port',port['name'],'data bit_width is smaller than the minimum value of 8')
-            sys.exit(1)
-        elif port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] > 4096:
-            print('ERROR: Port',port['name'],'total data width (bit_width*num_samples*num_channels) is larger than the maximum value of 4096')
-            sys.exit(1)
+                # Check the data bit_width for limits
+                if port['data']['bit_width'] < 8:
+                    print('ERROR: Port',port['name'],'data bit_width is smaller than the minimum value of 8')
+                    sys.exit(1)
+                elif port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] > 4096:
+                    print('ERROR: Port',port['name'],'total data width (bit_width*num_samples*num_channels) is larger than the maximum value of 4096')
+                    sys.exit(1)
 
     # Return the modified dictionary
     return fins_data
@@ -718,15 +754,23 @@ def populate_filesets(fins_data,verbose):
         if design_file_key in fins_data['filesets']:
             for design_file in fins_data['filesets'][design_file_key]:
                 if not 'type' in design_file:
-                    if '.vhd' in design_file['path']:
+                    if '.dat' in design_file['path']:
+                        design_file['type'] = 'dat'
+                    elif '.hex' in design_file['path']:
+                        design_file['type'] = 'hex'
+                    elif '.mif' in design_file['path']:
+                        design_file['type'] = 'mif'
+                    elif '.vhd' in design_file['path']:
                         design_file['type'] = 'vhdl'
                     elif '.vhdl' in design_file['path']:
                         design_file['type'] = 'vhdl'
                     elif '.v' in design_file['path']:
                         design_file['type'] = 'verilog'
+                    elif '.sv' in design_file['path']:
+                        design_file['type'] = 'system_verilog'
                     else:
-                        print('ERROR: A type cannot be auto-detected from design file',design_file['path'])
-                        sys.exit(1)
+                        design_file['type'] = 'other'
+                        print('WARNING: No type was provided or detected, so OTHER was assigned to',design_file['path'],'... ONLY a concern with Quartus')
 
     if 'constraints' in fins_data['filesets']:
         for constraints_file in fins_data['filesets']['constraints']:
@@ -746,14 +790,17 @@ def populate_filesets(fins_data,verbose):
                 for script_file in fins_data['filesets']['scripts'][script_key]:
                     if not 'type' in script_file:
                         if '.py' in script_file['path']:
-                            script_file['type'] = 'python'
+                            script_file['type'] = 'python3'
                         elif '.m' in script_file['path']:
                             # NOTE: Default for .m files is Octave, not Matlab
                             script_file['type'] = 'octave'
                         elif '.tcl' in script_file['path']:
                             script_file['type'] = 'tcl'
+                        elif '.sh' in script_file['path']:
+                            script_file['type'] = 'cmdline'
                         else:
-                            print('ERROR: A type cannot be auto-detected from script file',script_file['path'])
+                            script_file['type'] = 'cmdline'
+                            print('WARNING: No type provided or detected, so CMDLINE was assigned to',script_file['path'],'... ONLY a concern if command line execution not intended')
                             sys.exit(1)
 
         if 'vendor_ip' in fins_data['filesets']['scripts']:
@@ -1180,9 +1227,9 @@ def validate_filesets(fins_data,filename,verbose):
     # Validate filesets
     if verbose:
         print('+++++ Validating filesets of {} ...'.format(filename))
-    validate_files(fins_data['name'],filename,fins_data['filesets']['source'],DESIGN_FILE_TYPES,verbose)
+    validate_files(fins_data['name'],filename,fins_data['filesets']['source'],QUARTUS_DESIGN_FILE_TYPES,verbose)
     if 'sim' in fins_data['filesets']:
-        validate_files(fins_data['name'],filename,fins_data['filesets']['sim'],DESIGN_FILE_TYPES,verbose)
+        validate_files(fins_data['name'],filename,fins_data['filesets']['sim'],QUARTUS_DESIGN_FILE_TYPES,verbose)
     if 'constraints' in fins_data['filesets']:
         validate_files(fins_data['name'],filename,fins_data['filesets']['constraints'],CONSTRAINT_FILE_TYPES,verbose)
     if 'scripts' in fins_data['filesets']:
@@ -1350,15 +1397,18 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
     for node in fins_data['nodes']:
         # Convert dictionary to uint
         if isinstance(node['properties_offset'], str):
-            _, bd_extension = os.path.splitext(node['properties_offset'])
-            if bd_extension.lower() == '.qsys':
-                base_address = find_base_address_from_qsys(node['properties_offset'],node['module_name'],node['interface_name'])
-            elif bd_extension.lower() == '.bd':
-                base_address = find_base_address_from_bd(node['properties_offset'],node['module_name'],node['interface_name'])
+            if os.path.exists(node['properties_offset']):
+                _, bd_extension = os.path.splitext(node['properties_offset'])
+                if bd_extension.lower() == '.qsys':
+                    base_address = find_base_address_from_qsys(node['properties_offset'],node['module_name'],node['interface_name'])
+                elif bd_extension.lower() == '.bd':
+                    base_address = find_base_address_from_bd(node['properties_offset'],node['module_name'],node['interface_name'])
+                else:
+                    print('ERROR: Unknown block design extension in FINS nodeset:',bd_extension)
+                    sys.exit(1)
+                node['properties_offset'] = base_address
             else:
-                print('ERROR: Unknown block design extension in FINS nodeset:',bd_extension)
-                sys.exit(1)
-            node['properties_offset'] = base_address
+                print('WARNING: Properties offset path',node['properties_offset'],'for',node['module_name'],'does not exist')
 
         # Load FINS Node JSON for each node
         node_fins_data = load_json_file(node['fins_path'],verbose)

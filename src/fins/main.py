@@ -86,10 +86,10 @@ def run_generator(generator,filepath,backend,verbose):
         for ip in fins_data['ip']:
             run_generator(generator,ip['fins_path'],backend,verbose)
 
-    # Reset working directory to the one used by this level of recursion
-    os.chdir(working_directory)
-    if verbose:
-        print('-- Changing directories to',working_directory)
+            # Reset working directory to the one used by this level of recursion
+            os.chdir(working_directory)
+            if verbose:
+                print('-- Changing directories to',working_directory)
 
     # Validate filesets
     # NOTE: This validate happens after the generator since some of the files referenced

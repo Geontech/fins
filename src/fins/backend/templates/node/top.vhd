@@ -67,6 +67,17 @@ entity {{ fins['name']|lower }} is
     S_AXI_RREADY  : in  std_logic{% if 'ports' in fins %};{% endif %}
     {%- endif %}
     {%- if 'ports' in fins %}
+    {%- if 'hdl' in fins['ports'] %}
+    -- Discrete HDL Ports
+    {%- for port_hdl in fins['ports']['hdl'] %}
+    {%- if port_hdl['bit_width'] > 1 %}
+    {{ port_hdl['name'] }} : {{ port_hdl['direction'] }} std_logic_vector({{ port_hdl['bit_width'] }}-1 downto 0){% if (not loop.last) or ('ports' in fins['ports']) %};{% endif %}
+    {%- else %}
+    {{ port_hdl['name'] }} : {{ port_hdl['direction'] }} std_logic{% if (not loop.last) or ('ports' in fins['ports']) %};{% endif %}
+    {%- endif %}
+    {%- endfor %}
+    {%- endif %}
+    {%- if 'ports' in fins['ports'] %}
     {%- for port in fins['ports']['ports'] %}
     {%- set outer_loop = loop %}
     -- AXI4-Stream Port {{ port['direction']|upper }}: {{ port['name']|lower }}
@@ -84,6 +95,7 @@ entity {{ fins['name']|lower }} is
     {{ port|axisprefix(i) }}_tlast   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%- endfor %}
     {%- endfor %}
+    {%- endif %}
     {%- endif %}
   );
 end {{ fins['name']|lower }};
@@ -131,6 +143,7 @@ architecture struct of {{ fins['name']|lower }} is
   {%- endif %}
 
   {%- if 'ports' in fins %}
+  {%- if 'ports' in fins['ports'] %}
   -- Auto-generated AXI4-Stream FINS Ports interface
   component {{ fins['name']|lower }}_axis is
     port (
@@ -155,6 +168,7 @@ architecture struct of {{ fins['name']|lower }} is
     );
   end component;
   {%- endif %}
+  {%- endif %}
 
   -- Auto-generated User Core Code
   component {{ fins['name']|lower }}_core is
@@ -164,8 +178,14 @@ architecture struct of {{ fins['name']|lower }} is
       props_status  : out t_{{ fins['name']|lower }}_props_status{% if 'ports' in fins %};{% endif %}
       {%- endif %}
       {%- if 'ports' in fins %}
+      {%- if 'hdl' in fins['ports'] %}
+      ports_hdl_in  : in  t_{{ fins['name']|lower }}_ports_hdl_in;
+      ports_hdl_out : out t_{{ fins['name']|lower }}_ports_hdl_out{% if 'ports' in fins['ports'] %};{% endif %}
+      {%- endif %}
+      {%- if 'ports' in fins['ports'] %}
       ports_in      : in  t_{{ fins['name']|lower }}_ports_in;
       ports_out     : out t_{{ fins['name']|lower }}_ports_out
+      {%- endif %}
       {%- endif %}
     );
   end component;
@@ -178,8 +198,14 @@ architecture struct of {{ fins['name']|lower }} is
   signal props_status  : t_{{ fins['name']|lower }}_props_status;
   {%- endif %}
   {%- if 'ports' in fins %}
+  {%- if 'hdl' in fins['ports'] %}
+  signal ports_hdl_in  : t_{{ fins['name']|lower }}_ports_hdl_in;
+  signal ports_hdl_out : t_{{ fins['name']|lower }}_ports_hdl_out;
+  {%- endif %}
+  {%- if 'ports' in fins['ports'] %}
   signal ports_in      : t_{{ fins['name']|lower }}_ports_in;
   signal ports_out     : t_{{ fins['name']|lower }}_ports_out;
+  {%- endif %}
   {%- endif %}
 
 begin
@@ -220,6 +246,19 @@ begin
   --------------------------------------------------------------------------------
   -- Ports
   --------------------------------------------------------------------------------
+  {%- if 'hdl' in fins['ports'] %}
+  -- Discrete HDL Ports
+  {%- for port_hdl in fins['ports']['hdl'] %}
+  {%- if port_hdl['direction']|lower == 'in' %}
+  ports_hdl_in.{{ port_hdl['name'] }} <= {{ port_hdl['name'] }};
+  {%- else %}
+  {{ port_hdl['name'] }} <= ports_hdl_out.{{ port_hdl['name'] }};
+  {%- endif %}
+  {%- endfor %}
+  {%- endif %}{#### if 'hdl' in fins['ports'] ####}
+
+  {%- if 'ports' in fins['ports'] %}
+  -- FINS Ports: AXI4-Stream Buses
   u_ports : {{ fins['name']|lower }}_axis
     port map (
       {%- for port in fins['ports']['ports'] %}
@@ -240,7 +279,8 @@ begin
       ports_in  => ports_in,
       ports_out => ports_out
     );
-  {%- endif %}
+  {%- endif %}{#### if 'ports' in fins['ports'] ####}
+  {%- endif %}{#### if 'ports' in fins ####}
 
   --------------------------------------------------------------------------------
   -- User Core
@@ -252,8 +292,14 @@ begin
       props_status  => props_status{% if 'ports' in fins %},{% endif %}
       {%- endif %}
       {%- if 'ports' in fins %}
+      {%- if 'hdl' in fins['ports'] %}
+      ports_hdl_in  => ports_hdl_in,
+      ports_hdl_out => ports_hdl_out{% if 'ports' in fins['ports'] %},{% endif %}
+      {%- endif %}
+      {%- if 'ports' in fins['ports'] %}
       ports_in      => ports_in,
       ports_out     => ports_out
+      {%- endif %}
       {%- endif %}
     );
 

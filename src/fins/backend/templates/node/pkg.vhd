@@ -180,6 +180,7 @@ end record t_{{ fins['name']|lower }}_props_status;
 --------------------------------------------------------------------------------
 -- Ports
 --------------------------------------------------------------------------------
+{%- if 'ports' in fins['ports'] %}
 {%- for port in fins['ports']['ports'] %}
 -- {{ port['name']|lower }} DATA Records/Functions
 {%- if port['data']['is_complex'] %}
@@ -284,6 +285,32 @@ type t_{{ fins['name']|lower }}_ports_out is record
   {%- endfor %}
 end record t_{{ fins['name']|lower }}_ports_out;
 
+{%- endif %}{#### if 'ports' in fins['ports'] ####}
+
+{%- if 'hdl' in fins['ports'] %}
+-- Top Level Ports PORTS_HDL_IN Record
+type t_{{ fins['name']|lower }}_ports_hdl_in is record
+  {%- for port_hdl in fins['ports']['hdl'] %}
+  {%- if port_hdl['direction']|lower == 'in' %}
+  {{ port_hdl['name']|lower }} : std_logic{% if port_hdl['bit_width'] > 1 %}_vector({{ port_hdl['bit_width'] }}-1 downto 0){% endif %};
+  {%- else %}
+  {{ port_hdl['name']|lower }} : boolean; -- Null placeholder
+  {%- endif %}
+  {%- endfor %}
+end record t_{{ fins['name']|lower }}_ports_hdl_in;
+
+-- Top Level Ports PORTS_HDL_OUT Record
+type t_{{ fins['name']|lower }}_ports_hdl_out is record
+  {%- for port_hdl in fins['ports']['hdl'] %}
+  {%- if port_hdl['direction']|lower == 'out' %}
+  {{ port_hdl['name']|lower }} : std_logic{% if port_hdl['bit_width'] > 1 %}_vector({{ port_hdl['bit_width'] }}-1 downto 0){% endif %};
+  {%- else %}
+  {{ port_hdl['name']|lower }} : boolean; -- Null placeholder
+  {%- endif %}
+  {%- endfor %}
+end record t_{{ fins['name']|lower }}_ports_hdl_out;
+{%- endif %}{#### if 'hdl' in fins['ports'] ####}
+
 {%- endif %}{#### if 'ports' in fins ####}
 
 end {{ fins['name']|lower }}_pkg;
@@ -291,6 +318,7 @@ end {{ fins['name']|lower }}_pkg;
 package body {{ fins['name']|lower }}_pkg is
 
   {%- if 'ports' in fins %}
+  {%- if 'ports' in fins['ports'] %}
   {%- for port in fins['ports']['ports'] %}
   -- {{ port['name']|lower }} DATA Functions
   function f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_data (
@@ -463,6 +491,7 @@ package body {{ fins['name']|lower }}_pkg is
   end function f_unserialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata;
   {%- endif %}
   {%- endfor %}{#### for port in fins['ports']['ports'] ####}
+  {%- endif %}{#### if 'ports' in fins['ports'] ####}
   {%- endif %}{#### if 'ports' in fins ####}
 
 end package body {{ fins['name']|lower }}_pkg;

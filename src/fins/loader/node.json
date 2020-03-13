@@ -71,7 +71,7 @@
       "types":["dict"],
       "fields":{
         "ports":{
-          "is_required":true,
+          "is_required":false,
           "types":["list"],
           "list_types":["dict"],
           "fields":{
@@ -85,15 +85,15 @@
             },
             "supports_backpressure":{
               "is_required":false,
-              "types":["bool"]
+              "types":["bool","str"]
             },
             "num_instances":{
               "is_required":false,
-              "types":["int"]
+              "types":["int","str"]
             },
             "use_pipeline":{
               "is_required":false,
-              "types":["bool"]
+              "types":["bool","str"]
             },
             "data":{
               "is_required":true,
@@ -143,6 +143,25 @@
                   "types":["bool","str"]
                 }
               }
+            }
+          }
+        },
+        "hdl":{
+          "is_required":false,
+          "types":["list"],
+          "list_types":["dict"],
+          "fields":{
+            "name":{
+              "is_required":true,
+              "types":["str"]
+            },
+            "direction":{
+              "is_required":true,
+              "types":["str"]
+            },
+            "bit_width":{
+              "is_required":true,
+              "types":["int","str"]
             }
           }
         }

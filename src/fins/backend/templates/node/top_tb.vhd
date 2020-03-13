@@ -46,8 +46,9 @@ use work.{{ fins['name']|lower }}_axilite_verify.all;
 
 -- Entity
 entity {{ fins['name']|lower }}_tb is
+  {%- if 'ports' in fins %}
+  {%- if 'ports' in fins['ports'] %}
   generic (
-    {%- if 'ports' in fins %}
     {%- for port in fins['ports']['ports'] %}
     {%- set outer_loop = loop %}
     {%- for i in range(port['num_instances']) %}
@@ -71,8 +72,9 @@ entity {{ fins['name']|lower }}_tb is
     {%- endif  %}{#### if port['direction'] == "in" ####}
     {%- endfor %}{#### for i in range(port['num_instances']) ####}
     {%- endfor %}{#### for port in fins['ports']['ports'] ####}
-    {%- endif  %}{#### if 'ports' in fins ####}
   );
+  {%- endif  %}{#### if 'ports' in fins['ports'] ####}
+  {%- endif  %}{#### if 'ports' in fins ####}
 end entity {{ fins['name']|lower }}_tb;
 
 -- Architecture
@@ -105,6 +107,17 @@ architecture behav of {{ fins['name']|lower }}_tb is
   signal S_AXI_RREADY  : std_logic;
   {%- endif %}
   {%- if 'ports' in fins %}
+  {%- if 'hdl' in fins['ports'] %}
+  -- Discrete HDL Ports
+  {%- for port_hdl in fins['ports']['hdl'] %}
+  {%- if port_hdl['bit_width'] > 1 %}
+  signal {{ port_hdl['name'] }} : std_logic_vector({{ port_hdl['bit_width'] }}-1 downto 0);
+  {%- else %}
+  signal {{ port_hdl['name'] }} : std_logic;
+  {%- endif %}
+  {%- endfor %}
+  {%- endif %}
+  {%- if 'ports' in fins['ports'] %}
   {%- for port in fins['ports']['ports'] %}
   -- AXI4-Stream Port {{ port['direction']|upper }}: {{ port['name']|lower }}
   {%- for i in range(port['num_instances']) %}
@@ -122,6 +135,7 @@ architecture behav of {{ fins['name']|lower }}_tb is
   {%- endfor %}
   {%- endfor %}
   {%- endif %}
+  {%- endif %}
 
   --------------------------------------------------------------------------------
   -- Testbench
@@ -134,6 +148,7 @@ architecture behav of {{ fins['name']|lower }}_tb is
   signal clock           : std_logic := '0';
   signal resetn          : std_logic := '1';
   {%- if 'ports' in fins %}
+  {%- if 'ports' in fins['ports'] %}
   {%- for port in fins['ports']['ports'] %}
   {%- for i in range(port['num_instances']) %}
   {%- if port['direction']|lower == 'in' %}
@@ -143,6 +158,7 @@ architecture behav of {{ fins['name']|lower }}_tb is
   {%- endif %}
   {%- endfor %}
   {%- endfor %}
+  {%- endif %}
   {%- endif %}
 
 begin
@@ -176,6 +192,12 @@ begin
       S_AXI_RREADY  => S_AXI_RREADY{% if 'ports' in fins %},{% endif %}
       {%- endif %}
       {%- if 'ports' in fins %}
+      {%- if 'hdl' in fins['ports'] %}
+      {%- for port_hdl in fins['ports']['hdl'] %}
+      {{ port_hdl['name'] }} => {{ port_hdl['name'] }}{% if (not loop.last) or ('ports' in fins['ports']) %},{% endif %}
+      {%- endfor %}
+      {%- endif %}
+      {%- if 'ports' in fins['ports'] %}
       {%- for port in fins['ports']['ports'] %}
       {%- set outer_loop = loop %}
       {%- for i in range(port['num_instances']) %}
@@ -193,9 +215,11 @@ begin
       {%- endfor %}
       {%- endfor %}
       {%- endif %}
+      {%- endif %}
     );
 
   {%- if 'ports' in fins %}
+  {%- if 'ports' in fins['ports'] %}
   --------------------------------------------------------------------------------
   -- File Input/Output AXI4-Stream Port Verification
   --------------------------------------------------------------------------------
@@ -249,6 +273,7 @@ begin
       {%- endfor %}
       {%- endfor %}
     );
+  {%- endif %}{#### if 'ports' in fins['ports'] ####}
   {%- endif %}{#### if 'ports' in fins ####}
 
   --------------------------------------------------------------------------------
@@ -273,6 +298,7 @@ begin
   S_AXI_ARESETN <= resetn;
   {%- endif %}
   {%- if 'ports' in fins %}
+  {%- if 'ports' in fins['ports'] %}
   {%- for port in fins['ports']['ports'] %}
   {%- for i in range(port['num_instances']) %}
   {%- if port['direction']|lower == 'in' %}
@@ -285,8 +311,10 @@ begin
   {%- endfor %}
   {%- endfor %}
   {%- endif %}
+  {%- endif %}
 
   {%- if 'ports' in fins %}
+  {%- if 'ports' in fins['ports'] %}
   --------------------------------------------------------------------------------
   -- Port Verification Procedures
   --------------------------------------------------------------------------------
@@ -322,6 +350,7 @@ begin
   {%- endfor %}
   {%- endif %}
   {%- endfor %}
+  {%- endif %}{#### if 'ports' in fins['ports'] ####}
   {%- endif %}{#### if 'ports' in fins ####}
 
   --------------------------------------------------------------------------------
@@ -355,6 +384,7 @@ begin
     {%- endif %}{#### if 'properties' in fins ####}
 
     {%- if 'ports' in fins %}
+    {%- if 'ports' in fins['ports'] %}
     --**************************************************
     -- Verify Ports
     --**************************************************
@@ -378,6 +408,7 @@ begin
     {%- endif %}
     {%- endfor %}
 
+    {%- endif %}{#### if 'ports' in fins['ports'] ####}
     {%- endif %}{#### if 'ports' in fins ####}
 
     --**************************************************
