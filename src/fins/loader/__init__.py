@@ -1324,7 +1324,9 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
         fins_data['base_offset'] = 0
     ports_producer_defined = False
     ports_consumer_defined = False
-    for node in fins_data['nodes']:
+    return fins_data
+
+def populate_fins_node(node,filepath,verbose):
         # Convert dictionary to uint
         if isinstance(node['properties_offset'], str):
             _, bd_extension = os.path.splitext(node['properties_offset'])
@@ -1337,10 +1339,15 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
                 sys.exit(1)
             node['properties_offset'] = base_address
         # Load FINS Node JSON for each node
-        node_fins_data = load_json_file(node['fins_path'],verbose)
+        node_fins_data = load_json_file(filepath,verbose)
+
+        node_name = node_fins_data['name']
+        node_dir = os.path.dirname(filepath)
+
+        node['fins_path'] = os.path.join(node_dir, 'gen/core/', node_name + '.json')
         node['properties'] = node_fins_data['properties']['properties']
-        node['node_name'] = node_fins_data['name']
-        node['node_id'] = node['node_name'] + '::' + node['module_name'] + '::' + node['interface_name']
+        node['node_name'] = node_name
+        node['node_id'] = node_name + '::' + node['module_name'] + '::' + node['interface_name']
         # Set defaults
         if 'ports_producer' in node:
             if ports_producer_defined:
@@ -1356,7 +1363,7 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
             ports_consumer_defined = True
         else:
             node['ports_consumer'] = ''
-    return fins_data
+
 
 def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
     """

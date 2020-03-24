@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 #
+import pdb
 
 import os
 import glob
@@ -26,6 +27,8 @@ import json
 import datetime
 
 import pkg_resources
+
+from fins.utils import cd
 
 from fins import loader
 from fins.backend.generator import Generator
@@ -53,49 +56,58 @@ def load_generator(name):
     raise KeyError(name)
 
 def run_generator(generator,filepath,backend,verbose):
-    # Change execution directory to where json file is located
-    if os.path.dirname(filepath):
-        os.chdir(os.path.dirname(filepath))
-        if verbose:
-            print('-- Changing directories to',os.path.dirname(filepath))
+
     filename = os.path.basename(filepath)
-    working_directory = os.getcwd()
 
-    # Load the fins_data and generate the backend
-    generator.start_file(filename)
-    fins_data = loader.load_json_file(filename,verbose)
-    if 'nodes' in fins_data:
-        # This is a FINS nodeset file
-        is_nodeset = True
-        fins_data = loader.validate_and_convert_fins_nodeset(fins_data,filename,verbose)
-        if backend != 'core':
-            print('INFO: The',backend,'backend provided is ignored since this is a FINS build file')
-            generator = load_generator('core')
-    else:
-        # This is a FINS file
-        is_nodeset = False
-        fins_data = loader.validate_and_convert_fins_data(fins_data,filename,backend,verbose)
-    try:
-        generator.generate(fins_data,filename,is_nodeset)
-    except RuntimeError as exc:
-        logging.error('Generator error: %s', exc)
-    generator.end_file()
+    # Change execution directory to where json file is located
+    target_dir = '.'
+    if os.path.dirname(filepath):
+        target_dir = os.path.dirname(filepath)
 
-    # Recursively call function on all sub-ip
-    if 'ip' in fins_data:
-        for ip in fins_data['ip']:
-            run_generator(generator,ip['fins_path'],backend,verbose)
+    if target_dir != '.' and verbose:
+        print('-- Temporarily changing directories to', os.path.dirname(filepath))
 
-    # Reset working directory to the one used by this level of recursion
-    os.chdir(working_directory)
-    if verbose:
-        print('-- Changing directories to',working_directory)
+    with cd(target_dir):
+        # Load the fins_data and generate the backend
+        generator.start_file(filename)
+        fins_data = loader.load_json_file(filename,verbose)
+        if 'nodes' in fins_data:
+            # This is a FINS nodeset file
+            is_nodeset = True
+            fins_data = loader.validate_and_convert_fins_nodeset(fins_data, filename, verbose)
+            # Recursively call function on all nodes
+            # and then populate their contents in fins_data via loader.populate_fins_node
+            for node in fins_data['nodes']:
+                print('Recursing into node at "{}"'.format(node['fins_path']))
+                run_generator(generator, node['fins_path'], backend, verbose)
 
-    # Validate filesets
-    # NOTE: This validate happens after the generator since some of the files referenced
-    #       may be generated files
-    if 'filesets' in fins_data:
-        loader.validate_filesets(fins_data,filename,verbose)
+                # Now that node-json files have been generated for each component node
+                # load the node json files and import their node data
+                loader.populate_fins_node(node, node['fins_path'], verbose)
+            if backend != 'core':
+                print('INFO: The',backend,'backend provided is ignored since this is a FINS build file')
+                generator = load_generator('core')
+        else:
+            # This is a FINS file
+            is_nodeset = False
+            fins_data = loader.validate_and_convert_fins_data(fins_data,filename,backend,verbose)
+        try:
+            generator.generate(fins_data,filename,is_nodeset)
+        except RuntimeError as exc:
+            logging.error('Generator error: %s', exc)
+        generator.end_file()
+
+        # Recursively call function on all sub-ip
+        if 'ip' in fins_data:
+            for ip in fins_data['ip']:
+                run_generator(generator,ip['fins_path'],backend,verbose)
+
+
+        # Validate filesets
+        # NOTE: This validate happens after the generator since some of the files referenced
+        #       may be generated files
+        if 'filesets' in fins_data:
+            loader.validate_filesets(fins_data,filename,verbose)
 
 def main():
     logging.basicConfig()
