@@ -38,14 +38,11 @@ class QuartusGenerator(Generator):
             output_directory = QUARTUS_OUTPUT_DIR
         os.makedirs(output_directory, exist_ok=True)
 
-        #pdb.set_trace()
         if is_nodeset:
             # Load JSON and Jinja
             jinja_env = self.create_jinja_env(os.path.join(QUARTUS_TEMPLATE_DIR, 'nodeset'))
 
-            pdb.set_trace()
             # Generate Quartus targets
-            #print('DIR: ', root_directory, 'nodeset/Makefile')
             self.render_jinja_template(jinja_env,'Makefile',root_directory+'Makefile',fins_data)
         else:
             # Load JSON and Jinja

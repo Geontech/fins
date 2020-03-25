@@ -1,0 +1,24 @@
+{
+  "name":"fins_test_ip_nodeset",
+  "base_offset":0,
+  "nodes":[
+    {
+      "fins_path":"../node/zynq.json",
+      "module_name":"fins_test_ip",
+      "interface_name":"S_AXI",
+      "properties_offset":0
+    },
+    {
+      "fins_path":"../node/ip/test_middle/zynq.json",
+      "module_name":"fins_test_ip",
+      "interface_name":"S_AXI_TEST_MIDDLE",
+      "properties_offset":65536
+    },
+    {
+      "fins_path":"../node/ip/test_middle/ip/test_bottom/zynq.json",
+      "module_name":"fins_test_ip",
+      "interface_name":"S_AXI_TEST_BOTTOM",
+      "properties_offset":131072
+    }
+  ]
+}
