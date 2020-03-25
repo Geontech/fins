@@ -32,7 +32,7 @@ setup(
     ],
     package_data={
         'fins.backend.quartus':[
-            'templates/*',
+            'templates/node/*',
             'templates/nodeset/*'
         ]
     },

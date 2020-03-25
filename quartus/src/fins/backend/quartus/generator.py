@@ -46,7 +46,7 @@ class QuartusGenerator(Generator):
             self.render_jinja_template(jinja_env,'Makefile',root_directory+'Makefile',fins_data)
         else:
             # Load JSON and Jinja
-            jinja_env = self.create_jinja_env(QUARTUS_TEMPLATE_DIR)
+            jinja_env = self.create_jinja_env(os.path.join(QUARTUS_TEMPLATE_DIR, 'node'))
 
             # Generate Quartus targets
             self.render_jinja_template(jinja_env,'Makefile',root_directory+'Makefile',fins_data)
