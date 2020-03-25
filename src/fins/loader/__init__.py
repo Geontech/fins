@@ -1344,6 +1344,7 @@ def populate_fins_node(node,filepath,verbose):
         node_name = node_fins_data['name']
         node_dir = os.path.dirname(filepath)
 
+        node['node_dir'] = os.path.join(node_dir)
         node['fins_path'] = os.path.join(node_dir, 'gen/core/', node_name + '.json')
         node['properties'] = node_fins_data['properties']['properties']
         node['node_name'] = node_name

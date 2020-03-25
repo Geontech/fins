@@ -32,7 +32,8 @@ setup(
     ],
     package_data={
         'fins.backend.quartus':[
-            'templates/*'
+            'templates/*',
+            'templates/nodeset/*'
         ]
     },
     entry_points={

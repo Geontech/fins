@@ -84,9 +84,6 @@ def run_generator(generator,filepath,backend,verbose):
                 # Now that node-json files have been generated for each component node
                 # load the node json files and import their node data
                 loader.populate_fins_node(node, node['fins_path'], verbose)
-            if backend != 'core':
-                print('INFO: The',backend,'backend provided is ignored since this is a FINS build file')
-                generator = load_generator('core')
         else:
             # This is a FINS file
             is_nodeset = False
