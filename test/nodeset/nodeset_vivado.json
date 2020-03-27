@@ -1,5 +1,6 @@
 {
   "name":"fins_test_ip_nodeset",
+  "part":"xc7z020clg484-1",
   "base_offset":0,
   "params": [
     { "name":"TEST_PARAM_BOOLEAN",         "value":false,               "description":"This is a test parameter excercising a boolean type" },

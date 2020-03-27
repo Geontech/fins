@@ -6,6 +6,10 @@
       "is_required":true,
       "types":["str"]
     },
+    "part":{
+      "is_required":false,
+      "types":["str"]
+    },
     "base_offset":{
       "is_required":false,
       "types":["int"]
