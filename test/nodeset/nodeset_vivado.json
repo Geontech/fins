@@ -1,12 +1,20 @@
 {
   "name":"fins_test_ip_nodeset",
   "base_offset":0,
+  "params": [
+    { "name":"TEST_PARAM_BOOLEAN",         "value":false,               "description":"This is a test parameter excercising a boolean type" },
+    { "name":"TEST_PARAM_STRING",          "value":"my_nodeset_string", "description":"This is a test parameter excercising a string type" }
+  ],
   "nodes":[
     {
       "fins_path":"../node/zynq.json",
       "module_name":"fins_test_ip",
       "interface_name":"S_AXI",
-      "properties_offset":0
+      "properties_offset":0,
+      "params": [
+        { "name":"TEST_PARAM_BOOLEAN",         "parent": "TEST_PARAM_BOOLEAN" },
+        { "name":"TEST_PARAM_STRING",          "parent": "TEST_PARAM_STRING" }
+      ]
     },
     {
       "fins_path":"../node/ip/test_middle/zynq.json",

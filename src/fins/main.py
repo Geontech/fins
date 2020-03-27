@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 #
-import pdb
 
 import os
 import glob
@@ -78,12 +77,13 @@ def run_generator(generator,filepath,backend,verbose):
             # Recursively call function on all nodes
             # and then populate their contents in fins_data via loader.populate_fins_node
             for node in fins_data['nodes']:
-                print('Recursing into node at "{}"'.format(node['fins_path']))
-                run_generator(generator, node['fins_path'], backend, verbose)
-
+                if verbose:
+                    print('INFO: Recursing into node at "{}"'.format(node['fins_path']))
                 # Now that node-json files have been generated for each component node
                 # load the node json files and import their node data
                 loader.populate_fins_node(node, node['fins_path'], verbose)
+                run_generator(generator, node['fins_path'], backend, verbose)
+
         else:
             # This is a FINS file
             is_nodeset = False
@@ -97,6 +97,8 @@ def run_generator(generator,filepath,backend,verbose):
         # Recursively call function on all sub-ip
         if 'ip' in fins_data:
             for ip in fins_data['ip']:
+                if verbose:
+                    print('Recursing into IP at', ip['fins_path'])
                 run_generator(generator,ip['fins_path'],backend,verbose)
 
 

@@ -520,7 +520,23 @@ def convert_parameters_to_literal(fins_data,verbose):
                 # Convert value
                 prop[key] = get_param_value(params, value)
 
-    # Convert all string fields of ip to literals
+    # Convert all string fields of node to literals
+    if 'nodes' in fins_data:
+        for node in fins_data['nodes']:
+            # Make sure there are params
+            if 'params' in node:
+                # Loop through parameters of node
+                for param_ix, param in enumerate(node['params']):
+                    # Get the value of parent parameter
+                    parent_value = get_param_value(params, param['parent'])
+                    if parent_value is None:
+                        print('ERROR: {} of {} not found in parent IP'.format(param['parent'], node['fins_path']))
+                        sys.exit(1)
+                    # Put the value into the node
+                    node['params'][param_ix]['value'] = parent_value
+                    node['params'][param_ix]['parent_ip'] = fins_data['name']
+
+    # Convert all string fields of IP to literals
     if 'ip' in fins_data:
         for ip in fins_data['ip']:
             # Make sure there are params
@@ -1134,13 +1150,16 @@ def populate_hdl_inferences(fins_data,verbose):
 
     return fins_data
 
-def override_fins_data(fins_data,filename,verbose):
+def override_fins_data(fins_data,origfile,filename,verbose):
     '''
     Looks for a <filename>.json.override file in the same directory and overrides params/part of the fins data
     '''
     if (os.path.exists(filename)):
         # Open .override file
         with open(filename) as override_file:
+            origpath = os.path.join(os.path.abspath(origfile))
+            if verbose:
+                print('INFO: FINS JSON file "{}" is overridden by "{}"'.format(origpath, filename))
             override_data = json.load(override_file)
         # Override parameters
         if 'params' in override_data:
@@ -1302,7 +1321,7 @@ def find_base_address_from_bd(filename, module_name, interface_name):
 
 def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
     """
-    Validates and converts data from a Firmware IP Node Specification JSON build file
+    Validates and converts data from a Firmware Nodeset Specification JSON build file
     """
     # Read the nodeset schema data
     if verbose:
@@ -1324,6 +1343,13 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
         fins_data['base_offset'] = 0
     ports_producer_defined = False
     ports_consumer_defined = False
+
+    # Override the FINS Node JSON data with a .override file if it exists
+    fins_data = override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
+
+    # Replace any linked parameters with their literal values
+    fins_data = convert_parameters_to_literal(fins_data,verbose)
+
     return fins_data
 
 def populate_fins_node(node,filepath,verbose):
@@ -1344,8 +1370,9 @@ def populate_fins_node(node,filepath,verbose):
         node_name = node_fins_data['name']
         node_dir = os.path.dirname(filepath)
 
-        node['node_dir'] = os.path.join(node_dir)
-        node['fins_path'] = os.path.join(node_dir, 'gen/core/', node_name + '.json')
+        node['fins_dir'] = os.path.join(node_dir)
+        node['fins_path'] = os.path.join(filepath)
+        node['node_path'] = os.path.join(node_dir, 'gen/core/', node_name + '.json')
         node['properties'] = node_fins_data['properties']['properties']
         node['node_name'] = node_name
         node['node_id'] = node_name + '::' + node['module_name'] + '::' + node['interface_name']
@@ -1377,7 +1404,7 @@ def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
     fins_data['backend'] = backend
 
     # Override the FINS Node JSON data with a .override file if it exists
-    fins_data = override_fins_data(fins_data,os.path.basename(filename)+'.override',verbose)
+    fins_data = override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
 
     # Replace any linked parameters with their literal values
     fins_data = convert_parameters_to_literal(fins_data,verbose)

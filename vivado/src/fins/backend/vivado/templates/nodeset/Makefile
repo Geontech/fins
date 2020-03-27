@@ -46,7 +46,7 @@ TEMP_FILES:=$(LOGS_DIR)
 # All phony target to build the Vivado project
 all:
 	{%- for node in fins['nodes'] %}
-	$(MAKE) -C {{ node['node_dir'] }} all
+	$(MAKE) -C {{ node['fins_dir'] }} all
 	{%- endfor %}
 
 # Clean phony target that cleans only this nodeset
@@ -56,7 +56,7 @@ clean:
 # Clean-nodes phony target that cleans all nodes
 clean-nodes: 
 {%- for node in fins['nodes'] %}
-	$(MAKE) -C {{ node['node_dir'] }} $@
+	$(MAKE) -C {{ node['fins_dir'] }} clean-all
 {%- endfor %}
 
 # Clean-all phony target that cleans this nodeset and all nodes

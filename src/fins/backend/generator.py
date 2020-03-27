@@ -86,6 +86,20 @@ class Generator:
             # Write the build data to a new json file
             with open(output_directory+filename, 'w') as fins_data_file:
                 json.dump(fins_data, fins_data_file, sort_keys=True, indent=2)
+
+            if 'nodes' in fins_data:
+                # Generate fins_edit.json files for each Sub-IP
+                for node in fins_data['nodes']:
+                    if 'params' in node:
+                        # Once we are done retrieving parameter values, write the
+                        # fins edit JSON file for sub-ip
+                        with open(node['fins_path']+'.override', 'w') as override_file:
+                            # Strip all fields except for params
+                            override_data = {}
+                            override_data['params'] = node['params']
+                            if 'part' in fins_data:
+                                override_data['part'] = fins_data['part']
+                            json.dump(override_data, override_file, sort_keys=True, indent=2)
         else:
             # Write the FINS data model to file
             with open(output_directory+fins_data['name']+'.json', 'w') as fins_data_file:
