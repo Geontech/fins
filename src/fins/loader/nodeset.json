@@ -55,11 +55,11 @@
           "is_required":true,
           "types":["str","int"]
         },
-        "ports_producer":{
+        "ports_producer_name":{
           "is_required":false,
           "types":["str"]
         },
-        "ports_consumer":{
+        "ports_consumer_name":{
           "is_required":false,
           "types":["str"]
         },

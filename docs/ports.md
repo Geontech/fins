@@ -2,30 +2,54 @@
 
 **[RETURN TO TOP LEVEL README](../README.md)**
 
-Ports are a way to standardize data and metadata communication within the programmable logic. FINS generates an AXI4-Stream bus interpreter module which transmits data and metadata in parallel through the AXI4-Stream TDATA and TUSER fields, respectively. Metadata is assumed to be coincident with the first sample of the AXI4-Stream packet.
+FINS Ports are a way to standardize data and metadata communication within the programmable logic. FINS generates an AXI4-Stream bus interpreter module which transmits data and metadata in parallel through the AXI4-Stream TDATA and TUSER fields, respectively.
 
 ## JSON Schema
 
-The top-level `ports` field of the FINS Node JSON Schema in turn has a single `ports` field. See the table below for the details of this single field:
+The top-level `ports` field of the FINS Node JSON Schema in turn has two fields.
 
 > NOTE: In the tables below, `param['name']` is used for "Type" for some fields. This indicates that a string containing the name of a FINS parameter can be used in place of the value. However, ensure the FINS parameter has the same type as expected by the field!
 
 | Key   | Type   | Required | Default Value | Description |
 | ----- | ------ | -------- | ------------- | ----------- |
-| ports | dict[] | YES      |               | An array of port definitions. See below for more information on the schema for each element of the array. |
+| ports | dict[] | YES      |               | An array of FINS Port definitions which are ultimately generated as AXI4-Stream buses. See below for more information on the schema for each element of the array. |
+| hdl   | dict[] | NO       |               | An array of HDL port definitions which are ultimately generated as raw VHDL ports. See below for more information on the schema for each element of the array. |
 
-Each dictionary element of the `ports` dictionary array field has the following fields:
+## HDL Ports
 
-> NOTES: Each element within the `ports` dictionary array must have a unique `name` field. While neither `data` nor `metadata` are required in the table below, at least one must be used.
+### JSON Schema
 
-| Key                  | Type   | Required | Default Value | Value Restrictions | Description |
-| -------------------- | ------ | -------- | ------------- | ------------------ | ----------- |
-| name                 | string | YES      |               |                    | The name of the port. This must be unique within a FINS IP. |
-| direction            | string | YES      |               | in<br />out        | The bus direction of the port. This generally corresponds to the HDL port direction - except for the "tready" signal. |
-| supports_backpressue | bool   | NO       | false         |                    | A flag indicating if the port supports backpressure. Backpressure manifests as the "tready" signal of the AXI4-Stream bus. |
-| streaming_metadata   | bool   | NO       | false         |                    | A flag indicating if the metadata is valid for every transaction of a AXI4-Stream packet. If false, then the metadata is assumed to be valid ONLY on the first transaction of a AXI4-Stream packet. |
-| data                 | dict   | NO       |               |                    | A dictionary the describes the data characteristics. This dictionary determines how the bus interpreter module decodes the "tdata" signal of the AXI4-Stream bus. |
-| metadata             | dict[] | NO       |               |                    | An array of dictionaries that define metadata. This array of dictionaries determines how the bus interpreter module decodes the "tuser" signal of the AXI4-Stream bus. |
+Each dictionary element of the `hdl` dictionary array field has the following fields:
+
+> NOTES: Each element within the `hdl` dictionary array must have a unique `name` field.
+
+| Key                  | Type                    | Required | Default Value | Value Restrictions | Description |
+| -------------------- | ----------------------- | -------- | ------------- | ------------------ | ----------- |
+| name                 | string                  | YES      |               |                    | The name of the VHDL port. This must be unique within a FINS IP. |
+| direction            | string                  | YES      |               | in<br />out        | The direction of the VHDL port. |
+| bit_width            | uint or `param['name']` | YES      |               |                    | The bit width of the VHDL port. |
+
+### Records
+
+FINS Ports in a FINS Node JSON file autogenerate into an intepreter module that uses records defined in the VHDL package file. This module interacts with user HDL through the `ports_hdl_in` and `ports_hdl_out` record interfaces which are defined in the auto-generated VHDL package file. All HDL ports that have a `direction` of "in" are transported to the HDL user core on the `ports_hdl_in` record, and all HDL ports that have a `direction` of "out" are transported to the HDL user core on the `ports_hdl_out` record.
+
+## FINS Ports
+
+### JSON Schema
+
+Each dictionary element of the FINS `ports` dictionary array field has the following fields:
+
+> NOTES: Each element within the FINS `ports` dictionary array must have a unique `name` field. While neither `data` nor `metadata` are required in the table below, at least one must be used.
+
+| Key                  | Type                    | Required | Default Value | Value Restrictions | Description |
+| -------------------- | ----------------------- | -------- | ------------- | ------------------ | ----------- |
+| name                 | string                  | YES      |               |                    | The name of the port. This must be unique within a FINS IP. |
+| direction            | string                  | YES      |               | in<br />out        | The bus direction of the port. This generally corresponds to the HDL port direction - except for the "tready" signal. |
+| supports_backpressue | bool or `param['name']` | NO       | false         |                    | A flag indicating if the port supports backpressure. Backpressure manifests as the "tready" signal of the AXI4-Stream bus. |
+| num_instances        | uint or `param['name']` | NO       | 1             | >=1                | The number of instances of this port. Each instance is independent and has unique control signals. |
+| use_pipeline         | bool or `param['name']` | NO       | true          |                    | A flag indicating if a pipeline should be inserted in the port. If true, input and output ports will have a 1 clock latency. |
+| data                 | dict or `param['name']` | YES      |               |                    | A dictionary the describes the data characteristics. This dictionary determines how the bus interpreter module decodes the "tdata" signal of the AXI4-Stream bus. |
+| metadata             | dict[]                  | NO       |               |                    | An array of dictionaries that define metadata. This array of dictionaries determines how the bus interpreter module decodes the "tuser" signal of the AXI4-Stream bus. |
 
 The `data` dictionary field has the following fields:
 
@@ -46,30 +70,32 @@ Each dictionary element of the `metadata` dictionary array field has the followi
 | Key          | Type                    | Required | Default Value | Value Restrictions | Description |
 | ------------ | ----------------------- | -------- | ------------- | ------------------ | ----------- |
 | name         | string                  | YES      |               |                    | The name of the metadata. This must be unique within a port. |
-| bit_width    | uint or `param['name']` | NO       | 16            | >= 1               | The bit width of the metadata. If `is_complex` is true, then this value is the bit width for BOTH real and imaginary components. |
+| bit_width    | uint or `param['name']` | NO       | 16            | >= 1<b>*</b>       | The bit width of the metadata. If `is_complex` is true, then this value is the bit width for BOTH real and imaginary components. |
 | is_complex   | bool or `param['name']` | NO       | false         |                    | A flag indicating if the metadata has real and imaginary parts. The real and imaginary parts MUST have the same bit width, and their summed bit widths should be put in the `bit_width` field. If this value is true, then real data is packed in the LSBs of the sample. |
 | is_signed    | bool or `param['name']` | NO       | false         |                    | A flag indicating if the metadata is interpreted as a signed 2's complement value; otherwise, it is interpreted as an unsigned value. This value applies to the individual real and imaginary components when `is_complex` is true. |
 
-## Ports Records
+> **\*** The `bit_width` for all metadata fields must sum to <= 4096.
 
-Ports in a FINS Node JSON file autogenerate into an intepreter module that uses records defined in the VHDL package file. This module interacts with user HDL through the `ports_in` and `ports_out` record interfaces which are defined in the auto-generated VHDL package file. `ports_in` contains the signals that go from the bus interpreter decode module to user HDL, and `ports_out` contains the signals that go from user HDL to the bus interpreter decode module. These top-level records have a field for each property that can interact with other HDL. Each port in turn has fields that specify the interface with the user HDL. The fields of each port record depend on the direction and if backpressure is supported. The table below shows all available combinations:
+### Records
 
-| `direction` | `supports_backpressure` | `data` exists | `metadata` exists | ports_in Record Fields                  | ports_out Record Fields                 |
-| ----------- | ----------------------- | ------------- | ----------------- | --------------------------------------- | --------------------------------------- |
-| in          | true                    | true          | false             | valid<br />last<br />data               | ready                                   |
-| in          | true                    | false         | true              | valid<br />last<br />metadata           | ready                                   |
-| in          | true                    | true          | true              | valid<br />last<br />data<br />metadata | ready                                   |
-| in          | false                   | true          | false             | valid<br />last<br />data               |                                         |
-| in          | false                   | false         | true              | valid<br />last<br />metadata           |                                         |
-| in          | false                   | true          | true              | valid<br />last<br />data<br />metadata |                                         |
-| out         | true                    | true          | false             | ready                                   | valid<br />last<br />data               |
-| out         | true                    | false         | true              | ready                                   | valid<br />last<br />metadata           |
-| out         | true                    | true          | true              | ready                                   | valid<br />last<br />data<br />metadata |
-| out         | false                   | true          | false             |                                         | valid<br />last<br />data               |
-| out         | false                   | false         | true              |                                         | valid<br />last<br />metadata           |
-| out         | false                   | true          | true              |                                         | valid<br />last<br />data<br />metadata |
+FINS Ports in a FINS Node JSON file autogenerate into an intepreter module that uses records defined in the VHDL package file. This module interacts with user HDL through the `ports_in` and `ports_out` record interfaces which are defined in the auto-generated VHDL package file. `ports_in` contains the signals that go from the bus interpreter decode module to user HDL, and `ports_out` contains the signals that go from user HDL to the bus interpreter decode module. These top-level records are an array if `num_instances > 1`, and they have a field for each property that can interact with other HDL. Each port in turn has fields that specify the interface with the user HDL. The fields of each port record depend on the direction and if backpressure is supported. The table below shows all available combinations:
 
-The diagram below has a visual representation of how the AXI4-Stream buses are converted to Port records:
+| `direction` | `supports_backpressure` | `data` exists | `metadata` exists | ports_in Record Fields                                       | ports_out Record Fields                 |
+| ----------- | ----------------------- | ------------- | ----------------- | ------------------------------------------------------------ | --------------------------------------- |
+| in          | true                    | true          | false             | clk<br />resetn<br />valid<br />last<br />data               | ready                                   |
+| in          | true                    | false         | true              | clk<br />resetn<br />valid<br />last<br />metadata           | ready                                   |
+| in          | true                    | true          | true              | clk<br />resetn<br />valid<br />last<br />data<br />metadata | ready                                   |
+| in          | false                   | true          | false             | clk<br />resetn<br />valid<br />last<br />data               |                                         |
+| in          | false                   | false         | true              | clk<br />resetn<br />valid<br />last<br />metadata           |                                         |
+| in          | false                   | true          | true              | clk<br />resetn<br />valid<br />last<br />data<br />metadata |                                         |
+| out         | true                    | true          | false             | clk<br />resetn<br />ready                                   | valid<br />last<br />data               |
+| out         | true                    | false         | true              | clk<br />resetn<br />ready                                   | valid<br />last<br />metadata           |
+| out         | true                    | true          | true              | clk<br />resetn<br />ready                                   | valid<br />last<br />data<br />metadata |
+| out         | false                   | true          | false             | clk<br />resetn                                              | valid<br />last<br />data               |
+| out         | false                   | false         | true              | clk<br />resetn                                              | valid<br />last<br />metadata           |
+| out         | false                   | true          | true              | clk<br />resetn                                              | valid<br />last<br />data<br />metadata |
+
+The diagram below has a visual representation of how example ports are converted to Port records from AXI4-Stream buses:
 
 ![](./port_types.png)
 
@@ -137,8 +163,8 @@ The source and sink text files require a specific format for file IO processes t
 2. Each AXI4-Stream transaction is a row within the text file.
 3. Each transaction (row) is space-separated to differentiate between TLAST, TUSER, and TDATA fields.
 4. Each transaction is required to start with a single hex character that represents the TLAST field of the AXI4-Stream bus protocol.
-5. After the TLAST field, the transaction row contains TDATA and/or TUSER fields.
-6. If both TDATA and TUSER are present in the file, TDATA precedes TUSER.
+5. After the TLAST field, the transaction row contains the TDATA field.
+6. If there is metadata communicated through the port, the TUSER field is present after the TDATA field in the transaction row.
 
 An example of a simulation source file for a port that has both data (TDATA) and metadata (TUSER) is below. This example contains two AXI4-Stream packets, each with 4 transactions.
 

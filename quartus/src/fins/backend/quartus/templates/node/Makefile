@@ -156,7 +156,7 @@ IP_TARGET:=$(QUARTUS_DIR)/$(PROJECT_FILENAME)
 #-------------------------------------------------------------------------------
 # Makefile targets
 #-------------------------------------------------------------------------------
-.PHONY: all clean clean-all sim
+.PHONY: all clean clean-all {% if 'filesets' in fins %}{% if 'sim' in fins['filesets'] %}sim{% endif %}{% endif %}
 
 # All phony target to build the Vivado project
 all:
@@ -198,13 +198,17 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
 	cd $(QUARTUS_DIR) && qsys-script --search-path=$(IP_SEARCH_PATHS)$$ --new-quartus-project=$(PROJECT_FILENAME) --script=$(QUARTUS_TO_IP_CREATE_SCRIPT_PATH) $(if $(UseBatch),>> $(QUARTUS_TO_IP_CREATE_LOG_PATH) 2>&1)
-	cd $(QUARTUS_DIR) && qsys-generate --search-path=$(IP_SEARCH_PATHS)$$ --quartus-project=$(PROJECT_FILENAME) --synthesis=$(SYNTH_LANGUAGE) --simulation=$(SIM_LANGUAGE) --ipxact $(QSYS_IP_FILENAME) $(if $(UseBatch),>> $(QUARTUS_TO_IP_CREATE_LOG_PATH) 2>&1)
+	cd $(QUARTUS_DIR) && qsys-generate --search-path=$(IP_SEARCH_PATHS)$$ --quartus-project=$(PROJECT_FILENAME) --synthesis=$(SYNTH_LANGUAGE) {% if 'filesets' in fins %}{% if 'sim' in fins['filesets'] %}--simulation=$(SIM_LANGUAGE){% endif %}{% endif %} --ipxact $(QSYS_IP_FILENAME) $(if $(UseBatch),>> $(QUARTUS_TO_IP_CREATE_LOG_PATH) 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
 	{%- if 'postbuild' in fins['filesets']['scripts'] %}
@@ -219,12 +223,18 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
 
+{%- if 'filesets' in fins %}
+{%- if 'sim' in fins['filesets'] %}
 # Simulation phony target
 sim : all
 	{%- if 'filesets' in fins %}
@@ -241,6 +251,10 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
@@ -262,8 +276,14 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
+{%- endif %}
+{%- endif %}

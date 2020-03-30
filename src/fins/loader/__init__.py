@@ -47,8 +47,9 @@ PROPERTY_TYPES = [
     'read-write-memmap'
 ]
 PORT_DIRECTIONS = ['in', 'out']
-DESIGN_FILE_TYPES = ['vhdl', 'verilog']
-SCRIPT_FILE_TYPES = ['matlab', 'octave', 'python', 'tcl']
+PORT_HDL_DIRECTIONS = ['in', 'out']
+QUARTUS_DESIGN_FILE_TYPES = ['dat', 'fli_library', 'hex', 'mif', 'other', 'pli_library', 'system_verilog', 'system_verilog_encrypt', 'system_verilog_include', 'verilog', 'verilog_encrypt', 'verilog_include', 'vhdl', 'vhdl_encrypt', 'vpi_library']
+SCRIPT_FILE_TYPES = ['matlab', 'octave', 'python', 'python3', 'tcl', 'cmdline']
 CONSTRAINT_FILE_TYPES = ['xdc', 'sdc']
 VENDOR_SCRIPT_FILE_TYPES = ['tcl']
 # Regular expression strings used with re.search() on port names
@@ -58,55 +59,62 @@ INTERFACE_PORT_INFERENCE = {
         { 'pattern':r'reset',        'regex':False,'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'\w+_reset',    'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'reset_\w+',    'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
-        { 'pattern':r'\w+_reset_\w+','regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'resetin',      'regex':False,'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'\w+_resetin',  'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
+        { 'pattern':r'resetin_\w+',  'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'resetn',       'regex':False,'properties':{'signal':'reset_n','polarity':'active_low' }},
         { 'pattern':r'\w+_resetn',   'regex':True, 'properties':{'signal':'reset_n','polarity':'active_low' }},
+        { 'pattern':r'resetn_\w+',   'regex':True, 'properties':{'signal':'reset_n','polarity':'active_low' }},
         { 'pattern':r'rst',          'regex':False,'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'\w+_rst',      'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
+        { 'pattern':r'rst_\w+',      'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'rstin',        'regex':False,'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'\w+_rstin',    'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
+        { 'pattern':r'rstin_\w+',    'regex':True, 'properties':{'signal':'reset',  'polarity':'active_high'}},
         { 'pattern':r'aresetn',      'regex':False,'properties':{'signal':'reset_n','polarity':'active_low' }},
-        { 'pattern':r'\w+_aresetn',  'regex':True, 'properties':{'signal':'reset_n','polarity':'active_low' }}
+        { 'pattern':r'\w+_aresetn',  'regex':True, 'properties':{'signal':'reset_n','polarity':'active_low' }},
+        { 'pattern':r'aresetn_\w+',  'regex':True, 'properties':{'signal':'reset_n','polarity':'active_low' }}
     ],
     'clock':[
         { 'pattern':r'clock',        'regex':False,'properties':{'signal':'clk'}},
         { 'pattern':r'\w+_clock',    'regex':True, 'properties':{'signal':'clk'}},
         { 'pattern':r'clock_\w+',    'regex':True, 'properties':{'signal':'clk'}},
-        { 'pattern':r'\w+_clock_\w+','regex':True, 'properties':{'signal':'clk'}},
         { 'pattern':r'clk',          'regex':False,'properties':{'signal':'clk'}},
         { 'pattern':r'\w+_clk',      'regex':True, 'properties':{'signal':'clk'}},
+        { 'pattern':r'clk_\w+',      'regex':True, 'properties':{'signal':'clk'}},
         { 'pattern':r'clkin',        'regex':False,'properties':{'signal':'clk'}},
         { 'pattern':r'\w+_clkin',    'regex':True, 'properties':{'signal':'clk'}},
+        { 'pattern':r'clkin_\w+',    'regex':True, 'properties':{'signal':'clk'}},
         { 'pattern':r'aclk',         'regex':False,'properties':{'signal':'clk'}},
         { 'pattern':r'\w+_aclk',     'regex':True, 'properties':{'signal':'clk'}},
+        { 'pattern':r'aclk_\w+',     'regex':True, 'properties':{'signal':'clk'}},
         { 'pattern':r'aclkin',       'regex':False,'properties':{'signal':'clk'}},
-        { 'pattern':r'\w+_aclkin',   'regex':True, 'properties':{'signal':'clk'}}
+        { 'pattern':r'\w+_aclkin',   'regex':True, 'properties':{'signal':'clk'}},
+        { 'pattern':r'aclkin_\w+',   'regex':True, 'properties':{'signal':'clk'}}
     ],
     'axi4stream':[
-        { 'pattern':r's\d*_axis_\w*_aclk|s\d*_axis_\w*_aclk',      'regex':True,'properties':{'mode':'slave',  'signal':'clk'    }},
-        { 'pattern':r's\d*_axis_\w*_aresetn|s\d*_axis_\w*_aresetn','regex':True,'properties':{'mode':'slave',  'signal':'reset_n'}},
-        { 'pattern':r's\d*_axis_\w*_tdata|s\d*_axis_\w*_tdata',    'regex':True,'properties':{'mode':'slave',  'signal':'tdata'  }},
-        { 'pattern':r's\d*_axis_\w*_tvalid|s\d*_axis_\w*_tvalid',  'regex':True,'properties':{'mode':'slave',  'signal':'tvalid' }},
-        { 'pattern':r's\d*_axis_\w*_tready|s\d*_axis_\w*_tready',  'regex':True,'properties':{'mode':'slave',  'signal':'tready' }},
-        { 'pattern':r's\d*_axis_\w*_tstrb|s\d*_axis_\w*_tstrb',    'regex':True,'properties':{'mode':'slave',  'signal':'tstrb'  }},
-        { 'pattern':r's\d*_axis_\w*_tkeep|s\d*_axis_\w*_tkeep',    'regex':True,'properties':{'mode':'slave',  'signal':'tkeep'  }},
-        { 'pattern':r's\d*_axis_\w*_tlast|s\d*_axis_\w*_tlast',    'regex':True,'properties':{'mode':'slave',  'signal':'tlast'  }},
-        { 'pattern':r's\d*_axis_\w*_tid|s\d*_axis_\w*_tid',        'regex':True,'properties':{'mode':'slave',  'signal':'tid'    }},
-        { 'pattern':r's\d*_axis_\w*_tdest|s\d*_axis_\w*_tdest',    'regex':True,'properties':{'mode':'slave',  'signal':'tdest'  }},
-        { 'pattern':r's\d*_axis_\w*_tuser|s\d*_axis_\w*_tuser',    'regex':True,'properties':{'mode':'slave',  'signal':'tuser'  }},
-        { 'pattern':r'm\d*_axis_\w*_aclk|m\d*_axis_\w*_aclk',      'regex':True,'properties':{'mode':'master', 'signal':'clk'    }},
-        { 'pattern':r'm\d*_axis_\w*_aresetn|m\d*_axis_\w*_aresetn','regex':True,'properties':{'mode':'master', 'signal':'reset_n'}},
-        { 'pattern':r'm\d*_axis_\w*_tdata|m\d*_axis_\w*_tdata',    'regex':True,'properties':{'mode':'master', 'signal':'tdata'  }},
-        { 'pattern':r'm\d*_axis_\w*_tvalid|m\d*_axis_\w*_tvalid',  'regex':True,'properties':{'mode':'master', 'signal':'tvalid' }},
-        { 'pattern':r'm\d*_axis_\w*_tready|m\d*_axis_\w*_tready',  'regex':True,'properties':{'mode':'master', 'signal':'tready' }},
-        { 'pattern':r'm\d*_axis_\w*_tstrb|m\d*_axis_\w*_tstrb',    'regex':True,'properties':{'mode':'master', 'signal':'tstrb'  }},
-        { 'pattern':r'm\d*_axis_\w*_tkeep|m\d*_axis_\w*_tkeep',    'regex':True,'properties':{'mode':'master', 'signal':'tkeep'  }},
-        { 'pattern':r'm\d*_axis_\w*_tlast|m\d*_axis_\w*_tlast',    'regex':True,'properties':{'mode':'master', 'signal':'tlast'  }},
-        { 'pattern':r'm\d*_axis_\w*_tid|m\d*_axis_\w*_tid',        'regex':True,'properties':{'mode':'master', 'signal':'tid'    }},
-        { 'pattern':r'm\d*_axis_\w*_tdest|m\d*_axis_\w*_tdest',    'regex':True,'properties':{'mode':'master', 'signal':'tdest'  }},
-        { 'pattern':r'm\d*_axis_\w*_tuser|m\d*_axis_\w*_tuser',    'regex':True,'properties':{'mode':'master', 'signal':'tuser'  }}
+        { 'pattern':r's\d*_axis_aclk|s\d*_axis_\w*_aclk',      'regex':True,'properties':{'mode':'slave',  'signal':'clk'    }},
+        { 'pattern':r's\d*_axis_aresetn|s\d*_axis_\w*_aresetn','regex':True,'properties':{'mode':'slave',  'signal':'reset_n'}},
+        { 'pattern':r's\d*_axis_tdata|s\d*_axis_\w*_tdata',    'regex':True,'properties':{'mode':'slave',  'signal':'tdata'  }},
+        { 'pattern':r's\d*_axis_tvalid|s\d*_axis_\w*_tvalid',  'regex':True,'properties':{'mode':'slave',  'signal':'tvalid' }},
+        { 'pattern':r's\d*_axis_tready|s\d*_axis_\w*_tready',  'regex':True,'properties':{'mode':'slave',  'signal':'tready' }},
+        { 'pattern':r's\d*_axis_tstrb|s\d*_axis_\w*_tstrb',    'regex':True,'properties':{'mode':'slave',  'signal':'tstrb'  }},
+        { 'pattern':r's\d*_axis_tkeep|s\d*_axis_\w*_tkeep',    'regex':True,'properties':{'mode':'slave',  'signal':'tkeep'  }},
+        { 'pattern':r's\d*_axis_tlast|s\d*_axis_\w*_tlast',    'regex':True,'properties':{'mode':'slave',  'signal':'tlast'  }},
+        { 'pattern':r's\d*_axis_tid|s\d*_axis_\w*_tid',        'regex':True,'properties':{'mode':'slave',  'signal':'tid'    }},
+        { 'pattern':r's\d*_axis_tdest|s\d*_axis_\w*_tdest',    'regex':True,'properties':{'mode':'slave',  'signal':'tdest'  }},
+        { 'pattern':r's\d*_axis_tuser|s\d*_axis_\w*_tuser',    'regex':True,'properties':{'mode':'slave',  'signal':'tuser'  }},
+        { 'pattern':r'm\d*_axis_aclk|m\d*_axis_\w*_aclk',      'regex':True,'properties':{'mode':'master', 'signal':'clk'    }},
+        { 'pattern':r'm\d*_axis_aresetn|m\d*_axis_\w*_aresetn','regex':True,'properties':{'mode':'master', 'signal':'reset_n'}},
+        { 'pattern':r'm\d*_axis_tdata|m\d*_axis_\w*_tdata',    'regex':True,'properties':{'mode':'master', 'signal':'tdata'  }},
+        { 'pattern':r'm\d*_axis_tvalid|m\d*_axis_\w*_tvalid',  'regex':True,'properties':{'mode':'master', 'signal':'tvalid' }},
+        { 'pattern':r'm\d*_axis_tready|m\d*_axis_\w*_tready',  'regex':True,'properties':{'mode':'master', 'signal':'tready' }},
+        { 'pattern':r'm\d*_axis_tstrb|m\d*_axis_\w*_tstrb',    'regex':True,'properties':{'mode':'master', 'signal':'tstrb'  }},
+        { 'pattern':r'm\d*_axis_tkeep|m\d*_axis_\w*_tkeep',    'regex':True,'properties':{'mode':'master', 'signal':'tkeep'  }},
+        { 'pattern':r'm\d*_axis_tlast|m\d*_axis_\w*_tlast',    'regex':True,'properties':{'mode':'master', 'signal':'tlast'  }},
+        { 'pattern':r'm\d*_axis_tid|m\d*_axis_\w*_tid',        'regex':True,'properties':{'mode':'master', 'signal':'tid'    }},
+        { 'pattern':r'm\d*_axis_tdest|m\d*_axis_\w*_tdest',    'regex':True,'properties':{'mode':'master', 'signal':'tdest'  }},
+        { 'pattern':r'm\d*_axis_tuser|m\d*_axis_\w*_tuser',    'regex':True,'properties':{'mode':'master', 'signal':'tuser'  }}
     ],
     'axi4lite':[
         { 'pattern':r's\d*_axi_aclk|s\d*_axi_\w+_aclk',        'regex':True,'properties':{'mode':'slave',  'signal':'clk'     }},
@@ -399,7 +407,7 @@ def validate_files(fins_name,filename,file_list,allowed_types,verbose):
         # Check the type
         if 'type' in fins_file:
             if not (fins_file['type'].lower() in [allowed_type.lower() for allowed_type in allowed_types]):
-                print('ERROR: Invalid type',fins_file['type'],'for file',filepath)
+                print('WARNING: Unknown type',fins_file['type'],'for file',filepath)
         # Notify of success
         if verbose:
             print('PASS:',filepath)
@@ -445,27 +453,52 @@ def validate_properties(fins_data,verbose):
         sys.exit(1)
 
 def validate_ports(fins_data,verbose):
-    # Iterate through all ports
-    port_names = []
-    for port in fins_data['ports']['ports']:
-        # Add to the list of names
-        port_names.append(port['name'])
-        # Check the direction
-        if not port['direction'] in PORT_DIRECTIONS:
-            print('ERROR: Port',port['name'],'direction',port['direction'],'is invalid')
-            sys.exit(1)
-        # Neither data nor metadata are required, but we must have at least one
-        if not 'data' in port and not 'metadata' in port:
-            print('ERROR: Port',port['name'],'must have either metadata or data')
-            sys.exit(1)
-        # Notify of success
-        if verbose:
-            print('PASS: Port',port['name'],'with direction',port['direction'])
+    # Iterate through all FINS ports
+    if 'ports' in fins_data['ports']:
+        port_names = []
+        for port in fins_data['ports']['ports']:
+            # Add to the list of names
+            port_names.append(port['name'])
+            # Check the direction
+            if not port['direction'] in PORT_DIRECTIONS:
+                print('ERROR: Port',port['name'],'direction',port['direction'],'is invalid')
+                sys.exit(1)
+            # Neither data nor metadata are required, but we must have at least one
+            if not 'data' in port and not 'metadata' in port:
+                print('ERROR: Port',port['name'],'must have either metadata or data')
+                sys.exit(1)
+            # Notify of success
+            if verbose:
+                print('PASS: Port',port['name'],'with direction',port['direction'])
 
-    # Check for name duplicates
-    if (len(port_names) != len(set(port_names))):
-        print('ERROR: Duplicate port names detected')
-        sys.exit(1)
+        # Check for name duplicates
+        if (len(port_names) != len(set(port_names))):
+            print('ERROR: Duplicate port names detected')
+            sys.exit(1)
+
+    # Iterate through all FINS ports HDL
+    if 'hdl' in fins_data['ports']:
+        port_hdl_names = []
+        for port_hdl in fins_data['ports']['hdl']:
+            # Add to the list of names
+            port_hdl_names.append(port_hdl['name'])
+            # Check the direction
+            if not port_hdl['direction'] in PORT_HDL_DIRECTIONS:
+                print('ERROR: Port HDL',port_hdl['name'],'direction',port_hdl['direction'],'is invalid')
+                sys.exit(1)
+            # Check that bit width is > 0
+            bit_width = get_param_value(fins_data['params'], port_hdl['bit_width'])
+            if bit_width < 1:
+                print('ERROR: Port HDL',port_hdl['name'],'must have a bit_width > 0')
+                sys.exit(1)
+            # Notify of success
+            if verbose:
+                print('PASS: Port HDL',port_hdl['name'],'with direction',port_hdl['direction'])
+
+        # Check for name duplicates
+        if (len(port_hdl_names) != len(set(port_hdl_names))):
+            print('ERROR: Duplicate port HDL names detected')
+            sys.exit(1)
 
 def get_param_value(params,key_or_value):
     if isinstance(key_or_value, str):
@@ -486,19 +519,41 @@ def convert_parameters_to_literal(fins_data,verbose):
 
     # Convert all non-string fields of ports to literals
     if 'ports' in fins_data:
-        for port in fins_data['ports']['ports']:
-            if 'data' in port:
+        # Loop through FINS Ports
+        if 'ports' in fins_data['ports']:
+            for port in fins_data['ports']['ports']:
+                # Convert port fields
+                for key, value in port.items():
+                    # Don't convert string/dictionary typed fields
+                    if (key.lower() == 'name') or (key.lower() == 'direction') or (key.lower() == 'data') or (key.lower() == 'metadata'):
+                        continue
+                    # Convert value
+                    port[key] = get_param_value(params, value)
+
+                # Convert data fields
                 for key, value in port['data'].items():
                     # Convert value
                     port['data'][key] = get_param_value(params, value)
-            if 'metadata' in port:
-                for metafield in port['metadata']:
-                    for key, value in metafield.items():
-                        # Don't convert string typed fields
-                        if (key.lower() == 'name'):
-                            continue
-                        # Convert value
-                        metafield[key] = get_param_value(params, value)
+
+                # Convert metadata fields
+                if 'metadata' in port:
+                    for metafield in port['metadata']:
+                        for key, value in metafield.items():
+                            # Don't convert string typed fields
+                            if (key.lower() == 'name'):
+                                continue
+                            # Convert value
+                            metafield[key] = get_param_value(params, value)
+        # Loop through FINS Ports HDL
+        if 'hdl' in fins_data['ports']:
+            for port_hdl in fins_data['ports']['hdl']:
+                # Convert port HDL fields
+                for key, value in port_hdl.items():
+                    # Don't convert string/dictionary typed fields
+                    if (key.lower() == 'name') or (key.lower() == 'direction'):
+                        continue
+                    # Convert value
+                    port_hdl[key] = get_param_value(params, value)
 
     # Convert all non-string fields of properties
     if 'properties' in fins_data:
@@ -654,50 +709,54 @@ def populate_properties(fins_data,base_offset,verbose):
     return fins_data
 
 def populate_ports(fins_data,verbose):
-    # Make sure there are ports first
-    if not 'ports' in fins_data:
-        return fins_data
-
     # Loop through ports
-    for port in fins_data['ports']['ports']:
-        # Set defaults
-        if not 'supports_backpressure' in port:
-            port['supports_backpressure'] = False
-        if not 'streaming_metadata' in port:
-            port['streaming_metadata'] = False
-        if 'data' in port:
-            if not 'bit_width' in port['data']:
-                port['data']['bit_width'] = 16
-            if not 'is_complex' in port['data']:
-                port['data']['is_complex'] = False
-            if not 'is_signed' in port['data']:
-                port['data']['is_signed'] = False
-            if not 'num_samples' in port['data']:
-                port['data']['num_samples'] = 1
-            if not 'num_channels' in port['data']:
-                port['data']['num_channels'] = 1
-        if 'metadata' in port:
-            current_offset = 0
-            for metafield in port['metadata']:
-                # Set and update the bit offset
-                metafield['offset'] = current_offset
-                current_offset = metafield['offset'] + metafield['bit_width']
-                # Set defaults for non-populated fields
-                if not 'bit_width' in metafield:
-                    metafield['bit_width'] = 16
-                if not 'is_complex' in metafield:
-                    metafield['is_complex'] = False
-                if not 'is_signed' in metafield:
-                    metafield['is_signed'] = False
+    if 'ports' in fins_data:
+        if 'ports' in fins_data['ports']:
+            for port in fins_data['ports']['ports']:
+                # Set defaults for port
+                if not 'supports_backpressure' in port:
+                    port['supports_backpressure'] = False
+                if not 'use_pipeline' in port:
+                    port['use_pipeline'] = True
+                if not 'num_instances' in port:
+                    port['num_instances'] = 1
+                # Set defaults for data fields
+                if not 'bit_width' in port['data']:
+                    port['data']['bit_width'] = 16
+                if not 'is_complex' in port['data']:
+                    port['data']['is_complex'] = False
+                if not 'is_signed' in port['data']:
+                    port['data']['is_signed'] = False
+                if not 'num_samples' in port['data']:
+                    port['data']['num_samples'] = 1
+                if not 'num_channels' in port['data']:
+                    port['data']['num_channels'] = 1
+                # Set defaults for metadata fields
+                if 'metadata' in port:
+                    current_offset = 0
+                    for metafield in port['metadata']:
+                        # Set defaults for non-populated fields
+                        if not 'bit_width' in metafield:
+                            metafield['bit_width'] = 16
+                        if not 'is_complex' in metafield:
+                            metafield['is_complex'] = False
+                        if not 'is_signed' in metafield:
+                            metafield['is_signed'] = False
+                        # Set and update the bit offset
+                        metafield['offset'] = current_offset
+                        current_offset = metafield['offset'] + metafield['bit_width']
+                # Validate values
+                if port['num_instances'] < 1:
+                    print('ERROR: The num_instances of port {} is < 1'.format(port['name']))
+                    sys.exit(1)
 
-        # Check the data bit_width for limits
-        if 'data' in port:
-            if port['data']['bit_width'] < 8:
-                print('ERROR: Port',port['name'],'data bit_width is smaller than the minimum value of 8')
-                sys.exit(1)
-            elif port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] > 4096:
-                print('ERROR: Port',port['name'],'total data width (bit_width*num_samples*num_channels) is larger than the maximum value of 4096')
-                sys.exit(1)
+                # Check the data bit_width for limits
+                if port['data']['bit_width'] < 8:
+                    print('ERROR: Port',port['name'],'data bit_width is smaller than the minimum value of 8')
+                    sys.exit(1)
+                elif port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] > 4096:
+                    print('ERROR: Port',port['name'],'total data width (bit_width*num_samples*num_channels) is larger than the maximum value of 4096')
+                    sys.exit(1)
 
     # Return the modified dictionary
     return fins_data
@@ -711,15 +770,23 @@ def populate_filesets(fins_data,verbose):
         if design_file_key in fins_data['filesets']:
             for design_file in fins_data['filesets'][design_file_key]:
                 if not 'type' in design_file:
-                    if '.vhd' in design_file['path']:
+                    if '.dat' in design_file['path']:
+                        design_file['type'] = 'dat'
+                    elif '.hex' in design_file['path']:
+                        design_file['type'] = 'hex'
+                    elif '.mif' in design_file['path']:
+                        design_file['type'] = 'mif'
+                    elif '.vhd' in design_file['path']:
                         design_file['type'] = 'vhdl'
                     elif '.vhdl' in design_file['path']:
                         design_file['type'] = 'vhdl'
                     elif '.v' in design_file['path']:
                         design_file['type'] = 'verilog'
+                    elif '.sv' in design_file['path']:
+                        design_file['type'] = 'system_verilog'
                     else:
-                        print('ERROR: A type cannot be auto-detected from design file',design_file['path'])
-                        sys.exit(1)
+                        design_file['type'] = 'other'
+                        print('WARNING: No type was provided or detected, so OTHER was assigned to',design_file['path'],'... ONLY a concern with Quartus')
 
     if 'constraints' in fins_data['filesets']:
         for constraints_file in fins_data['filesets']['constraints']:
@@ -739,14 +806,17 @@ def populate_filesets(fins_data,verbose):
                 for script_file in fins_data['filesets']['scripts'][script_key]:
                     if not 'type' in script_file:
                         if '.py' in script_file['path']:
-                            script_file['type'] = 'python'
+                            script_file['type'] = 'python3'
                         elif '.m' in script_file['path']:
                             # NOTE: Default for .m files is Octave, not Matlab
                             script_file['type'] = 'octave'
                         elif '.tcl' in script_file['path']:
                             script_file['type'] = 'tcl'
+                        elif '.sh' in script_file['path']:
+                            script_file['type'] = 'cmdline'
                         else:
-                            print('ERROR: A type cannot be auto-detected from script file',script_file['path'])
+                            script_file['type'] = 'cmdline'
+                            print('WARNING: No type provided or detected, so CMDLINE was assigned to',script_file['path'],'... ONLY a concern if command line execution not intended')
                             sys.exit(1)
 
         if 'vendor_ip' in fins_data['filesets']['scripts']:
@@ -848,11 +918,11 @@ def populate_hdl_inferences(fins_data,verbose):
 
     # Make sure we found the top-level source file
     if not top_file_descriptor:
-        print('ERROR: No source file matches the top_source key',fins_data['top_source'])
-        sys.exit(1)
+        print('WARNING: HDL inference failed because no source file matches the top_source key',fins_data['top_source'])
+        return fins_data
     if not os.path.isfile(top_file_descriptor['path']):
-        print('ERROR: The top-level source file does not exist',top_file_descriptor['path'])
-        sys.exit(1)
+        print('WARNING: HDL inference failed because the top-level source file does not exist',top_file_descriptor['path'])
+        return fins_data
 
     # Initialize the fins_data dictionary
     fins_data['hdl'] = {'ports':[], 'generics':[], 'interfaces':[]}
@@ -868,11 +938,11 @@ def populate_hdl_inferences(fins_data,verbose):
         # Find the entity
         vhdl_entity_find = re.findall(r'\s+entity\s+\w+\s+is.+?\s+end[\s;]',top_file_contents,flags=re.IGNORECASE|re.DOTALL)
         if not vhdl_entity_find:
-            print('ERROR: No entity found in VHDL file',top_file_descriptor['path'])
-            sys.exit(1)
+            print('WARNING: HDL inference failed because no entity found in VHDL file',top_file_descriptor['path'])
+            return fins_data
         if len(vhdl_entity_find) > 1:
-            print('ERROR: The top level source file',top_file_descriptor['path'],'can not be read because has multiple entities')
-            sys.exit(1)
+            print('WARNING: HDL inference failed because the top level source file',top_file_descriptor['path'],'has multiple entities')
+            return fins_data
         vhdl_entity = vhdl_entity_find[0]
 
         # Remove comments from entity
@@ -887,19 +957,19 @@ def populate_hdl_inferences(fins_data,verbose):
         # Find the keywords to use for parsing
         vhdl_entity_generic_keyword = re.findall(r'\s+generic\s*\(',vhdl_entity,flags=re.IGNORECASE)
         if len(vhdl_entity_generic_keyword) > 1:
-            print('ERROR: The top level source file',top_file_descriptor['path'],'can not be read because it has multiple generics lists')
-            sys.exit(1)
+            print('WARNING: HDL inference failed because the top level source file',top_file_descriptor['path'],'has multiple generics lists')
+            return fins_data
         if vhdl_entity_generic_keyword:
             vhdl_entity_generic_keyword = vhdl_entity_generic_keyword[0]
         vhdl_entity_port_keyword = re.findall(r'\s+port\s*\(',vhdl_entity,flags=re.IGNORECASE)
         if len(vhdl_entity_port_keyword) > 1:
-            print('ERROR: The top level source file',top_file_descriptor['path'],'can not be read because it has multiple ports lists')
-            sys.exit(1)
+            print('WARNING: HDL inference failed because the top level source file',top_file_descriptor['path'],'has multiple ports lists')
+            return fins_data
         if vhdl_entity_port_keyword:
             vhdl_entity_port_keyword = vhdl_entity_port_keyword[0]
         else:
-            print('ERROR: A port list was not detected in the top level source file',top_file_descriptor['path'])
-            sys.exit(1)
+            print('WARNING: HDL inference failed because a port list was not detected in the top level source file',top_file_descriptor['path'])
+            return fins_data
 
         # Find the ports
         # NOTE: Only ports of type "in", "out", and "inout" are supported
@@ -971,14 +1041,14 @@ def populate_hdl_inferences(fins_data,verbose):
                     try:
                         new_generic_def['width'] = int(width_partition[0].strip())+1
                     except ValueError:
-                        print('ERROR: Unable to parse the width specification of std_logic_vector generic. Problem string:',width_partition[0].strip())
-                        sys.exit(1)
+                        print('WARNING: HDL inference failed because parsing the width specification of std_logic_vector generic encountered an error. Problem string:',width_partition[0].strip())
+                        return fins_data
                 # Add the generics array
                 fins_data['hdl']['generics'].append(new_generic_def)
 
     else:
-        print('ERROR: Verilog top-level file not yet supported.')
-        sys.exit(1)
+        print('WARNING: HDL inference failed because verilog top-level file not yet supported.')
+        return fins_data
 
         # Find the module
         # NOTE: Verilog 2001 ANSI-style is assumed, i.e. `module foo #(PARAMETERS)(PORTS);`
@@ -1176,9 +1246,9 @@ def validate_filesets(fins_data,filename,verbose):
     # Validate filesets
     if verbose:
         print('+++++ Validating filesets of {} ...'.format(filename))
-    validate_files(fins_data['name'],filename,fins_data['filesets']['source'],DESIGN_FILE_TYPES,verbose)
+    validate_files(fins_data['name'],filename,fins_data['filesets']['source'],QUARTUS_DESIGN_FILE_TYPES,verbose)
     if 'sim' in fins_data['filesets']:
-        validate_files(fins_data['name'],filename,fins_data['filesets']['sim'],DESIGN_FILE_TYPES,verbose)
+        validate_files(fins_data['name'],filename,fins_data['filesets']['sim'],QUARTUS_DESIGN_FILE_TYPES,verbose)
     if 'constraints' in fins_data['filesets']:
         validate_files(fins_data['name'],filename,fins_data['filesets']['constraints'],CONSTRAINT_FILE_TYPES,verbose)
     if 'scripts' in fins_data['filesets']:
@@ -1341,8 +1411,6 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
     # Set defaults
     if not 'base_offset' in fins_data:
         fins_data['base_offset'] = 0
-    ports_producer_defined = False
-    ports_consumer_defined = False
 
     # Override the FINS Node JSON data with a .override file if it exists
     fins_data = override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
@@ -1352,9 +1420,12 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
 
     return fins_data
 
-def populate_fins_node(node,filepath,verbose):
-        # Convert dictionary to uint
-        if isinstance(node['properties_offset'], str):
+def populate_fins_node(node, verbose):
+    ports_producer_name_defined = False
+    ports_consumer_name_defined = False
+    # Convert dictionary to uint
+    if isinstance(node['properties_offset'], str):
+        if os.path.exists(node['properties_offset']):
             _, bd_extension = os.path.splitext(node['properties_offset'])
             if bd_extension.lower() == '.qsys':
                 base_address = find_base_address_from_qsys(node['properties_offset'],node['module_name'],node['interface_name'])
@@ -1364,33 +1435,68 @@ def populate_fins_node(node,filepath,verbose):
                 print('ERROR: Unknown block design extension in FINS nodeset:',bd_extension)
                 sys.exit(1)
             node['properties_offset'] = base_address
-        # Load FINS Node JSON for each node
-        node_fins_data = load_json_file(filepath,verbose)
-
-        node_name = node_fins_data['name']
-        node_dir = os.path.dirname(filepath)
-
-        node['fins_dir'] = os.path.join(node_dir)
-        node['fins_path'] = os.path.join(filepath)
-        node['node_path'] = os.path.join(node_dir, 'gen/core/', node_name + '.json')
-        node['properties'] = node_fins_data['properties']['properties']
-        node['node_name'] = node_name
-        node['node_id'] = node_name + '::' + node['module_name'] + '::' + node['interface_name']
-        # Set defaults
-        if 'ports_producer' in node:
-            if ports_producer_defined:
-                print('ERROR: ports_producer can only be defined in one node')
-                sys.exit(1)
-            ports_producer_defined = True
         else:
-            node['ports_producer'] = ''
-        if 'ports_consumer' in node:
-            if ports_consumer_defined:
-                print('ERROR: ports_consumer can only be defined in one node')
-                sys.exit(1)
-            ports_consumer_defined = True
-        else:
-            node['ports_consumer'] = ''
+            print('WARNING: Properties offset path',node['properties_offset'],'for',node['module_name'],'does not exist')
+
+    # Load FINS Node JSON for each node
+    node_fins_data_tmp = load_json_file(node['fins_path'],verbose)
+
+    node_name = node_fins_data_tmp['name']
+    node_dir = os.path.dirname(node['fins_path'])
+
+    gen_node_path = os.path.join(node_dir, 'gen/core/', node_name + '.json')
+    node_fins_data = load_json_file(gen_node_path, verbose)
+
+    node['fins_dir'] = node_dir
+    node['properties'] = node_fins_data['properties']['properties']
+    node['node_name'] = node_fins_data['name']
+    node['node_id'] = node['node_name'] + '::' + node['module_name'] + '::' + node['interface_name']
+
+    # Find the port listed in ports_producer_name
+    if 'ports_producer_name' in node:
+        # Make sure ports_producer_name is in only one node
+        if ports_producer_name_defined:
+            print('ERROR: ports_producer_name can only be defined in one node')
+            sys.exit(1)
+        ports_producer_name_defined = True
+        # Find the port
+        ports_producer_found = False
+        for port in node_fins_data['ports']['ports']:
+            if node['ports_producer_name'].lower() == port['name'].lower():
+                if port['direction'].lower() == 'in':
+                    print('ERROR: ports_producer was incorrectly assigned to an input port')
+                    sys.exit(1)
+                node['ports_producer'] = port
+                ports_producer_found = True
+        if not ports_producer_found:
+            print('ERROR: ports_producer_name',node['ports_producer_name'],'not found in node',node['node_name'])
+            sys.exit(1)
+    else:
+        node['ports_producer_name'] = ''
+        node['ports_producer'] = {}
+
+    # Find the port listed in ports_consumer_name
+    if 'ports_consumer_name' in node:
+        # Make sure ports_consumer_name is in only one node
+        if ports_consumer_name_defined:
+            print('ERROR: ports_consumer_name can only be defined in one node')
+            sys.exit(1)
+        ports_consumer_name_defined = True
+        # Find the port
+        ports_consumer_found = False
+        for port in node_fins_data['ports']['ports']:
+            if node['ports_consumer_name'].lower() == port['name'].lower():
+                if port['direction'].lower() == 'out':
+                    print('ERROR: ports_consumer was incorrectly assigned to an output port')
+                    sys.exit(1)
+                node['ports_consumer'] = port
+                ports_consumer_found = True
+        if not ports_consumer_found:
+            print('ERROR: ports_consumer_name',node['ports_consumer_name'],'not found in node',node['node_name'])
+            sys.exit(1)
+    else:
+        node['ports_consumer_name'] = ''
+        node['ports_consumer'] = {}
 
 
 def validate_and_convert_fins_data(fins_data,filename,backend,verbose):

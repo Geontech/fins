@@ -6,25 +6,15 @@ Firmware Intellectual Property (IP) Node Specification (FINS) is an innovative s
 2. **Rapid Reconfiguration.** FINS consolidates parameterization of IP into a single location and distributes these parameters across design tools with code generation of header-like package files.
 3. **Properties and Ports Interfaces.** FINS generates HDL source code for a properties interface that enables repeatable software control of firmware and for a ports interface that standardizes firmware to firmware movement of data.
 
-Additional detailed documentation is referenced here and is available at the following links:
-
-* [Nodeset Integration](./docs/integration.md)
-* [Node Development](./docs/development.md)
-* [Node Parameters](./docs/parameters.md)
-* [Node Properties](./docs/properties.md)
-* [Node Ports](./docs/ports.md)
-* [Node Filesets](./docs/filesets.md)
-* [Node Sub-IP](./docs/sub-ip.md)
-
 ## Prerequisites
 
 The software packages required to use FINS are:
 
-* Xilinx Vivado (Tested with 2018.2, 2018.3) and/or Intel Quartus Prime Pro (Tested with 19.1)
+* Xilinx Vivado (Tested with 2019.1) and/or Intel Quartus Prime Pro (Tested with 19.1)
 * GNU Make
 * Python 3.6 with setuptools 41.2.0
 * Jinja2
-* GNU Octave and/or Mathworks MATLAB
+* \[Optional\] GNU Octave and/or Mathworks MATLAB
 
 ## Installation
 
@@ -34,26 +24,32 @@ Run the following commands from the root of this repository to install the FINS 
 
 ```bash
 # Install the FINS software and "core" generator
-$ sudo python3 -m pip install .
+$ python3 -m pip install .
 # Install the "vivado" generator plugin
-$ sudo python3 -m pip install ./vivado
+$ python3 -m pip install ./vivado
 # Install the "quartus" generator plugin
-$ sudo python3 -m pip install ./quartus
+$ python3 -m pip install ./quartus
 ```
+---
+**NOTE**
+You may not have permissions to run these `python3 -m pip` commands. To resolve this you can either use a python virtual environment, the `--user` option (`python3 -m pip --user`), or `sudo`.
+
+---
 
 To uninstall FINS, run the following commands:
 
 ```bash
-$ sudo python3 -m pip uninstall fins-quartus
-$ sudo python3 -m pip uninstall fins-vivado
-$ sudo python3 -m pip uninstall fins
+$ python3 -m pip uninstall fins fins-quartus fins-vivado
 ```
+---
+**NOTE**
+Again, you may not have permissions to run these `python3 -m pip` commands. To resolve this you can either use a python virtual environment, the `--user` option (`python3 -m pip --user`), or `sudo`.
 
-## TL;DR Example
+---
 
-To run an example of a FINS IP, execute the following commands to build and simulate the test IP with Vivado:
+To verify your installation and run an example of a FINS Node, execute the following commands to build and simulate the test IP with Vivado:
 
-> NOTES: Make sure you have sourced the Xilinx "settings64.sh" script for the version of Vivado you are using.
+> NOTES: Make sure you have sourced the Xilinx "settings64.sh" script for the version of Vivado you are using. This test requires GNU Octave or Mathworks MATLAB.
 
 ```bash
 # Enter the test IP directory
@@ -64,25 +60,32 @@ $ fins -b vivado zynq.json
 $ make sim
 ```
 
-When the commands have finished executing, notice the following files and folders (relative to the root of the `./test` directory):
+The log files below contain the details of operations in the FINS execution process:
 
-* **Makefile**: This is the Makefile that provides the `all` and `sim` targets for the "test_top" IP.
-* **./gen/core/**: This directory contains the generated code from the "core" backend that was used by the "test_top" IP.
-* **./gen/vivado/**: This directory contains the generated scripts from the "vivado" backend that built and simulated the "test_top" IP.
-* **./log/ip_create.log**: This log file contains the details of each step executed to build the "test_top" IP.
-* **./log/ip_simulate.log**: This log file contains the details of each step executed to simulate the "test_top" IP.
+* **./test/node/log/ip_create.log**: This log file contains the details of each step executed to build the "test_top" IP.
+* **./test/node/log/ip_simulate.log**: This log file contains the details of each step executed to simulate the "test_top" IP.
 
 ## Learning FINS
 
-To learn how to create a simple "power_converter" IP with FINS, see the tutorial [here](docs/tutorial1.md).
+A FINS "Node" is a single modular, resuable firmware Intellectual Property (IP). A Node serves as the foundation of FINS. See the link below for more information on development of a "Node".
 
-## Developing a FINS "Node"
+* [Node Development](./docs/development.md)
 
-A FINS "Node" is a single modular, resuable firmware Intellectual Property (IP). A Node serves as the foundation of FINS. See [here](docs/development.md) for more information on development of a "Node".
+To follow a tutorial on how to create a simple "power_converter" FINS Node, see the link below.
 
-## Integrating a FINS "Nodeset"
+* [Power Converter Tutorial](docs/tutorial1.md)
 
-A FINS "Nodeset" is the collection of FINS Nodes that exist within a programmable logic build. See [here](docs/integration.md) for more information on integrating a FINS "Nodeset".
+See the links below for detailed documentation on elements of a FINS Node.
+
+* [Node Parameters](./docs/parameters.md)
+* [Node Properties](./docs/properties.md)
+* [Node Ports](./docs/ports.md)
+* [Node Filesets](./docs/filesets.md)
+* [Node Sub-IP](./docs/sub-ip.md)
+
+A FINS "Nodeset" is the collection of FINS Nodes that exist within a programmable logic build. See the link below for more information on integrating a FINS "Nodeset".
+
+* [Nodeset Integration](./docs/integration.md)
 
 ## Notes
 
@@ -93,6 +96,7 @@ Here are few things to keep in mind when developing FINS IP:
 * FINS currently generates only VHDL for all HDL code. Verilog user code may require a translation layer of properties and ports records.
 * When switching between vendors, you will need to change the part specified in the FINS Node JSON file. You may also find it convenient to specify a top-level FINS parameter to define the vendor that can be used in the HDL in "generate" statements.
 * The "quartus" backend does not support a Verilog file as its top-level source file.
+* No directory paths should have spaces. For example, `/home/user/Documents/project 1/` is invalid.
 
 The AXI4-Lite buses and AXI4-Stream buses used in the top-level source file have strict requirements for their signals used and their naming. Every bus must have both clock and reset with signal names `aclk` and `aresetn`, respectively. The naming conventions are listed below.
 
@@ -104,13 +108,18 @@ The AXI4-Lite buses and AXI4-Stream buses used in the top-level source file have
 To develop FINS templates or Python code, it is strongly recommended to use a virtual environment with an "editable" install:
 
 ```bash
-$ sudo pip3 install virtualenv
+$ pip3 install virtualenv
 $ python3 -m venv env
 $ source env/bin/activate
 $ pip3 install -e .
 $ pip3 install -e ./vivado
 $ pip3 install -e ./quartus
 ```
+---
+**NOTE**
+You may not have permissions to run the first `pip3` command here. To resolve this you can use the `--user` option or `sudo`.
+
+---
 
 Any new code must be able to build and simulate the test IP for both Vivado and Quartus. To run both tests, execute the following commands:
 

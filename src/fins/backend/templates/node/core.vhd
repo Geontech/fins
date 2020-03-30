@@ -1,3 +1,4 @@
+{#-
 --
 -- Copyright (C) 2019 Geon Technologies, LLC
 --
@@ -16,6 +17,17 @@
 -- You should have received a copy of the GNU Lesser General Public License
 -- along with this program.  If not, see http://www.gnu.org/licenses/.
 --
+-#}
+--==============================================================================
+-- Firmware IP Node Specification (FINS) Auto-Generated File
+-- ---------------------------------------------------------
+-- Template:    core.vhd
+-- Backend:     {{ fins['backend'] }}
+-- Generated:   {{ now }}
+-- ---------------------------------------------------------
+-- Description: Core functionality code stub for a FINS IP
+-- Reset Type:  Synchronous
+--==============================================================================
 
 -- Standard Libraries
 library ieee;
@@ -25,183 +37,42 @@ use ieee.math_real.all;
 
 -- User Libraries
 library work;
-use work.power_converter_pkg.all;
+use work.{{ fins['name']|lower }}_pkg.all;
 
 -- Entity
-entity power_converter is
+entity {{ fins['name']|lower }}_core is
   port (
-    -- AXI4-Lite Properties Bus
-    S_AXI_ACLK    : in  std_logic;
-    S_AXI_ARESETN : in  std_logic;
-    S_AXI_AWADDR  : in  std_logic_vector(16-1 downto 0);
-    S_AXI_AWPROT  : in  std_logic_vector(2 downto 0);
-    S_AXI_AWVALID : in  std_logic;
-    S_AXI_AWREADY : out std_logic;
-    S_AXI_WDATA   : in  std_logic_vector(32-1 downto 0);
-    S_AXI_WSTRB   : in  std_logic_vector((32/8)-1 downto 0);
-    S_AXI_WVALID  : in  std_logic;
-    S_AXI_WREADY  : out std_logic;
-    S_AXI_BRESP   : out std_logic_vector(1 downto 0);
-    S_AXI_BVALID  : out std_logic;
-    S_AXI_BREADY  : in  std_logic;
-    S_AXI_ARADDR  : in  std_logic_vector(16-1 downto 0);
-    S_AXI_ARPROT  : in  std_logic_vector(2 downto 0);
-    S_AXI_ARVALID : in  std_logic;
-    S_AXI_ARREADY : out std_logic;
-    S_AXI_RDATA   : out std_logic_vector(32-1 downto 0);
-    S_AXI_RRESP   : out std_logic_vector(1 downto 0);
-    S_AXI_RVALID  : out std_logic;
-    S_AXI_RREADY  : in  std_logic;
-    -- AXI4-Stream Input Port: iq
-    s_axis_iq_aclk    : in  std_logic;
-    s_axis_iq_aresetn : in  std_logic;
-    s_axis_iq_tdata   : in  std_logic_vector(32-1 downto 0);
-    s_axis_iq_tvalid  : in  std_logic;
-    s_axis_iq_tlast   : in  std_logic;
-    -- AXI4-Stream Output Port: power
-    m_axis_power_aclk    : in  std_logic;
-    m_axis_power_aresetn : in  std_logic;
-    m_axis_power_tdata   : out std_logic_vector(16-1 downto 0);
-    m_axis_power_tvalid  : out std_logic;
-    m_axis_power_tlast   : out std_logic
+    {%- if 'properties' in fins %}
+    props_control : in  t_{{ fins['name']|lower }}_props_control;
+    props_status  : out t_{{ fins['name']|lower }}_props_status{% if 'ports' in fins %};{% endif %}
+    {%- endif %}
+    {%- if 'ports' in fins %}
+    {%- if 'hdl' in fins['ports'] %}
+    ports_hdl_in  : in  t_{{ fins['name']|lower }}_ports_hdl_in;
+    ports_hdl_out : out t_{{ fins['name']|lower }}_ports_hdl_out{% if 'ports' in fins['ports'] %};{% endif %}
+    {%- endif %}
+    {%- if 'ports' in fins['ports'] %}
+    ports_in      : in  t_{{ fins['name']|lower }}_ports_in;
+    ports_out     : out t_{{ fins['name']|lower }}_ports_out
+    {%- endif %}
+    {%- endif %}
   );
-end power_converter;
+end {{ fins['name']|lower }}_core;
 
 -- Architecture
-architecture struct of power_converter is
-
-  --------------------------------------------------------------------------------
-  -- Components
-  --------------------------------------------------------------------------------
-  -- Auto-generated AXI4-Lite FINS Properties interface
-  component power_converter_axilite is
-    generic (
-      G_AXI_BYTE_INDEXED : boolean := false;
-      G_AXI_ADDR_WIDTH   : natural := 16;
-      G_AXI_DATA_WIDTH   : natural := 32
-    );
-    port (
-      S_AXI_ACLK    : in  std_logic;
-      S_AXI_ARESETN : in  std_logic;
-      S_AXI_AWADDR  : in  std_logic_vector(G_AXI_ADDR_WIDTH-1 downto 0);
-      S_AXI_AWPROT  : in  std_logic_vector(2 downto 0);
-      S_AXI_AWVALID : in  std_logic;
-      S_AXI_AWREADY : out std_logic;
-      S_AXI_WDATA   : in  std_logic_vector(G_AXI_DATA_WIDTH-1 downto 0);
-      S_AXI_WSTRB   : in  std_logic_vector((G_AXI_DATA_WIDTH/8)-1 downto 0);
-      S_AXI_WVALID  : in  std_logic;
-      S_AXI_WREADY  : out std_logic;
-      S_AXI_BRESP   : out std_logic_vector(1 downto 0);
-      S_AXI_BVALID  : out std_logic;
-      S_AXI_BREADY  : in  std_logic;
-      S_AXI_ARADDR  : in  std_logic_vector(G_AXI_ADDR_WIDTH-1 downto 0);
-      S_AXI_ARPROT  : in  std_logic_vector(2 downto 0);
-      S_AXI_ARVALID : in  std_logic;
-      S_AXI_ARREADY : out std_logic;
-      S_AXI_RDATA   : out std_logic_vector(G_AXI_DATA_WIDTH-1 downto 0);
-      S_AXI_RRESP   : out std_logic_vector(1 downto 0);
-      S_AXI_RVALID  : out std_logic;
-      S_AXI_RREADY  : in  std_logic;
-      props_control : out t_power_converter_props_control;
-      props_status  : in  t_power_converter_props_status
-    );
-  end component;
-  -- Auto-generated AXI4-Stream FINS Ports interface
-  component power_converter_axis is
-    port (
-      -- AXI4-Stream Input Port: iq
-      s_axis_iq_aclk    : in  std_logic;
-      s_axis_iq_aresetn : in  std_logic;
-      s_axis_iq_tdata   : in  std_logic_vector(32-1 downto 0);
-      s_axis_iq_tvalid  : in  std_logic;
-      s_axis_iq_tlast   : in  std_logic;
-      -- AXI4-Stream Output Port: power
-      m_axis_power_aclk    : in  std_logic;
-      m_axis_power_aresetn : in  std_logic;
-      m_axis_power_tdata   : out std_logic_vector(16-1 downto 0);
-      m_axis_power_tvalid  : out std_logic;
-      m_axis_power_tlast   : out std_logic;
-      ports_in  : out t_power_converter_ports_in;
-      ports_out : in  t_power_converter_ports_out
-    );
-  end component;
-
-  --------------------------------------------------------------------------------
-  -- Signals
-  --------------------------------------------------------------------------------
-  signal props_control   : t_power_converter_props_control;
-  signal props_status    : t_power_converter_props_status;
-  signal ports_in        : t_power_converter_ports_in;
-  signal ports_out       : t_power_converter_ports_out;
-
-  -- Data processing
-  constant MODULE_LATENCY  : natural := 4;
-  signal input_i           : signed(IQ_DATA_WIDTH/2-1 downto 0);
-  signal input_q           : signed(IQ_DATA_WIDTH/2-1 downto 0);
-  signal input_squared_i   : signed(IQ_DATA_WIDTH-1 downto 0);
-  signal input_squared_q   : signed(IQ_DATA_WIDTH-1 downto 0);
-  signal power_full_scale  : signed(IQ_DATA_WIDTH-1 downto 0);
-  signal power             : signed(POWER_DATA_WIDTH-1 downto 0);
-  signal valid_delay_chain : std_logic_vector(MODULE_LATENCY-1 downto 0);
-  signal last_delay_chain  : std_logic_vector(MODULE_LATENCY-1 downto 0);
+architecture rtl of {{ fins['name']|lower }}_core is
 
 begin
-  --------------------------------------------------------------------------------
-  -- Properties
-  --------------------------------------------------------------------------------
-  u_properties : power_converter_axilite
-    port map (
-      S_AXI_ACLK    => S_AXI_ACLK,
-      S_AXI_ARESETN => S_AXI_ARESETN,
-      S_AXI_AWADDR  => S_AXI_AWADDR,
-      S_AXI_AWPROT  => S_AXI_AWPROT,
-      S_AXI_AWVALID => S_AXI_AWVALID,
-      S_AXI_AWREADY => S_AXI_AWREADY,
-      S_AXI_WDATA   => S_AXI_WDATA,
-      S_AXI_WSTRB   => S_AXI_WSTRB,
-      S_AXI_WVALID  => S_AXI_WVALID,
-      S_AXI_WREADY  => S_AXI_WREADY,
-      S_AXI_BRESP   => S_AXI_BRESP,
-      S_AXI_BVALID  => S_AXI_BVALID,
-      S_AXI_BREADY  => S_AXI_BREADY,
-      S_AXI_ARADDR  => S_AXI_ARADDR,
-      S_AXI_ARPROT  => S_AXI_ARPROT,
-      S_AXI_ARVALID => S_AXI_ARVALID,
-      S_AXI_ARREADY => S_AXI_ARREADY,
-      S_AXI_RDATA   => S_AXI_RDATA,
-      S_AXI_RRESP   => S_AXI_RRESP,
-      S_AXI_RVALID  => S_AXI_RVALID,
-      S_AXI_RREADY  => S_AXI_RREADY,
-      props_control => props_control,
-      props_status  => props_status
-    );
-  --------------------------------------------------------------------------------
-  -- Ports
-  --------------------------------------------------------------------------------
-  u_ports : power_converter_axis
-    port map (
-      s_axis_iq_aclk    => s_axis_iq_aclk,
-      s_axis_iq_aresetn => s_axis_iq_aresetn,
-      s_axis_iq_tdata   => s_axis_iq_tdata,
-      s_axis_iq_tvalid  => s_axis_iq_tvalid,
-      s_axis_iq_tlast   => s_axis_iq_tlast,
-      m_axis_power_aclk    => m_axis_power_aclk,
-      m_axis_power_aresetn => m_axis_power_aresetn,
-      m_axis_power_tdata   => m_axis_power_tdata,
-      m_axis_power_tvalid  => m_axis_power_tvalid,
-      m_axis_power_tlast   => m_axis_power_tlast,
-      ports_in  => ports_in,
-      ports_out => ports_out
-    );
 
   --------------------------------------------------------------------------------
-  -- User Code
+  -- User Core Code Goes Here!
   --------------------------------------------------------------------------------
+  {%- if 'properties' in fins %}
   -- To use the software-controllable FINS "Properties" interface, use the
   -- fields of the following record signals:
   --
-  --   * props_control : t_power_converter_props_control;
-  --   * props_status  : t_power_converter_props_status;
+  --   * props_control : t_{{ fins['name']|lower }}_props_control;
+  --   * props_status  : t_{{ fins['name']|lower }}_props_status;
   --
   -- The fields of props_control and props_status record signals above are the
   -- property names. A property name field is in turn a record of access signal
@@ -224,7 +95,7 @@ begin
   --   | read-write-memmap   | rd_en, rd_addr, wr_en, wr_data, wr_addr | rd_data, rd_valid          |
   --
   -- The only property types that instantiate a physical storage register
-  -- inside the power_converter_axilite module are the "read-write-data"
+  -- inside the {{ fins['name']|lower }}_axilite module are the "read-write-data"
   -- and the "read-write-internal". The most common property type used is
   -- "read-write-data", and its value can be used directly since it doesn't
   -- have any of the other access signals. An example of the usage of a property
@@ -252,16 +123,20 @@ begin
   --   props_status.coefficient.rd_data  <= coefficient_register;
   --
   --------------------------------------------------------------------------------
+  {%- endif %}
+  {%- if 'ports' in fins %}
+  {%- if 'ports' in fins['ports'] %}
   -- To use the standardized FINS "Ports" interfaces, use the
   -- fields of the following record signals:
   --
-  --   * ports_in  : t_power_converter_ports_in;
-  --   * ports_out : t_power_converter_ports_out;
+  --   * ports_in  : t_{{ fins['name']|lower }}_ports_in;
+  --   * ports_out : t_{{ fins['name']|lower }}_ports_out;
   --
   -- The fields of ports_in and ports_out record signals above are the port names.
-  -- A port name field is in turn a record of access signal records. The fields
-  -- of the port name records are dependent on the port characteristics and are
-  -- listed in the table below:
+  -- When a port has (num_instances > 1), the port name field is an array of
+  -- access signal records. Otherwise, the port name field is a single access
+  -- signal record. The fields of the port name records are dependent on the port
+  -- characteristics and are listed in the table below:
   --
   --   | `direction` | `supports_backpressure` | `data` exists | `metadata` exists | ports_in Record Fields      | ports_out Record Fields     |
   --   | ----------- | ----------------------- | ------------- | ----------------- | --------------------------- | --------------------------- |
@@ -324,41 +199,7 @@ begin
   -- from the package file to make the assignment with incongruous types.
   --
   --------------------------------------------------------------------------------
-  -- Synchronous process for the user code of the power conversion function
-  s_user_code : process (s_axis_iq_aclk)
-  begin
-    if (rising_edge(s_axis_iq_aclk)) then
-      -- Data Registers
-      input_i          <= ports_in.iq.data.i;
-      input_q          <= ports_in.iq.data.q;
-      input_squared_i  <= input_i * input_i;
-      input_squared_q  <= input_q * input_q;
-      power_full_scale <= resize(
-        input_squared_i + input_squared_q,
-        power_full_scale'length
-      ); -- Resize drops extra signed bit from previous multiplication operation
-      power <= resize(
-        resize(power_full_scale, power'length) * signed(props_control.gain.wr_data),
-        power'length
-      );
-      -- Control Registers
-      if (s_axis_iq_aresetn = '0') then
-        valid_delay_chain <= (others => '0');
-        last_delay_chain  <= (others => '0');
-      else
-        valid_delay_chain(0) <= ports_in.iq.valid;
-        last_delay_chain(0)  <= ports_in.iq.last;
-        for ix in 1 to MODULE_LATENCY-1 loop
-          valid_delay_chain(ix) <= valid_delay_chain(ix-1);
-          last_delay_chain(ix)  <= last_delay_chain(ix-1);
-        end loop;
-      end if;
-    end if;
-  end process s_user_code;
+  {%- endif %}
+  {%- endif %}
 
-  -- Assign outputs
-  ports_out.power.data  <= power;
-  ports_out.power.valid <= valid_delay_chain(MODULE_LATENCY-1);
-  ports_out.power.last  <= last_delay_chain(MODULE_LATENCY-1);
-
-end struct;
+end rtl;

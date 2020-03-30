@@ -100,7 +100,7 @@ IP_TARGET:=$(PROJECT_VIVADO_DIR)/{{ fins['name'] }}.xpr
 #-------------------------------------------------------------------------------
 # Makefile targets
 #-------------------------------------------------------------------------------
-.PHONY: all clean clean-all sim
+.PHONY: all clean clean-all {% if 'filesets' in fins %}{% if 'sim' in fins['filesets'] %}sim{% endif %}{% endif %}
 
 # All phony target to build the Vivado project
 all:
@@ -141,6 +141,10 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
@@ -161,12 +165,18 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
 
+{%- if 'filesets' in fins %}
+{%- if 'sim' in fins['filesets'] %}
 # Simulation phony target
 sim : all
 	{%- if 'filesets' in fins %}
@@ -183,6 +193,10 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
@@ -203,8 +217,14 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
+{%- endif %}
+{%- endif %}

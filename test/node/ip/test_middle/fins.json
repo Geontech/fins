@@ -1,14 +1,13 @@
 {
-  "name":"test_bottom",
-  "description":"Bottom level IP for testing",
+  "name":"test_middle",
+  "description":"Top level IP for testing",
   "version":"0.0",
   "company_name":"Geon Technologies",
   "company_url":"geon.tech",
   "company_logo":"docs/geontech_logo.png",
   "library":"user",
-  "part":"10CX220YF780I5G",
-  "top_source":"test_bottom",
-  "top_sim":"test_bottom_tb",
+  "top_source":"test_middle",
+  "top_sim":"test_middle_tb",
   "params" : [
     { "name":"TEST_PARAM_BOOLEAN",         "value":true,        "description":"This is a test parameter excercising a boolean type" },
     { "name":"TEST_PARAM_INTEGER",         "value":4,           "description":"This is a test parameter excercising an integer type" },
@@ -36,7 +35,11 @@
           "is_signed":"PORTS_IS_SIGNED",
           "num_samples":1,
           "num_channels":1
-        }
+        },
+        "metadata":[
+          { "name":"timestamp", "bit_width":64 },
+          { "name":"sample_period", "bit_width":64 }
+        ]
       },
       {
         "name":"myoutput",
@@ -45,12 +48,17 @@
           "bit_width":"PORTS_WIDTH",
           "is_complex":"PORTS_IS_COMPLEX",
           "is_signed":"PORTS_IS_SIGNED"
-        }
+        },
+        "metadata":[
+          { "name":"timestamp", "bit_width":64 },
+          { "name":"sample_period", "bit_width":64 }
+        ]
       },
       {
         "name":"test_in",
         "direction":"in",
         "supports_backpressure":true,
+        "num_instances":2,
         "data":{
           "bit_width":8,
           "is_complex":true,
@@ -67,6 +75,7 @@
         "name":"test_out",
         "direction":"out",
         "supports_backpressure":true,
+        "num_instances":2,
         "data":{
           "bit_width":8,
           "is_complex":true,
@@ -139,20 +148,21 @@
   },
   "filesets":{
     "source":[
-      { "path":"gen/core/test_bottom_pkg.vhd", "type":"vhdl"    },
-      { "path":"gen/core/test_bottom_axis.vhd"                  },
-      { "path":"gen/core/test_bottom_swconfig.vhd"              },
-      { "path":"hdl/test_bottom.vhd",          "type":"VHDL"    }
+      { "path":"gen/core/test_middle_pkg.vhd", "type":"vhdl"    },
+      { "path":"gen/core/test_middle_axis.vhd"                  },
+      { "path":"gen/core/test_middle_axilite.vhd"               },
+      { "path":"hdl/test_middle.vhd",          "type":"VHDL"    }
     ],
     "sim":[
-      { "path":"./gen/core/test_bottom_swconfig_verify.vhd", "type":"Vhdl" },
-      { "path":"./gen/core/test_bottom_axis_verify.vhd", "type":"VHDL" },
-      { "path":"./hdl/test_bottom_tb.vhd" }
+      { "path":"ip/test_bottom/gen/core/test_bottom_swconfig_verify.vhd" },
+      { "path":"./gen/core/test_middle_axilite_verify.vhd", "type":"Vhdl" },
+      { "path":"./gen/core/test_middle_axis_verify.vhd", "type":"VHDL" },
+      { "path":"./hdl/test_middle_tb.vhd" }
     ],
     "constraints":[
-      { "path":"constraints/test_bottom.xdc", "type":"XDC" },
-      { "path":"constraints/test_bottom.sdc", "type":"sdc" },
-      { "path":"constraints/test_bottom.xdc"               }
+      { "path":"constraints/test_middle.xdc", "type":"XDC" },
+      { "path":"constraints/test_middle.sdc", "type":"sdc" },
+      { "path":"constraints/test_middle.xdc"               }
     ],
     "scripts":{
       "presim":[
@@ -184,6 +194,29 @@
         { "path":"scripts/print.tcl",   "type":"tcl"    }
       ]
     }
-  }
+  },
+  "ip":[
+    {
+      "fins_path":"ip/test_bottom/fins.json",
+      "params":[
+        { "name":"TEST_PARAM_BOOLEAN",         "parent":"TEST_PARAM_BOOLEAN"         },
+        { "name":"TEST_PARAM_INTEGER",         "parent":"TEST_PARAM_INTEGER"         },
+        { "name":"TEST_PARAM_STRING",          "parent":"TEST_PARAM_STRING"          },
+        { "name":"TEST_PARAM_INTEGER_LIST",    "parent":"TEST_PARAM_INTEGER_LIST"    },
+        { "name":"TEST_FIFO_DEPTH",            "parent":"TEST_FIFO_DEPTH"            },
+        { "name":"TEST_RAM_DEPTH",             "parent":"TEST_RAM_DEPTH"             },
+        { "name":"PORTS_WIDTH",                "parent":"PORTS_WIDTH"                },
+        { "name":"PORTS_IS_COMPLEX",           "parent":"PORTS_IS_COMPLEX"           },
+        { "name":"PORTS_IS_SIGNED",            "parent":"PORTS_IS_SIGNED"            },
+        { "name":"PORTS_PACKET_SIZE",          "parent":"PORTS_PACKET_SIZE"          },
+        { "name":"PROPS_DATA_WIDTH",           "parent":"PROPS_DATA_WIDTH"           },
+        { "name":"PROPS_ADDR_WIDTH",           "parent":"PROPS_ADDR_WIDTH"           },
+        { "name":"PROPS_IS_ADDR_BYTE_INDEXED", "parent":"PROPS_IS_ADDR_BYTE_INDEXED" }
+      ],
+      "instances":[
+        { "module_name":"test_bottom_0" }
+      ]
+    }
+  ]
 }
 

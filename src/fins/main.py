@@ -79,10 +79,10 @@ def run_generator(generator,filepath,backend,verbose):
             for node in fins_data['nodes']:
                 if verbose:
                     print('INFO: Recursing into node at "{}"'.format(node['fins_path']))
+                run_generator(generator, node['fins_path'], backend, verbose)
                 # Now that node-json files have been generated for each component node
                 # load the node json files and import their node data
-                loader.populate_fins_node(node, node['fins_path'], verbose)
-                run_generator(generator, node['fins_path'], backend, verbose)
+                loader.populate_fins_node(node, verbose)
 
         else:
             # This is a FINS file

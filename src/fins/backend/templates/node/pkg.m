@@ -42,6 +42,7 @@ params.{{ param['name'] }} =
 {% endif %}
 
 {% if 'ports' in fins %}
+{% if 'ports' in fins['ports'] %}
 % Ports
 {%- for port in fins['ports']['ports'] %}
 ports.{{ port['direction']|lower }}.{{ port['name']|lower }}.data.bit_width    = {{ port['data']['bit_width'] }};
@@ -57,4 +58,5 @@ ports.{{ port['direction']|lower }}.{{ port['name']|lower }}.metadata.{{ metafie
 {%- endfor %}
 {%- endif %}
 {%- endfor %}
+{% endif %}
 {% endif %}

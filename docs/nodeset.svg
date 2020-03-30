@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="66cm" height="30cm" viewBox="-824 -1414 1307 596" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rect style="fill: none; fill-opacity:0; stroke-width: 6; stroke: #005596" x="-500" y="-1380" width="660" height="220"/>
+  <polygon style="fill: none; fill-opacity:0; stroke-width: 6; stroke: #c41230" points="-820,-940 480,-940 480,-1380 200,-1380 200,-1120 -540,-1120 -540,-1380 -820,-1380 "/>
+  <text font-size="22.5778" style="fill: #005596;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-190" y="-1392.17">
+    <tspan x="-190" y="-1392.17">APPLICATION</tspan>
+  </text>
+  <text font-size="22.5778" style="fill: #c41230;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-680" y="-1392.17">
+    <tspan x="-680" y="-1392.17">PLATFORM</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="240" y="-1340" width="200" height="120"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="240" y="-1340" width="200" height="120"/>
+    <text font-size="15.24" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="340" y="-1284.9">
+      <tspan x="340" y="-1284.9">module_name:</tspan>
+      <tspan x="340" y="-1265.85">dma_0</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x1="-260" y1="-1280" x2="-231.972" y2="-1280"/>
+    <polygon style="fill: #000000" points="-224.472,-1280 -234.472,-1275 -231.972,-1280 -234.472,-1285 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" points="-224.472,-1280 -234.472,-1275 -231.972,-1280 -234.472,-1285 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-780" y="-1060" width="1220" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="-780" y="-1060" width="1220" height="80"/>
+    <text font-size="15.24" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-170" y="-1015.37">
+      <tspan x="-170" y="-1015.37">AXI INTERCONNECT</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" x1="-120" y1="-1188.03" x2="-120" y2="-1091.97"/>
+    <polygon style="fill: #7f7f7f" points="-120,-1195.53 -115,-1185.53 -120,-1188.03 -125,-1185.53 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="-120,-1195.53 -115,-1185.53 -120,-1188.03 -125,-1185.53 "/>
+    <polygon style="fill: #7f7f7f" points="-120,-1084.47 -125,-1094.47 -120,-1091.97 -115,-1094.47 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="-120,-1084.47 -125,-1094.47 -120,-1091.97 -115,-1094.47 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" x1="-170" y1="-968.028" x2="-170" y2="-911.972"/>
+    <polygon style="fill: #7f7f7f" points="-170,-975.528 -165,-965.528 -170,-968.028 -175,-965.528 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="-170,-975.528 -165,-965.528 -170,-968.028 -175,-965.528 "/>
+    <polygon style="fill: #7f7f7f" points="-170,-904.472 -175,-914.472 -170,-911.972 -165,-914.472 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="-170,-904.472 -175,-914.472 -170,-911.972 -165,-914.472 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-280" y="-900" width="220" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="-280" y="-900" width="220" height="80"/>
+    <text font-size="15.24" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-170" y="-855.375">
+      <tspan x="-170" y="-855.375">PROCESSOR</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" x1="-680" y1="-1188.03" x2="-680" y2="-1091.97"/>
+    <polygon style="fill: #7f7f7f" points="-680,-1195.53 -675,-1185.53 -680,-1188.03 -685,-1185.53 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="-680,-1195.53 -675,-1185.53 -680,-1188.03 -685,-1185.53 "/>
+    <polygon style="fill: #7f7f7f" points="-680,-1084.47 -685,-1094.47 -680,-1091.97 -675,-1094.47 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="-680,-1084.47 -685,-1094.47 -680,-1091.97 -675,-1094.47 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" x1="-360" y1="-1188.03" x2="-360" y2="-1091.97"/>
+    <polygon style="fill: #7f7f7f" points="-360,-1195.53 -355,-1185.53 -360,-1188.03 -365,-1185.53 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="-360,-1195.53 -355,-1185.53 -360,-1188.03 -365,-1185.53 "/>
+    <polygon style="fill: #7f7f7f" points="-360,-1084.47 -365,-1094.47 -360,-1091.97 -355,-1094.47 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="-360,-1084.47 -365,-1094.47 -360,-1091.97 -355,-1094.47 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" x1="340" y1="-1188.03" x2="340" y2="-1091.97"/>
+    <polygon style="fill: #7f7f7f" points="340,-1195.53 345,-1185.53 340,-1188.03 335,-1185.53 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="340,-1195.53 345,-1185.53 340,-1188.03 335,-1185.53 "/>
+    <polygon style="fill: #7f7f7f" points="340,-1084.47 335,-1094.47 340,-1091.97 345,-1094.47 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #7f7f7f" points="340,-1084.47 335,-1094.47 340,-1091.97 345,-1094.47 "/>
+  </g>
+  <text font-size="12.4178" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-380" y="-1238.47">
+    <tspan x="-380" y="-1238.47">interface_name:</tspan>
+    <tspan x="-380" y="-1222.95">S_AXI_COEF</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="-780" y="-1340" width="200" height="120"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="-780" y="-1340" width="200" height="120"/>
+    <text font-size="15.24" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-680" y="-1284.9">
+      <tspan x="-680" y="-1284.9">module_name:</tspan>
+      <tspan x="-680" y="-1265.85">ethernet_0</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-740" y="-1240" width="120" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #7f7f7f" x="-740" y="-1240" width="120" height="40"/>
+    <text font-size="12.8" style="fill: #7f7f7f;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-680" y="-1224.1">
+      <tspan x="-680" y="-1224.1">interface_name:</tspan>
+      <tspan x="-680" y="-1208.1">S_AXI</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="280" y="-1240" width="120" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #7f7f7f" x="280" y="-1240" width="120" height="40"/>
+    <text font-size="12.8" style="fill: #7f7f7f;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="340" y="-1224.1">
+      <tspan x="340" y="-1224.1">interface_name:</tspan>
+      <tspan x="340" y="-1208.1">S_AXI_DESCRIP</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-460" y="-1340" width="200" height="120"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="-460" y="-1340" width="200" height="120"/>
+    <text font-size="15.24" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-360" y="-1284.9">
+      <tspan x="-360" y="-1284.9">module_name:</tspan>
+      <tspan x="-360" y="-1265.85">filter_0</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-220" y="-1340" width="200" height="120"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="-220" y="-1340" width="200" height="120"/>
+    <text font-size="15.24" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-120" y="-1284.9">
+      <tspan x="-120" y="-1284.9">module_name:</tspan>
+      <tspan x="-120" y="-1265.85">filter_1</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-420" y="-1240" width="120" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #7f7f7f" x="-420" y="-1240" width="120" height="40"/>
+    <text font-size="12.8" style="fill: #7f7f7f;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-360" y="-1224.1">
+      <tspan x="-360" y="-1224.1">interface_name:</tspan>
+      <tspan x="-360" y="-1208.1">S_AXI_COEF</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-40" y="-1320" width="160" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #7f7f7f" x="-40" y="-1320" width="160" height="40"/>
+    <text font-size="12.8016" style="fill: #7f7f7f;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="40" y="-1304.1">
+      <tspan x="40" y="-1304.1">ports_producer_name:</tspan>
+      <tspan x="40" y="-1288.1">m_axis_data</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-180" y="-1240" width="120" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #7f7f7f" x="-180" y="-1240" width="120" height="40"/>
+    <text font-size="12.8" style="fill: #7f7f7f;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-120" y="-1224.1">
+      <tspan x="-120" y="-1224.1">interface_name:</tspan>
+      <tspan x="-120" y="-1208.1">S_AXI_COEF</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x1="120" y1="-1300" x2="228.028" y2="-1300"/>
+    <polygon style="fill: #000000" points="235.528,-1300 225.528,-1295 228.028,-1300 225.528,-1305 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" points="235.528,-1300 225.528,-1295 228.028,-1300 225.528,-1305 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-740" y="-1080" width="120" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #7f7f7f" x="-740" y="-1080" width="120" height="40"/>
+    <text font-size="12.8" style="fill: #7f7f7f;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-680" y="-1064.1">
+      <tspan x="-680" y="-1064.1">properties_offset:</tspan>
+      <tspan x="-680" y="-1048.1">0x1000</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-420" y="-1080" width="120" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #7f7f7f" x="-420" y="-1080" width="120" height="40"/>
+    <text font-size="12.8" style="fill: #7f7f7f;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-360" y="-1064.1">
+      <tspan x="-360" y="-1064.1">properties_offset:</tspan>
+      <tspan x="-360" y="-1048.1">0x2000</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-180" y="-1080" width="120" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #7f7f7f" x="-180" y="-1080" width="120" height="40"/>
+    <text font-size="12.8" style="fill: #7f7f7f;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-120" y="-1064.1">
+      <tspan x="-120" y="-1064.1">properties_offset:</tspan>
+      <tspan x="-120" y="-1048.1">0x3000</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="280" y="-1080" width="120" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #7f7f7f" x="280" y="-1080" width="120" height="40"/>
+    <text font-size="12.8" style="fill: #7f7f7f;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="340" y="-1064.1">
+      <tspan x="340" y="-1064.1">properties_offset:</tspan>
+      <tspan x="340" y="-1048.1">0x4000</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-230" y="-920" width="120" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #7f7f7f" x="-230" y="-920" width="120" height="40"/>
+    <text font-size="12.8" style="fill: #7f7f7f;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-170" y="-904.1">
+      <tspan x="-170" y="-904.1">base_offset:</tspan>
+      <tspan x="-170" y="-888.1">0xF9000000</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-40" y="-1280" width="160" height="40"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #7f7f7f" x="-40" y="-1280" width="160" height="40"/>
+    <text font-size="12.8016" style="fill: #7f7f7f;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="40" y="-1264.1">
+      <tspan x="40" y="-1264.1">ports_consumer_name:</tspan>
+      <tspan x="40" y="-1248.1">s_axis_test</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x1="240" y1="-1260" x2="131.972" y2="-1260"/>
+    <polygon style="fill: #000000" points="124.472,-1260 134.472,-1265 131.972,-1260 134.472,-1255 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" points="124.472,-1260 134.472,-1265 131.972,-1260 134.472,-1255 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x1="-580" y1="-1280" x2="-471.972" y2="-1280"/>
+    <polygon style="fill: #000000" points="-464.472,-1280 -474.472,-1275 -471.972,-1280 -474.472,-1285 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" points="-464.472,-1280 -474.472,-1275 -471.972,-1280 -474.472,-1285 "/>
+  </g>
+</svg>
