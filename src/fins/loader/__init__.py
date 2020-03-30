@@ -1407,7 +1407,7 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
     validate_fins('nodeset',fins_data,fins_schema,verbose)
     if verbose:
         print('+++++ Done.')
-    
+
     # Set defaults
     if not 'base_offset' in fins_data:
         fins_data['base_offset'] = 0
@@ -1438,13 +1438,16 @@ def populate_fins_node(node, verbose):
         else:
             print('WARNING: Properties offset path',node['properties_offset'],'for',node['module_name'],'does not exist')
 
-    # Load FINS Node JSON for each node
+    # In order to construct the path to the generated JSON for this node,
+    # the user-authored JSON must first be loaded to determine its name
+    # which is part of the file-path to the generated file
     node_fins_data_tmp = load_json_file(node['fins_path'],verbose)
-
     node_name = node_fins_data_tmp['name']
-    node_dir = os.path.dirname(node['fins_path'])
 
+    # Path to generated JSON file for node
+    node_dir = os.path.dirname(node['fins_path'])
     gen_node_path = os.path.join(node_dir, 'gen/core/', node_name + '.json')
+    # Load FINS Node JSON for each node
     node_fins_data = load_json_file(gen_node_path, verbose)
 
     node['fins_dir'] = node_dir
