@@ -235,18 +235,21 @@ INTERFACE_PORT_INFERENCE = {
 }
 
 def get_interface_name(interface_type, hdl_port):
+    return get_str_interface_name(interface_type, hdl_port['name'])
+
+def get_str_interface_name(interface_type, name):
     if interface_type == 'reset':
-        return hdl_port['name']
+        return name
     elif interface_type == 'clock':
-        return hdl_port['name']
+        return name
     elif interface_type == 'axi4stream':
-        return hdl_port['name'].rpartition('_')[0]
+        return name
     elif interface_type == 'axi4lite':
-        return hdl_port['name'].rpartition('_')[0]
+        return name
     elif interface_type == 'avalon_streaming':
-        return hdl_port['name'].rpartition('_')[0]
+        return name.rpartition('_')[0]
     else:
-        print('ERROR: Unsupported interface type',interface_type)
+        print('ERROR: Unsupported interface type', interface_type)
         sys.exit(1)
 
 def get_interface_mode(interface_type, hdl_port, signal_def):
@@ -1539,3 +1542,112 @@ def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
 
     # Return
     return fins_data
+
+def get_elem_with_name(fins_list, name, name_key="name"):
+    """
+    For a given list of fins dicts, find the element with the specified name.
+    """
+    name_list = [n[name_key] for n in fins_list]
+    if name not in name_list:
+        raise ValueError("No element exists with {}={}'", name_key, name)
+    elem_index = name_list.index(name)
+    return fins_list[elem_index]
+
+def get_port_signal_name(direction, instance_num, name, signal_type):
+    """
+    Given a port (name) with type a certain direction, get the full signal name with specified type
+    """
+    if signal_type == 'clock':
+        suffix = '_aclk'
+    elif signal_type == 'reset':
+        suffix = '_aresetn'
+    else:
+        suffix = ''
+
+    inst_num_str = f"{instance_num:02d}"
+
+    if direction == 'in':
+        prefix = 's' + inst_num_str + '_axis_'
+    else:
+        prefix = 'm' + inst_num_str + '_axis_'
+    return prefix + name + suffix
+
+def populate_connections(fins_data, verbose):
+    # Collect the interfaces
+    if 'connections' in fins_data:
+
+        node_names = [n['module_name'] for n in fins_data['nodes']]
+
+        for connection in fins_data['connections']:
+            # Loop through the interface port inference dictionary
+            for interface_type, signal_defs in INTERFACE_PORT_INFERENCE.items():
+                for signal_def in signal_defs:
+                    # Search for an interface match for this signal name
+                    match_found = False
+                    if signal_def['regex']:
+                        # The pattern is a regular expression so search for match
+                        if re.search(signal_def['pattern'], connection['source'], flags=re.IGNORECASE):
+                            match_found = True
+                    else:
+                        # The pattern is not a regular expression so do a string compare
+                        if signal_def['pattern'].lower() == connection['source'].lower():
+                            match_found = True
+                    # Parse the interface
+                    if match_found:
+                        # Add field to port
+                        connection['interface_signal'] = signal_def['properties']['signal']
+                        # Parse interface details
+                        src_interface_name = get_str_interface_name(interface_type, connection['source'])
+
+                        # Create new interface
+                        connection['src_interface_name'] = src_interface_name
+                        connection['type'] = interface_type
+
+                        if verbose:
+                            print('INFO: Port', connection['source'], 'was associated to interface', src_interface_name, 'with type', interface_type)
+
+            # For the given connection, loop through each destination port/signal
+            # Determine if the destination is a port or signal. If it is a port, infer the signal name
+            # (add s/m_axi_ and _aclk/_aresetn depending on port type and source signal type)
+            for destination in connection['destination']:
+                destination_node = get_elem_with_name(fins_data['nodes'], destination['node'], name_key='module_name')
+                # If there is only one destination port, make it a list of size=1
+                if 'port' in destination:
+                    destination_ports = [destinaton['port']]
+                else:
+                    destination_ports = destination['ports']
+
+                destination['signals'] = []
+                # For each destination
+                #   If it is found in the list of the node's ports, then treat it like a port:
+                #     Find the relevant signal (e.g. aclk, aresetn...) on the port that should be connected to 'source'
+                #     Otherwise, the destination is just a signal, so connect directly to it
+                for port_name in destination_ports:
+                    try:
+                        dest_node_ports = destination_node['node_details']['ports']['ports']
+                        # this call will fail if there is no port with the given name, fallback to 'except'
+                        port = get_elem_with_name(dest_node_ports, port_name)
+                        if 'type' not in connection:
+                            # FIXME if source signal has no signal type, and destination is port, ERROR
+                            print("ERROR: Source signal '{}' has no type (clock/reset...),".format(connection['source']),
+                                  "and therefore a signal could not be chosen on port '{}' to connect to.".format(port_name))
+                            exit(-1)
+
+                        dest_signals = []
+
+                        if 'num_instances' not in port or port['num_instances'] == 1:
+                            signal_name = get_port_signal_name(port['direction'], 0, port_name, connection['type'])
+                            destination['signals'].append(signal_name)
+                            print(port['name'], "is a port. Its signal '", signal_name, "' will be connected")
+                        else:
+                            for i in range(port['num_instances']):
+                                signal_name = get_port_signal_name(port['direction'], i, port_name, connection['type'])
+                                destination['signals'].append(signal_name)
+                                print(port['name'], "is a port. Its signal '", signal_name, "' will be connected")
+
+                    except ValueError:
+                        print("Port", port_name, "is a signal")
+                        destination['signals'].append(port_name)
+
+        if verbose:
+            print('INFO: Inferred interfaces for connections', unique_interface_ids)

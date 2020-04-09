@@ -43,6 +43,10 @@
           "is_required":true,
           "types":["str"]
         },
+        "descriptive_node":{
+          "is_required":false,
+          "types":["bool"]
+        },
         "module_name":{
           "is_required":true,
           "types":["str"]
@@ -75,6 +79,37 @@
             "parent":{
               "is_required":true,
               "types":["str"]
+            }
+          }
+        }
+      }
+    },
+    "connections":{
+      "is_required":false,
+      "types":["list"],
+      "list_types":["dict"],
+      "fields":{
+        "source":{
+          "is_required":true,
+          "types":["str"]
+        },
+        "destination":{
+          "is_required":true,
+          "types":["list"],
+          "list_types":["dict"],
+          "fields":{
+            "node":{
+              "is_required":true,
+              "types":["str"]
+            },
+            "port":{
+              "is_required":false,
+              "types":["str"]
+            },
+            "ports":{
+              "is_required":false,
+              "types":["list"],
+              "list_types":["str"]
             }
           }
         }

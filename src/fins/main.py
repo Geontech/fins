@@ -79,10 +79,15 @@ def run_generator(generator,filepath,backend,verbose):
             for node in fins_data['nodes']:
                 if verbose:
                     print('INFO: Recursing into node at "{}"'.format(node['fins_path']))
-                run_generator(generator, node['fins_path'], backend, verbose)
+
+                if 'descriptive_node' not in node or not node['descriptive_node']:
+                    node['node_details'] = run_generator(generator, node['fins_path'], backend, verbose)
+                # TODO else Warning for field deprecation
+
                 # Now that node-json files have been generated for each component node
                 # load the node json files and import their node data
                 loader.populate_fins_node(node, verbose)
+            loader.populate_connections(fins_data, verbose)
 
         else:
             # This is a FINS file
@@ -107,6 +112,8 @@ def run_generator(generator,filepath,backend,verbose):
         #       may be generated files
         if 'filesets' in fins_data:
             loader.validate_filesets(fins_data,filename,verbose)
+
+        return fins_data
 
 def main():
     logging.basicConfig()
