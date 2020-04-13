@@ -243,9 +243,9 @@ def get_str_interface_name(interface_type, name):
     elif interface_type == 'clock':
         return name
     elif interface_type == 'axi4stream':
-        return name
+        return name.rpartition('_')[0]
     elif interface_type == 'axi4lite':
-        return name
+        return name.rpartition('_')[0]
     elif interface_type == 'avalon_streaming':
         return name.rpartition('_')[0]
     else:
@@ -1505,44 +1505,6 @@ def populate_fins_node(node, verbose):
         node['ports_consumer'] = {}
 
 
-def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
-    """
-    Validates and converts data from a Firmware IP Node Specification JSON file
-    """
-    # Validate the FINS Node JSON using the node.json file
-    validate_fins_data(fins_data,filename,verbose)
-
-    # Set the backend used for generation
-    fins_data['backend'] = backend
-
-    # Override the FINS Node JSON data with a .override file if it exists
-    fins_data = override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
-
-    # Replace any linked parameters with their literal values
-    fins_data = convert_parameters_to_literal(fins_data,verbose)
-
-    # Set defaults for top-level keys
-    fins_data = populate_fins_fields(fins_data,verbose)
-
-    # Apply property defaults and calculate offsets
-    fins_data = populate_properties(fins_data,0,verbose)
-
-    # Apply port defaults
-    fins_data = populate_ports(fins_data,verbose)
-
-    # Auto-detect file types
-    fins_data = populate_filesets(fins_data,verbose)
-
-    # Auto-detect sub-ip versions
-    fins_data = populate_ip(fins_data,verbose)
-
-    # Read top-level HDL code and find the ports
-    # NOTE: Must be executed after populate_fins_fields() and after populate_filesets()
-    fins_data = populate_hdl_inferences(fins_data,verbose)
-
-    # Return
-    return fins_data
-
 def get_elem_with_name(fins_list, name, name_key="name"):
     """
     For a given list of fins dicts, find the element with the specified name.
@@ -1553,9 +1515,11 @@ def get_elem_with_name(fins_list, name, name_key="name"):
     elem_index = name_list.index(name)
     return fins_list[elem_index]
 
-def get_port_signal_name(direction, instance_num, name, signal_type):
+
+def get_port_signal_names(name, direction, num_instances, signal_type):
     """
-    Given a port (name) with type a certain direction, get the full signal name with specified type
+    Given a port (name) with type a certain direction, get the list of full signal
+    names on the port with the specified type
     """
     if signal_type == 'clock':
         suffix = '_aclk'
@@ -1564,13 +1528,24 @@ def get_port_signal_name(direction, instance_num, name, signal_type):
     else:
         suffix = ''
 
-    inst_num_str = f"{instance_num:02d}"
-
-    if direction == 'in':
-        prefix = 's' + inst_num_str + '_axis_'
+    if num_instances == 1:
+        if direction == 'in':
+            prefix = 's_axis_'
+        else:
+            prefix = 'm_axis_'
+        return [prefix + name + suffix]
     else:
-        prefix = 'm' + inst_num_str + '_axis_'
-    return prefix + name + suffix
+        signals = []
+        for i in range(num_instances):
+            inst_num_str = f"{i:02d}"
+
+            if direction == 'in':
+                prefix = 's' + inst_num_str + '_axis_'
+            else:
+                prefix = 'm' + inst_num_str + '_axis_'
+            signals.append(prefix + name + suffix)
+        return signals
+
 
 def populate_connections(fins_data, verbose):
     # Collect the interfaces
@@ -1635,15 +1610,12 @@ def populate_connections(fins_data, verbose):
 
                         dest_signals = []
 
-                        if 'num_instances' not in port or port['num_instances'] == 1:
-                            signal_name = get_port_signal_name(port['direction'], 0, port_name, connection['type'])
-                            destination['signals'].append(signal_name)
-                            print(port['name'], "is a port. Its signal '", signal_name, "' will be connected")
-                        else:
-                            for i in range(port['num_instances']):
-                                signal_name = get_port_signal_name(port['direction'], i, port_name, connection['type'])
-                                destination['signals'].append(signal_name)
-                                print(port['name'], "is a port. Its signal '", signal_name, "' will be connected")
+                        # If there is only one instance, connect the port's relevant signal,
+                        # but if there are multiple instances of this port, connect all matching signals on the port
+                        num_instances = port['num_instances'] if 'num_instances' in port else 0
+                        signals = get_port_signal_names(port_name, port['direction'], num_instances, connection['type'])
+                        destination['signals'] += signals
+                        print(port['name'], "is a port. The following signal(s) on this port will be connected:", str(signals))
 
                     except ValueError:
                         print("Port", port_name, "is a signal")
@@ -1651,3 +1623,42 @@ def populate_connections(fins_data, verbose):
 
         if verbose:
             print('INFO: Inferred interfaces for connections', unique_interface_ids)
+
+
+def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
+    """
+    Validates and converts data from a Firmware IP Node Specification JSON file
+    """
+    # Validate the FINS Node JSON using the node.json file
+    validate_fins_data(fins_data,filename,verbose)
+
+    # Set the backend used for generation
+    fins_data['backend'] = backend
+
+    # Override the FINS Node JSON data with a .override file if it exists
+    fins_data = override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
+
+    # Replace any linked parameters with their literal values
+    fins_data = convert_parameters_to_literal(fins_data,verbose)
+
+    # Set defaults for top-level keys
+    fins_data = populate_fins_fields(fins_data,verbose)
+
+    # Apply property defaults and calculate offsets
+    fins_data = populate_properties(fins_data,0,verbose)
+
+    # Apply port defaults
+    fins_data = populate_ports(fins_data,verbose)
+
+    # Auto-detect file types
+    fins_data = populate_filesets(fins_data,verbose)
+
+    # Auto-detect sub-ip versions
+    fins_data = populate_ip(fins_data,verbose)
+
+    # Read top-level HDL code and find the ports
+    # NOTE: Must be executed after populate_fins_fields() and after populate_filesets()
+    fins_data = populate_hdl_inferences(fins_data,verbose)
+
+    # Return
+    return fins_data
