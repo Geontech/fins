@@ -87,6 +87,8 @@ def run_generator(generator,filepath,backend,verbose):
                 # Now that node-json files have been generated for each component node
                 # load the node json files and import their node data
                 loader.populate_fins_node(node, verbose)
+            # Now that all nodes and their ports are loaded into fins_data, populate each connection in
+            # the nodeset with important metadata based on the signals and ports being connected.
             loader.populate_connections(fins_data, verbose)
 
         else:

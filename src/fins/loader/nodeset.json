@@ -91,9 +91,19 @@
       "fields":{
         "source":{
           "is_required":true,
-          "types":["str"]
+          "types":["dict"],
+          "fields":{
+            "node":{
+              "is_required":false,
+              "types":["str"]
+            },
+            "net":{
+              "is_required":false,
+              "types":["str"]
+            }
+          }
         },
-        "destination":{
+        "destinations":{
           "is_required":true,
           "types":["list"],
           "list_types":["dict"],
@@ -102,14 +112,9 @@
               "is_required":true,
               "types":["str"]
             },
-            "port":{
+            "net":{
               "is_required":false,
               "types":["str"]
-            },
-            "ports":{
-              "is_required":false,
-              "types":["list"],
-              "list_types":["str"]
             }
           }
         }

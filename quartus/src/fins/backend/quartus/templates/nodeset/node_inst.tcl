@@ -31,32 +31,62 @@
 #              * Intel Quartus Prime Pro 19.1
 #===============================================================================
 
-#proc {{ fins['name'] }}_add_nodes {} {
-    # Instantiate all nodes in nodeset
+{#-
+# Instantiate all nodes in nodeset
+-#}
+{%  for node in fins['nodes'] %}
+{%- if 'descriptive_node' not in node or node['descriptive_node'] in fins %}
+# Instantiate node "{{ node['node_name'] }}" as module "{{ node['module_name'] }}"
+add_component {{ node['module_name'] }} {{ node['module_name'] }}.ip {{ node['node_name'] }}
+load_component {{ node['module_name'] }}
+save_component
+load_instantiation {{ node['module_name'] }}
+save_instantiation
+{%  endif %}
+{%- endfor %}
 
-    {%- for node in fins['nodes'] %}
-    {%- if 'descriptive_node' not in node or node['descriptive_node'] in fins %}
-    # Instantiate node "{{ node['node_name'] }}" as module "{{ node['module_name'] }}"
-    add_component {{ node['module_name'] }} {{ node['module_name'] }}.ip {{ node['node_name'] }}
-    load_component {{ node['module_name'] }}
-    save_component
-    load_instantiation {{ node['module_name'] }}
-    save_instantiation
-    {%- endif %}
-    {%- endfor %}
+{#-
+# For each connection, determine the 'type' of each source and destination (clock, reset or port)
+# Make connections between ports or signals accordingly, and include '<node>.' as a signal prefix
+-#}
+{%- for connection in fins['connections'] %}
+{%- for destination in connection['destinations'] %}
 
-    {%  if 'connections' in fins %}
-    {%- for connection in fins['connections'] %}
-    # Connections to "{{ connection['source'] }}"
-    {%- for destination in connection['destination'] %}
-    {%- if 'signals' in destination %}
-    {%- for signal in destination['signals'] %}
-    add_connection {{ connection['source'] }}/{{ destination['node'] }}.{{ signal }}
-    {%- endfor %}
-    {%- endif %}
-    {%- endfor %}
-    {%- endfor %}
-    {%- endif %}
+{%- set source = connection['source'] %}
 
-#}
+{#-
+# Determine whether each connection source and destination is associated with node
+-#}
+{%- if 'node' in source and source['node'] is not none %}
+    {%- set snode = source['node'] + '.' %}
+{%- else %}
+    {%- set snode = "" %}
+{%- endif %}
+{%- if 'node' in destination and destination['node'] is not none %}
+    {%- set dnode = destination['node'] + '.' %}
+{%- else %}
+    {%- set dnode = '' %}
+{%- endif %}
+
+{%- if source['type'] == 'clock' and destination['type'] == 'port' %}
+# Connecting clock signal "{{ snode }}{{ source['net'] }}" to clock(s) on port "{{ dnode }}{{ destination['net'] }}"
+{%- for i in range(destination['port']['num_instances']) %}
+add_connection {{ snode }}{{ source['net'] }}/{{ dnode }}{{ destination['port']|axisprefix(i) }}_aclk
+{%- endfor %}
+{%- elif source['type'] == 'reset' and destination['type'] == 'port' %}
+# Connecting reset signal "{{ source['net'] }}" to reset(s) on port "{{ destination['net'] }}"
+{%- for i in range(destination['port']['num_instances']) %}
+add_connection {{ snode }}{{ source['net'] }}/{{ dnode }}{{ destination['port']|axisprefix(i) }}_aresetn
+{%- endfor %}
+{%- elif source['type'] == 'port' and destination['type'] == 'port' %}
+# Connecting port "{{ source['net'] }}" to port "{{ destination['net'] }}"
+{%- for i in range(source['port']['num_instances']) %}
+add_connection {{ snode }}{{ source['port']|axisprefix(i) }}/{{ dnode }}{{ destination['port']|axisprefix(i) }}
+{%- endfor %}
+{%- else %}
+# Connecting signal "{{ source['net'] }}" to signal "{{ destination['net'] }}"
+add_connection {{ snode }}{{ source['net'] }}/{{ dnode }}{{ destination['net'] }}
+{%- endif %}
+{%  endfor %}
+{%- endfor %}
 
