@@ -1570,6 +1570,42 @@ def get_net_type(net, fins_data, verbose):
 
     return net_type, port
 
+
+def validate_connected_ports(source, destination, verbose):
+    """
+    Given two connection endpoints/nets that are both ports, confirm that a connection between these ports
+    would be valid
+
+    Check that the following fields match between the two ports:
+        supports_backpressure, num_instances, metadata, and data fields
+    Confirm that the 'direction' field is opposite between the two connections.
+
+    If the source and destination ports are a mistmatch, print a helpful error message and exit.
+    """
+    src_port = source['port']
+    dst_port = destination['port']
+    src_name = source['node'] + '.' + source['net'] if 'node' in source else source['net']
+    dst_name = destination['node'] + '.' + destination['net'] if 'node' in destination else destination['net']
+
+    if src_port['supports_backpressure'] != dst_port['supports_backpressure']:
+        print('ERROR: One port in connection ({}->{}) supports backpressure, but the other does not'.format(src_name, dst_name))
+        sys.exit(1)
+    elif src_port['num_instances'] != dst_port['num_instances']:
+        print('ERROR: Ports in connection ({}->{}) have different number of instances'.format(src_name, dst_name))
+        sys.exit(1)
+    elif (('metadata' in src_port and 'metadata' not in dst_port) or
+          ('metadata' not in src_port and 'metadata' in dst_port) or
+          ('metadata' in src_port and 'metadata' in dst_port and src_port['metadata'] != dst_port['metadata'])):
+        print('ERROR: Metadata does not match on ports in connection ({}->{})'.format(src_name, dst_name))
+        sys.exit(1)
+    elif src_port['direction'] == dst_port['direction']:
+        print('ERROR: Ports of the same direction cannot be connected ({}->{})'.format(src_name, dst_name))
+        sys.exit(1)
+    elif src_port['data'] != dst_port['data']:
+        print('ERROR: Data type or width mismatch between ports in connection ({}->{})'.format(src_name, dst_name))
+        sys.exit(1)
+
+
 def populate_connections(fins_data, verbose):
     """
     Populate each connection in the nodeset so that each source and destination
@@ -1585,6 +1621,9 @@ def populate_connections(fins_data, verbose):
             # Each connection only has one source, but may have multiple destinations
             for destination in connection['destinations']:
                 destination['type'], destination['port'] = get_net_type(destination, fins_data, verbose)
+                # For port-to-port connections, perform error checks to ensure connection would be valid
+                if source['type'] == 'port' and destination['type'] == 'port':
+                    validate_connected_ports(source, destination, verbose)
 
 
 def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
