@@ -31,7 +31,6 @@
 #              * Intel Quartus Prime Pro 19.1
 #===============================================================================
 
-set ::qsys_version [package require qsys]
 package require qsys
 
 # Set the fixed filepaths
