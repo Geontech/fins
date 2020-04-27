@@ -198,6 +198,10 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
@@ -219,6 +223,10 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
@@ -243,6 +251,10 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
@@ -264,6 +276,10 @@ endif
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
 	python {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}

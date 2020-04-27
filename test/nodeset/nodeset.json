@@ -1,6 +1,9 @@
 {
   "name":"fins_test_ip_nodeset",
   "base_offset":0,
+  "params":[
+    { "name":"NODESET_TEST_PARAM", "value":true, "description":"A parameter for testing FINS Nodeset TCL generated output" }
+  ],
   "nodes":[
     {
       "fins_path":"../node/gen/core/test_top.json",

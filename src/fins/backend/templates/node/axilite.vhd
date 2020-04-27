@@ -349,18 +349,24 @@ begin
     if rising_edge(S_AXI_ACLK) then
       if S_AXI_ARESETN = '0' then
         axi_rvalid  <= '0';
-        axi_rresp   <= "00";
+        axi_rresp   <= "00"; -- 'OKAY' response
         read_active <= '0';
       else
         if (axi_arready = '1' and S_AXI_ARVALID = '1' and axi_rvalid = '0') then
-          -- Valid read data is available at the read data bus
+          -- A read request has been issued, enter read acknowledge mode
           read_active <= '1';
-          axi_rvalid  <= rd_valid;
-          axi_rresp   <= "00"; -- 'OKAY' response
+          -- Hold the read valid high until acknowledged by the read ready
+          if (rd_valid = '1') then
+            axi_rvalid <= '1';
+            axi_rresp  <= "00"; -- 'OKAY' response
+          end if;
         elsif (read_active = '1') then
-          -- Waiting for read valid
-          axi_rvalid  <= rd_valid;
-          axi_rresp   <= "00"; -- 'OKAY' response
+          -- Hold the read valid high until acknowledged by the read ready
+          if (rd_valid = '1') then
+            axi_rvalid  <= '1';
+            axi_rresp   <= "00"; -- 'OKAY' response
+          end if;
+          -- Clear the read valid and the read acknowledge mode
           if (axi_rvalid = '1' and S_AXI_RREADY = '1') then
             -- Read data is accepted by the master
             read_active <= '0';
@@ -382,7 +388,9 @@ begin
       -- Data registers without reset
       --****************************************
       wr_data   <= S_AXI_WDATA;
-      axi_rdata <= rd_data;
+      if (rd_valid = '1') then
+        axi_rdata <= rd_data;
+      end if;
 
       --****************************************
       -- Control registers with reset

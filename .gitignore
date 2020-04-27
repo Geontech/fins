@@ -19,3 +19,4 @@
 
 *.pyc
 *.dia~
+/test/nodeset/gen/*

@@ -2,21 +2,44 @@
 
 **[RETURN TO TOP LEVEL README](../README.md)**
 
-Ports are a way to standardize data and metadata communication within the programmable logic. FINS generates an AXI4-Stream bus interpreter module which transmits data and metadata in parallel through the AXI4-Stream TDATA and TUSER fields, respectively.
+FINS Ports are a way to standardize data and metadata communication within the programmable logic. FINS generates an AXI4-Stream bus interpreter module which transmits data and metadata in parallel through the AXI4-Stream TDATA and TUSER fields, respectively.
 
 ## JSON Schema
 
-The top-level `ports` field of the FINS Node JSON Schema in turn has a single `ports` field. See the table below for the details of this single field:
+The top-level `ports` field of the FINS Node JSON Schema in turn has two fields.
 
 > NOTE: In the tables below, `param['name']` is used for "Type" for some fields. This indicates that a string containing the name of a FINS parameter can be used in place of the value. However, ensure the FINS parameter has the same type as expected by the field!
 
 | Key   | Type   | Required | Default Value | Description |
 | ----- | ------ | -------- | ------------- | ----------- |
-| ports | dict[] | YES      |               | An array of port definitions. See below for more information on the schema for each element of the array. |
+| ports | dict[] | YES      |               | An array of FINS Port definitions which are ultimately generated as AXI4-Stream buses. See below for more information on the schema for each element of the array. |
+| hdl   | dict[] | NO       |               | An array of HDL port definitions which are ultimately generated as raw VHDL ports. See below for more information on the schema for each element of the array. |
 
-Each dictionary element of the `ports` dictionary array field has the following fields:
+## HDL Ports
 
-> NOTES: Each element within the `ports` dictionary array must have a unique `name` field. While neither `data` nor `metadata` are required in the table below, at least one must be used.
+### JSON Schema
+
+Each dictionary element of the `hdl` dictionary array field has the following fields:
+
+> NOTES: Each element within the `hdl` dictionary array must have a unique `name` field.
+
+| Key                  | Type                    | Required | Default Value | Value Restrictions | Description |
+| -------------------- | ----------------------- | -------- | ------------- | ------------------ | ----------- |
+| name                 | string                  | YES      |               |                    | The name of the VHDL port. This must be unique within a FINS IP. |
+| direction            | string                  | YES      |               | in<br />out        | The direction of the VHDL port. |
+| bit_width            | uint or `param['name']` | YES      |               |                    | The bit width of the VHDL port. |
+
+### Records
+
+FINS Ports in a FINS Node JSON file autogenerate into an intepreter module that uses records defined in the VHDL package file. This module interacts with user HDL through the `ports_hdl_in` and `ports_hdl_out` record interfaces which are defined in the auto-generated VHDL package file. All HDL ports that have a `direction` of "in" are transported to the HDL user core on the `ports_hdl_in` record, and all HDL ports that have a `direction` of "out" are transported to the HDL user core on the `ports_hdl_out` record.
+
+## FINS Ports
+
+### JSON Schema
+
+Each dictionary element of the FINS `ports` dictionary array field has the following fields:
+
+> NOTES: Each element within the FINS `ports` dictionary array must have a unique `name` field. While neither `data` nor `metadata` are required in the table below, at least one must be used.
 
 | Key                  | Type                    | Required | Default Value | Value Restrictions | Description |
 | -------------------- | ----------------------- | -------- | ------------- | ------------------ | ----------- |
@@ -53,9 +76,9 @@ Each dictionary element of the `metadata` dictionary array field has the followi
 
 > **\*** The `bit_width` for all metadata fields must sum to <= 4096.
 
-## Ports Records
+### Records
 
-Ports in a FINS Node JSON file autogenerate into an intepreter module that uses records defined in the VHDL package file. This module interacts with user HDL through the `ports_in` and `ports_out` record interfaces which are defined in the auto-generated VHDL package file. `ports_in` contains the signals that go from the bus interpreter decode module to user HDL, and `ports_out` contains the signals that go from user HDL to the bus interpreter decode module. These top-level records are an array if `num_instances > 1`, and they have a field for each property that can interact with other HDL. Each port in turn has fields that specify the interface with the user HDL. The fields of each port record depend on the direction and if backpressure is supported. The table below shows all available combinations:
+FINS Ports in a FINS Node JSON file autogenerate into an intepreter module that uses records defined in the VHDL package file. This module interacts with user HDL through the `ports_in` and `ports_out` record interfaces which are defined in the auto-generated VHDL package file. `ports_in` contains the signals that go from the bus interpreter decode module to user HDL, and `ports_out` contains the signals that go from user HDL to the bus interpreter decode module. These top-level records are an array if `num_instances > 1`, and they have a field for each property that can interact with other HDL. Each port in turn has fields that specify the interface with the user HDL. The fields of each port record depend on the direction and if backpressure is supported. The table below shows all available combinations:
 
 | `direction` | `supports_backpressure` | `data` exists | `metadata` exists | ports_in Record Fields                                       | ports_out Record Fields                 |
 | ----------- | ----------------------- | ------------- | ----------------- | ------------------------------------------------------------ | --------------------------------------- |

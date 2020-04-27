@@ -10,6 +10,26 @@
       "is_required":false,
       "types":["int"]
     },
+    "params":{
+      "is_required":false,
+      "types":["list"],
+      "list_types":["dict"],
+      "fields":{
+        "name":{
+          "is_required":true,
+          "types":["str"]
+        },
+        "value":{
+          "is_required":true,
+          "types":["str","bool","int","list"],
+          "list_types":["int"]
+        },
+        "description":{
+          "is_required":false,
+          "types":["str"]
+        }
+      }
+    },
     "nodes":{
       "is_required":true,
       "types":["list"],

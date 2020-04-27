@@ -47,8 +47,14 @@ entity {{ fins['name']|lower }}_core is
     props_status  : out t_{{ fins['name']|lower }}_props_status{% if 'ports' in fins %};{% endif %}
     {%- endif %}
     {%- if 'ports' in fins %}
+    {%- if 'hdl' in fins['ports'] %}
+    ports_hdl_in  : in  t_{{ fins['name']|lower }}_ports_hdl_in;
+    ports_hdl_out : out t_{{ fins['name']|lower }}_ports_hdl_out{% if 'ports' in fins['ports'] %};{% endif %}
+    {%- endif %}
+    {%- if 'ports' in fins['ports'] %}
     ports_in      : in  t_{{ fins['name']|lower }}_ports_in;
     ports_out     : out t_{{ fins['name']|lower }}_ports_out
+    {%- endif %}
     {%- endif %}
   );
 end {{ fins['name']|lower }}_core;
@@ -119,6 +125,7 @@ begin
   --------------------------------------------------------------------------------
   {%- endif %}
   {%- if 'ports' in fins %}
+  {%- if 'ports' in fins['ports'] %}
   -- To use the standardized FINS "Ports" interfaces, use the
   -- fields of the following record signals:
   --
@@ -192,6 +199,7 @@ begin
   -- from the package file to make the assignment with incongruous types.
   --
   --------------------------------------------------------------------------------
+  {%- endif %}
   {%- endif %}
 
 end rtl;
