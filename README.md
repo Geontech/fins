@@ -35,10 +35,17 @@ $ python3 -m pip install ./quartus
 You may not have permissions to run these `python3 -m pip` commands. To resolve this you can either use a python virtual environment, the `--user` option (`python3 -m pip --user`), or `sudo`.
 
 ---
-### Optional Installation - Bash Completion
-Follow these steps to enable autocompletion of FINS commands in a bash shell:
+### Optional Installation of Bash Completion
+Follow the steps below to enable autocompletion of FINS commands in a bash shell.
+
+To enable completion in only this shell session:
 ```bash
-echo 'eval "$(register-python-argcomplete fins)"' >> ~/.bashrc
+eval "$(register-python-argcomplete fins)"
+```
+
+To permanently enable completion but only for the current user:
+```bash
+echo 'register-python-argcomplete fins' >> ~/.bashrc
 source ~/.bashrc
 ```
 
