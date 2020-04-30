@@ -21,6 +21,7 @@ import os
 import glob
 import logging
 import argparse
+import argcomplete
 import jinja2
 import json
 import datetime
@@ -40,6 +41,12 @@ class NullGenerator(Generator):
     """
     def generate(self, packet):
         pass
+
+def available_generators():
+    """
+    Get the list of available generators for argument checking/parsing
+    """
+    return [entry.name for entry in pkg_resources.iter_entry_points(ENTRY_POINT_ID)]
 
 def load_generator(name):
     if name is None:
@@ -105,10 +112,11 @@ def main():
     arg_parser.add_argument('-v', '--verbose', action='store_true', default=False,
                             help='display debug messages')
     arg_parser.add_argument('--version', action='version', version='%(prog)s '+version.__version__)
-    arg_parser.add_argument('-b', '--backend', default='core', help='code generator backend to target')
+    arg_parser.add_argument('-b', '--backend', default='core', choices=available_generators(), help='code generator backend to target')
     arg_parser.add_argument('-o', '--option', action='append', default=[],
                             help='options for code generator backend')
 
+    argcomplete.autocomplete(arg_parser)
     args = arg_parser.parse_args()
 
     if args.verbose:

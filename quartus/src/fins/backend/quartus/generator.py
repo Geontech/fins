@@ -24,6 +24,8 @@ QUARTUS_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/'
 QUARTUS_OUTPUT_DIR = 'gen/quartus/'
 
 class QuartusGenerator(Generator):
+    def __init(self):
+        self.name = 'quartus'
     def generate(self, fins_data, filename, is_nodeset):
         # First generate the source files using base class
         self.generate_core(fins_data, filename, is_nodeset)

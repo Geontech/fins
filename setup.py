@@ -34,7 +34,8 @@ setup(
     python_requires='>= 3.6',
     url='http://geon.tech',
     install_requires=[
-        'Jinja2 ~= 2.8'
+        'Jinja2 ~= 2.8',
+        'argcomplete ~= 1.11'
     ],
     package_data={
         'fins':[
