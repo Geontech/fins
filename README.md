@@ -43,7 +43,7 @@ To enable completion in only this shell session:
 eval "$(register-python-argcomplete fins)"
 ```
 
-To permanently enable completion but only for the current user:
+To permanently enable completion for the current user:
 ```bash
 echo 'register-python-argcomplete fins' >> ~/.bashrc
 source ~/.bashrc
