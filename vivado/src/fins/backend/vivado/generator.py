@@ -24,6 +24,10 @@ VIVADO_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/'
 VIVADO_OUTPUT_DIR = 'gen/vivado/'
 
 class VivadoGenerator(Generator):
+
+    def __init(self):
+        self.name = 'vivado'
+
     def generate(self, fins_data, filename, is_nodeset):
         # First generate the source files using base class
         self.generate_core(fins_data, filename, is_nodeset)

@@ -28,6 +28,10 @@ CORE_NODESET_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/nodeset/'
 CORE_OUTPUT_DIR = 'gen/core/'
 
 class Generator:
+
+    def __init(self):
+        self.name = 'core'
+
     def set_option(self, name, value):
         raise ValueError("invalid option '"+name+"'")
 

@@ -35,7 +35,21 @@ $ python3 -m pip install ./quartus
 You may not have permissions to run these `python3 -m pip` commands. To resolve this you can either use a python virtual environment, the `--user` option (`python3 -m pip --user`), or `sudo`.
 
 ---
+### Optional Installation of Bash Completion
+Follow the steps below to enable autocompletion of FINS commands in a bash shell.
 
+To enable completion in only this shell session:
+```bash
+eval "$(register-python-argcomplete fins)"
+```
+
+To permanently enable completion for the current user:
+```bash
+echo 'register-python-argcomplete fins' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### Uninstallation
 To uninstall FINS, run the following commands:
 
 ```bash
@@ -47,6 +61,7 @@ Again, you may not have permissions to run these `python3 -m pip` commands. To r
 
 ---
 
+### Verify Installation
 To verify your installation and run an example of a FINS Node, execute the following commands to build and simulate the test IP with Vivado:
 
 > NOTES: Make sure you have sourced the Xilinx "settings64.sh" script for the version of Vivado you are using. This test requires GNU Octave or Mathworks MATLAB.
