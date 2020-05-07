@@ -51,7 +51,6 @@ set TOP_LEVEL_NAME "${UNIT_SIM_LIBRARY}.nodeset_test_tb"
 
 elab
 run -a
-puts "===============================HEREERERRERER"
 
 # Run Post-Sim TCL Scripts
 # Note: These scripts can use parameters defined above since they are sourced by this script
