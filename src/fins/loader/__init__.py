@@ -1546,27 +1546,32 @@ def get_signal_type(signal_name, verbose):
                 return interface_type
     return None
 
+def get_port(node_name, port_name, fins_data):
+    """
+    Get the port on the specified node in fins_data
+        node_name : node of interest in fins_data
+        port_name : port being searched for in the node specified by node_name
+        fins_dataa: fins_data which may contain the specified node and its port
+    """
+    # If a node is associated with the net, get the corresponding node in fins_data
+    node = get_elem_with_name(fins_data['nodes'], node_name, name_key='module_name')
+
+    # Get the port in this node if it exists
+    node_ports = node['node_details']['ports']['ports']
+    return get_elem_with_name(node_ports, port_name)
+
 
 def get_net_type(net, fins_data, verbose):
     """
     Given a net, return its type and its port (if the type is 'port')
         net_type : 'port' if the net is actually a node's port, otherwise the signal-type of this net ('clock' or 'reset')
                    None if the net is just a type-less signal
-        port     : the port that this net matches based on its name (None if this net does not match a port name)
+        port     : the port that this net matches based on its node and name (None if this net does not match a port in the nodeset)
     """
-    net_name = net['net']
-
-    net_type, port = None, None
-    if 'node' in net:
-        # If a node is associated with the net, get the corresponding node in fins_data
-        node = get_elem_with_name(fins_data['nodes'], net['node'], name_key='module_name')
-
-        # Get the port in this node if it exists
-        node_ports = node['node_details']['ports']['ports']
-        port = get_elem_with_name(node_ports, net_name)
+    port = get_port(net['node'], net['net'], fins_data) if 'node' in net else None
 
     # Determine if the source net has an associated type (clock/reset...) and if so, get it
-    net_type = 'port' if port is not None else get_signal_type(net_name, verbose)
+    net_type = 'port' if port is not None else get_signal_type(net['net'], verbose)
 
     return net_type, port
 
@@ -1605,11 +1610,12 @@ def validate_connected_ports(source, destination, verbose):
         print('ERROR: Data type or width mismatch between ports in connection ({}->{})'.format(src_name, dst_name))
         sys.exit(1)
 
-
 def populate_connections(fins_data, verbose):
     """
     Populate each connection in the nodeset so that each source and destination
     is associated with a type and port (if applicable)
+
+    Export ports and interfaces that should be exposed externally to the nodeset
     """
 
     # if this nodeset has connections, iterate over the connections,
@@ -1624,6 +1630,23 @@ def populate_connections(fins_data, verbose):
                 # For port-to-port connections, perform error checks to ensure connection would be valid
                 if source['type'] == 'port' and destination['type'] == 'port':
                     validate_connected_ports(source, destination, verbose)
+
+    # any ports that are exported should be exported in tcl
+    # TODO make port-exports entirely auto-filled if omitted in node json
+    if 'port-exports' in fins_data:
+        for net in fins_data['port-exports']:
+            net['port'] = get_port(net['node'], net['net'], fins_data)
+
+    # Get the non-descriptive nodes (nodes that we actually instantiated in the design)
+    nodes = [n for n in fins_data['nodes'] if 'descriptive_node' not in n or not n['descriptive_node']]
+
+    # Export axi4lite interfaces for each node
+    fins_data['interface-exports'] = []
+    for node in nodes:
+        # Get all axi4lite interfaces for the node
+        interfaces = [i for i in node['node_details']['hdl']['interfaces'] if i['type'] == 'axi4lite']
+        # Add this node/interfaces pair to the interface-exports list
+        fins_data['interface-exports'].append({'node':node['module_name'], 'interfaces': interfaces})
 
 
 def validate_and_convert_fins_data(fins_data,filename,backend,verbose):

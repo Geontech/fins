@@ -89,4 +89,3 @@ add_connection {{ snode }}{{ source['net'] }}/{{ dnode }}{{ destination['net'] }
 {%- endif %}
 {%  endfor %}
 {%- endfor %}
-

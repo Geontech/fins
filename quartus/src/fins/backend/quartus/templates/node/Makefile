@@ -163,7 +163,7 @@ IP_TARGET:=$(QUARTUS_DIR)/$(PROJECT_FILENAME)
 #-------------------------------------------------------------------------------
 .PHONY: all clean clean-all {% if 'filesets' in fins %}{% if 'sim' in fins['filesets'] %}sim{% endif %}{% endif %}
 
-# All phony target to build the Vivado project
+# All phony target to build the {{ fins['backend'] }} project
 all:
 	{%- for ip in fins['ip'] %}
 	{%- if ip['library'] == "user" %}
@@ -185,7 +185,7 @@ clean-all:
 {%- endfor %}
 	rm -rf $(TEMP_FILES)
 
-# Vivado project target
+# {{ fins['backend'] }} project target
 $(IP_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES)
 	$(if $(UseBatch),mkdir -p $(LOGS_DIR))
 	rm -rf $(QUARTUS_DIR) && mkdir -p $(QUARTUS_DIR)
