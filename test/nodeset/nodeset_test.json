@@ -132,14 +132,6 @@
       ]
     }
   ],
-  "port-exports":[
-    {"node":"fins_test_ip_0", "net":"myinput"},
-    {"node":"fins_test_ip_0", "net":"test_in"},
-    {"node":"fins_test_ip_0", "net":"sfix_cpx_in"},
-    {"node":"fins_test_ip_1", "net":"myoutput"},
-    {"node":"fins_test_ip_1", "net":"test_out"},
-    {"node":"fins_test_ip_1", "net":"sfix_cpx_out"}
-  ],
   "filesets":{
     "source":[
       { "path":"../node/gen/core/test_top_pkg.vhd", "type":"vhdl"    }

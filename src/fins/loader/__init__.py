@@ -1630,17 +1630,40 @@ def populate_connections(fins_data, verbose):
                 # For port-to-port connections, perform error checks to ensure connection would be valid
                 if source['type'] == 'port' and destination['type'] == 'port':
                     validate_connected_ports(source, destination, verbose)
+                    # Flag port as 'connected'
+                    source['port']['connected'] = True
+                    destination['port']['connected'] = True
 
-    # any ports that are exported should be exported in tcl
-    # TODO make port-exports entirely auto-filled if omitted in node json
+    # Export ports as ports of the nodeset itself
     if 'port-exports' in fins_data:
         for net in fins_data['port-exports']:
             net['port'] = get_port(net['node'], net['net'], fins_data)
+    else:
+        # If port-exports isn't present in the JSON, they should be auto-generated:
+        #     export all node output ports and on any unconnected input ports
+        fins_data['port-exports'] = []
+
+        for node in fins_data['nodes']:
+            # Only fully FINS-defined nodes are relevant here
+            if 'descriptive_node' not in node or not node['descriptive_node']:
+                for port in node['node_details']['ports']['ports']:
+
+                    test_mode = 'test_mode' in fins_data and fins_data['test_mode']
+                    # is this port part of a connection?
+                    port_unconnected = 'connected' not in port or not port['connected']
+
+                    # if port is unconnected, export it
+                    #     if in test-mode and this is an output port, export it even if it is connected
+                    if port_unconnected or (test_mode and port['direction'] == 'out'):
+                        fins_data['port-exports'].append({'net': port['name'], 'node': node['module_name'], 'port': port})
+
+        # TODO what if the connection is for just the data signal on the port but not the entire port?
+        # TODO port-exports should become "ports" of node for composability of nodesets
 
     # Get the non-descriptive nodes (nodes that we actually instantiated in the design)
     nodes = [n for n in fins_data['nodes'] if 'descriptive_node' not in n or not n['descriptive_node']]
 
-    # Export axi4lite interfaces for each node
+    # Automatically export axi4lite interfaces for each node
     fins_data['interface-exports'] = []
     for node in nodes:
         # Get all axi4lite interfaces for the node

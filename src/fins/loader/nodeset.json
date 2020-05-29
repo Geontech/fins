@@ -42,6 +42,10 @@
       "is_required":false,
       "types":["int"]
     },
+    "test_mode":{
+      "is_required":false,
+      "types":["bool"]
+    },
     "params":{
       "is_required":false,
       "types":["list"],
