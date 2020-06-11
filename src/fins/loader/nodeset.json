@@ -125,7 +125,7 @@
           "is_required":true,
           "types":["dict"],
           "fields":{
-            "node":{
+            "node_name":{
               "is_required":false,
               "types":["str"]
             },
@@ -140,7 +140,7 @@
           "types":["list"],
           "list_types":["dict"],
           "fields":{
-            "node":{
+            "node_name":{
               "is_required":true,
               "types":["str"]
             },
@@ -157,7 +157,22 @@
       "types":["list"],
       "list_types":["dict"],
       "fields":{
-        "node":{
+        "node_name":{
+          "is_required":true,
+          "types":["str"]
+        },
+        "net":{
+          "is_required":true,
+          "types":["str"]
+        }
+      }
+    },
+    "hdl-port-exports":{
+      "is_required":false,
+      "types":["list"],
+      "list_types":["dict"],
+      "fields":{
+        "node_name":{
           "is_required":true,
           "types":["str"]
         },

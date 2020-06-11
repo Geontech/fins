@@ -35,7 +35,7 @@
 # Instantiate all nodes in nodeset
 -#}
 {%  for node in fins['nodes'] %}
-{%- if 'descriptive_node' not in node or node['descriptive_node'] in fins %}
+{%- if 'descriptive_node' not in node or not node['descriptive_node'] %}
 # Instantiate node "{{ node['node_name'] }}" as module "{{ node['module_name'] }}"
 add_component {{ node['module_name'] }} {{ node['module_name'] }}.ip {{ node['node_name'] }}
 load_component {{ node['module_name'] }}
@@ -57,13 +57,13 @@ save_instantiation
 {#-
 # Determine whether each connection source and destination is associated with node
 -#}
-{%- if 'node' in source and source['node'] is not none %}
-    {%- set snode = source['node'] + '.' %}
+{%- if 'node_name' in source and source['node_name'] is not none %}
+    {%- set snode = source['node_name'] + '.' %}
 {%- else %}
     {%- set snode = "" %}
 {%- endif %}
-{%- if 'node' in destination and destination['node'] is not none %}
-    {%- set dnode = destination['node'] + '.' %}
+{%- if 'node_name' in destination and destination['node_name'] is not none %}
+    {%- set dnode = destination['node_name'] + '.' %}
 {%- else %}
     {%- set dnode = '' %}
 {%- endif %}

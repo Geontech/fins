@@ -26,7 +26,6 @@ from jinja2 import FileSystemLoader
 CORE_NODE_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/node/'
 CORE_NODESET_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/nodeset/'
 CORE_OUTPUT_DIR = 'gen/core/'
-
 class Generator:
     def set_option(self, name, value):
         raise ValueError("invalid option '"+name+"'")
@@ -122,6 +121,8 @@ class Generator:
                         if 'part' in fins_data:
                             override_data['part'] = fins_data['part']
                         json.dump(override_data, override_file, sort_keys=True, indent=2)
+
+            self.render_jinja_template(jinja_env, 'nodeset_tb.vhd', output_directory+fins_data['name']+'_tb.vhd', fins_data)
 
             # Generate FINS core files
             for node in fins_data['nodes']:

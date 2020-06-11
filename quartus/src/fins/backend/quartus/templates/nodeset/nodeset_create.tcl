@@ -132,23 +132,23 @@ set_interface_property clk EXPORT_OF clock_in.in_clk
 #set_exported_interface_sysinfo_parameter_value clk reset_domain {-1}
 set_interface_property reset EXPORT_OF reset_in.in_reset
 
-## TODO auto-export unconnected ports
-{% if 'port-exports' in fins and fins['port-exports'] is not none %}
+{%- if 'ports' in fins %}
+{%-  if 'ports' in fins['ports'] %}
 # The following ports were exported (made external) from the nodeset
-{%- for net in fins['port-exports'] %}
-{%- set port = net['port'] %}
-{%- for i in range(port['num_instances']) %}
-set_interface_property {{ net['node'] }}_{{ port|axisprefix(i) }} EXPORT_OF {{ net['node'] }}.{{ port|axisprefix(i) }}
-{%-  endfor %}
-{%-  endfor %}
+{%-   for port in fins['ports']['ports'] %}
+{%-    for i in range(port['num_instances']) %}
+set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']|axisprefix(i) }}
+{%-    endfor %}
+{%-   endfor %}
+{%-  endif %}
 {%- endif %}
 
 # The following interfaces were exported (made external) from the nodeset
-{% if 'interface-exports' in fins and fins['interface-exports'] is not none %}
-{%- for net in fins['interface-exports'] %}
-{%- for interface in net['interfaces'] %}
-set_interface_property {{ net['node'] }}_{{ interface['name'] }} EXPORT_OF {{ net['node'] }}.{{ interface['name'] }}
-{%-  endfor %}
+{%- if 'interface-exports' in fins and fins['interface-exports'] is not none %}
+{%-  for export in fins['interface-exports'] %}
+{%-   for interface in export['interfaces'] %}
+set_interface_property {{ export['node_name'] }}_{{ interface['name'] }} EXPORT_OF {{ export['node_name'] }}.{{ interface['name'] }}
+{%-   endfor %}
 {%-  endfor %}
 {%- endif %}
 

@@ -1546,39 +1546,80 @@ def get_signal_type(signal_name, verbose):
                 return interface_type
     return None
 
-def get_port(node_name, port_name, fins_data):
+def get_port(node_name, port_name, fins_data, port_type='ports'):
     """
     Get the port on the specified node in fins_data
         node_name : node of interest in fins_data
         port_name : port being searched for in the node specified by node_name
-        fins_dataa: fins_data which may contain the specified node and its port
+        fins_data : fins_data which may contain the specified node and its port
     """
     # If a node is associated with the net, get the corresponding node in fins_data
     node = get_elem_with_name(fins_data['nodes'], node_name, name_key='module_name')
 
     # Get the port in this node if it exists
-    node_ports = node['node_details']['ports']['ports']
+    if port_type not in node['node_details']['ports']:
+        return None
+    node_ports = node['node_details']['ports'][port_type]
     return get_elem_with_name(node_ports, port_name)
+
+
+def get_hdl_port(node_name, port_name, fins_data):
+    """
+    Get the HDL port on the specified node in fins_data
+        node_name : node of interest in fins_data
+        port_name : port being searched for in the node specified by node_name
+        fins_data : fins_data which may contain the specified node and its port
+    """
+    return get_port(node_name, port_name, fins_data, port_type='hdl')
+
+
+def get_any_port(node_name, port_name, fins_data):
+    """
+    Get the any port on the specified node in fins_data (AXIS or HDL)
+        node_name : node of interest in fins_data
+        port_name : port being searched for in the node specified by node_name
+        fins_dataa: fins_data which may contain the specified node and its port
+    """
+    hdl_port = get_port(node_name, port_name, fins_data, port_type='hdl')
+    if hdl_port is not None:
+        return hdl_port
+    return get_port(node_name, port_name, fins_data, port_type='hdl')
 
 
 def get_net_type(net, fins_data, verbose):
     """
-    Given a net, return its type and its port (if the type is 'port')
-        net_type : 'port' if the net is actually a node's port, otherwise the signal-type of this net ('clock' or 'reset')
-                   None if the net is just a type-less signal
-        port     : the port that this net matches based on its node and name (None if this net does not match a port in the nodeset)
-    """
-    port = get_port(net['node'], net['net'], fins_data) if 'node' in net else None
+    Given a net, return its type and its port (if the type is 'port' or 'hdl_port')
+        net_type : 'port' if the net is actually a node's port, 'hdl_port' if the net is an HDL port on a node,
+                     otherwise the signal-type of this net ('clock' or 'reset')
+                    None if the net is just a type-less signal
+        port     : the port that this net matches based on its node and name (None if this "net" is not a port in the nodeset)
 
-    # Determine if the source net has an associated type (clock/reset...) and if so, get it
-    net_type = 'port' if port is not None else get_signal_type(net['net'], verbose)
+    """
+    # TODO once clocks are exported/automated, there should be no connection nets without an associated 'node_name'
+    net_type = None
+    port = None
+    if 'node_name' in net:
+        port = get_port(net['node_name'], net['net'], fins_data)
+
+        if port is not None:
+            net_type = 'port'
+            #return 'port', port
+        else:
+            port = get_hdl_port(net['node_name'], net['net'], fins_data)
+            if port is not None:
+                net_type = 'hdl_port'
+                #return 'hdl_port', port
+
+    if net_type is None:
+        # Determine if the source net has an associated type (clock/reset...) and if so, get it
+        net_type = get_signal_type(net['net'], verbose)
 
     return net_type, port
 
 
 def validate_connected_ports(source, destination, verbose):
     """
-    Given two connection endpoints/nets that are both ports, confirm that a connection between these ports
+    Given two connection endpoints that are both ports, confirm that a connection between these ports
     would be valid
 
     Check that the following fields match between the two ports:
@@ -1589,10 +1630,20 @@ def validate_connected_ports(source, destination, verbose):
     """
     src_port = source['port']
     dst_port = destination['port']
-    src_name = source['node'] + '.' + source['net'] if 'node' in source else source['net']
-    dst_name = destination['node'] + '.' + destination['net'] if 'node' in destination else destination['net']
+    src_name = source['node_name'] + '.' + source['net']
+    dst_name = destination['node_name'] + '.' + destination['net']
+    src_type = source['type']
+    dst_type = destination['type']
 
-    if src_port['supports_backpressure'] != dst_port['supports_backpressure']:
+    if ((src_type == 'hdl_port' and dst_type == 'hdl_port') and
+        src_port['bit_width'] != dst_port['bit_width']):
+        print('ERROR: HDL Ports in connection ({}->{}) do not have the same width'.format(src_name, dst_name))
+        sys.exit(1)
+    elif ((src_type == 'hdl_port' and dst_type == 'port') or
+          (src_type == 'port' and dst_type == 'hdl_port')):
+        print('ERROR: One port is HDL and the other is AXIS in connection ({}->{})'.format(src_name, dst_name))
+        sys.exit(1)
+    elif src_port['supports_backpressure'] != dst_port['supports_backpressure']:
         print('ERROR: One port in connection ({}->{}) supports backpressure, but the other does not'.format(src_name, dst_name))
         sys.exit(1)
     elif src_port['num_instances'] != dst_port['num_instances']:
@@ -1610,6 +1661,7 @@ def validate_connected_ports(source, destination, verbose):
         print('ERROR: Data type or width mismatch between ports in connection ({}->{})'.format(src_name, dst_name))
         sys.exit(1)
 
+
 def populate_connections(fins_data, verbose):
     """
     Populate each connection in the nodeset so that each source and destination
@@ -1620,6 +1672,7 @@ def populate_connections(fins_data, verbose):
 
     # if this nodeset has connections, iterate over the connections,
     # get and set the type and port (if applicable) of each source and destination net
+    # TODO make connections between hdl ports
     if 'connections' in fins_data:
         for connection in fins_data['connections']:
             source = connection['source']
@@ -1628,7 +1681,8 @@ def populate_connections(fins_data, verbose):
             for destination in connection['destinations']:
                 destination['type'], destination['port'] = get_net_type(destination, fins_data, verbose)
                 # For port-to-port connections, perform error checks to ensure connection would be valid
-                if source['type'] == 'port' and destination['type'] == 'port':
+                if ((source['type'] == 'port' and destination['type'] == 'port') or
+                    (source['type'] == 'hdl_port' and destination['type'] == 'hdl_port')):
                     validate_connected_ports(source, destination, verbose)
                     # Flag port as 'connected'
                     source['port']['connected'] = True
@@ -1636,29 +1690,92 @@ def populate_connections(fins_data, verbose):
 
     # Export ports as ports of the nodeset itself
     if 'port-exports' in fins_data:
+
+        if 'ports' not in fins_data:
+            fins['ports'] = {}
+        fins['ports']['ports'] = []
+
         for net in fins_data['port-exports']:
-            net['port'] = get_port(net['node'], net['net'], fins_data)
+            port = get_port(net['node_name'], net['net'], fins_data)
+            if port is None:
+                print('ERROR: Exported port not found {}'.format(net['net']))
+                sys.exit(1)
+
+            nodeset_port = port.copy()
+            nodeset_port['name'] = net['node_name'] + '_' + port['name']
+            nodeset_port['node_name'] = net['node_name']
+            nodeset_port['node_port'] = port
+            fins_data['ports']['ports'].append(nodeset_port)
+
     else:
         # If port-exports isn't present in the JSON, they should be auto-generated:
         #     export all node output ports and on any unconnected input ports
-        fins_data['port-exports'] = []
+
+        if 'ports' not in fins_data:
+            fins_data['ports'] = {}
+        fins_data['ports']['ports'] = []
 
         for node in fins_data['nodes']:
             # Only fully FINS-defined nodes are relevant here
             if 'descriptive_node' not in node or not node['descriptive_node']:
-                for port in node['node_details']['ports']['ports']:
 
-                    test_mode = 'test_mode' in fins_data and fins_data['test_mode']
-                    # is this port part of a connection?
-                    port_unconnected = 'connected' not in port or not port['connected']
+                if 'ports' in node['node_details']['ports']:
+                    for port in node['node_details']['ports']['ports']:
+                        test_mode = 'test_mode' in fins_data and fins_data['test_mode']
+                        # is this port part of a connection?
+                        port_unconnected = 'connected' not in port or not port['connected']
 
-                    # if port is unconnected, export it
-                    #     if in test-mode and this is an output port, export it even if it is connected
-                    if port_unconnected or (test_mode and port['direction'] == 'out'):
-                        fins_data['port-exports'].append({'net': port['name'], 'node': node['module_name'], 'port': port})
+                        # if port is unconnected, export it
+                        #     if in test-mode and this is an output port, export it even if it is connected
+                        if port_unconnected or (test_mode and port['direction'] == 'out'):
+                            nodeset_port = port.copy()
+                            nodeset_port['name'] = node['module_name'] + '_' + port['name']
+                            nodeset_port['node_name'] = node['module_name']
+                            nodeset_port['node_port'] = port
+                            fins_data['ports']['ports'].append(nodeset_port)
 
-        # TODO what if the connection is for just the data signal on the port but not the entire port?
-        # TODO port-exports should become "ports" of node for composability of nodesets
+    if 'hdl-port-exports' in fins_data:
+        if 'ports' not in fins_data:
+            fins_data['ports'] = {}
+        fins_data['ports']['hdl_ports'] = []
+
+        for net in fins_data['hdl-port-exports']:
+            port = get_port(net['node_name'], net['net'], fins_data, port_type='hdl_ports')
+            if port is None:
+                print('ERROR: Exported port not found {}'.format(net['net']))
+                sys.exit(1)
+
+            nodeset_port = port.copy()
+            nodeset_port['name'] = net['node_name'] + '_' + port['name']
+            nodeset_port['node_name'] = net['node_name']
+            nodeset_port['node_port'] = port
+            fins_data['ports']['hdl_ports'].append(nodeset_port)
+    else:
+        # If hdl-port-exports isn't present in the JSON, they should be auto-generated:
+        #     export all node output ports and on any unconnected input ports
+
+        if 'ports' not in fins_data:
+            fins_data['ports'] = {}
+        fins_data['ports']['hdl_ports'] = []
+
+        for node in fins_data['nodes']:
+            # Only fully FINS-defined nodes are relevant here
+            if 'descriptive_node' not in node or not node['descriptive_node']:
+                if 'hdl_ports' in node['node_details']['ports']:
+                    for port in node['node_details']['ports']['hdl_ports']:
+                        test_mode = 'test_mode' in fins_data and fins_data['test_mode']
+                        # is this port part of a connection?
+                        port_unconnected = 'connected' not in port or not port['connected']
+
+                        # if port is unconnected, export it
+                        #     if in test-mode and this is an output port, export it even if it is connected
+                        if port_unconnected or (test_mode and port['direction'] == 'out'):
+                            nodeset_port = port.copy()
+                            nodeset_port['name'] = node['module_name'] + '_' + port['name']
+                            nodeset_port['node_name'] = node['module_name']
+                            nodeset_port['node_port'] = port
+                            fins_data['ports']['hdl_ports'].append(nodeset_port)
+
 
     # Get the non-descriptive nodes (nodes that we actually instantiated in the design)
     nodes = [n for n in fins_data['nodes'] if 'descriptive_node' not in n or not n['descriptive_node']]
@@ -1669,7 +1786,8 @@ def populate_connections(fins_data, verbose):
         # Get all axi4lite interfaces for the node
         interfaces = [i for i in node['node_details']['hdl']['interfaces'] if i['type'] == 'axi4lite']
         # Add this node/interfaces pair to the interface-exports list
-        fins_data['interface-exports'].append({'node':node['module_name'], 'interfaces': interfaces})
+        fins_data['interface-exports'].append({'node_name': node['module_name'], 'node': node, 'interfaces': interfaces})
+        # TODO exported interfaces of each node become the ['hdl']['interfaces'] of the nodeset
 
 
 def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
