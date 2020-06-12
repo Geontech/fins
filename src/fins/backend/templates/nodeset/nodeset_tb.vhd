@@ -64,7 +64,7 @@ entity {{ fins['name'] }}_tb is
     {%-    if fins['backend']|lower == 'quartus' %}
     G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      : string := "../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%-    else %}
-    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      : string := "../../../../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      : string := "../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%-    endif %}
     {%-   else %}
     G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_NUM_PACKETS_EXPECTED : natural := 1;
@@ -73,7 +73,7 @@ entity {{ fins['name'] }}_tb is
     {%-    if fins['backend']|lower == 'quartus' %}
     G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH        : string := "../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%-    else %}
-    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH        : string := "../../../../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH        : string := "../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%-    endif %}
     {%-   endif  %}{#### if port['direction'] == "in" ####}
     {%-  endfor %}{#### for i in range(port['num_instances']) ####}
@@ -137,8 +137,6 @@ architecture behav of {{ fins['name'] }}_tb is
   {%-  endif %}
 
   {%-  if 'ports' in fins['ports'] %}
-  generic (
-    -- TODO codegen based on generics of component nodes? or params of nodeset?
   {%-   for port in fins['ports']['ports'] %}
   -- AXI4-Stream Port {{ port['direction']|upper }}: {{ port['name']|lower }}
   {%-    for i in range(port['num_instances']) %}
@@ -258,7 +256,7 @@ begin
   -- File Input/Output AXI4-Stream Port Verification
   --------------------------------------------------------------------------------
   -- NOTE: The source/sink filepaths are relative to where the simulation is executed
-  u_file_io : entity test_top_00.test_top_axis_verify
+  u_file_io : entity work.{{ fins['name']|lower }}_axis_verify
     generic map (
     {%- for port in fins['ports']['ports'] %}
     {%-  set outer_loop = loop %}
@@ -417,14 +415,14 @@ begin
     {%-   set node      = interface_export['node'] %}
     {%-   for interface in interface_export['interfaces'] %}
     -- Verify Properties on AXILite Interface "{{ interface['name'] }}" on node "{{ node_name }}"
-    {{ node_name }}_{{ fins['name']|lower }}_axilite_verify (
-      {{ node_name }}_{{ interface['name'] }}_ACLK,   {{ node_name }}_{{ interface['name'] }}_ARESETN,
-      {{ node_name }}_{{ interface['name'] }}_AWADDR, {{ node_name }}_{{ interface['name'] }}_AWPROT, {{ node_name }}_{{ interface['name'] }}_AWVALID, {{ node_name }}_{{ interface['name'] }}_AWREADY,
-      {{ node_name }}_{{ interface['name'] }}_WDATA,  {{ node_name }}_{{ interface['name'] }}_WSTRB,  {{ node_name }}_{{ interface['name'] }}_WVALID,  {{ node_name }}_{{ interface['name'] }}_WREADY,
-      {{ node_name }}_{{ interface['name'] }}_BRESP,  {{ node_name }}_{{ interface['name'] }}_BVALID, {{ node_name }}_{{ interface['name'] }}_BREADY,
-      {{ node_name }}_{{ interface['name'] }}_ARADDR, {{ node_name }}_{{ interface['name'] }}_ARPROT, {{ node_name }}_{{ interface['name'] }}_ARVALID, {{ node_name }}_{{ interface['name'] }}_ARREADY,
-      {{ node_name }}_{{ interface['name'] }}_RDATA,  {{ node_name }}_{{ interface['name'] }}_RRESP,  {{ node_name }}_{{ interface['name'] }}_RVALID,  {{ node_name }}_{{ interface['name'] }}_RREADY
-    );
+    --{{ node_name }}_{{ fins['name']|lower }}_axilite_verify (
+    --  {{ node_name }}_{{ interface['name'] }}_ACLK,   {{ node_name }}_{{ interface['name'] }}_ARESETN,
+    --  {{ node_name }}_{{ interface['name'] }}_AWADDR, {{ node_name }}_{{ interface['name'] }}_AWPROT, {{ node_name }}_{{ interface['name'] }}_AWVALID, {{ node_name }}_{{ interface['name'] }}_AWREADY,
+    --  {{ node_name }}_{{ interface['name'] }}_WDATA,  {{ node_name }}_{{ interface['name'] }}_WSTRB,  {{ node_name }}_{{ interface['name'] }}_WVALID,  {{ node_name }}_{{ interface['name'] }}_WREADY,
+    --  {{ node_name }}_{{ interface['name'] }}_BRESP,  {{ node_name }}_{{ interface['name'] }}_BVALID, {{ node_name }}_{{ interface['name'] }}_BREADY,
+    --  {{ node_name }}_{{ interface['name'] }}_ARADDR, {{ node_name }}_{{ interface['name'] }}_ARPROT, {{ node_name }}_{{ interface['name'] }}_ARVALID, {{ node_name }}_{{ interface['name'] }}_ARREADY,
+    --  {{ node_name }}_{{ interface['name'] }}_RDATA,  {{ node_name }}_{{ interface['name'] }}_RRESP,  {{ node_name }}_{{ interface['name'] }}_RVALID,  {{ node_name }}_{{ interface['name'] }}_RREADY
+    --);
 
     {%-   endfor %}{#### for interface in range(interface-exports['interfaces']) ####}
     {%-  endfor %}{#### for interface_export in fins['interface-exports'] ####}
@@ -448,17 +446,17 @@ begin
     writeline(output, my_line);
 
     -- Wait for the output verification processes to complete
-    {%-  for port in fins['ports']['ports'] %}
-    {%-   if port['direction']|lower == 'out' %}
-    {%-    for i in range(port['num_instances']) %}
-    if (not {{ port|axisprefix(i) }}_verify_done) then
-      wait until ({{ port|axisprefix(i) }}_verify_done);
-    end if;
-    write(my_line, string'("Verification complete for '{{ port['name'] }}'"));
-    writeline(output, my_line);
-    {%-    endfor %}{#### for i in range(port['num_instances']) ####}
-    {%-   endif %}
-    {%-  endfor %}{#### for port in fins['ports']['ports'] ####}
+    --{%-  for port in fins['ports']['ports'] %}
+    --{%-   if port['direction']|lower == 'out' %}
+    --{%-    for i in range(port['num_instances']) %}
+    --if (not {{ port|axisprefix(i) }}_verify_done) then
+    --  wait until ({{ port|axisprefix(i) }}_verify_done);
+    --end if;
+    --write(my_line, string'("Verification complete for '{{ port['name'] }}'"));
+    --writeline(output, my_line);
+    --{%-    endfor %}{#### for i in range(port['num_instances']) ####}
+    --{%-   endif %}
+    --{%-  endfor %}{#### for port in fins['ports']['ports'] ####}
 
     {%-  endif  %}{#### if 'ports' in fins['ports'] ####}
     {%- endif  %}{#### if 'ports' in fins ####}

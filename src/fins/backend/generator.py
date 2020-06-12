@@ -122,6 +122,7 @@ class Generator:
                             override_data['part'] = fins_data['part']
                         json.dump(override_data, override_file, sort_keys=True, indent=2)
 
+            self.render_jinja_template(jinja_env, 'axis_verify.vhd', output_directory+fins_data['name']+'_axis_verify.vhd', fins_data)
             self.render_jinja_template(jinja_env, 'nodeset_tb.vhd', output_directory+fins_data['name']+'_tb.vhd', fins_data)
 
             # Generate FINS core files
