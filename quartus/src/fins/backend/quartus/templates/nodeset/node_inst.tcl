@@ -60,7 +60,7 @@ save_instantiation
 {%- if 'node_name' in source and source['node_name'] is not none %}
     {%- set snode = source['node_name'] + '.' %}
 {%- else %}
-    {%- set snode = "" %}
+    {%- set snode = '' %}
 {%- endif %}
 {%- if 'node_name' in destination and destination['node_name'] is not none %}
     {%- set dnode = destination['node_name'] + '.' %}

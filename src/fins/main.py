@@ -95,18 +95,21 @@ def run_generator(generator,filepath,backend,verbose):
             # This is a FINS file
             is_nodeset = False
             fins_data = loader.validate_and_convert_fins_data(fins_data,filename,backend,verbose)
+
+            # Recursively call function on all sub-ip
+            if 'ip' in fins_data:
+                for ip in fins_data['ip']:
+                    if verbose:
+                        print('Recursing into IP at', ip['fins_path'])
+                    ip['ip_details'] = run_generator(generator,ip['fins_path'],backend,verbose)
+
+        loader.populate_property_interfaces(fins_data, verbose)
+
         try:
             generator.generate(fins_data,filename,is_nodeset)
         except RuntimeError as exc:
             logging.error('Generator error: %s', exc)
         generator.end_file()
-
-        # Recursively call function on all sub-ip
-        if 'ip' in fins_data:
-            for ip in fins_data['ip']:
-                if verbose:
-                    print('Recursing into IP at', ip['fins_path'])
-                run_generator(generator,ip['fins_path'],backend,verbose)
 
 
         # Validate filesets

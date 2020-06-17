@@ -137,17 +137,24 @@ set_interface_property reset EXPORT_OF reset_in.in_reset
 # The following ports were exported (made external) from the nodeset
 {%-   for port in fins['ports']['ports'] %}
 {%-    for i in range(port['num_instances']) %}
+#set_interface_property {{ port|axisprefix(i) }}_aclk EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']|axisprefix(i) }}_aclk
+#set_interface_property {{ port|axisprefix(i) }}_aresetn EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']|axisprefix(i) }}_aresetn
 set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']|axisprefix(i) }}
 {%-    endfor %}
 {%-   endfor %}
 {%-  endif %}
 {%- endif %}
 
-# The following interfaces were exported (made external) from the nodeset
-{%- if 'interface-exports' in fins and fins['interface-exports'] is not none %}
-{%-  for export in fins['interface-exports'] %}
-{%-   for interface in export['interfaces'] %}
-set_interface_property {{ export['node_name'] }}_{{ interface['name'] }} EXPORT_OF {{ export['node_name'] }}.{{ interface['name'] }}
+{%- if 'prop_interfaces' in fins %}
+# The following property interfaces are exported for this nodeset
+{%-  for node_interfaces in fins['prop_interfaces'] %}
+{%-   set node_name = node_interfaces['node_name'] %}
+{%-   for interface in node_interfaces['interfaces'] %}
+{%-    set external_iface_name = (node_name + '_' + interface)|axi4liteprefix() %}
+{%-    set internal_iface_name = node_name + '.' + interface|axi4liteprefix(node_interfaces['top']) %}
+set_interface_property {{ external_iface_name }}_ACLK    EXPORT_OF {{ internal_iface_name }}_ACLK
+set_interface_property {{ external_iface_name }}_ARESETN EXPORT_OF {{ internal_iface_name }}_ARESETN
+set_interface_property {{ external_iface_name }}         EXPORT_OF {{ internal_iface_name }}
 {%-   endfor %}
 {%-  endfor %}
 {%- endif %}

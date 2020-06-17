@@ -21,7 +21,7 @@
 --==============================================================================
 -- Firmware IP Node Specification (FINS) Auto-Generated File
 -- -------------------------------------------------------------
--- Template:    nodeset_tb.vhd
+-- Template:    {{ fins['name'] }}_tb.vhd
 -- Backend:     {{ fins['backend'] }}
 -- Generated:   {{ now }}
 -- -------------------------------------------------------------
@@ -39,15 +39,15 @@ use std.textio.all;
 
 -- User Libraries
 library work;
--- TODO codegen based on component nodes
-{%  for node in fins['nodes'] %}
-{%-  if 'descriptive_node' not in node or not node['descriptive_node'] %}
-{%-   set node_name = node['node_details']['name']|lower %}
-library {{ node_name }}_00;
-use {{ node_name }}_00.all;
-use {{ node_name }}_00.{{ node_name }}_pkg.all;
-{%   endif %}
-{%- endfor %}
+
+{%- if 'prop_interfaces' in fins %}
+{%-  for node_interfaces in fins['prop_interfaces'] %}
+-- HDL imports for property-interfaces on node '{{ node_interfaces['node_name'] }}'
+{%-   for interface in node_interfaces['interfaces'] %}
+use work.{{ interface }}_axilite_verify.all;
+{%-   endfor %}
+{%-  endfor %}
+{%  endif %}
 
 -- Entity
 entity {{ fins['name'] }}_tb is
@@ -90,35 +90,40 @@ architecture behav of {{ fins['name'] }}_tb is
   --------------------------------------------------------------------------------
   -- AXI4-Lite Properties Buses
 
-  {%- if 'interface-exports' in fins %}
-  {%-  for interface_export in fins['interface-exports'] %}
-  {%-   set node_name = interface_export['node_name']|lower %}
-  {%-   set node      = interface_export['node'] %}
-  {%-   for interface in interface_export['interfaces'] %}
-  -- AXILite Interface "{{ interface['name'] }}" on node "{{ node_name }}"
-  {%- set addr_width = node['node_details']['properties']['addr_width'] %}
-  {%- set data_width = node['node_details']['properties']['data_width'] %}
-  --signal {{ node_name }}_{{ interface['name'] }}_ACLK    : std_logic;
-  --signal {{ node_name }}_{{ interface['name'] }}_ARESETN : std_logic;
-  signal {{ node_name }}_{{ interface['name'] }}_AWADDR  : std_logic_vector({{ addr_width }}-1 downto 0);
-  signal {{ node_name }}_{{ interface['name'] }}_AWPROT  : std_logic_vector(2 downto 0);
-  signal {{ node_name }}_{{ interface['name'] }}_AWVALID : std_logic;
-  signal {{ node_name }}_{{ interface['name'] }}_AWREADY : std_logic;
-  signal {{ node_name }}_{{ interface['name'] }}_WDATA   : std_logic_vector({{ data_width }}-1 downto 0);
-  signal {{ node_name }}_{{ interface['name'] }}_WSTRB   : std_logic_vector(({{ data_width }}/8)-1 downto 0);
-  signal {{ node_name }}_{{ interface['name'] }}_WVALID  : std_logic;
-  signal {{ node_name }}_{{ interface['name'] }}_WREADY  : std_logic;
-  signal {{ node_name }}_{{ interface['name'] }}_BRESP   : std_logic_vector(1 downto 0);
-  signal {{ node_name }}_{{ interface['name'] }}_BVALID  : std_logic;
-  signal {{ node_name }}_{{ interface['name'] }}_BREADY  : std_logic;
-  signal {{ node_name }}_{{ interface['name'] }}_ARADDR  : std_logic_vector({{ addr_width }}-1 downto 0);
-  signal {{ node_name }}_{{ interface['name'] }}_ARPROT  : std_logic_vector(2 downto 0);
-  signal {{ node_name }}_{{ interface['name'] }}_ARVALID : std_logic;
-  signal {{ node_name }}_{{ interface['name'] }}_ARREADY : std_logic;
-  signal {{ node_name }}_{{ interface['name'] }}_RDATA   : std_logic_vector({{ data_width }}-1 downto 0);
-  signal {{ node_name }}_{{ interface['name'] }}_RRESP   : std_logic_vector(1 downto 0);
-  signal {{ node_name }}_{{ interface['name'] }}_RVALID  : std_logic;
-  signal {{ node_name }}_{{ interface['name'] }}_RREADY  : std_logic;
+  {%- if 'prop_interfaces' in fins %}
+  --**************************************************
+  -- Verify Properties
+  --**************************************************
+  {%-  for node_interfaces in fins['prop_interfaces'] %}
+  {%-   set node_name = node_interfaces['node_name'] %}
+
+  {%-   set addr_width = node_interfaces['addr_width'] %}
+  {%-   set data_width = node_interfaces['data_width'] %}
+
+  {%-   for interface in node_interfaces['interfaces'] %}
+  {%-    set iface_name = (node_name + '_' + interface)|axi4liteprefix() %}
+  -- AXILite Interface "{{ iface_name }}" on node "{{ node_name }}"
+  --signal {{ iface_name }}_ACLK    : std_logic;
+  --signal {{ iface_name }}_ARESETN : std_logic;
+  signal {{ iface_name }}_AWADDR  : std_logic_vector({{ addr_width }}-1 downto 0);
+  signal {{ iface_name }}_AWPROT  : std_logic_vector(2 downto 0);
+  signal {{ iface_name }}_AWVALID : std_logic;
+  signal {{ iface_name }}_AWREADY : std_logic;
+  signal {{ iface_name }}_WDATA   : std_logic_vector({{ data_width }}-1 downto 0);
+  signal {{ iface_name }}_WSTRB   : std_logic_vector(({{ data_width }}/8)-1 downto 0);
+  signal {{ iface_name }}_WVALID  : std_logic;
+  signal {{ iface_name }}_WREADY  : std_logic;
+  signal {{ iface_name }}_BRESP   : std_logic_vector(1 downto 0);
+  signal {{ iface_name }}_BVALID  : std_logic;
+  signal {{ iface_name }}_BREADY  : std_logic;
+  signal {{ iface_name }}_ARADDR  : std_logic_vector({{ addr_width }}-1 downto 0);
+  signal {{ iface_name }}_ARPROT  : std_logic_vector(2 downto 0);
+  signal {{ iface_name }}_ARVALID : std_logic;
+  signal {{ iface_name }}_ARREADY : std_logic;
+  signal {{ iface_name }}_RDATA   : std_logic_vector({{ data_width }}-1 downto 0);
+  signal {{ iface_name }}_RRESP   : std_logic_vector(1 downto 0);
+  signal {{ iface_name }}_RVALID  : std_logic;
+  signal {{ iface_name }}_RREADY  : std_logic;
   {%-   endfor %}
   {%-  endfor %}
   {%- endif %}
@@ -186,38 +191,38 @@ begin
   -- Device Under Test
   --------------------------------------------------------------------------------
   -- TODO last comma? three different possible loops
-  --u_dut : entity work.nodeset_test
-  u_dut : entity work.nodeset_test
+  u_dut : entity work.{{ fins['name'] }}
     port map (
       clk_clk => clock,
-      {%- if 'interface-exports' in fins %}
-      {%-  for interface_export in fins['interface-exports'] %}
-      {%-   set node_name = interface_export['node_name']|lower %}
-      {%-   for interface in interface_export['interfaces'] %}
-      --{{ node_name }}_{{ interface['name'] }}_ACLK    => {{ node_name }}_{{ interface['name'] }}_ACLK   ,
-      --{{ node_name }}_{{ interface['name'] }}_ARESETN => {{ node_name }}_{{ interface['name'] }}_ARESETN,
-      {{ node_name }}_{{ interface['name'] }}_AWADDR  => {{ node_name }}_{{ interface['name'] }}_AWADDR ,
-      {{ node_name }}_{{ interface['name'] }}_AWPROT  => {{ node_name }}_{{ interface['name'] }}_AWPROT ,
-      {{ node_name }}_{{ interface['name'] }}_AWVALID => {{ node_name }}_{{ interface['name'] }}_AWVALID,
-      {{ node_name }}_{{ interface['name'] }}_AWREADY => {{ node_name }}_{{ interface['name'] }}_AWREADY,
-      {{ node_name }}_{{ interface['name'] }}_WDATA   => {{ node_name }}_{{ interface['name'] }}_WDATA  ,
-      {{ node_name }}_{{ interface['name'] }}_WSTRB   => {{ node_name }}_{{ interface['name'] }}_WSTRB  ,
-      {{ node_name }}_{{ interface['name'] }}_WVALID  => {{ node_name }}_{{ interface['name'] }}_WVALID ,
-      {{ node_name }}_{{ interface['name'] }}_WREADY  => {{ node_name }}_{{ interface['name'] }}_WREADY ,
-      {{ node_name }}_{{ interface['name'] }}_BRESP   => {{ node_name }}_{{ interface['name'] }}_BRESP  ,
-      {{ node_name }}_{{ interface['name'] }}_BVALID  => {{ node_name }}_{{ interface['name'] }}_BVALID ,
-      {{ node_name }}_{{ interface['name'] }}_BREADY  => {{ node_name }}_{{ interface['name'] }}_BREADY ,
-      {{ node_name }}_{{ interface['name'] }}_ARADDR  => {{ node_name }}_{{ interface['name'] }}_ARADDR ,
-      {{ node_name }}_{{ interface['name'] }}_ARPROT  => {{ node_name }}_{{ interface['name'] }}_ARPROT ,
-      {{ node_name }}_{{ interface['name'] }}_ARVALID => {{ node_name }}_{{ interface['name'] }}_ARVALID,
-      {{ node_name }}_{{ interface['name'] }}_ARREADY => {{ node_name }}_{{ interface['name'] }}_ARREADY,
-      {{ node_name }}_{{ interface['name'] }}_RDATA   => {{ node_name }}_{{ interface['name'] }}_RDATA  ,
-      {{ node_name }}_{{ interface['name'] }}_RRESP   => {{ node_name }}_{{ interface['name'] }}_RRESP  ,
-      {{ node_name }}_{{ interface['name'] }}_RVALID  => {{ node_name }}_{{ interface['name'] }}_RVALID ,
-      {{ node_name }}_{{ interface['name'] }}_RREADY  => {{ node_name }}_{{ interface['name'] }}_RREADY ,
-      {%-   endfor %}
-      {%-  endfor %}
-      {%- endif %}
+      {%- if 'prop_interfaces' in fins %}
+      {%-  for node_interfaces in fins['prop_interfaces'] %}
+      {%-   set node_name = node_interfaces['node_name'] %}
+      {%-   for interface in node_interfaces['interfaces'] %}
+      {%-    set iface_name = (node_name + '_' + interface)|axi4liteprefix() %}
+      --{{ iface_name }}_ACLK    => {{ iface_name }}_ACLK   ,
+      --{{ iface_name }}_ARESETN => {{ iface_name }}_ARESETN,
+      {{ iface_name }}_AWADDR  => {{ iface_name }}_AWADDR ,
+      {{ iface_name }}_AWPROT  => {{ iface_name }}_AWPROT ,
+      {{ iface_name }}_AWVALID => {{ iface_name }}_AWVALID,
+      {{ iface_name }}_AWREADY => {{ iface_name }}_AWREADY,
+      {{ iface_name }}_WDATA   => {{ iface_name }}_WDATA  ,
+      {{ iface_name }}_WSTRB   => {{ iface_name }}_WSTRB  ,
+      {{ iface_name }}_WVALID  => {{ iface_name }}_WVALID ,
+      {{ iface_name }}_WREADY  => {{ iface_name }}_WREADY ,
+      {{ iface_name }}_BRESP   => {{ iface_name }}_BRESP  ,
+      {{ iface_name }}_BVALID  => {{ iface_name }}_BVALID ,
+      {{ iface_name }}_BREADY  => {{ iface_name }}_BREADY ,
+      {{ iface_name }}_ARADDR  => {{ iface_name }}_ARADDR ,
+      {{ iface_name }}_ARPROT  => {{ iface_name }}_ARPROT ,
+      {{ iface_name }}_ARVALID => {{ iface_name }}_ARVALID,
+      {{ iface_name }}_ARREADY => {{ iface_name }}_ARREADY,
+      {{ iface_name }}_RDATA   => {{ iface_name }}_RDATA  ,
+      {{ iface_name }}_RRESP   => {{ iface_name }}_RRESP  ,
+      {{ iface_name }}_RVALID  => {{ iface_name }}_RVALID ,
+      {{ iface_name }}_RREADY  => {{ iface_name }}_RREADY ,
+      {%-   endfor %}{#### for interface in node_interfaces['interfaces'] ####}
+      {%-  endfor %}{#### for node_interfaces in fins['prop_interfaces'] ####}
+      {%- endif %}{#### if 'prop_interfaces' in fins ####}
 
       {%- if 'ports' in fins %}
       {%-  if 'hdl_ports' in fins['ports'] %}
@@ -406,27 +411,26 @@ begin
     resetn <= '1';
     wait for CLOCK_PERIOD;
 
-    {%- if 'interface-exports' in fins %}
+    {%- if 'prop_interfaces' in fins %}
     --**************************************************
     -- Verify Properties
     --**************************************************
-    {%-  for interface_export in fins['interface-exports'] %}
-    {%-   set node_name = interface_export['node_name']|lower %}
-    {%-   set node      = interface_export['node'] %}
-    {%-   for interface in interface_export['interfaces'] %}
-    -- Verify Properties on AXILite Interface "{{ interface['name'] }}" on node "{{ node_name }}"
-    --{{ node_name }}_{{ fins['name']|lower }}_axilite_verify (
-    --  {{ node_name }}_{{ interface['name'] }}_ACLK,   {{ node_name }}_{{ interface['name'] }}_ARESETN,
-    --  {{ node_name }}_{{ interface['name'] }}_AWADDR, {{ node_name }}_{{ interface['name'] }}_AWPROT, {{ node_name }}_{{ interface['name'] }}_AWVALID, {{ node_name }}_{{ interface['name'] }}_AWREADY,
-    --  {{ node_name }}_{{ interface['name'] }}_WDATA,  {{ node_name }}_{{ interface['name'] }}_WSTRB,  {{ node_name }}_{{ interface['name'] }}_WVALID,  {{ node_name }}_{{ interface['name'] }}_WREADY,
-    --  {{ node_name }}_{{ interface['name'] }}_BRESP,  {{ node_name }}_{{ interface['name'] }}_BVALID, {{ node_name }}_{{ interface['name'] }}_BREADY,
-    --  {{ node_name }}_{{ interface['name'] }}_ARADDR, {{ node_name }}_{{ interface['name'] }}_ARPROT, {{ node_name }}_{{ interface['name'] }}_ARVALID, {{ node_name }}_{{ interface['name'] }}_ARREADY,
-    --  {{ node_name }}_{{ interface['name'] }}_RDATA,  {{ node_name }}_{{ interface['name'] }}_RRESP,  {{ node_name }}_{{ interface['name'] }}_RVALID,  {{ node_name }}_{{ interface['name'] }}_RREADY
-    --);
-
-    {%-   endfor %}{#### for interface in range(interface-exports['interfaces']) ####}
-    {%-  endfor %}{#### for interface_export in fins['interface-exports'] ####}
-    {%- endif %}{#### if 'interface-exports' in fins ####}
+    {%-  for node_interfaces in fins['prop_interfaces'] %}
+    {%-   set node_name = node_interfaces['node_name'] %}
+    {%-   for interface in node_interfaces['interfaces'] %}
+    {%-    set iface_name = (node_name + '_' + interface)|axi4liteprefix() %}
+    {{ interface|lower }}_axilite_verify (
+      clock, resetn,
+      --  {{ iface_name }}_ACLK,   {{ iface_name }}_ARESETN,
+      {{ iface_name }}_AWADDR, {{ iface_name }}_AWPROT, {{ iface_name }}_AWVALID, {{ iface_name }}_AWREADY,
+      {{ iface_name }}_WDATA,  {{ iface_name }}_WSTRB,  {{ iface_name }}_WVALID,  {{ iface_name }}_WREADY,
+      {{ iface_name }}_BRESP,  {{ iface_name }}_BVALID, {{ iface_name }}_BREADY,
+      {{ iface_name }}_ARADDR, {{ iface_name }}_ARPROT, {{ iface_name }}_ARVALID, {{ iface_name }}_ARREADY,
+      {{ iface_name }}_RDATA,  {{ iface_name }}_RRESP,  {{ iface_name }}_RVALID,  {{ iface_name }}_RREADY
+    );
+    {%-   endfor %}{#### for interface in node_interfaces['interfaces'] ####}
+    {%-  endfor %}{#### for node_interfaces in fins['prop_interfaces'] ####}
+    {%- endif %}{#### if 'prop_interfaces' in fins ####}
 
     {%- if 'ports' in fins %}
     {%-  if 'ports' in fins['ports'] %}

@@ -26,7 +26,10 @@ from jinja2 import FileSystemLoader
 CORE_NODE_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/node/'
 CORE_NODESET_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/nodeset/'
 CORE_OUTPUT_DIR = 'gen/core/'
+
+
 class Generator:
+
     def set_option(self, name, value):
         raise ValueError("invalid option '"+name+"'")
 
@@ -48,10 +51,13 @@ class Generator:
 
     def create_jinja_env(self, directory):
         # Create custom Jinja2 filters
+
         def basename(path):
             return os.path.basename(path)
+
         def dirname(path):
             return os.path.dirname(path)
+
         def axisprefix(port, instance_index, reverse=False):
             prefix = ''
             if port['direction'].lower() == 'in':
@@ -68,11 +74,24 @@ class Generator:
                 prefix += '{0:02d}'.format(instance_index)
             return prefix + '_axis_' + port['name'].lower()
 
+        def axi4liteprefix(interface, top=None, reverse=False):
+            prefix = ''
+            if not reverse:
+                prefix += 'S'
+            else:
+                prefix += 'M'
+            # The top-level interface of a node does not have a unique name (just 'M/S_AXI')
+            if interface == top:
+                return prefix + '_AXI'
+            else:
+                return prefix + '_AXI_' + interface.upper()
+
         # Create the Jinja Environment and load templates
         env = Environment(loader=FileSystemLoader(directory))
         env.filters['basename'] = basename
         env.filters['dirname'] = dirname
         env.filters['axisprefix'] = axisprefix
+        env.filters['axi4liteprefix'] = axi4liteprefix
 
         return env
 

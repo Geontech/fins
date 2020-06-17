@@ -1218,6 +1218,7 @@ def populate_hdl_inferences(fins_data,verbose):
                         fins_data['hdl']['interfaces'].append(new_interface)
                     if verbose:
                         print('INFO: Port',hdl_port['name'],'was associated to interface',interface_name,'with type',interface_type)
+
     if verbose:
         print('INFO: Inferred interfaces',unique_interface_ids)
 
@@ -1777,17 +1778,70 @@ def populate_connections(fins_data, verbose):
                             fins_data['ports']['hdl_ports'].append(nodeset_port)
 
 
-    # Get the non-descriptive nodes (nodes that we actually instantiated in the design)
-    nodes = [n for n in fins_data['nodes'] if 'descriptive_node' not in n or not n['descriptive_node']]
+def populate_property_interfaces(fins_data, verbose):
+    """
+    Populate the per-node lists of property interfaces fins_data['prop_interfaces']
 
-    # Automatically export axi4lite interfaces for each node
-    fins_data['interface-exports'] = []
-    for node in nodes:
-        # Get all axi4lite interfaces for the node
-        interfaces = [i for i in node['node_details']['hdl']['interfaces'] if i['type'] == 'axi4lite']
-        # Add this node/interfaces pair to the interface-exports list
-        fins_data['interface-exports'].append({'node_name': node['module_name'], 'node': node, 'interfaces': interfaces})
-        # TODO exported interfaces of each node become the ['hdl']['interfaces'] of the nodeset
+    A node/IP's or a nodeset's prop_interfaces maps a node_name to a list of property interfaces
+    on that node:
+        [
+         {'name': <node-name>,
+          'top':<top-interface>,
+          'addr_width': <addr-width>,
+          'data-width': <data-width>,
+          'interfaces': [<interface-name>, ...]
+         }, ...
+        ]
+
+        - Here, [<interface-name>, ...] includes the interface names of each sub-IP.
+          An interface name is the same as the node/IP name and is used for interface ports in HDL such as:
+              S_AXI_TEST_MIDDLE
+        - Here, <top-interface> is the name of the interface that is the top-level interface for a node
+          (is not a sub-IP's/sub-node's interface). This is necessary because top-level interfaces of a node
+          do not include the node's name in HDL (e.g. just S_AXI, not S_AXI_TEST_MIDDLE)
+    """
+
+    # TODO exported interfaces of each node become the ['hdl']['interfaces'] of the nodeset
+
+    if 'nodes' in fins_data:
+        fins_data['prop_interfaces'] = []
+        for node in fins_data['nodes']:
+            if 'descriptive_node' not in node or not node['descriptive_node']:
+                prop_interface = {}
+                prop_interface['node_name'] = node['module_name']
+                prop_interface['top'] = node['node_details']['name']
+
+                prop_interface['addr_width'] = node['node_details']['properties']['addr_width']
+                prop_interface['data_width'] = node['node_details']['properties']['data_width']
+
+                prop_interface['interfaces'] = node['node_details']['prop_interfaces'][0]['interfaces']
+
+                fins_data['prop_interfaces'].append(prop_interface)
+    else:
+
+        # Initialize the list of interfaces for this IP/node: this is a list where each entry maps a node_name to a list of
+        # property interfaces on that node. A node can have more than one prop interface when it has sub-IPs
+        # TODO IP/node instance name instead of IP/node name?
+        fins_data['prop_interfaces'] = \
+            [{
+              'node_name': fins_data['name'],
+              'top': fins_data['name'],
+              'addr_width': fins_data['properties']['addr_width'],
+              'data_width': fins_data['properties']['data_width'],
+              'interfaces': [fins_data['name']]
+            }] if 'properties' in fins_data else []
+
+        if 'ip' in fins_data:
+            for ip in fins_data['ip']:
+                if 'prop_interfaces' in ip['ip_details']:
+                    # Update the list of interfaces for this IP
+                    ip_interfaces =  ip['ip_details']['prop_interfaces'][0]['interfaces']
+                    #fins_data['prop_interfaces'][0]['addr_width'] = ip['ip_details']['properties']['addr_width']
+                    #fins_data['prop_interfaces'][0]['data_width'] = ip['ip_details']['properties']['data_width']
+                    fins_data['prop_interfaces'][0]['interfaces'] += ip_interfaces
+
+    if verbose:
+        print('Property interfaces for "{}": {}'.format(fins_data['name'], fins_data['prop_interfaces']))
 
 
 def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
