@@ -212,8 +212,8 @@ endif
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
-	cd $(QUARTUS_DIR) && qsys-script --search-path=$(NODESET_SEARCH_PATHS)$$ --new-quartus-project=$(PROJECT_FILENAME) --script=$(QUARTUS_TO_NODESET_CREATE_SCRIPT_PATH) $(if $(UseBatch),>> $(QUARTUS_TO_NODESET_CREATE_LOG_PATH) 2>&1)
-	cd $(QUARTUS_DIR) && qsys-generate --search-path=$(NODESET_SEARCH_PATHS)$$ --quartus-project=$(PROJECT_FILENAME) --synthesis=$(SYNTH_LANGUAGE) {% if 'filesets' in fins %}{% if 'sim' in fins['filesets'] %}--simulation=$(SIM_LANGUAGE){% endif %}{% endif %} --ipxact $(QSYS_NODESET_FILENAME) $(if $(UseBatch),>> $(QUARTUS_TO_NODESET_CREATE_LOG_PATH) 2>&1)
+	cd $(QUARTUS_DIR) && qsys-script --search-path=$(IP_SEARCH_PATHS)$$ --new-quartus-project=$(PROJECT_FILENAME) --script=$(QUARTUS_TO_NODESET_CREATE_SCRIPT_PATH) $(if $(UseBatch),>> $(QUARTUS_TO_NODESET_CREATE_LOG_PATH) 2>&1)
+	cd $(QUARTUS_DIR) && qsys-generate --search-path=$(IP_SEARCH_PATHS)$$ --quartus-project=$(PROJECT_FILENAME) --synthesis=$(SYNTH_LANGUAGE) {% if 'filesets' in fins %}{% if 'sim' in fins['filesets'] %}--simulation=$(SIM_LANGUAGE){% endif %}{% endif %} --ipxact $(QSYS_NODESET_FILENAME) $(if $(UseBatch),>> $(QUARTUS_TO_NODESET_CREATE_LOG_PATH) 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
 	{%- if 'postbuild' in fins['filesets']['scripts'] %}
@@ -264,7 +264,7 @@ endif
 	{%- endif %}
 	{%- endif %}
 	cd $(QUARTUS_DIR) && ip-setup-simulation --quartus-project=$(PROJECT_FILENAME) --output-directory=./ --use-relative-paths $(if $(UseBatch),>> $(QUARTUS_TO_NODESET_SIMULATE_LOG_PATH) 2>&1)
-	cd $(QUARTUS_DIR) && sim-script-gen --system-file=$(QSYS_NODESET_FILENAME) --output-directory=./ --use-relative-paths $(if $(UseBatch),>> $(QUARTUS_TO_NODESET_SIMULATE_LOG_PATH) 2>&1)
+	cd $(QUARTUS_DIR) && sim-script-gen --search-path=$(IP_SEARCH_PATHS)$$ --system-file=$(QSYS_NODESET_FILENAME) --output-directory=./ --use-relative-paths $(if $(UseBatch),>> $(QUARTUS_TO_NODESET_SIMULATE_LOG_PATH) 2>&1)
 	cd $(MODELSIM_DIR) && vsim $(if $(UseBatch),-batch) -do $(MODELSIM_TO_NODESET_SIMULATE_SCRIPT_PATH) $(if $(UseBatch),>> $(MODELSIM_TO_NODESET_SIMULATE_LOG_PATH) 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}

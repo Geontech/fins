@@ -72,7 +72,7 @@ com
 {%- if 'filesets' in fins %}
 {%- if 'source' in fins['filesets'] %}
 {%- for src_file in fins['filesets']['sim'] %}
-vcom -work nodeset_test ${IP_ROOT_RELATIVE_TO_PROJ}/{{ src_file['path'] }}
+vcom -work {{ fins['name'] }} ${IP_ROOT_RELATIVE_TO_PROJ}/{{ src_file['path'] }}
 {%- endfor %}
 {%- endif %}
 {%- endif %}

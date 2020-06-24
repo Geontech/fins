@@ -1412,6 +1412,9 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
     if verbose:
         print('+++++ Done.')
 
+    # Set defaults for top-level keys
+    fins_data = populate_fins_fields(fins_data,verbose)
+
     # Set defaults
     if not 'base_offset' in fins_data:
         fins_data['base_offset'] = 0
