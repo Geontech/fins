@@ -152,8 +152,8 @@ set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }
 {%-   for interface in node_interfaces['interfaces'] %}
 {%-    set external_iface_name = (node_name + '_' + interface)|axi4liteprefix() %}
 {%-    set internal_iface_name = node_name + '.' + interface|axi4liteprefix(node_interfaces['top']) %}
-set_interface_property {{ external_iface_name }}_ACLK    EXPORT_OF {{ internal_iface_name }}_ACLK
-set_interface_property {{ external_iface_name }}_ARESETN EXPORT_OF {{ internal_iface_name }}_ARESETN
+#set_interface_property {{ external_iface_name }}_ACLK    EXPORT_OF {{ internal_iface_name }}_ACLK
+#set_interface_property {{ external_iface_name }}_ARESETN EXPORT_OF {{ internal_iface_name }}_ARESETN
 set_interface_property {{ external_iface_name }}         EXPORT_OF {{ internal_iface_name }}
 {%-   endfor %}
 {%-  endfor %}

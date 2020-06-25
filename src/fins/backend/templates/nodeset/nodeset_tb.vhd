@@ -103,8 +103,8 @@ architecture behav of {{ fins['name'] }}_tb is
   {%-   for interface in node_interfaces['interfaces'] %}
   {%-    set iface_name = (node_name + '_' + interface)|axi4liteprefix() %}
   -- AXILite Interface "{{ iface_name }}" on node "{{ node_name }}"
-  --signal {{ iface_name }}_ACLK    : std_logic;
-  --signal {{ iface_name }}_ARESETN : std_logic;
+  signal {{ iface_name }}_ACLK    : std_logic;
+  signal {{ iface_name }}_ARESETN : std_logic;
   signal {{ iface_name }}_AWADDR  : std_logic_vector({{ addr_width }}-1 downto 0);
   signal {{ iface_name }}_AWPROT  : std_logic_vector(2 downto 0);
   signal {{ iface_name }}_AWVALID : std_logic;
@@ -124,9 +124,9 @@ architecture behav of {{ fins['name'] }}_tb is
   signal {{ iface_name }}_RRESP   : std_logic_vector(1 downto 0);
   signal {{ iface_name }}_RVALID  : std_logic;
   signal {{ iface_name }}_RREADY  : std_logic;
-  {%-   endfor %}
-  {%-  endfor %}
-  {%- endif %}
+  {%-   endfor %}{#### for interface in node_interfaces['interfaces'] ####}
+  {%-  endfor %}{#### for node_interfaces in fins['prop_interfaces'] ####}
+  {%- endif %}{#### if 'prop_interfaces' in fins ####}
 
 
   {%- if 'ports' in fins %}
@@ -284,8 +284,7 @@ begin
       {%-  set outer_loop = loop %}
       {%-  for i in range(port['num_instances']) %}
       {%-   if port['direction']|lower == 'out' %}
-      --{{ port|axisprefix(i,True) }}_aclk    => {{ port|axisprefix(i) }}_aclk,
-      {{ port|axisprefix(i,True) }}_aclk    => clock,
+      {{ port|axisprefix(i,True) }}_aclk    => {{ port|axisprefix(i) }}_aclk,
       {%-    if port['supports_backpressure'] %}
       {{ port|axisprefix(i,True) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%-    endif %}
@@ -296,8 +295,7 @@ begin
       {{ port|axisprefix(i,True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
       {{ port|axisprefix(i,True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%-   else %}
-      --{{ port|axisprefix(i,True) }}_aclk    => {{ port|axisprefix(i) }}_aclk,
-      {{ port|axisprefix(i,True) }}_aclk    => clock,
+      {{ port|axisprefix(i,True) }}_aclk    => {{ port|axisprefix(i) }}_aclk,
       {{ port|axisprefix(i,True) }}_enable  => {{ port|axisprefix(i) }}_enable,
       {%-    if port['supports_backpressure'] %}
       {{ port|axisprefix(i,True) }}_tready  => {{ port|axisprefix(i) }}_tready,
@@ -332,30 +330,29 @@ begin
   end process w_clock;
 
   -- By default, copy the clock and reset for the Ports and Properties interfaces
-  --S_AXI_ACLK    <= clock;
-  --S_AXI_ARESETN <= resetn;
-  --S_AXI_TEST_MIDDLE_ACLK    <= clock;
-  --S_AXI_TEST_MIDDLE_ARESETN <= resetn;
-  --S_AXI_TEST_BOTTOM_ACLK    <= clock;
-  --S_AXI_TEST_BOTTOM_ARESETN <= resetn;
-  --s_axis_myinput_aclk    <= clock;
-  --s_axis_myinput_aresetn <= resetn;
-  --m_axis_myoutput_aclk    <= clock;
-  --m_axis_myoutput_aresetn <= resetn;
-  --s00_axis_test_in_aclk    <= clock;
-  --s00_axis_test_in_aresetn <= resetn;
-  --s01_axis_test_in_aclk    <= clock;
-  --s01_axis_test_in_aresetn <= resetn;
-  --m00_axis_test_out_aclk    <= clock;
-  --m00_axis_test_out_aresetn <= resetn;
-  --m01_axis_test_out_aclk    <= clock;
-  --m01_axis_test_out_aresetn <= resetn;
-  --s_axis_sfix_cpx_in_aclk    <= clock;
-  --s_axis_sfix_cpx_in_aresetn <= resetn;
-  --m_axis_sfix_cpx_out_aclk    <= clock;
-  --m_axis_sfix_cpx_out_aresetn <= resetn;
+  {%- if 'prop_interfaces' in fins %}
+  {%-  for node_interfaces in fins['prop_interfaces'] %}
+  {%-   set node_name = node_interfaces['node_name'] %}
+  {%-   for interface in node_interfaces['interfaces'] %}
+  {%-    set iface_name = (node_name + '_' + interface)|axi4liteprefix() %}
+  {{ iface_name }}_ACLK    <= clock;
+  {{ iface_name }}_ARESETN <= resetn;
+  {%-   endfor %}{#### for interface in node_interfaces['interfaces'] ####}
+  {%-  endfor %}{#### for node_interfaces in fins['prop_interfaces'] ####}
+  {%- endif %}{#### if 'prop_interfaces' in fins ####}
 
   {%- if 'ports' in fins %}
+  {%-  if 'ports' in fins['ports'] %}
+  {%-   for port in fins['ports']['ports'] %}
+  {%-    for i in range(port['num_instances']) %}
+  {{ port|axisprefix(i) }}_aclk    <= clock;
+  {{ port|axisprefix(i) }}_aresetn <= resetn;
+  {%-    endfor %}{#### for i in range(port['num_instances']) ####}
+  {%-   endfor %}{#### for port in fins['ports']['ports'] ####}
+  {%-  endif  %}{#### if 'ports' in fins['ports'] ####}
+  {%- endif  %}{#### if 'ports' in fins ####}
+
+  {%  if 'ports' in fins %}
   {%-  if 'ports' in fins['ports'] %}
   --------------------------------------------------------------------------------
   -- Port Verification Procedures
@@ -420,8 +417,7 @@ begin
     {%-   for interface in node_interfaces['interfaces'] %}
     {%-    set iface_name = (node_name + '_' + interface)|axi4liteprefix() %}
     {{ interface|lower }}_axilite_verify (
-      clock, resetn,
-      --  {{ iface_name }}_ACLK,   {{ iface_name }}_ARESETN,
+      {{ iface_name }}_ACLK,   {{ iface_name }}_ARESETN,
       {{ iface_name }}_AWADDR, {{ iface_name }}_AWPROT, {{ iface_name }}_AWVALID, {{ iface_name }}_AWREADY,
       {{ iface_name }}_WDATA,  {{ iface_name }}_WSTRB,  {{ iface_name }}_WVALID,  {{ iface_name }}_WREADY,
       {{ iface_name }}_BRESP,  {{ iface_name }}_BVALID, {{ iface_name }}_BREADY,
@@ -446,21 +442,16 @@ begin
     {%-   endif %}
     {%-  endfor %}
 
-    write(my_line, string'("Beggining ouptut verification"));
-    writeline(output, my_line);
-
     -- Wait for the output verification processes to complete
-    --{%-  for port in fins['ports']['ports'] %}
-    --{%-   if port['direction']|lower == 'out' %}
-    --{%-    for i in range(port['num_instances']) %}
-    --if (not {{ port|axisprefix(i) }}_verify_done) then
-    --  wait until ({{ port|axisprefix(i) }}_verify_done);
-    --end if;
-    --write(my_line, string'("Verification complete for '{{ port['name'] }}'"));
-    --writeline(output, my_line);
-    --{%-    endfor %}{#### for i in range(port['num_instances']) ####}
-    --{%-   endif %}
-    --{%-  endfor %}{#### for port in fins['ports']['ports'] ####}
+    {%-  for port in fins['ports']['ports'] %}
+    {%-   if port['direction']|lower == 'out' %}
+    {%-    for i in range(port['num_instances']) %}
+    if (not {{ port|axisprefix(i) }}_verify_done) then
+      wait until ({{ port|axisprefix(i) }}_verify_done);
+    end if;
+    {%-    endfor %}{#### for i in range(port['num_instances']) ####}
+    {%-   endif %}
+    {%-  endfor %}{#### for port in fins['ports']['ports'] ####}
 
     {%-  endif  %}{#### if 'ports' in fins['ports'] ####}
     {%- endif  %}{#### if 'ports' in fins ####}
