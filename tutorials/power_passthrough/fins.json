@@ -1,0 +1,48 @@
+{
+  "name":"power_passthrough",
+    "params":[
+    { "name":"POWER_DATA_WIDTH", "value":16 }
+  ],
+  "properties":{
+    "addr_width":16,
+    "data_width":32,
+    "is_addr_byte_indexed":false,
+    "properties":[
+      { "name":"enable", "type":"read-write-data", "width":1, "default_values":1 }
+    ]
+  },
+  "ports":{
+    "ports":[
+      {
+        "name":"power_in",
+        "direction":"in",
+        "data":{ "bit_width":"POWER_DATA_WIDTH", "is_signed":true }
+      },
+      {
+        "name":"power_out",
+        "direction":"out",
+        "data":{ "bit_width":"POWER_DATA_WIDTH", "is_signed":true }
+      }
+    ]
+  },
+  "filesets":{
+    "source":[
+      { "path":"gen/core/power_passthrough_pkg.vhd" },
+      { "path":"gen/core/power_passthrough_axis.vhd" },
+      { "path":"gen/core/power_passthrough_axilite.vhd" },
+      { "path":"hdl/power_passthrough_core.vhd" },
+      { "path":"gen/core/power_passthrough.vhd" }
+    ],
+    "sim":[
+      { "path":"gen/core/power_passthrough_axilite_verify.vhd" },
+      { "path":"gen/core/power_passthrough_axis_verify.vhd" },
+      { "path":"gen/core/power_passthrough_tb.vhd" }
+    ],
+    "scripts":{
+      "postsim":[
+        { "path":"scripts/verify_sim.py" }
+      ]
+    }
+  }
+
+}
