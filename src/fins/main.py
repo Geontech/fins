@@ -106,11 +106,13 @@ def run_generator(generator,filepath,backend,verbose):
         loader.populate_property_interfaces(fins_data, verbose)
 
         try:
-            generator.generate(fins_data,filename,is_nodeset)
+            # Run core generation, post core generation ops, and finally backend generation
+            generator.generate_core(fins_data,filename,is_nodeset)
+            loader.post_generate_core_operations(fins_data, verbose)
+            generator.generate_backend(fins_data,filename,is_nodeset)
         except RuntimeError as exc:
             logging.error('Generator error: %s', exc)
         generator.end_file()
-
 
         # Validate filesets
         # NOTE: This validate happens after the generator since some of the files referenced

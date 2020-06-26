@@ -214,5 +214,9 @@ class Generator:
                 self.render_jinja_template(jinja_env, 'top.vhd', output_directory+fins_data['name']+'.vhd', fins_data)
                 self.render_jinja_template(jinja_env, 'top_tb.vhd', output_directory+fins_data['name']+'_tb.vhd', fins_data)
 
-    def generate(self, fins_data, filename, is_nodeset):
-        self.generate_core(fins_data, filename, is_nodeset)
+    def generate_backend(self, fins_data, filename, is_nodeset):
+        """
+        Only implemented by Generator subclasses
+        """
+        pass
+

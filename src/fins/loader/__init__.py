@@ -1693,13 +1693,13 @@ def populate_connections(fins_data, verbose):
                     destination['port']['connected'] = True
 
     # Export ports as ports of the nodeset itself
-    if 'port-exports' in fins_data:
+    if 'port_exports' in fins_data:
 
         if 'ports' not in fins_data:
             fins['ports'] = {}
         fins['ports']['ports'] = []
 
-        for net in fins_data['port-exports']:
+        for net in fins_data['port_exports']:
             port = get_port(net['node_name'], net['net'], fins_data)
             if port is None:
                 print('ERROR: Exported port not found {}'.format(net['net']))
@@ -1712,7 +1712,7 @@ def populate_connections(fins_data, verbose):
             fins_data['ports']['ports'].append(nodeset_port)
 
     else:
-        # If port-exports isn't present in the JSON, they should be auto-generated:
+        # If port_exports isn't present in the JSON, they should be auto-generated:
         #     export all node output ports and on any unconnected input ports
 
         if 'ports' not in fins_data:
@@ -1725,6 +1725,7 @@ def populate_connections(fins_data, verbose):
 
                 if 'ports' in node['node_details']['ports']:
                     for port in node['node_details']['ports']['ports']:
+                        # FIXME test_mode is gimmicky and should probably just be removed
                         test_mode = 'test_mode' in fins_data and fins_data['test_mode']
                         # is this port part of a connection?
                         port_unconnected = 'connected' not in port or not port['connected']
@@ -1738,12 +1739,12 @@ def populate_connections(fins_data, verbose):
                             nodeset_port['node_port'] = port
                             fins_data['ports']['ports'].append(nodeset_port)
 
-    if 'hdl-port-exports' in fins_data:
+    if 'hdl_port_exports' in fins_data:
         if 'ports' not in fins_data:
             fins_data['ports'] = {}
         fins_data['ports']['hdl_ports'] = []
 
-        for net in fins_data['hdl-port-exports']:
+        for net in fins_data['hdl_port_exports']:
             port = get_port(net['node_name'], net['net'], fins_data, port_type='hdl_ports')
             if port is None:
                 print('ERROR: Exported port not found {}'.format(net['net']))
@@ -1755,7 +1756,7 @@ def populate_connections(fins_data, verbose):
             nodeset_port['node_port'] = port
             fins_data['ports']['hdl_ports'].append(nodeset_port)
     else:
-        # If hdl-port-exports isn't present in the JSON, they should be auto-generated:
+        # If hdl_port_exports isn't present in the JSON, they should be auto-generated:
         #     export all node output ports and on any unconnected input ports
 
         if 'ports' not in fins_data:
@@ -1878,9 +1879,15 @@ def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
     # Auto-detect sub-ip versions
     fins_data = populate_ip(fins_data,verbose)
 
+    # Return
+    return fins_data
+
+def post_generate_core_operations(fins_data, verbose):
+    """
+    Operations that must occur after the 'core' generation is complete, but before
+    backend generation starts
+    """
     # Read top-level HDL code and find the ports
     # NOTE: Must be executed after populate_fins_fields() and after populate_filesets()
     fins_data = populate_hdl_inferences(fins_data,verbose)
-
-    # Return
     return fins_data
