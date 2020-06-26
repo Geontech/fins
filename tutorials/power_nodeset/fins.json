@@ -9,7 +9,6 @@
       "fins_path":"../power_converter/fins.json",
       "module_name":"power_converter_0",
       "interface_name":"S_AXI_POWER_CONVERTER_0",
-      "properties_offset":0,
       "params": [
         { "name":"IQ_DATA_WIDTH",         "parent": "IQ_DATA_WIDTH" },
         { "name":"POWER_DATA_WIDTH",      "parent": "POWER_DATA_WIDTH" }
@@ -19,7 +18,6 @@
       "fins_path":"../power_passthrough/fins.json",
       "module_name":"power_passthrough_0",
       "interface_name":"S_AXI_POWER_PASSTHROUGH_0",
-      "properties_offset":196608,
       "params": [
         { "name":"POWER_DATA_WIDTH", "parent": "POWER_DATA_WIDTH" }
       ]

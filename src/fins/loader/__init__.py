@@ -1422,10 +1422,13 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
     if 'base_offset' not in fins_data:
         fins_data['base_offset'] = 0
 
-    # Set per-node defaults
     for node in fins_data['nodes']:
+        # Set per-node defaults
         if 'descriptive_node' not in node:
             node['descriptive_node'] = False
+        # Ensure that mandatory per-node keys are present
+        if fins_data['is_system_nodeset'] and 'properties_offset' not in node:
+            print('ERROR: Required key properties_offset does not exist for node', node['module_name'])
 
     # Override the FINS Node JSON data with a .override file if it exists
     fins_data = override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
@@ -1438,8 +1441,9 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
 def populate_fins_node(node, verbose):
     ports_producer_name_defined = False
     ports_consumer_name_defined = False
+
     # Convert dictionary to uint
-    if isinstance(node['properties_offset'], str):
+    if 'properties_offset' in node and isinstance(node['properties_offset'], str):
         if os.path.exists(node['properties_offset']):
             _, bd_extension = os.path.splitext(node['properties_offset'])
             if bd_extension.lower() == '.qsys':
