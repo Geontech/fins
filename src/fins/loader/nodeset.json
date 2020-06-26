@@ -34,9 +34,9 @@
       "is_required":false,
       "types":["str"]
     },
-    "top_sim":{
+    "is_system_nodeset":{
       "is_required":false,
-      "types":["str"]
+      "types":["bool"]
     },
     "base_offset":{
       "is_required":false,

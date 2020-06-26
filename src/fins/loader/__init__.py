@@ -1415,9 +1415,17 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
     # Set defaults for top-level keys
     fins_data = populate_fins_fields(fins_data,verbose)
 
-    # Set defaults
-    if not 'base_offset' in fins_data:
+    # Set defaults for nodeset-specific top-level keys
+    if 'is_system_nodeset' not in fins_data:
+        fins_data['is_system_nodeset'] = False
+
+    if 'base_offset' not in fins_data:
         fins_data['base_offset'] = 0
+
+    # Set per-node defaults
+    for node in fins_data['nodes']:
+        if 'descriptive_node' not in node:
+            node['descriptive_node'] = False
 
     # Override the FINS Node JSON data with a .override file if it exists
     fins_data = override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
@@ -1721,7 +1729,7 @@ def populate_connections(fins_data, verbose):
 
         for node in fins_data['nodes']:
             # Only fully FINS-defined nodes are relevant here
-            if 'descriptive_node' not in node or not node['descriptive_node']:
+            if not node['descriptive_node']:
 
                 if 'ports' in node['node_details']['ports']:
                     for port in node['node_details']['ports']['ports']:
@@ -1765,7 +1773,7 @@ def populate_connections(fins_data, verbose):
 
         for node in fins_data['nodes']:
             # Only fully FINS-defined nodes are relevant here
-            if 'descriptive_node' not in node or not node['descriptive_node']:
+            if not node['descriptive_node']:
                 if 'hdl_ports' in node['node_details']['ports']:
                     for port in node['node_details']['ports']['hdl_ports']:
                         test_mode = 'test_mode' in fins_data and fins_data['test_mode']
@@ -1810,7 +1818,7 @@ def populate_property_interfaces(fins_data, verbose):
     if 'nodes' in fins_data:
         fins_data['prop_interfaces'] = []
         for node in fins_data['nodes']:
-            if 'descriptive_node' not in node or not node['descriptive_node']:
+            if not node['descriptive_node']:
                 prop_interface = {}
                 prop_interface['node_name'] = node['module_name']
                 prop_interface['top'] = node['node_details']['name']
@@ -1889,5 +1897,6 @@ def post_generate_core_operations(fins_data, verbose):
     """
     # Read top-level HDL code and find the ports
     # NOTE: Must be executed after populate_fins_fields() and after populate_filesets()
-    fins_data = populate_hdl_inferences(fins_data,verbose)
+    if 'nodes' not in fins_data:
+        fins_data = populate_hdl_inferences(fins_data,verbose)
     return fins_data

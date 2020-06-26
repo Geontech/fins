@@ -128,22 +128,6 @@ class Generator:
             # Create the parameters TCL script
             self.render_jinja_template(jinja_env, 'params.tcl', output_directory+'params.tcl', fins_data)
 
-            for node in fins_data['nodes']:
-                # Generate JSON override files for each node
-                if 'params' in node:
-                    # Once we are done retrieving parameter values, write the
-                    # fins edit JSON file for sub-ip
-                    with open(node['fins_path']+'.override', 'w') as override_file:
-                        # Strip all fields except for params
-                        override_data = {}
-                        override_data['params'] = node['params']
-                        if 'part' in fins_data:
-                            override_data['part'] = fins_data['part']
-                        json.dump(override_data, override_file, sort_keys=True, indent=2)
-
-            self.render_jinja_template(jinja_env, 'axis_verify.vhd', output_directory+fins_data['name']+'_axis_verify.vhd', fins_data)
-            self.render_jinja_template(jinja_env, 'nodeset_tb.vhd', output_directory+fins_data['name']+'_tb.vhd', fins_data)
-
             # Generate FINS core files
             for node in fins_data['nodes']:
                 if node['ports_producer']:
@@ -166,6 +150,26 @@ class Generator:
                     os.makedirs(ports_consumer_directory, exist_ok=True)
                     self.render_jinja_template(jinja_env, 'avalonst_tdm_to_parallel.vhd', ports_consumer_directory+node['ports_consumer']['name']+'_avalonst_tdm_to_parallel.vhd', node['ports_consumer'])
                     self.render_jinja_template(jinja_env, 'avalonst_tdm_to_parallel.json', ports_consumer_directory+node['ports_consumer']['name']+'_avalonst_tdm_to_parallel.json', node['ports_consumer'])
+
+            # Some operations only happen for non-system-level nodesets (e.g. application-level nodesets)
+            # Run some HDL code generation and iterate into sub-nodes
+            if not fins_data['is_system_nodeset']:
+                for node in fins_data['nodes']:
+                    # Generate JSON override files for each node
+                    if 'params' in node:
+                        # Once we are done retrieving parameter values, write the
+                        # fins edit JSON file for sub-ip
+                        with open(node['fins_path']+'.override', 'w') as override_file:
+                            # Strip all fields except for params
+                            override_data = {}
+                            override_data['params'] = node['params']
+                            if 'part' in fins_data:
+                                override_data['part'] = fins_data['part']
+                            json.dump(override_data, override_file, sort_keys=True, indent=2)
+
+                self.render_jinja_template(jinja_env, 'axis_verify.vhd', output_directory+fins_data['name']+'_axis_verify.vhd', fins_data)
+                self.render_jinja_template(jinja_env, 'nodeset_tb.vhd', output_directory+fins_data['name']+'_tb.vhd', fins_data)
+
         else:
             # Write the FINS data model to file
             with open(output_directory+fins_data['name']+'.json', 'w') as fins_data_file:
