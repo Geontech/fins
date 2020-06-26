@@ -70,7 +70,7 @@ source msim_setup.tcl
 
 com
 {%- if 'filesets' in fins %}
-{%- if 'source' in fins['filesets'] %}
+{%- if 'sim' in fins['filesets'] %}
 {%- for src_file in fins['filesets']['sim'] %}
 vcom -work {{ fins['name'] }} ${IP_ROOT_RELATIVE_TO_PROJ}/{{ src_file['path'] }}
 {%- endfor %}

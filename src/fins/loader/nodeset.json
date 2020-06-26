@@ -186,21 +186,6 @@
       "is_required":false,
       "types":["dict"],
       "fields":{
-        "source":{
-          "is_required":false,
-          "types":["list"],
-          "list_types":["dict"],
-          "fields":{
-            "path":{
-              "is_required":true,
-              "types":["str"]
-            },
-            "type":{
-              "is_required":false,
-              "types":["str"]
-            }
-          }
-        },
         "sim":{
           "is_required":false,
           "types":["list"],

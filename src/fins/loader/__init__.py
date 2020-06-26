@@ -1250,7 +1250,9 @@ def validate_filesets(fins_data,filename,verbose):
     # Validate filesets
     if verbose:
         print('+++++ Validating filesets of {} ...'.format(filename))
-    validate_files(fins_data['name'],filename,fins_data['filesets']['source'],QUARTUS_DESIGN_FILE_TYPES,verbose)
+    if 'source' in fins_data['filesets']:
+        # TODO error if 'source' is not present for a Node
+        validate_files(fins_data['name'],filename,fins_data['filesets']['source'],QUARTUS_DESIGN_FILE_TYPES,verbose)
     if 'sim' in fins_data['filesets']:
         validate_files(fins_data['name'],filename,fins_data['filesets']['sim'],QUARTUS_DESIGN_FILE_TYPES,verbose)
     if 'constraints' in fins_data['filesets']:

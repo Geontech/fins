@@ -54,7 +54,6 @@
     }
   ],
   "filesets":{
-    "source":[],
     "sim":[
       { "path":"../power_converter/gen/core/power_converter_pkg.vhd" },
       { "path":"../power_converter/gen/core/power_converter_axilite_verify.vhd" },
