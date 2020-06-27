@@ -2,7 +2,7 @@
 
 **[RETURN TO TOP LEVEL README](../README.md)**
 
-In this tutorial, we will buid on the work done in [Tutorial: FINS Node Power Converter](tutorial1.md) to create a simple firware IP Nodeset using FINS and Intel Quartus Prime Pro 19.1. This Nodeset will include the Power Converter Node and a basic Passthrough Node. Make sure you have installed `fins` and the `fins-quartus` backed, and make sure you have completed the first tutorial.
+In this tutorial, we will buid on the work done in [Tutorial: FINS Node Power Converter](tutorial1.md) to create a simple firware IP Nodeset using FINS and Intel Quartus Prime Pro 19.1. This Nodeset will include the Power Converter Node and a basic Passthrough Node. Make sure you have installed `fins` and the `fins-quartus` backed, and make sure you have completed the [first tutorial](tutorial1.md).
 
 ## Step 1: Copy the Passthrough Node into your workspace
 
@@ -90,8 +90,8 @@ Using your favorite text editor, create a file called **fins.json** in the **pow
 
 In the **fins.json** file we just created, we have defined:
 1. Two "params" which override params of the Nodes in this Nodeset. See [here](parameters.md) for more information about parameters.
-2. A list of FINS "nodes" to be instantiated and connected in this Nodeset. Each Node's property interface is assigned a meaningful name, and Node parameters are overwritten by parameters of the Nodeset. FINS code-generation instantiates the anodes listed here in a backend/tool-specific block design (Vivado Block Design or Quartus Platform Designer System). For more information on the fields of each "nodes" entry see [here](integration.md).
-3. Connections between Node ports and connections to clocks and resets. For more information on "connections" see [here](integration.md).
+2. A list of FINS "nodes" to be instantiated and connected in this Nodeset. Each Node's property interface is assigned a meaningful name, and Node parameters are overwritten by parameters of the Nodeset. FINS code-generation instantiates the nodes listed here in a backend/tool-specific block design (Vivado Block Design or Quartus Platform Designer System). For more information on the fields of each "nodes" entry see [here](integration.md).
+3. Connections between Node ports, and connections to clocks and resets. For more information on "connections" see [here](integration.md).
 
 > NOTE: The way clocks are exported and connected is in flux and will likely change in the short term.
 
@@ -110,7 +110,7 @@ Once that operation completes, inspect the **./gen/core** directory to find the 
 
 ## Step 4: Adding the Filesets
 
-Modify your **fins.json** file to add the following code after the `connections` top-level key. Remember to use a comma after the closing curly brace (`}`) of `connections`!
+Modify your **fins.json** file to add the following code after the `connections` top-level key. Remember to use a comma after the closing square brace (`]`) of `connections`!
 
 ```json
   "filesets":{
@@ -130,7 +130,7 @@ Modify your **fins.json** file to add the following code after the `connections`
   }
 ```
 
-The `filesets` top-level key indicates which files are used in the Nodeset project. For Nodesets in particular, HDL files can only be added for simulation purposes. Notice that most of the files are located in the **gen/core/** directory. These files are auto-generated and accordingly updated with the `fins` code generator executable. Since FINS manages these files, the burden of creating and maintaining these files is removed from the developer!
+The `filesets` top-level key indicates which files are used in the Nodeset project. For Nodesets in particular, HDL files can only be added for simulation purposes. Notice that a few of the files are located in the **gen/core/** directory. These files are auto-generated and accordingly updated with the `fins` code generator executable. Since FINS manages these files, the burden of creating and maintaining these files is removed from the developer!
 
 A few files pointed to here are from the Nodes in this Nodeset. They are for property access and verification, and provide other utility in the Nodeset testbench.
 
@@ -140,7 +140,7 @@ The `filesets` key also contains a reference to a script that is executed after 
 
 First we need to create a data-source file called **sim_source_power_converter_0_iq.txt**. This will drive the "iq" input port of the **power_converter** node. This filename matches the default used in the testbench VHDL and is derived from the Node's `module_name` in **fins.json**.
 
-Create a directory **./sim_data** in the Nodeset root to contain our simulation files. **./sim_data** is the generated testbench's default location for source/sink files. Since this nodeset is just a **power_converter** Node connected to a passthrough Node, just copy over the simulation data from the **power_converter** tutorial.
+Create a directory **./sim_data** in the Nodeset root to contain our simulation files. **./sim_data** is the generated testbench's default location for source/sink files. Since this Nodeset is just a **power_converter** Node connected to a passthrough Node, just copy over the simulation data from the **power_converter** tutorial.
 
 ```
 $ mkdir sim_data
@@ -154,7 +154,7 @@ $ mkdir scripts
 $ cp ../power_converter/scripts/verify_sim.py scripts/
 ```
 
-This script is referenced as `postsim` in the JSON's `filesets`, so it will be run _after_ the simulation completes.
+This script is referenced as `postsim` in the JSON's `filesets`, so it will run _after_ simulation completes.
 
 ## Step 5: Building the Nodeset with Intel Quartus Prime Pro
 
@@ -167,7 +167,7 @@ $ fins -b quartus fins.json
 Inspect the **./gen/quartus** directory to find the auto-generated Intel Quartus Prime Pro TCL scripts listed below.
 
 * **node_inst.tcl**: This is a Platform Designer Tcl script that instantiates and connects the Nodes of this Nodeset.
-* **nodeset_create.tcl**: This is the script that the **Makefile** will use to create a Quartus Platform Designer System (QSYS). It calls **node_inst.tcl**, exports property interfaces and unconnected ports to become externals of the QSYS. It also manages connections to clocks and resets of the Nodes. 
+* **nodeset_create.tcl**: This is the script that the **Makefile** will use to create a Quartus Platform Designer System (QSYS). It calls **node_inst.tcl** and then exports property interfaces and unconnected ports to become externals of the QSYS. It also manages connections to clocks and resets of the Nodes. 
 * **nodeset_simulate.tcl**: This is the script that will run the simulation in the next step of this tutorial.
 
 To package and build the Nodeset with Intel Quartus Prime Pro, execute the following commands.
