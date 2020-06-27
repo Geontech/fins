@@ -179,7 +179,7 @@ $ make clean
 $ make UseGui=1
 ```
 
-The `UseGui=1` make variable tells FINS to display the Quartus messages to the command window. Since Quartus has a more command-line flow, the Quartus GUI is not opened. Once the operations have completed, check the command line console output to make sure that there were no errors. Look inside the **./project/quartus** directory and you will find the **power_nodeset.qpf** project file that was created and the **power_converter.qsys** Platform Designer System definition file.
+The `UseGui=1` make variable tells FINS to display the Quartus messages to the command window. Since Quartus has a more command-line flow, the Quartus GUI is not opened. Once the operations have completed, check the command line console output to make sure that there were no errors. Look inside the **./project/quartus** directory and you will find the **power_nodeset.qpf** project file that was created and the **power_nodeset.qsys** Platform Designer System definition file.
 
 ## Step 6: Simulating the Nodeset with ModelSim
 
