@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="33cm" height="38cm" viewBox="-524 -1404 647 747" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g id="Background">
+    <rect style="fill: none; stroke-opacity: 1; stroke-width: 6; stroke: #005596" x="-520" y="-1400" width="640" height="740" rx="0" ry="0"/>
+    <rect style="fill: none; stroke-opacity: 1; stroke-width: 6; stroke: #005596" x="-440" y="-1120" width="480" height="260" rx="0" ry="0"/>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #c41230" x="-160" y="-1060" width="160" height="160" rx="0" ry="0"/>
+      <text font-size="11.8533" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-80" y="-976.406">
+        <tspan x="-80" y="-976.406">power_passthrough</tspan>
+      </text>
+    </g>
+    <text font-size="22.5778" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-340" y="-1232.18">
+      <tspan x="-340" y="-1232.18"></tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #c41230" x="-400" y="-1060" width="160" height="160" rx="0" ry="0"/>
+      <text font-size="11.8533" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-320" y="-976.406">
+        <tspan x="-320" y="-976.406">power_converter</tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #005596" x="-260" y="-820" width="120" height="120" rx="0" ry="0"/>
+      <text font-size="16.9333" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-200" y="-765.449">
+        <tspan x="-200" y="-765.449">AXIS</tspan>
+        <tspan x="-200" y="-744.282">VERIFY</tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #005596" x="-240" y="-1320" width="120" height="120" rx="0" ry="0"/>
+      <text font-size="16.9333" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-180" y="-1265.45">
+        <tspan x="-180" y="-1265.45">AXILITE</tspan>
+        <tspan x="-180" y="-1244.28">VERIFY</tspan>
+      </text>
+    </g>
+    <text font-size="22.5778" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-200" y="-1372.51">
+      <tspan x="-200" y="-1372.51">POWER_NODESET_TB</tspan>
+    </text>
+    <g>
+      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" points="-200,-1208.03 -200,-1160 -320,-1160 -320,-1100 -320,-1071.97 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-200,-1215.53 -195,-1205.53 -200,-1208.03 -205,-1205.53 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-320,-1064.47 -325,-1074.47 -320,-1071.97 -315,-1074.47 "/>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" x1="-228.028" y1="-980" x2="-171.972" y2="-980"/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-235.528,-980 -225.528,-985 -228.028,-980 -225.528,-975 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-164.472,-980 -174.472,-975 -171.972,-980 -174.472,-985 "/>
+    </g>
+    <g>
+      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" points="-80,-1071.97 -80,-1120 -80,-1160 -180,-1160 -180,-1188.03 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-80,-1064.47 -85,-1074.47 -80,-1071.97 -75,-1074.47 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-180,-1195.53 -175,-1185.53 -180,-1188.03 -185,-1185.53 "/>
+    </g>
+    <g>
+      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" points="-411.972,-980 -480,-980 -480,-760 -260,-760 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-404.472,-980 -414.472,-975 -411.972,-980 -414.472,-985 "/>
+    </g>
+    <g>
+      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" points="-128.028,-760 80,-760 80,-980 0,-980 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-135.528,-760 -125.528,-765 -128.028,-760 -125.528,-755 "/>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #005596" x="-260" y="-1340" width="120" height="120" rx="0" ry="0"/>
+      <text font-size="16.9333" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-200" y="-1285.45">
+        <tspan x="-200" y="-1285.45">AXILITE</tspan>
+        <tspan x="-200" y="-1264.28">VERIFY</tspan>
+      </text>
+    </g>
+    <text font-size="22.5778" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-200" y="-1092.18">
+      <tspan x="-200" y="-1092.18">POWER_NODESET</tspan>
+    </text>
+  </g>
+</svg>

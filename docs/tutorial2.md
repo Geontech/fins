@@ -136,6 +136,9 @@ A few files pointed to here are from the Nodes in this Nodeset. They are for pro
 
 The `filesets` key also contains a reference to a script that is executed after the simulation process `scripts/verify_sim.py`.
 
+The following diagram illustrates how the Nodeset block design connects to the generated testbench for verification.
+![](tutorial_nodeset.png)
+
 ### Copy simulation files into the nodeset
 
 First we need to create a data-source file called **sim_source_power_converter_0_iq.txt**. This will drive the "iq" input port of the **power_converter** node. This filename matches the default used in the testbench VHDL and is derived from the Node's `module_name` in **fins.json**.
@@ -180,6 +183,13 @@ $ make UseGui=1
 ```
 
 The `UseGui=1` make variable tells FINS to display the Quartus messages to the command window. Since Quartus has a more command-line flow, the Quartus GUI is not opened. Once the operations have completed, check the command line console output to make sure that there were no errors. Look inside the **./project/quartus** directory and you will find the **power_nodeset.qpf** project file that was created and the **power_nodeset.qsys** Platform Designer System definition file.
+
+You can open up the Nodeset in the Platform Designer GUI to inspect:
+```bash
+qsys-edit --quartus_project=power_nodeset.qpf power_nodeset.qsys
+```
+![](tutorial_qsys.png)
+![](tutorial_qsys_schematic.png)
 
 ## Step 6: Simulating the Nodeset with ModelSim
 
