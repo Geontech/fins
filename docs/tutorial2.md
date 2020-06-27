@@ -138,16 +138,16 @@ The `filesets` key also contains a reference to a script that is executed after 
 
 ### Copy simulation files into the nodeset
 
-First we need to create a simulation source file called **sim_sink_power_converter_0_iq.txt** for the "iq" input port of the **power_converter** node. This is the testbench's default name and is derived from the Node's `module_name` in **fins.json**.
+First we need to create a data-source file called **sim_source_power_converter_0_iq.txt**. This will drive the "iq" input port of the **power_converter** node. This filename matches the default used in the testbench VHDL and is derived from the Node's `module_name` in **fins.json**.
 
-Create a directory **./sim_data** in the Nodeset root to contain our simulation files. **./sim_data** is the default simulation file source/sink location of the generated testbench **gen/core/power_nodeset_tb.vhd**. Since this nodeset is just a **power_converter** and a passthrough Node, just copy over the simulation data from the **power_converter** tutorial.
+Create a directory **./sim_data** in the Nodeset root to contain our simulation files. **./sim_data** is the generated testbench's default location for source/sink files. Since this nodeset is just a **power_converter** Node connected to a passthrough Node, just copy over the simulation data from the **power_converter** tutorial.
 
 ```
 $ mkdir sim_data
 $ cp ../power_converter/sim_data/sim_source_iq.txt sim_data/sim_source_power_converter_0_iq.txt
 ```
 
-Since the second Node in this Nodeset is just a passthrough, we can use the same python verification as is used by the **power_converter** Node. Copy it over.
+Again, since the second Node in this Nodeset is just a passthrough, we can use the same python verification script used by the **power_converter**. Copy it over.
 
 ```
 $ mkdir scripts
