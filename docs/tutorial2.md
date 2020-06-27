@@ -196,7 +196,7 @@ Verify all the commands completed without error, and check the log files after e
 
 ## Solution
 
-The solution files for this tutorial are located in the **tutorials/power_converter** directory of the FINS repository.
+The solution files for this tutorial are located in the **tutorials/power_nodeset** directory of the FINS repository.
 
 
 **[RETURN TO TOP LEVEL README](../README.md)**
