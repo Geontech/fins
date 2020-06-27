@@ -168,6 +168,7 @@ all:
 	{%- for node in fins['nodes'] %}
 	$(MAKE) -C {{ node['fins_dir'] }} all
 	{%- endfor %}
+	make -C . $(NODESET_TARGET)
 
 # Clean phony target that cleans only this nodeset
 clean:
