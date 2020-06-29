@@ -123,7 +123,7 @@ save_instantiation
 add_connection clock_in.out_clk/reset_in.clk
 
 # Source FINS nodeset Tcl to instantiate FINS nodes and make connections to/between them
-source ../../gen/quartus/node_inst.tcl
+source ../../gen/quartus/nodes_instantiate.tcl
 
 # add the exports
 set_interface_property clk EXPORT_OF clock_in.in_clk

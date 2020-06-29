@@ -79,13 +79,13 @@
           "is_required":true,
           "types":["str"]
         },
-        "descriptive_node":{
-          "is_required":false,
-          "types":["bool"]
-        },
         "interface_name":{
           "is_required":true,
           "types":["str"]
+        },
+        "sub_node":{
+          "is_required":false,
+          "types":["bool"]
         },
         "properties_offset":{
           "is_required":false,

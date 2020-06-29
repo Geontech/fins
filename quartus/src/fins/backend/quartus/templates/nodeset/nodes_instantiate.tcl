@@ -21,7 +21,7 @@
 #===============================================================================
 # Firmware IP Node Specification (FINS) Auto-Generated File
 # ---------------------------------------------------------
-# Template:    node_inst.tcl
+# Template:    nodes_instantiate.tcl
 # Backend:     {{ fins['backend'] }}
 # Generated:   {{ now }}
 # ---------------------------------------------------------
@@ -35,7 +35,7 @@
 # Instantiate all nodes in nodeset
 -#}
 {%  for node in fins['nodes'] %}
-{%- if not node['descriptive_node'] %}
+{%- if not node['sub_node'] %}
 # Instantiate node "{{ node['node_name'] }}" as module "{{ node['module_name'] }}"
 add_component {{ node['module_name'] }} {{ node['module_name'] }}.ip {{ node['node_name'] }}
 load_component {{ node['module_name'] }}

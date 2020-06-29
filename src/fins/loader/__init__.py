@@ -1426,8 +1426,8 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
 
     for node in fins_data['nodes']:
         # Set per-node defaults
-        if 'descriptive_node' not in node:
-            node['descriptive_node'] = False
+        if 'sub_node' not in node:
+            node['sub_node'] = False
         # Ensure that mandatory per-node keys are present
         if fins_data['is_system_nodeset'] and 'properties_offset' not in node:
             print('ERROR: Required key properties_offset does not exist for node', node['module_name'])
@@ -1735,7 +1735,7 @@ def populate_connections(fins_data, verbose):
 
         for node in fins_data['nodes']:
             # Only fully FINS-defined nodes are relevant here
-            if not node['descriptive_node']:
+            if not node['sub_node']:
 
                 if 'ports' in node['node_details']['ports']:
                     for port in node['node_details']['ports']['ports']:
@@ -1779,7 +1779,7 @@ def populate_connections(fins_data, verbose):
 
         for node in fins_data['nodes']:
             # Only fully FINS-defined nodes are relevant here
-            if not node['descriptive_node']:
+            if not node['sub_node']:
                 if 'hdl_ports' in node['node_details']['ports']:
                     for port in node['node_details']['ports']['hdl_ports']:
                         test_mode = 'test_mode' in fins_data and fins_data['test_mode']
@@ -1824,7 +1824,7 @@ def populate_property_interfaces(fins_data, verbose):
     if 'nodes' in fins_data:
         fins_data['prop_interfaces'] = []
         for node in fins_data['nodes']:
-            if not node['descriptive_node']:
+            if not node['sub_node']:
                 prop_interface = {}
                 prop_interface['node_name'] = node['module_name']
                 prop_interface['top'] = node['node_details']['name']

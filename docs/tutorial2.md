@@ -169,8 +169,8 @@ $ fins -b quartus fins.json
 
 Inspect the **./gen/quartus** directory to find the auto-generated Intel Quartus Prime Pro TCL scripts listed below.
 
-* **node_inst.tcl**: This is a Platform Designer Tcl script that instantiates and connects the Nodes of this Nodeset.
-* **nodeset_create.tcl**: This is the script that the **Makefile** will use to create a Quartus Platform Designer System (QSYS). It calls **node_inst.tcl** and then exports property interfaces and unconnected ports to become externals of the QSYS. It also manages connections to clocks and resets of the Nodes. 
+* **nodes_instantiate.tcl**: This is a Platform Designer Tcl script that instantiates and connects the Nodes of this Nodeset.
+* **nodeset_create.tcl**: This is the script that the **Makefile** will use to create a Quartus Platform Designer System (QSYS). It calls **nodes_instantiate.tcl** and then exports property interfaces and unconnected ports to become externals of the QSYS. It also manages connections to clocks and resets of the Nodes. 
 * **nodeset_simulate.tcl**: This is the script that will run the simulation in the next step of this tutorial.
 
 To package and build the Nodeset with Intel Quartus Prime Pro, execute the following commands.
