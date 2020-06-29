@@ -119,4 +119,7 @@ The JSON schema for FINS Node is composed of the following top-level fields:
 | ports           | dict   | NO       |               | A dictionary of ports definitions. See the ports documentation [here](ports.md). |
 | properties      | dict   | NO       |               | A dictionary of properties definitions. See the properties documentation [here](properties.md). |
 
+## Integration of Multiple FINS IPs
+A FINS Nodeset is used to connect multiple FINS IPs in an application along with a simulation testbench. See [FINS Nodesets and Integration](integration.md) for more information.
+
 **[RETURN TO TOP LEVEL README](../README.md)**

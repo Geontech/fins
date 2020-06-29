@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="56cm" height="29cm" viewBox="-423 -987 1105 577" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g id="Background">
+    <rect style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #c41230" x="60" y="-960" width="300" height="280" rx="0" ry="0"/>
+    <rect style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #7f7f7f" x="-420" y="-960" width="460" height="280" rx="0" ry="0"/>
+    <polygon style="fill: #fffaef; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="220,-580 226,-590 260,-590 268,-580 340,-580 340,-512 336,-508 220,-508 "/>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="280" y="-544.569">
+      <tspan x="280" y="-544.569">./gen/vivado/</tspan>
+    </text>
+    <polygon style="fill: #fffaef; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="-320,-580 -314,-590 -280,-590 -272,-580 -200,-580 -200,-512 -204,-508 -320,-508 "/>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-260" y="-544.569">
+      <tspan x="-260" y="-544.569">./gen/core/</tspan>
+    </text>
+    <polygon style="fill: #fffaef; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="-60,-580 -54,-590 -20,-590 -12,-580 60,-580 60,-512 56,-508 -60,-508 "/>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="0" y="-544.569">
+      <tspan x="0" y="-544.569">./</tspan>
+    </text>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x1="280" y1="-700" x2="280" y2="-590.744"/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="280,-583.244 275,-593.244 280,-590.744 285,-593.244 "/>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x1="-260" y1="-711.428" x2="-260" y2="-590.718"/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="-260,-583.218 -265,-593.218 -260,-590.718 -255,-593.218 "/>
+    </g>
+    <text font-size="22.5778" style="fill: #7f7f7f; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-190" y="-965.325">
+      <tspan x="-190" y="-965.325">CORE BACKEND</tspan>
+    </text>
+    <text font-size="22.5778" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="210" y="-965.325">
+      <tspan x="210" y="-965.325">VIVADO BACKEND</tspan>
+    </text>
+    <rect style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #005596" x="380" y="-960" width="300" height="280" rx="0" ry="0"/>
+    <text font-size="22.5778" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="530" y="-965.325">
+      <tspan x="530" y="-965.325">QUARTUS BACKEND</tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="400" y="-780" width="120" height="80" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="460" y="-752.119">
+        <tspan x="460" y="-752.119"></tspan>
+        <tspan x="460" y="-736.119">Makefile</tspan>
+        <tspan x="460" y="-720.119"></tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="529.35" y="-780" width="141.3" height="80" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="600" y="-760.119">
+        <tspan x="600" y="-760.119"></tspan>
+        <tspan x="600" y="-744.119">nodes_instantiate.tcl</tspan>
+        <tspan x="600" y="-728.119">nodeset_create.tcl</tspan>
+        <tspan x="600" y="-712.119">nodeset_simulate.tcl</tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="80" y="-780" width="120" height="80" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="140" y="-752.119">
+        <tspan x="140" y="-752.119"></tspan>
+        <tspan x="140" y="-736.119">Makefile</tspan>
+        <tspan x="140" y="-720.119"></tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="212.374" y="-780" width="135.25" height="80" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="279.999" y="-760.119">
+        <tspan x="279.999" y="-760.119"></tspan>
+        <tspan x="279.999" y="-744.119">nodes_instantiate.tcl</tspan>
+        <tspan x="279.999" y="-728.119">nodeset_create.tcl</tspan>
+        <tspan x="279.999" y="-712.119">nodeset_simulate.tcl</tspan>
+      </text>
+    </g>
+    <polygon style="fill: #fffaef; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="540,-580 546,-590 580,-590 588,-580 660,-580 660,-512 656,-508 540,-508 "/>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="600" y="-544.569">
+      <tspan x="600" y="-544.569">./gen/quartus/</tspan>
+    </text>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x1="600" y1="-700" x2="600" y2="-589.736"/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="600,-582.236 595,-592.236 600,-589.736 605,-592.236 "/>
+    </g>
+    <g>
+      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #000000" points="460,-700 460,-620 24,-620 24,-589.736 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="24,-582.236 19,-592.236 24,-589.736 29,-592.236 "/>
+    </g>
+    <g>
+      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #000000" points="140,-700 140,-640.501 0,-640.501 0,-590.739 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="0,-583.239 -5,-593.239 0,-590.739 5,-593.239 "/>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="-100" y="-780" width="120" height="80" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-40" y="-752.119">
+        <tspan x="-40" y="-752.119"></tspan>
+        <tspan x="-40" y="-736.119">.gitignore</tspan>
+        <tspan x="-40" y="-720.119"></tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="-400" y="-780" width="140" height="80" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-330" y="-736.119">
+        <tspan x="-330" y="-736.119">params.tcl</tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="-260" y="-860" width="140" height="80" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-190" y="-816.119">
+        <tspan x="-190" y="-816.119">axis_verify.vhd</tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="-400" y="-940" width="140" height="80" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-330" y="-896.119">
+        <tspan x="-330" y="-896.119">nodeset_tb.vhd</tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="-260" y="-780" width="140" height="80" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-190" y="-736.119">
+        <tspan x="-190" y="-736.119">nodeset.json</tspan>
+      </text>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x1="-40" y1="-700" x2="-40" y2="-597.736"/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" fill-rule="evenodd" points="-40,-590.236 -45,-600.236 -40,-597.736 -35,-600.236 "/>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="-400" y="-860" width="140" height="80" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-330" y="-832.119">
+        <tspan x="-330" y="-832.119">pkg.vhd</tspan>
+        <tspan x="-330" y="-816.119">pkg.py</tspan>
+        <tspan x="-330" y="-800.119">pkg.m</tspan>
+      </text>
+    </g>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-330" y="-928.119">
+      <tspan x="-330" y="-928.119">DEFAULT TOP</tspan>
+    </text>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-40" y="-768.119">
+      <tspan x="-40" y="-768.119">GIT</tspan>
+    </text>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-330" y="-768.119">
+      <tspan x="-330" y="-768.119">PARAMETERS</tspan>
+    </text>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-190" y="-848.119">
+      <tspan x="-190" y="-848.119">SIMULATION</tspan>
+    </text>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-190" y="-768.119">
+      <tspan x="-190" y="-768.119">JSON</tspan>
+    </text>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-330" y="-848.119">
+      <tspan x="-330" y="-848.119">PACKAGES</tspan>
+    </text>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="280" y="-768.119">
+      <tspan x="280" y="-768.119">SCRIPTS</tspan>
+    </text>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="140" y="-768.119">
+      <tspan x="140" y="-768.119">MAKE</tspan>
+    </text>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="600" y="-768.119">
+      <tspan x="600" y="-768.119">SCRIPTS</tspan>
+    </text>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="460" y="-768.119">
+      <tspan x="460" y="-768.119">MAKE</tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="-260" y="-940" width="140" height="80" rx="0" ry="0"/>
+      <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-190" y="-912.119">
+        <tspan x="-190" y="-912.119"></tspan>
+        <tspan x="-190" y="-896.119">core.vhd</tspan>
+        <tspan x="-190" y="-880.119"></tspan>
+      </text>
+    </g>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-190" y="-928.119">
+      <tspan x="-190" y="-928.119">USER STUB</tspan>
+    </text>
+    <line style="fill: none; stroke-opacity: 1; stroke-width: 8; stroke: #c41230" x1="-360.772" y1="-846.12" x2="-300.772" y2="-786.12"/>
+    <line style="fill: none; stroke-opacity: 1; stroke-width: 8; stroke: #c41230" x1="-360.772" y1="-786.12" x2="-300.772" y2="-846.12"/>
+    <line style="fill: none; stroke-opacity: 1; stroke-width: 8; stroke: #c41230" x1="249.254" y1="-765.35" x2="309.254" y2="-705.35"/>
+    <line style="fill: none; stroke-opacity: 1; stroke-width: 8; stroke: #c41230" x1="249.254" y1="-705.35" x2="309.254" y2="-765.35"/>
+    <line style="fill: none; stroke-opacity: 1; stroke-width: 8; stroke: #c41230" x1="-69.6576" y1="-766.802" x2="-9.65768" y2="-706.802"/>
+    <line style="fill: none; stroke-opacity: 1; stroke-width: 8; stroke: #c41230" x1="-69.6576" y1="-706.802" x2="-9.65768" y2="-766.802"/>
+    <line style="fill: none; stroke-opacity: 1; stroke-width: 8; stroke: #c41230" x1="3.5971" y1="-475.326" x2="63.597" y2="-415.326"/>
+    <line style="fill: none; stroke-opacity: 1; stroke-width: 8; stroke: #c41230" x1="3.5971" y1="-415.326" x2="63.597" y2="-475.326"/>
+    <line style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #005596" x1="73.5934" y1="-449.678" x2="93.5934" y2="-449.678"/>
+    <line style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #005596" x1="73.6828" y1="-439.932" x2="93.6828" y2="-439.932"/>
+    <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="114.664" y="-440.978">
+      <tspan x="114.664" y="-440.978">Not yet implemented</tspan>
+    </text>
+  </g>
+</svg>

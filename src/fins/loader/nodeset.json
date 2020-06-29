@@ -26,10 +26,6 @@
       "is_required":false,
       "types":["str"]
     },
-    "library":{
-      "is_required":false,
-      "types":["str"]
-    },
     "part":{
       "is_required":false,
       "types":["str"]

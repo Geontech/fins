@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="37cm" height="38cm" viewBox="-664 -1444 727 747" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g id="Background">
+    <rect style="fill: none; stroke-opacity: 1; stroke-width: 6; stroke: #005596" x="-660" y="-1440" width="720" height="740" rx="0" ry="0"/>
+    <rect style="fill: none; stroke-opacity: 1; stroke-width: 6; stroke: #c41230" x="-580" y="-1160" width="560" height="260" rx="0" ry="0"/>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #c41230" x="-300" y="-1100" width="160" height="160" rx="0" ry="0"/>
+      <text font-size="16.9333" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-220" y="-1014.87">
+        <tspan x="-220" y="-1014.87">IP 1</tspan>
+      </text>
+    </g>
+    <text font-size="22.5778" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-480" y="-1272.18">
+      <tspan x="-480" y="-1272.18"></tspan>
+    </text>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #c41230" x="-540" y="-1100" width="160" height="160" rx="0" ry="0"/>
+      <text font-size="16.9333" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-460" y="-1014.87">
+        <tspan x="-460" y="-1014.87">IP 0</tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #005596" x="-360" y="-860" width="120" height="120" rx="0" ry="0"/>
+      <text font-size="16.9333" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-300" y="-805.449">
+        <tspan x="-300" y="-805.449">AXIS</tspan>
+        <tspan x="-300" y="-784.282">VERIFY</tspan>
+      </text>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #005596" x="-400" y="-1360" width="120" height="120" rx="0" ry="0"/>
+      <text font-size="16.9333" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-340" y="-1305.45">
+        <tspan x="-340" y="-1305.45">AXILITE</tspan>
+        <tspan x="-340" y="-1284.28">VERIFY</tspan>
+      </text>
+    </g>
+    <text font-size="22.5778" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-300" y="-1412.18">
+      <tspan x="-300" y="-1412.18">NODESET TESTBENCH</tspan>
+    </text>
+    <g>
+      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" points="-360,-1248.03 -360,-1200 -460,-1200 -460,-1140 -460,-1111.97 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-360,-1255.53 -355,-1245.53 -360,-1248.03 -365,-1245.53 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-460,-1104.47 -465,-1114.47 -460,-1111.97 -455,-1114.47 "/>
+    </g>
+    <g>
+      <line style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" x1="-368.028" y1="-1020" x2="-311.972" y2="-1020"/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-375.528,-1020 -365.528,-1025 -368.028,-1020 -365.528,-1015 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-304.472,-1020 -314.472,-1015 -311.972,-1020 -314.472,-1025 "/>
+    </g>
+    <g>
+      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" points="-220,-1111.97 -220,-1160 -220,-1200 -340,-1200 -340,-1228.03 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-220,-1104.47 -225,-1114.47 -220,-1111.97 -215,-1114.47 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-340,-1235.53 -335,-1225.53 -340,-1228.03 -345,-1225.53 "/>
+    </g>
+    <g>
+      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" points="-551.972,-1020 -620,-1020 -620,-800 -360,-800 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-544.472,-1020 -554.472,-1015 -551.972,-1020 -554.472,-1025 "/>
+    </g>
+    <g>
+      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" points="-228.028,-800 20,-800 20,-1020 -140,-1020 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-235.528,-800 -225.528,-805 -228.028,-800 -225.528,-795 "/>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #005596" x="-420" y="-1380" width="120" height="120" rx="0" ry="0"/>
+      <text font-size="16.9333" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-360" y="-1325.45">
+        <tspan x="-360" y="-1325.45">AXILITE</tspan>
+        <tspan x="-360" y="-1304.28">VERIFY</tspan>
+      </text>
+    </g>
+    <line style="fill: none; stroke-opacity: 1; stroke-width: 8; stroke-dasharray: 8; stroke: #c41230" x1="-100" y1="-960" x2="-60" y2="-960"/>
+    <line style="fill: none; stroke-opacity: 1; stroke-width: 8; stroke-dasharray: 8; stroke: #005596" x1="-260" y1="-1260" x2="-220" y2="-1260"/>
+    <text font-size="22.5778" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-300" y="-1132.18">
+      <tspan x="-300" y="-1132.18">NODESET</tspan>
+    </text>
+  </g>
+</svg>
