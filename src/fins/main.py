@@ -80,7 +80,8 @@ def run_generator(generator,filepath,backend,verbose):
                 if verbose:
                     print('INFO: Recursing into node at "{}"'.format(node['fins_path']))
 
-                if not fins_data['is_system_nodeset'] and not node['sub_node']:
+                #if not fins_data['is_system_nodeset'] and not node['descriptive_node']:
+                if not node['descriptive_node']:
                     node['node_details'] = run_generator(generator, node['fins_path'], backend, verbose)
 
                 # Now that node-json files have been generated for each component node

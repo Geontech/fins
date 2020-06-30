@@ -1425,12 +1425,13 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
         fins_data['base_offset'] = 0
 
     for node in fins_data['nodes']:
-        # Set per-node defaults
-        if 'sub_node' not in node:
-            node['sub_node'] = False
         # Ensure that mandatory per-node keys are present
         if fins_data['is_system_nodeset'] and 'properties_offset' not in node:
             print('ERROR: Required key properties_offset does not exist for node', node['module_name'])
+
+        # Set per-node defaults
+        if 'descriptive_node' not in node:
+            node['descriptive_node'] = False
 
     # Override the FINS Node JSON data with a .override file if it exists
     fins_data = override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
@@ -1467,7 +1468,11 @@ def populate_fins_node(node, verbose):
 
     # Path to generated JSON file for node
     node_dir = os.path.dirname(node['fins_path'])
-    gen_node_path = os.path.join(node_dir, 'gen/core/', node_name + '.json')
+    if node['descriptive_node']:
+        gen_node_path = node['fins_path']
+    else:
+        gen_node_path = os.path.join(node_dir, 'gen/core/', node_name + '.json')
+
     # Load FINS Node JSON for each node
     node_fins_data = load_json_file(gen_node_path, verbose)
 
@@ -1735,7 +1740,7 @@ def populate_connections(fins_data, verbose):
 
         for node in fins_data['nodes']:
             # Only fully FINS-defined nodes are relevant here
-            if not node['sub_node']:
+            if not node['descriptive_node']:
 
                 if 'ports' in node['node_details']['ports']:
                     for port in node['node_details']['ports']['ports']:
@@ -1779,7 +1784,7 @@ def populate_connections(fins_data, verbose):
 
         for node in fins_data['nodes']:
             # Only fully FINS-defined nodes are relevant here
-            if not node['sub_node']:
+            if not node['descriptive_node']:
                 if 'hdl_ports' in node['node_details']['ports']:
                     for port in node['node_details']['ports']['hdl_ports']:
                         test_mode = 'test_mode' in fins_data and fins_data['test_mode']
@@ -1824,7 +1829,7 @@ def populate_property_interfaces(fins_data, verbose):
     if 'nodes' in fins_data:
         fins_data['prop_interfaces'] = []
         for node in fins_data['nodes']:
-            if not node['sub_node']:
+            if not node['descriptive_node']:
                 prop_interface = {}
                 prop_interface['node_name'] = node['module_name']
                 prop_interface['top'] = node['node_details']['name']

@@ -29,14 +29,14 @@
       "module_name":"fins_test_ip_0",
       "interface_name":"S_AXI_TEST_MIDDLE_0",
       "properties_offset":65536,
-      "sub_node":true
+      "descriptive_node":true
     },
     {
       "fins_path":"../node/ip/test_middle/ip/test_bottom/fins.json",
       "module_name":"fins_test_ip_0",
       "interface_name":"S_AXI_TEST_BOTTOM_0",
       "properties_offset":131072,
-      "sub_node":true
+      "descriptive_node":true
     },
     {
       "fins_path":"../node/fins.json",
@@ -55,14 +55,14 @@
       "module_name":"fins_test_ip_1",
       "interface_name":"S_AXI_TEST_MIDDLE_1",
       "properties_offset":262144,
-      "sub_node":true
+      "descriptive_node":true
     },
     {
       "fins_path":"../node/ip/test_middle/ip/test_bottom/fins.json",
       "module_name":"fins_test_ip_1",
       "interface_name":"S_AXI_TEST_BOTTOM_1",
       "properties_offset":327680,
-      "sub_node":true
+      "descriptive_node":true
     }
   ],
   "connections":[
