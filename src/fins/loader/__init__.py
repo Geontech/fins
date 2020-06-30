@@ -1430,8 +1430,14 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
             print('ERROR: Required key properties_offset does not exist for node', node['module_name'])
 
         # Set per-node defaults
+
+        # By default, a node is descriptive for System-level Nodesets,
+        # and standard/non-descriptive for Application-level Nodesets
         if 'descriptive_node' not in node:
-            node['descriptive_node'] = False
+            if fins_data['is_system_nodeset']:
+                node['descriptive_node'] = True
+            else:
+                node['descriptive_node'] = False
 
     # Override the FINS Node JSON data with a .override file if it exists
     fins_data = override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
