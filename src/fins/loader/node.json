@@ -232,7 +232,7 @@
           "types":["int","str"]
         },
         "is_addr_byte_indexed":{
-          "is_required":true,
+          "is_required":false,
           "types":["bool","str"]
         },
         "properties":{

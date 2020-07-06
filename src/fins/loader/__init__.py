@@ -455,6 +455,10 @@ def validate_properties(fins_data,verbose):
         print('ERROR: Duplicate property names detected')
         sys.exit(1)
 
+    # Set top-level defaults for properties interface
+    if 'is_addr_byte_indexed' not in fins_data['properties']:
+        fins_data['properties']['is_addr_byte_indexed'] = True
+
 def validate_ports(fins_data,verbose):
     # Iterate through all FINS ports
     if 'ports' in fins_data['ports']:

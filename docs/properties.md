@@ -14,7 +14,7 @@ The top-level `properties` field of the FINS Node JSON Schema in turn has severa
 | -------------------- | ----------------------- | -------- | ------------- | ----------- |
 | addr_width           | uint or `param['name']` | YES      |               | The address width of the underlying memory-mapped bus. |
 | data_width           | uint or `param['name']` | YES      |               | The data width of the underlying memory-mapped bus. This setting also determines the default bit width of each property. The maximum value for this setting is currently 128, but it should be set appropriately for the underlying bus architecture. |
-| is_addr_byte_indexed | bool or `param['name']` | YES      |               | A boolean that determines if each increment by 1 of the address corresponds to a byte or to a word (a word is the full `data_width`). By default, Vivado's AXI interconnect is byte indexed and Quartus' AXI interconnect is word indexed. |
+| is_addr_byte_indexed | bool or `param['name']` | NO       | True          | A boolean that determines if each increment by 1 of the address corresponds to a byte or to a word (a word is the full `data_width`). By default, Vivado's AXI interconnect is byte indexed and Quartus' AXI interconnect is word indexed. |
 | properties           | dict[]                  | YES      |               | An array of property definitions. See below for more information on the schema for each element of the array. |
 
 Each dictionary element of the `properties` dictionary array field has the following fields:
