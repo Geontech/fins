@@ -151,9 +151,9 @@ class Generator:
                     self.render_jinja_template(jinja_env, 'avalonst_tdm_to_parallel.vhd', ports_consumer_directory+node['ports_consumer']['name']+'_avalonst_tdm_to_parallel.vhd', node['ports_consumer'])
                     self.render_jinja_template(jinja_env, 'avalonst_tdm_to_parallel.json', ports_consumer_directory+node['ports_consumer']['name']+'_avalonst_tdm_to_parallel.json', node['ports_consumer'])
 
-            # Some operations only happen for non-system-level nodesets (e.g. application-level nodesets)
+            # Some operations only happen for Application-level nodesets
             # Run some HDL code generation and iterate into sub-nodes
-            if not fins_data['is_system_nodeset']:
+            if fins_data['is_app_nodeset']:
                 for node in fins_data['nodes']:
                     # Generate JSON override files for each node
                     if 'params' in node:

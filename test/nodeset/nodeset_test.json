@@ -1,5 +1,6 @@
 {
   "name":"nodeset_test",
+  "is_app_nodeset":true,
   "description":"FINS Nodeset for testing",
   "version":"0.0",
   "company_name":"Geon Technologies",

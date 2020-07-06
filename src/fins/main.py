@@ -80,14 +80,14 @@ def run_generator(generator,filepath,backend,verbose):
                 if verbose:
                     print('INFO: Recursing into node at "{}"'.format(node['fins_path']))
 
-                if not fins_data['is_system_nodeset'] and not node['descriptive_node']:
+                if fins_data['is_app_nodeset'] and not node['descriptive_node']:
                     node['node_details'] = run_generator(generator, node['fins_path'], backend, verbose)
 
                 # Now that node-json files have been generated for each component node
                 # load the node json files and import their node data
                 loader.populate_fins_node(node, verbose)
 
-            if not fins_data['is_system_nodeset']:
+            if fins_data['is_app_nodeset']:
                 # Now that all nodes and their ports are loaded into fins_data, populate each connection in
                 # the nodeset with important metadata based on the signals and ports being connected.
                 loader.populate_connections(fins_data, verbose)
@@ -106,7 +106,7 @@ def run_generator(generator,filepath,backend,verbose):
 
         # Populate property interfaces
         # At the system-level nodeset, interfaces and ports are not tracked in this manner, so skip
-        if not is_nodeset or not fins_data['is_system_nodeset']:
+        if not is_nodeset or fins_data['is_app_nodeset']:
             loader.populate_property_interfaces(fins_data, verbose)
 
         try:
@@ -114,7 +114,7 @@ def run_generator(generator,filepath,backend,verbose):
             generator.generate_core(fins_data,filename,is_nodeset)
             # Only proceed with post-core operations and backend generation if this is just an IP or
             # or a basic (not-system-level) nodeset. System-level nodesets do not perform backend generation.
-            if not is_nodeset or not fins_data['is_system_nodeset']:
+            if not is_nodeset or fins_data['is_app_nodeset']:
                 loader.post_generate_core_operations(fins_data, verbose)
                 generator.generate_backend(fins_data,filename,is_nodeset)
         except RuntimeError as exc:

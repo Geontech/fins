@@ -66,10 +66,11 @@ Using the information provided by these steps, FINS will generate a block design
 
 The FINS Nodeset JSON is detailed in a [section below](#Nodeset-Json-Schema), but here are some important notes:
 1. Choose a unique and descriptive value for the `name` key.
-2. The `parameters` key contains constants that are propagated throughout the design with code generation, so set values that could potentially change as the design evolves or is adapted. The `parameters` schema is located [here](parameters.md).
-3. The `nodes` key lists the FINS Nodes which will make up the Nodeset. To instantiate and connect nodes via JSON see the [Nodes JSON section](#Nodeset-Json-Schema:-Nodes).
-4. The `connections` key defines port connections between Nodes in the Nodeset. To instantiate and connect nodes via JSON see the [Connections JSON section](#Nodeset-Json-Schema:-Connections).
-5. The `[hdl_]port_exports` key defines which Node ports should be exported (become the external ports) from the Nodeset. If unset, all unconnected ports are exported from a Nodeset.
+2. The `is_app_nodeset` must be set to `true` to flag this Nodeset as Application-level.
+3. The `parameters` key contains constants that are propagated throughout the design with code generation, so set values that could potentially change as the design evolves or is adapted. The `parameters` schema is located [here](parameters.md).
+4. The `nodes` key lists the FINS Nodes which will make up the Nodeset. To instantiate and connect nodes via JSON see the [Nodes JSON section](#Nodeset-Json-Schema:-Nodes).
+5. The `connections` key defines port connections between Nodes in the Nodeset. To instantiate and connect nodes via JSON see the [Connections JSON section](#Nodeset-Json-Schema:-Connections).
+6. The `[hdl_]port_exports` key defines which Node ports should be exported (become the external ports) from the Nodeset. If unset, all unconnected ports are exported from a Nodeset.
 
 The `fins` executable is used with the FINS Nodeset to run code generation. The standard "core" backend location is **./gen/core/**. The `fins` executable automatically detects differences in FINS Nodeset schemas. To generate the Application-level Nodeset, execute the following commands:
 
@@ -98,13 +99,12 @@ Once you have a bitstream that integrates application-level content with a Platf
 To get started developing a System-level Nodeset, create a Nodeset JSON with the following:
 
 1. A unique and descriptive value for the `name` key.
-2. The `is_system_nodeset` must be set to `true` to flag this Nodeset as System-level.
-3. The `parameters` key contains constants that can be used elsewhere in the JSON file. The `parameters` schema is located [here](parameters.md).
-4. The `nodes` key lists the IPs and Nodes which are being described by this Nodeset. See the [Nodes JSON section](#Nodeset-Json-Schema:-Nodes) for more information.
-5. The `base_offset` key is the global offset for the bus that controls the AXI4-Lite Properties interface. For many architectures this is 0, but some specify this base address at the bus level.
-6. The `properties_offset` key is the offset for a particular node in the `nodes` array. It can be set manually or can be set to the filepath of the block design file to auto-infer the offset.
-7. The `ports_consumer_name` key is set for the element of the `nodes` array that consumes data from a processor through a DMA module. At most one element of the `nodes` array can have this key set.
-8. The `ports_producer_name` key is set for the element of the `nodes` array that produces data to a processor through a DMA module. At most one element of the `nodes` array can have this key set.
+2. The `parameters` key contains constants that can be used elsewhere in the JSON file. The `parameters` schema is located [here](parameters.md).
+3. The `nodes` key lists the IPs and Nodes which are being described by this Nodeset. See the [Nodes JSON section](#Nodeset-Json-Schema:-Nodes) for more information.
+4. The `base_offset` key is the global offset for the bus that controls the AXI4-Lite Properties interface. For many architectures this is 0, but some specify this base address at the bus level.
+5. The `properties_offset` key is the offset for a particular node in the `nodes` array. It can be set manually or can be set to the filepath of the block design file to auto-infer the offset.
+6. The `ports_consumer_name` key is set for the element of the `nodes` array that consumes data from a processor through a DMA module. At most one element of the `nodes` array can have this key set.
+7. The `ports_producer_name` key is set for the element of the `nodes` array that produces data to a processor through a DMA module. At most one element of the `nodes` array can have this key set.
 
 The `fins` executable is used with the FINS Nodeset to run code generation. The standard "core" backend location is **./gen/core/**. The `fins` executable automatically detects differences in FINS Nodeset schemas. To generate the System-level Nodeset, execute the following commands:
 
@@ -122,23 +122,23 @@ Fields are flagged as being for an Application-level Nodeset, System-level Nodes
  
 The JSON schema for a FINS Nodeset is composed of the following top-level fields:
 
-| Key              | Type   | Mode | Required | Default Value | Description |
-| ---------------- | ------ | ---- | -------- | ------------- | ----------- |
-| name             | string | BOTH | YES      |               | The name of the Nodeset |
-| description      | string | BOTH | NO       |               | The description of the Nodeset |
-| version          | string | BOTH | NO       | 1.0           | The version of the Nodeset |
-| company_name     | string | BOTH | NO       |               | The name of the company which created the Nodeset |
-| company_url      | string | BOTH | NO       | user.org      | The base URL of the company which created the Nodeset. Quartus uses this field as the AUTHOR. |
-| company_logo     | string | APP  | NO       |               | The relative filepath of the logo image to use for display purposes. |
-| part             | string | APP  | NO       |               | The programmable logic part number. While a default is not selected for the JSON, the auto-generated vendor scripts use the following default parts: Vivado uses the Zynq weback part **xc7z020clg484-1** and Quartus uses the Cyclone V **10CX220YF780I5G**. |
-| is_system_level  | bool   | SYS  | YES      |         false | The base address offset oilef the bus used to communicate with the FINS nodes. |
-| base_offset      | uint   | SYS  | NO       |             0 | The base address offset oilef the bus used to communicate with the FINS nodes. |
-| params           | dict[] | BOTH | NO       |               | An array of parameter definitions. See the parameters documentation [here](parameters.md). |
-| nodes            | dict[] | BOTH | YES      |               | A dictionary array that contains a description of each node. See [Nodes JSON section](#Nodeset-Json-Schema:-Nodes). |
-| connections      | dict[] | APP  | NO       |               | An array of connections between to/from ports of Nodes in the Nodeset. See [Connections JSON section](#Nodeset-Json-Schema:-Connections). |
-| port_exports     | dict[] | APP  | NO       | open ports    | An array of ports to export and become the external ports of this Nodeset. Each dict element contains the "node_name" for the port and the "net" or actual port name. | |
-| hdl_port_exports | dict[] | APP  | NO       | open ports    | An array of HDL ports (standard logic [vectors]) to export and become the external ports of this Nodeset. Each dict element contains the "node_name" for the port and the "net" or actual port name. |
-| filesets         | dict   | APP  | NO       |               | A dictionary of fileset definitions. See the filesets documentation [here](filesets.md). |
+| Key               | Type   | Mode | Required | Default Value | Description |
+| ----------------- | ------ | ---- | -------- | ------------- | ----------- |
+| name              | string | BOTH | YES      |               | The name of the Nodeset |
+| description       | string | BOTH | NO       |               | The description of the Nodeset |
+| version           | string | BOTH | NO       | 1.0           | The version of the Nodeset |
+| company_name      | string | BOTH | NO       |               | The name of the company which created the Nodeset |
+| company_url       | string | BOTH | NO       | user.org      | The base URL of the company which created the Nodeset. Quartus uses this field as the AUTHOR. |
+| company_logo      | string | APP  | NO       |               | The relative filepath of the logo image to use for display purposes. |
+| part              | string | APP  | NO       |               | The programmable logic part number. While a default is not selected for the JSON, the auto-generated vendor scripts use the following default parts: Vivado uses the Zynq weback part **xc7z020clg484-1** and Quartus uses the Cyclone V **10CX220YF780I5G**. |
+| is_app_nodeset    | bool   | SYS  | YES      |         false | Is this an Application-level nodeset? |
+| base_offset       | uint   | SYS  | NO       |             0 | The base address offset of the bus used to communicate with the FINS nodes. |
+| params            | dict[] | BOTH | NO       |               | An array of parameter definitions. See the parameters documentation [here](parameters.md). |
+| nodes             | dict[] | BOTH | YES      |               | A dictionary array that contains a description of each node. See [Nodes JSON section](#Nodeset-Json-Schema:-Nodes). |
+| connections       | dict[] | APP  | NO       |               | An array of connections between to/from ports of Nodes in the Nodeset. See [Connections JSON section](#Nodeset-Json-Schema:-Connections). |
+| port_exports      | dict[] | APP  | NO       | open ports    | An array of ports to export and become the external ports of this Nodeset. Each dict element contains the "node_name" for the port and the "net" or actual port name. | |
+| hdl_port_exports  | dict[] | APP  | NO       | open ports    | An array of HDL ports (standard logic [vectors]) to export and become the external ports of this Nodeset. Each dict element contains the "node_name" for the port and the "net" or actual port name. |
+| filesets          | dict   | APP  | NO       |               | A dictionary of fileset definitions. See the filesets documentation [here](filesets.md). |
 
 
 ### Nodeset JSON Schema: Nodes
