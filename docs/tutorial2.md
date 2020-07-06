@@ -32,6 +32,7 @@ Using your favorite text editor, create a file called **fins.json** in the **pow
 ```json
 {
   "name":"power_nodeset",
+  "is_app_nodeset":true,
   "params": [
     { "name":"IQ_DATA_WIDTH",    "value":32 },
     { "name":"POWER_DATA_WIDTH", "value":16 }
