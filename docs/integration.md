@@ -147,8 +147,8 @@ Each dictionary element of the `nodes` array has the following fields:
 | Key                 | Type              | Mode | Required | Default Value | Description |
 | ------------------- | ----------------- | ---- | -------- | ------------- | ----------- |
 | fins_path           | string            | BOTH | YES      |               | The path to the *generated* FINS Node JSON file of the IP node. |
-| module_name         | string            | BOTH | YES      |               | If `properties_offset` is a dictionary, this field is used to infer the offset. The name of the instantiated IP in the block design defined above. |
-| interface_name      | string            | BOTH | YES      |               | If `properties_offset` is a dictionary, this field is used to infer the offset. The name of the AXI4-Lite bus interface used to control and status the properties. |
+| module_name         | string            | BOTH | YES      |               | The name of this module when instantiated in the Block Design. |
+| interface_name      | string            | BOTH | NO       |               | The unique name given to this module's property offset to reference it externally (in testbench and from software). This field is required if the node has a properties interface. |
 | descriptive_node    | bool              | APP  | NO       | false         | This Node/IP is not a FINS Node and is present only to describe and expose its interfaces and ports to FINS Software. No code/JSON generation should be performed for this Node. |
 | properties_offset   | uint -OR- string  | SYS  | YES      |               | The base offset of the address region used to access this node. If a string type, this field is a path to the block design in which the decode of the properties interface is located. This path must end in `.qsys` for Intel Platform Designer or `.bd` for Vivado IP Integrator, and it used to infer the offset. |
 | ports_producer_name | string            | SYS  | NO       |               | The name of the AXI4-Stream bus interface that sends data to the processor through a DMA module. |

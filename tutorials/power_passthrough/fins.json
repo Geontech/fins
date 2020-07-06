@@ -3,14 +3,6 @@
     "params":[
     { "name":"POWER_DATA_WIDTH", "value":16 }
   ],
-  "properties":{
-    "addr_width":16,
-    "data_width":32,
-    "is_addr_byte_indexed":false,
-    "properties":[
-      { "name":"enable", "type":"read-write-data", "width":1, "default_values":1 }
-    ]
-  },
   "ports":{
     "ports":[
       {
@@ -29,12 +21,10 @@
     "source":[
       { "path":"gen/core/power_passthrough_pkg.vhd" },
       { "path":"gen/core/power_passthrough_axis.vhd" },
-      { "path":"gen/core/power_passthrough_axilite.vhd" },
       { "path":"hdl/power_passthrough_core.vhd" },
       { "path":"gen/core/power_passthrough.vhd" }
     ],
     "sim":[
-      { "path":"gen/core/power_passthrough_axilite_verify.vhd" },
       { "path":"gen/core/power_passthrough_axis_verify.vhd" },
       { "path":"gen/core/power_passthrough_tb.vhd" }
     ],
@@ -44,5 +34,4 @@
       ]
     }
   }
-
 }

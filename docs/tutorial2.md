@@ -49,7 +49,6 @@ Using your favorite text editor, create a file called **fins.json** in the **pow
     {
       "fins_path":"../power_passthrough/fins.json",
       "module_name":"power_passthrough_0",
-      "interface_name":"S_AXI_POWER_PASSTHROUGH_0",
       "params": [
         { "name":"POWER_DATA_WIDTH", "parent": "POWER_DATA_WIDTH" }
       ]
@@ -69,8 +68,7 @@ Using your favorite text editor, create a file called **fins.json** in the **pow
         {"node_name":"power_converter_0",   "net":"power"},
         {"node_name":"power_passthrough_0", "net":"power_in"},
         {"node_name":"power_passthrough_0", "net":"power_out"},
-        {"node_name":"power_converter_0",   "net":"S_AXI_ACLK"},
-        {"node_name":"power_passthrough_0", "net":"S_AXI_ACLK"}
+        {"node_name":"power_converter_0",   "net":"S_AXI_ACLK"}
       ]
     },
     {
@@ -80,8 +78,7 @@ Using your favorite text editor, create a file called **fins.json** in the **pow
         {"node_name":"power_converter_0",   "net":"power"},
         {"node_name":"power_passthrough_0", "net":"power_in"},
         {"node_name":"power_passthrough_0", "net":"power_out"},
-        {"node_name":"power_converter_0",   "net":"S_AXI_ARESETN"},
-        {"node_name":"power_passthrough_0", "net":"S_AXI_ARESETN"}
+        {"node_name":"power_converter_0",   "net":"S_AXI_ARESETN"}
       ]
     }
   ]
@@ -118,7 +115,6 @@ Modify your **fins.json** file to add the following code after the `connections`
       { "path":"../power_converter/gen/core/power_converter_pkg.vhd" },
       { "path":"../power_converter/gen/core/power_converter_axilite_verify.vhd" },
       { "path":"../power_passthrough/gen/core/power_passthrough_pkg.vhd" },
-      { "path":"../power_passthrough/gen/core/power_passthrough_axilite_verify.vhd" },
       { "path":"./gen/core/power_nodeset_axis_verify.vhd" },
       { "path":"./gen/core/power_nodeset_tb.vhd" }
     ],
@@ -128,6 +124,7 @@ Modify your **fins.json** file to add the following code after the `connections`
       ]
     }
   }
+}
 ```
 
 The `filesets` top-level key indicates which files are used in the Nodeset project. For Nodesets in particular, HDL files can only be added for simulation purposes. Notice that a few of the files are located in the **gen/core/** directory. These files are auto-generated and accordingly updated with the `fins` code generator executable. Since FINS manages these files, the burden of creating and maintaining these files is removed from the developer!

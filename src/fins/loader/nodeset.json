@@ -76,7 +76,7 @@
           "types":["str"]
         },
         "interface_name":{
-          "is_required":true,
+          "is_required":false,
           "types":["str"]
         },
         "descriptive_node":{

@@ -1483,9 +1483,15 @@ def populate_fins_node(node, verbose):
     node_fins_data = load_json_file(gen_node_path, verbose)
 
     node['fins_dir'] = node_dir
-    node['properties'] = node_fins_data['properties']['properties']
     node['node_name'] = node_fins_data['name']
-    node['node_id'] = node['node_name'] + '::' + node['module_name'] + '::' + node['interface_name']
+
+    if not node['descriptive_node'] and 'properties' in node_fins_data and 'interface_name' not in node:
+        print('ERROR: a node with a properties interface must have an "interface_name" specified in the nodeset')
+        sys.exit(1)
+
+    if 'properties' in node_fins_data:
+        node['properties'] = node_fins_data['properties']['properties']
+        node['node_id'] = node['node_name'] + '::' + node['module_name'] + '::' + node['interface_name']
 
     # Find the port listed in ports_producer_name
     if 'ports_producer_name' in node:
@@ -1835,7 +1841,7 @@ def populate_property_interfaces(fins_data, verbose):
     if 'nodes' in fins_data:
         fins_data['prop_interfaces'] = []
         for node in fins_data['nodes']:
-            if not node['descriptive_node']:
+            if not node['descriptive_node'] and 'properties' in node['node_details']:
                 prop_interface = {}
                 prop_interface['node_name'] = node['module_name']
                 prop_interface['top'] = node['node_details']['name']
@@ -1865,8 +1871,6 @@ def populate_property_interfaces(fins_data, verbose):
                 if 'prop_interfaces' in ip['ip_details']:
                     # Update the list of interfaces for this IP
                     ip_interfaces =  ip['ip_details']['prop_interfaces'][0]['interfaces']
-                    #fins_data['prop_interfaces'][0]['addr_width'] = ip['ip_details']['properties']['addr_width']
-                    #fins_data['prop_interfaces'][0]['data_width'] = ip['ip_details']['properties']['data_width']
                     fins_data['prop_interfaces'][0]['interfaces'] += ip_interfaces
 
     if verbose:

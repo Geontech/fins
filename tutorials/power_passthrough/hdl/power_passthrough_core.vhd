@@ -22,8 +22,6 @@ use work.power_passthrough_pkg.all;
 -- Entity
 entity power_passthrough_core is
   port (
-    props_control : in  t_power_passthrough_props_control;
-    props_status  : out t_power_passthrough_props_status;
     ports_in      : in  t_power_passthrough_ports_in;
     ports_out     : out t_power_passthrough_ports_out
   );
@@ -31,10 +29,6 @@ end power_passthrough_core;
 
 -- Architecture
 architecture rtl of power_passthrough_core is
-
--- Clock Domain Crossing for properties
-signal cdc_enable_q  : std_logic := '0';
-signal cdc_enable_qq : std_logic := '0';
 
 begin
 
@@ -173,12 +167,9 @@ begin
   s_data_processing : process (ports_in.power_in.clk)
   begin
     if (rising_edge(ports_in.power_out.clk)) then
-      -- Properties must cross over to the data clock domain
-      cdc_enable_q  <= props_control.enable.wr_data(0);
-      cdc_enable_qq <= cdc_enable_q;
 
       -- Control pipelines
-      if (ports_in.power_in.resetn = '0' or cdc_enable_qq = '0') then
+      if (ports_in.power_in.resetn = '0') then
         -- Data reset
         ports_out.power_out.data  <= (others => '0');
         ports_out.power_out.valid <= '0';
