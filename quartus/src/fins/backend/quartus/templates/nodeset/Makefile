@@ -91,10 +91,6 @@ CONSTRAINTS_FILES+= {{ constraints_file['path'] }}
 #-------------------------------------------------------------------------------
 # Additional variables
 #-------------------------------------------------------------------------------
-# Quartus version may be needed by "vendor_ip" Tcl scripts to choose the right versions
-# for Quartus IPs
-export QUARTUS_VERSION:=$(or $(shell quartus_sh --version | grep -oP "Version \K[0-9][0-9]\.[0-9]"),\
-                             $(error Quartus binaries were not found in PATH!))
 
 # Search paths of this IP's _hw.tcl and sub-IP
 IP_SEARCH_PATHS:=$(QUARTUS_TO_ROOT)/$(FINS_OUTPUT_DIR),
