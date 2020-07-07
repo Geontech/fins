@@ -31,14 +31,11 @@ if { $FINS_BACKEND == "vivado" } {
     ] [get_ips xilinx_memmap_property_ram]
 } else {
     set RAM_MODULE_NAME "intel_memmap_property_ram"
-    if { $::env(QUARTUS_VERSION) == "19.1" } {
-        set ram_2port_version 19.1
-    } else {
-        # elseif $qsys_version == "19.4"
-        set ram_2port_version 20.0
+    try {
+        add_hdl_instance $RAM_MODULE_NAME ram_2port 20.0
+    } on error {} {
+        add_hdl_instance $RAM_MODULE_NAME ram_2port 19.1
     }
-    puts "Quartus version '$::env(QUARTUS_VERSION)' has 'ram_2port' IP verson: $ram_2port_version"
-    add_hdl_instance $RAM_MODULE_NAME ram_2port $ram_2port_version
     set_instance_parameter_value $RAM_MODULE_NAME "DEVICE_FAMILY" $IP_DEVICE_FAMILY
     set_instance_parameter_value $RAM_MODULE_NAME "GUI_MODE" 0
     set_instance_parameter_value $RAM_MODULE_NAME "GUI_MEMSIZE_WORDS" $TEST_RAM_DEPTH
