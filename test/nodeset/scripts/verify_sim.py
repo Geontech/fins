@@ -21,15 +21,15 @@
 import sys
 
 # Import auto-generated parameters file
-sys.path.append('../node/gen/core/')
-import test_top_pkg
+sys.path.append('gen/core/')
+import nodeset_test_pkg
 
 ###################################################################################################
 # Path: myinput --> myoutput
 ###################################################################################################
 # Open our simulation input
 sim_source_data = {'last':[], 'data':[], 'metadata':[]}
-with open('sim_data/sim_source_myinput.txt', 'r') as sim_source_file:
+with open('sim_data/sim_source_fins_test_ip_0_myinput.txt', 'r') as sim_source_file:
     for sim_source_line in sim_source_file:
         line_data = sim_source_line.split(' ')
         sim_source_data['last'].append(int(line_data[0], 16))
@@ -38,7 +38,7 @@ with open('sim_data/sim_source_myinput.txt', 'r') as sim_source_file:
 
 # Open our simulation output
 sim_sink_data = {'last':[], 'data':[], 'metadata':[]}
-with open('sim_data/sim_sink_myoutput.txt', 'r') as sim_sink_file:
+with open('sim_data/sim_sink_fins_test_ip_1_myoutput.txt', 'r') as sim_sink_file:
     for sim_sink_line in sim_sink_file:
         line_data = sim_sink_line.split(' ')
         sim_sink_data['last'].append(int(line_data[0], 16))
@@ -47,7 +47,7 @@ with open('sim_data/sim_sink_myoutput.txt', 'r') as sim_sink_file:
 
 # Implement the algorithm
 def mult_3times(data_in):
-    mult_const = test_top_pkg.params['TEST_PARAM_INTEGER']
+    mult_const = nodeset_test_pkg.params['TEST_PARAM_INTEGER']
     return data_in * mult_const * mult_const * mult_const
 
 
@@ -68,7 +68,7 @@ else:
 ###################################################################################################
 # Open our simulation input
 sim_source_data = {'last':[], 'data':[], 'metadata':[]}
-with open('sim_data/sim_source_test_in00.txt', 'r') as sim_source_file:
+with open('sim_data/sim_source_fins_test_ip_0_test_in00.txt', 'r') as sim_source_file:
     for sim_source_line in sim_source_file:
         line_data = sim_source_line.split(' ')
         sim_source_data['last'].append(line_data[0].strip())
@@ -77,7 +77,7 @@ with open('sim_data/sim_source_test_in00.txt', 'r') as sim_source_file:
 
 # Open our simulation output
 sim_sink_data = {'last':[], 'data':[], 'metadata':[]}
-with open('sim_data/sim_sink_test_out00.txt', 'r') as sim_sink_file:
+with open('sim_data/sim_sink_fins_test_ip_1_test_out00.txt', 'r') as sim_sink_file:
     for sim_sink_line in sim_sink_file:
         line_data = sim_sink_line.split(' ')
         sim_sink_data['last'].append(line_data[0].strip())
@@ -97,7 +97,7 @@ else:
 ###################################################################################################
 # Open our simulation input
 sim_source_data = {'last':[], 'data':[], 'metadata':[]}
-with open('sim_data/sim_source_test_in01.txt', 'r') as sim_source_file:
+with open('sim_data/sim_source_fins_test_ip_0_test_in01.txt', 'r') as sim_source_file:
     for sim_source_line in sim_source_file:
         line_data = sim_source_line.split(' ')
         sim_source_data['last'].append(line_data[0].strip())
@@ -106,7 +106,7 @@ with open('sim_data/sim_source_test_in01.txt', 'r') as sim_source_file:
 
 # Open our simulation output
 sim_sink_data = {'last':[], 'data':[], 'metadata':[]}
-with open('sim_data/sim_sink_test_out01.txt', 'r') as sim_sink_file:
+with open('sim_data/sim_sink_fins_test_ip_1_test_out01.txt', 'r') as sim_sink_file:
     for sim_sink_line in sim_sink_file:
         line_data = sim_sink_line.split(' ')
         sim_sink_data['last'].append(line_data[0].strip())

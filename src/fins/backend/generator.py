@@ -157,6 +157,14 @@ class Generator:
             # Create the Jinja2 envjironment
             jinja_env = self.create_jinja_env(CORE_NODESET_TEMPLATE_DIR)
 
+            # Generate FINS core files
+            if not os.path.exists(root_directory+'.gitignore'):
+                # Only auto-generate .gitignore if the repository doesn't have one
+                self.render_jinja_template(jinja_env, '.gitignore', root_directory+'.gitignore', fins_data)
+            # HDL Source Package, Octave/Python Simulation Packages
+            self.render_jinja_template(jinja_env, 'pkg.vhd', output_directory+fins_data['name']+'_pkg.vhd', fins_data)
+            self.render_jinja_template(jinja_env, 'pkg.m', output_directory+fins_data['name']+'_pkg.m', fins_data)
+            self.render_jinja_template(jinja_env, 'pkg.py', output_directory+fins_data['name']+'_pkg.py', fins_data)
             # Create the parameters TCL script
             self.render_jinja_template(jinja_env, 'params.tcl', output_directory+'params.tcl', fins_data)
 

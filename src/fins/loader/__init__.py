@@ -1407,7 +1407,7 @@ def find_base_address_from_bd(filename, module_name, interface_name):
     print('ERROR: Unable to find address space for',interface_name,'of',module_name,'in',filename)
     sys.exit(1)
 
-def validate_and_convert_fins_nodeset(fins_data,filename,backend,verbose):
+def validate_and_convert_nodeset_fins_data(fins_data,filename,backend,verbose):
     """
     Validates and converts data from a Firmware Nodeset Specification JSON build file
     """
@@ -1431,6 +1431,9 @@ def validate_and_convert_fins_nodeset(fins_data,filename,backend,verbose):
 
     # Set defaults for top-level keys
     fins_data = populate_fins_fields(fins_data,verbose)
+
+    # Auto-detect file types
+    fins_data = populate_filesets(fins_data,verbose)
 
     # Set defaults for nodeset-specific top-level keys
     if 'is_app_nodeset' not in fins_data:

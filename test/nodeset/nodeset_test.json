@@ -9,6 +9,7 @@
   "base_offset":0,
   "params": [
     { "name":"TEST_PARAM_BOOLEAN", "value":false,               "description":"This is a test parameter excercising a boolean type" },
+    { "name":"TEST_PARAM_INTEGER", "value":4,                   "description":"This is a test parameter excercising an integer type" },
     { "name":"TEST_PARAM_STRING",  "value":"my_nodeset_string", "description":"This is a test parameter excercising a string type" },
     { "name":"NODESET_TEST_PARAM", "value":true,                "description":"A parameter for testing FINS Nodeset TCL generated output" }
   ],
@@ -20,6 +21,7 @@
       "properties_offset":0,
       "params": [
         { "name":"TEST_PARAM_BOOLEAN",         "parent": "TEST_PARAM_BOOLEAN" },
+        { "name":"TEST_PARAM_INTEGER",         "parent": "TEST_PARAM_INTEGER" },
         { "name":"TEST_PARAM_STRING",          "parent": "TEST_PARAM_STRING" }
       ],
       "ports_consumer_name":"myinput",
@@ -46,6 +48,7 @@
       "properties_offset":196608,
       "params": [
         { "name":"TEST_PARAM_BOOLEAN",         "parent": "TEST_PARAM_BOOLEAN" },
+        { "name":"TEST_PARAM_INTEGER",         "parent": "TEST_PARAM_INTEGER" },
         { "name":"TEST_PARAM_STRING",          "parent": "TEST_PARAM_STRING" }
       ],
       "ports_consumer_name":"myinput",
@@ -127,6 +130,11 @@
       { "path":"../node/gen/core/test_top_axilite_verify.vhd", "type":"Vhdl" },
       { "path":"./gen/core/nodeset_test_axis_verify.vhd" },
       { "path":"./gen/core/nodeset_test_tb.vhd" }
-    ]
+    ],
+    "scripts":{
+      "postsim":[
+        { "path":"scripts/verify_sim.py" }
+      ]
+    }
   }
 }

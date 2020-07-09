@@ -3,6 +3,7 @@ import sys
 
 # Import auto-generated parameters file
 sys.path.append('gen/core/')
+import power_passthrough_pkg
 
 # Open our simulation input
 sim_source_data = {'last':[], 'data':[]}
