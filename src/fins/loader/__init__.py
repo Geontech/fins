@@ -1753,13 +1753,13 @@ def populate_app_nodeset_clocks(fins_data, verbose):
         [
          {'base_name': <base_name>,
           'clock': <clock>,
-          'reset': <reset>,
+          'resetn': <resetn>,
           'nets': [net-dict, ...]
          }, ...
         ]
 
         Here, base_name refers to the name of the clock domain (e.g. "iq" as opposed to "iq_aclk")
-        'clock' and 'reset' are the actual names of the clock and reset names.
+        'clock' and 'resetn' are the actual names of the clock and resetn (active low) names.
         And each 'net-dict' contains node_name, type (port or interface)
         and the actual 'port' or 'interface' being connected to.
 
@@ -1774,8 +1774,8 @@ def populate_app_nodeset_clocks(fins_data, verbose):
             clock['clock'] = clock['base_name'] + '_aclk'
             #reset_name = clock['base_name'] + '_aresetn'
 
-        if 'reset' not in clock:
-            clock['reset'] =  clock['base_name'] + '_aresetn'
+        if 'resetn' not in clock:
+            clock['resetn'] =  clock['base_name'] + '_aresetn'
 
         nets = clock['nets']
         for net in nets:
@@ -1786,7 +1786,7 @@ def populate_app_nodeset_clocks(fins_data, verbose):
                 sys.exit(1)
             elif net['type'] == 'port':
                 net['port']['clock'] = clock['clock']
-                net['port']['reset'] = clock['reset']
+                net['port']['resetn'] = clock['resetn']
                 net['port']['clock_base_name'] = clock['base_name']
 
 
@@ -1943,7 +1943,7 @@ def populate_property_interfaces(fins_data, verbose):
          {
           'base_name': 'properties'
           'clock': 'properties_aclk'
-          'reset': 'properties_aresetn'
+          'resetn': 'properties_aresetn'
           'nets': [interface-net, ...]
          }
         ]
@@ -2000,7 +2000,7 @@ def populate_property_interfaces(fins_data, verbose):
         properties_clock = {
                             'base_name':'properties',
                             'clock':'properties_aclk',
-                            'reset':'properties_aresetn',
+                            'resetn':'properties_aresetn',
                             'nets':[]
                            }
         for node_interfaces in fins_data['prop_interfaces']:

@@ -119,8 +119,8 @@ add_connection {{ clock_bridge_name }}.out_clk/{{ reset_bridge_name }}.clk
 # add the exports
 set_interface_property {{ clock['clock'] }} EXPORT_OF {{ clock_bridge_name }}.in_clk
 set_interface_port_property {{ clock['clock'] }} {{ clock['clock'] }}_clk NAME {{ clock['clock'] }}
-set_interface_property {{ clock['reset'] }} EXPORT_OF {{ reset_bridge_name }}.in_reset
-set_interface_port_property {{ clock['reset'] }} {{ clock['reset'] }}_reset_n NAME {{ clock['reset'] }}
+set_interface_property {{ clock['resetn'] }} EXPORT_OF {{ reset_bridge_name }}.in_reset
+set_interface_port_property {{ clock['resetn'] }} {{ clock['resetn'] }}_reset_n NAME {{ clock['resetn'] }}
 {%- endfor %}{#### for clock in fins['clocks'] ####}
 
 # Source FINS nodeset Tcl to instantiate FINS nodes and make connections to/between them
@@ -153,7 +153,7 @@ set_interface_property {{ external_iface_name }} EXPORT_OF {{ internal_iface_nam
 {%- for clock in fins['clocks'] %}
 # Connecting clocks and resets for "{{ clock['base_name'] }}" clock domain
 {%-  set clock_name = clock['clock'] %}
-{%-  set reset_name = clock['reset'] %}
+{%-  set reset_name = clock['resetn'] %}
 {%-  set clock_bridge_name = clock['base_name'] + '_clock_bridge' %}
 {%-  set reset_bridge_name = clock['base_name'] + '_reset_bridge' %}
 {%-  for net in clock['nets'] %}

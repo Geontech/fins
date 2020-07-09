@@ -90,16 +90,15 @@ architecture behav of {{ fins['name'] }}_tb is
   --------------------------------------------------------------------------------
   -- Clocks and resets
   {%- for clock in fins['clocks'] %}
-  signal {{ clock['clock'] }} : std_logic;
-  signal {{ clock['reset'] }} : std_logic;
+  signal {{ clock['clock']  }} : std_logic := '0';
+  signal {{ clock['resetn'] }} : std_logic := '1';
   {%- endfor %}
 
-  -- AXI4-Lite Properties Buses
 
   {%- if 'prop_interfaces' in fins %}
-  --**************************************************
-  -- Verify Properties
-  --**************************************************
+  ----------------------------------------------------
+  -- Properties Buses
+  ----------------------------------------------------
   {%-  for node_interfaces in fins['prop_interfaces'] %}
   {%-   set node_name = node_interfaces['node_name'] %}
 
@@ -132,8 +131,7 @@ architecture behav of {{ fins['name'] }}_tb is
   {%-  endfor %}{#### for node_interfaces in fins['prop_interfaces'] ####}
   {%- endif %}{#### if 'prop_interfaces' in fins ####}
 
-
-  {%- if 'ports' in fins %}
+  {% if 'ports' in fins %}
   {%-  if 'hdl_ports' in fins['ports'] and fins['ports']['hdl_ports']|length > 0 %}
   -- Discrete HDL Ports
   {%-   for hdl_port in fins['ports']['hdl_ports'] %}
@@ -145,7 +143,7 @@ architecture behav of {{ fins['name'] }}_tb is
   {%-   endfor %}
   {%-  endif %}
 
-  {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
+  {%  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
   {%-   for port in fins['ports']['ports'] %}
   -- AXI4-Stream Port {{ port['direction']|upper }}: {{ port['name']|lower }}
   {%-    for i in range(port['num_instances']) %}
@@ -167,13 +165,12 @@ architecture behav of {{ fins['name'] }}_tb is
   -- Testbench
   --------------------------------------------------------------------------------
   -- Constants
-  -- TODO generate a clock for each node?
-  constant CLOCK_PERIOD  : time := 5 ns; -- 200MHz
+  {%- for clock in fins['clocks'] %}
+  constant {{ clock['base_name'] }}_CLOCK_PERIOD  : time := 5 ns; -- 200MHz
+  {%- endfor %}
 
   -- Signals
   signal simulation_done : boolean := false;
-  signal clock           : std_logic := '0';
-  signal resetn          : std_logic := '1';
   {%- if 'ports' in fins %}
   {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
   {%-   for port in fins['ports']['ports'] %}
@@ -251,8 +248,8 @@ begin
 
       {%- for clock in fins['clocks'] %}
       {%-  set outer_loop = loop %}
-      {{ clock['clock'] }} => clock,
-      {{ clock['reset'] }} => resetn{% if not (outer_loop.last and loop.last) %},{% endif %}
+      {{ clock['clock'] }} => {{ clock['clock'] }},
+      {{ clock['resetn'] }} => {{ clock['resetn'] }}{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%- endfor %}
     );
 
@@ -317,35 +314,20 @@ begin
   --------------------------------------------------------------------------------
   -- Clocks and Resets
   --------------------------------------------------------------------------------
-  -- Waveform process to generate a clock
-  w_clock : process
+  {%- for clock in fins['clocks'] %}
+  -- Waveform process to generate clock "{{ clock['clock'] }}"
+  w_{{ clock['clock'] }} : process
   begin
     if (simulation_done = false) then
-      clock <= '0';
-      wait for CLOCK_PERIOD/2;
-      clock <= '1';
-      wait for CLOCK_PERIOD/2;
+      {{ clock['clock'] }} <= '0';
+      wait for {{ clock['base_name']|upper }}_CLOCK_PERIOD/2;
+      {{ clock['clock'] }} <= '1';
+      wait for {{ clock['base_name']|upper }}_CLOCK_PERIOD/2;
     else
       wait;
     end if;
-  end process w_clock;
-
-  -- By default, copy the clock and reset for the Ports and Properties interfaces
-  {%- if 'prop_interfaces' in fins %}
-  properties_aclk    <= clock;
-  properties_aresetn <= resetn;
-  {%- endif %}{#### if 'prop_interfaces' in fins ####}
-
-  {%- if 'ports' in fins %}
-  {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
-  {%-   for port in fins['ports']['ports'] %}
-  {%-    for i in range(port['num_instances']) %}
-  {{ port['clock'] }} <= clock;
-  {{ port['reset'] }} <= resetn;
-  {%-    endfor %}{#### for i in range(port['num_instances']) ####}
-  {%-   endfor %}{#### for port in fins['ports']['ports'] ####}
-  {%-  endif  %}{#### if 'ports' in fins['ports'] ####}
-  {%- endif  %}{#### if 'ports' in fins ####}
+  end process w_{{ clock['clock'] }};
+  {%- endfor %}
 
   {%  if 'ports' in fins %}
   {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
@@ -361,8 +343,8 @@ begin
     variable packets_received : natural := 0;
   begin
     -- Wait for global reset to complete
-    if (resetn = '0') then
-      wait until (resetn = '1');
+    if ({{ port['resetn'] }} = '0') then
+      wait until ({{ port['resetn'] }} = '1');
     end if;
     -- Wait for all expected packets using the TLAST signal
     while (packets_received < G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_NUM_PACKETS_EXPECTED) loop
@@ -395,18 +377,20 @@ begin
     variable my_line : line;
   begin
 
-    --**************************************************
-    -- Reset
-    --**************************************************
-    resetn <= '0';
-    wait for CLOCK_PERIOD*10; -- Wait for an arbitrary 10 clocks
-    resetn <= '1';
-    wait for CLOCK_PERIOD;
+    -- Initialize Resets
+    {%- for clock in fins['clocks'] %}
+    {{ clock['resetn'] }} <= '0';
+    {%- endfor %}
 
     {%- if 'prop_interfaces' in fins %}
-    --**************************************************
+    -- deassert reset for properties interface after delay
+    wait for PROPERTIES_CLOCK_PERIOD*10; -- Wait for an arbitrary 10 clocks
+    properties_aresetn <= '1';
+    wait for PROPERTIES_CLOCK_PERIOD; -- Wait for an arbitrary 10 clocks
+
+    ----------------------------------------------------
     -- Verify Properties
-    --**************************************************
+    ----------------------------------------------------
     {%-  for node_interfaces in fins['prop_interfaces'] %}
     {%-   set node_name = node_interfaces['node_name'] %}
     {%-   for interface in node_interfaces['interfaces'] %}
@@ -425,10 +409,14 @@ begin
 
     {%- if 'ports' in fins %}
     {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
-    --**************************************************
+
+    ----------------------------------------------------
     -- Verify Ports
-    --**************************************************
+    ----------------------------------------------------
     -- Enable the inputs
+    {%- for clock in fins['clocks'] %}
+    {{ clock['resetn'] }} <= '1';
+    {%- endfor %}
     {%-  for port in fins['ports']['ports'] %}
     {%-   if port['direction']|lower == 'in' %}
     {%-    for i in range(port['num_instances']) %}
@@ -451,9 +439,9 @@ begin
     {%-  endif  %}{#### if 'ports' in fins['ports'] ####}
     {%- endif  %}{#### if 'ports' in fins ####}
 
-    --**************************************************
+    ----------------------------------------------------
     -- End Simulation
-    --**************************************************
+    ----------------------------------------------------
     write(my_line, string'("***** SIMULATION PASSED *****"));
     writeline(output, my_line);
     simulation_done <= true;
