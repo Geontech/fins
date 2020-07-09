@@ -84,51 +84,35 @@
       "destinations":[
         {"node_name":"fins_test_ip_1", "net":"sfix_cpx_in"}
       ]
-    },
+    }
+  ],
+  "clocks":[
     {
-      "source":{"net":"clock_in.out_clk"},
-      "destinations":[
+      "clock":"input",
+      "nets":[
         {"node_name":"fins_test_ip_0", "net":"myinput"},
-        {"node_name":"fins_test_ip_0", "net":"myoutput"},
         {"node_name":"fins_test_ip_0", "net":"test_in"},
-        {"node_name":"fins_test_ip_0", "net":"test_out"},
-        {"node_name":"fins_test_ip_0", "net":"sfix_cpx_in"},
-        {"node_name":"fins_test_ip_0", "net":"sfix_cpx_out"},
-        {"node_name":"fins_test_ip_0", "net":"S_AXI_ACLK"},
-        {"node_name":"fins_test_ip_0", "net":"S_AXI_TEST_BOTTOM_ACLK"},
-        {"node_name":"fins_test_ip_0", "net":"S_AXI_TEST_MIDDLE_ACLK"},
-        {"node_name":"fins_test_ip_1", "net":"myinput"},
-        {"node_name":"fins_test_ip_1", "net":"myoutput"},
-        {"node_name":"fins_test_ip_1", "net":"test_in"},
-        {"node_name":"fins_test_ip_1", "net":"test_out"},
-        {"node_name":"fins_test_ip_1", "net":"sfix_cpx_in"},
-        {"node_name":"fins_test_ip_1", "net":"sfix_cpx_out"},
-        {"node_name":"fins_test_ip_1", "net":"S_AXI_ACLK"},
-        {"node_name":"fins_test_ip_1", "net":"S_AXI_TEST_BOTTOM_ACLK"},
-        {"node_name":"fins_test_ip_1", "net":"S_AXI_TEST_MIDDLE_ACLK"}
+        {"node_name":"fins_test_ip_0", "net":"sfix_cpx_in"}
       ]
     },
     {
-      "source":{"net":"reset_in.out_reset"},
-      "destinations":[
-        {"node_name":"fins_test_ip_0", "net":"myinput"},
+      "clock":"processing",
+      "nets":[
         {"node_name":"fins_test_ip_0", "net":"myoutput"},
-        {"node_name":"fins_test_ip_0", "net":"test_in"},
         {"node_name":"fins_test_ip_0", "net":"test_out"},
-        {"node_name":"fins_test_ip_0", "net":"sfix_cpx_in"},
         {"node_name":"fins_test_ip_0", "net":"sfix_cpx_out"},
-        {"node_name":"fins_test_ip_0", "net":"S_AXI_ARESETN"},
-        {"node_name":"fins_test_ip_0", "net":"S_AXI_TEST_BOTTOM_ARESETN"},
-        {"node_name":"fins_test_ip_0", "net":"S_AXI_TEST_MIDDLE_ARESETN"},
         {"node_name":"fins_test_ip_1", "net":"myinput"},
-        {"node_name":"fins_test_ip_1", "net":"myoutput"},
         {"node_name":"fins_test_ip_1", "net":"test_in"},
+        {"node_name":"fins_test_ip_1", "net":"sfix_cpx_in"}
+      ]
+    },
+    {
+      "clock":"output_aclk",
+      "reset":"output_aresetn",
+      "nets":[
+        {"node_name":"fins_test_ip_1", "net":"myoutput"},
         {"node_name":"fins_test_ip_1", "net":"test_out"},
-        {"node_name":"fins_test_ip_1", "net":"sfix_cpx_in"},
-        {"node_name":"fins_test_ip_1", "net":"sfix_cpx_out"},
-        {"node_name":"fins_test_ip_1", "net":"S_AXI_ARESETN"},
-        {"node_name":"fins_test_ip_1", "net":"S_AXI_TEST_BOTTOM_ARESETN"},
-        {"node_name":"fins_test_ip_1", "net":"S_AXI_TEST_MIDDLE_ARESETN"}
+        {"node_name":"fins_test_ip_1", "net":"sfix_cpx_out"}
       ]
     }
   ],

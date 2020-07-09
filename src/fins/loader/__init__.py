@@ -1399,7 +1399,7 @@ def find_base_address_from_bd(filename, module_name, interface_name):
     print('ERROR: Unable to find address space for',interface_name,'of',module_name,'in',filename)
     sys.exit(1)
 
-def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
+def validate_and_convert_fins_nodeset(fins_data,filename,backend,verbose):
     """
     Validates and converts data from a Firmware Nodeset Specification JSON build file
     """
@@ -1417,6 +1417,9 @@ def validate_and_convert_fins_nodeset(fins_data,filename,verbose):
     validate_fins('nodeset',fins_data,fins_schema,verbose)
     if verbose:
         print('+++++ Done.')
+
+    # Set the backend used for generation
+    fins_data['backend'] = backend
 
     # Set defaults for top-level keys
     fins_data = populate_fins_fields(fins_data,verbose)
@@ -1701,12 +1704,26 @@ def validate_connected_ports(source, destination, verbose):
         sys.exit(1)
 
 
-def populate_connections(fins_data, verbose):
+def populate_app_nodeset_connections(fins_data, verbose):
     """
-    Populate each connection in the nodeset so that each source and destination
-    is associated with a type and port (if applicable)
+    Modifies the contents of fins_data for a FINS Nodeset.
 
-    Export ports and interfaces that should be exposed externally to the nodeset
+    Populate each connection in the Nodeset so that each source and destination
+    is associated with a type and port (if applicable).
+
+    The fins_data['connections'] list is populated as follows:
+        [
+         {'source': source-dict,
+          'destinations': [destination-dict],
+         }, ...
+        ]
+
+        Here, each source-dict and destination-dict follows the same format:
+            node_name
+            net = which net on the node should be connected
+            type = port, hdl_port, or a signal
+            port = if type is port or hdl_port, this is the actual port (dict) as found in the containing node
+            connected = flagged as True for any ports that have one or more connections
     """
 
     # if this nodeset has connections, iterate over the connections,
@@ -1727,14 +1744,79 @@ def populate_connections(fins_data, verbose):
                     source['port']['connected'] = True
                     destination['port']['connected'] = True
 
+
+def populate_app_nodeset_clocks(fins_data, verbose):
+    """
+    Modifies the contents of fins_data for a FINS Nodeset.
+
+    Populate clock domains (fins_data['clocks']) and which nets they connect to:
+        [
+         {'base_name': <base_name>,
+          'clock': <clock>,
+          'reset': <reset>,
+          'nets': [net-dict, ...]
+         }, ...
+        ]
+
+        Here, base_name refers to the name of the clock domain (e.g. "iq" as opposed to "iq_aclk")
+        'clock' and 'reset' are the actual names of the clock and reset names.
+        And each 'net-dict' contains node_name, type (port or interface)
+        and the actual 'port' or 'interface' being connected to.
+
+    Sets the clock information on the actual port.
+    """
+    # TODO connecting clocks to hdl_ports? Does this work? Test.
+
+    for clock in fins_data['clocks']:
+        clock['base_name'] = clock['clock']
+
+        if get_signal_type(clock['base_name'], verbose) != 'clock':
+            clock['clock'] = clock['base_name'] + '_aclk'
+            #reset_name = clock['base_name'] + '_aresetn'
+
+        if 'reset' not in clock:
+            clock['reset'] =  clock['base_name'] + '_aresetn'
+
+        nets = clock['nets']
+        for net in nets:
+            net['type'], net['port'] = get_net_type(net, fins_data, verbose)
+            if (net['type'] == 'hdl_port' and
+                (get_signal_type(net['net'], verbose) != 'clock' or net['port']['bit_width'] != 1)):
+                print('ERROR: To connect hdl_port "{}" to a clock it must be named as a clock and must have bit_width=1'.format(net['net']))
+                sys.exit(1)
+            elif net['type'] == 'port':
+                net['port']['clock'] = clock['clock']
+                net['port']['reset'] = clock['reset']
+                net['port']['clock_base_name'] = clock['base_name']
+
+
+def populate_app_nodeset_exports(fins_data, verbose):
+    """
+    Modifies the contents of fins_data for a FINS Nodeset.
+
+    Export ports that should be exposed externally from the nodeset.
+    "Exporting" is another way of saying "make this an external port/interface of this Nodeset"
+    Exported ports are added to the fins_data['ports']['ports'] or fins_data['ports']['hdl_ports'] lists
+
+    By default, export all unconnected ports (ports and hdl_ports). If port_exports
+    or hdl_port_exports is specified in the Nodeset JSON, only export the ports listed
+    in those fields.
+
+    An exported port is a copied version of the original Node port with a few modified/extra fields:
+        name: original port name prepended with the Node's module name
+        node_name: name of the node that this port was exported from
+        node_port: the original node port
+
+    """
     # Export ports as ports of the nodeset itself
     if 'port_exports' in fins_data:
-
         if 'ports' not in fins_data:
             fins['ports'] = {}
         fins['ports']['ports'] = []
 
         for net in fins_data['port_exports']:
+            # Get the port to export, copy it, change/add some information,
+            # and add it to the Nodeset's ports list
             port = get_port(net['node_name'], net['net'], fins_data)
             if port is None:
                 print('ERROR: Exported port not found {}'.format(net['net']))
@@ -1747,9 +1829,7 @@ def populate_connections(fins_data, verbose):
             fins_data['ports']['ports'].append(nodeset_port)
 
     else:
-        # If port_exports isn't present in the JSON, they should be auto-generated:
-        #     export all node output ports and on any unconnected input ports
-
+        # If port_exports isn't present in the JSON, export all unconnected ports
         if 'ports' not in fins_data:
             fins_data['ports'] = {}
         fins_data['ports']['ports'] = []
@@ -1760,8 +1840,11 @@ def populate_connections(fins_data, verbose):
 
                 if 'ports' in node['node_details']['ports']:
                     for port in node['node_details']['ports']['ports']:
+                        # The point of test_mode is to export all possible ports for test-purposes
+                        # (as opposed to just the unconnected ports)
                         # FIXME test_mode is gimmicky and should probably just be removed
                         test_mode = 'test_mode' in fins_data and fins_data['test_mode']
+
                         # is this port part of a connection?
                         port_unconnected = 'connected' not in port or not port['connected']
 
@@ -1774,12 +1857,15 @@ def populate_connections(fins_data, verbose):
                             nodeset_port['node_port'] = port
                             fins_data['ports']['ports'].append(nodeset_port)
 
+    # Export hdl_ports as hdl_ports of the nodeset itself
     if 'hdl_port_exports' in fins_data:
         if 'ports' not in fins_data:
             fins_data['ports'] = {}
         fins_data['ports']['hdl_ports'] = []
 
         for net in fins_data['hdl_port_exports']:
+            # Get the hdl_port to export, copy it, change/add some information,
+            # and add it to the Nodeset's hdl_ports list
             port = get_port(net['node_name'], net['net'], fins_data, port_type='hdl_ports')
             if port is None:
                 print('ERROR: Exported port not found {}'.format(net['net']))
@@ -1791,9 +1877,7 @@ def populate_connections(fins_data, verbose):
             nodeset_port['node_port'] = port
             fins_data['ports']['hdl_ports'].append(nodeset_port)
     else:
-        # If hdl_port_exports isn't present in the JSON, they should be auto-generated:
-        #     export all node output ports and on any unconnected input ports
-
+        # If hdl_port_exports isn't present in the JSON, export all unconnected ports
         if 'ports' not in fins_data:
             fins_data['ports'] = {}
         fins_data['ports']['hdl_ports'] = []
@@ -1817,65 +1901,113 @@ def populate_connections(fins_data, verbose):
                             fins_data['ports']['hdl_ports'].append(nodeset_port)
 
 
+def populate_fins_app_nodeset(fins_data, verbose):
+    """
+    Modifies the contents of fins_data for a FINS nodeset.
+
+    Populate contents specific to an Application-level Nodeset.
+    """
+    populate_app_nodeset_connections(fins_data, verbose)
+    populate_app_nodeset_clocks(fins_data, verbose)
+    populate_app_nodeset_exports(fins_data, verbose)
+
+
 def populate_property_interfaces(fins_data, verbose):
     """
-    Populate the per-node lists of property interfaces fins_data['prop_interfaces']
+    Modifies the contents of fins_data. Must be run after generator has been run for all sub-IPs/Nodes.
 
-    A node/IP's or a nodeset's prop_interfaces maps a node_name to a list of property interfaces
-    on that node:
+    Populate the per-node lists of property interfaces fins_data['prop_interfaces']
+    and create the 'properties' clock domain with connections to each interface.
+
+    A Node/IP's or a Nodeset's prop_interfaces maps a node_name to a list of property interfaces
+    on that Node:
         [
          {'name': <node-name>,
           'top':<top-interface>,
           'addr_width': <addr-width>,
           'data-width': <data-width>,
-          'interfaces': [<interface-name>, ...]
+          'interfaces': [interface-dict, ...]
          }, ...
         ]
 
-        - Here, [<interface-name>, ...] includes the interface names of each sub-IP.
-          An interface name is the same as the node/IP name and is used for interface ports in HDL such as:
-              S_AXI_TEST_MIDDLE
-        - Here, <top-interface> is the name of the interface that is the top-level interface for a node
-          (is not a sub-IP's/sub-node's interface). This is necessary because top-level interfaces of a node
-          do not include the node's name in HDL (e.g. just S_AXI, not S_AXI_TEST_MIDDLE)
+        Here, [interface-dict, ...] includes the interface dictionary of each sub-IP.
+        An interface-dict contains:
+            name: the simple and short name of this interface - same as name of containing IP/Node
+            extended_name: includes the parent-Node name when inside a Nodeset
+            top: is this the interface of the top-IP in a hierarchy (not a sub-IP)?
+                 Necessary because the top-IP's interface does not include the Node's name
+                 (e.g. just S_AXI not S_AXI_TEST_MIDDLE)
+
+    For Nodesets, this function adds a 'properties' clock domain dictionary to the fins_data['clocks'] list:
+        [
+         {
+          'base_name': 'properties'
+          'clock': 'properties_aclk'
+          'reset': 'properties_aresetn'
+          'nets': [interface-net, ...]
+         }
+        ]
+
+        Here, each interface-net is a dict  that contains the node_name, type=prop_interface
+        and the actual interface (interface-dict explained above)
     """
 
-    # TODO exported interfaces of each node become the ['hdl']['interfaces'] of the nodeset
-
+    # If this is a Nodeset, collect all of the properties interfaces for its Nodes
     if 'nodes' in fins_data:
         fins_data['prop_interfaces'] = []
         for node in fins_data['nodes']:
             if not node['descriptive_node'] and 'properties' in node['node_details']:
                 prop_interface = {}
                 prop_interface['node_name'] = node['module_name']
-                prop_interface['top'] = node['node_details']['name']
-
                 prop_interface['addr_width'] = node['node_details']['properties']['addr_width']
                 prop_interface['data_width'] = node['node_details']['properties']['data_width']
-
                 prop_interface['interfaces'] = node['node_details']['prop_interfaces'][0]['interfaces']
+                for interface in prop_interface['interfaces']:
+                    # The extended name is used when exporting an interface from a Nodeset and includes the
+                    # name of the parent-IP (the one explicitly included in the Nodeset)
+                    # For example, if the Nodeset includes a Node name "top" with a sub-IP named "bottom", and
+                    # both have properties interfaces, the extended name will be "top_bottom"
+                    interface['extended_name'] = node['module_name'] + '_' + interface['name']
 
                 fins_data['prop_interfaces'].append(prop_interface)
+
     else:
 
-        # Initialize the list of interfaces for this IP/node: this is a list where each entry maps a node_name to a list of
-        # property interfaces on that node. A node can have more than one prop interface when it has sub-IPs
-        # TODO IP/node instance name instead of IP/node name?
+        # Initialize the list of interfaces for this IP/Node: this is a list where each entry maps a node_name to a list of
+        # property interfaces on that Node. A Node can have more than one prop interface when it has sub-IPs
+        # TODO IP/Node instance name instead of IP/Node name?
         fins_data['prop_interfaces'] = \
             [{
               'node_name': fins_data['name'],
-              'top': fins_data['name'],
               'addr_width': fins_data['properties']['addr_width'],
               'data_width': fins_data['properties']['data_width'],
-              'interfaces': [fins_data['name']]
+              'interfaces': [{'name':fins_data['name'], 'top':True}]
             }] if 'properties' in fins_data else []
 
         if 'ip' in fins_data:
             for ip in fins_data['ip']:
                 if 'prop_interfaces' in ip['ip_details']:
                     # Update the list of interfaces for this IP
-                    ip_interfaces =  ip['ip_details']['prop_interfaces'][0]['interfaces']
+                    ip_interfaces = ip['ip_details']['prop_interfaces'][0]['interfaces']
+                    # These are sub-IPs so set their 'top' attribute to False
+                    for interface in ip_interfaces:
+                        interface['top'] = False
+
                     fins_data['prop_interfaces'][0]['interfaces'] += ip_interfaces
+
+    if 'nodes' in fins_data and len(fins_data['prop_interfaces']) > 0:
+        # For a Nodeset, create the properties clock domain and connect it to all properties interfaces
+        properties_clock = {
+                            'base_name':'properties',
+                            'clock':'properties_aclk',
+                            'reset':'properties_aresetn',
+                            'nets':[]
+                           }
+        for node_interfaces in fins_data['prop_interfaces']:
+            for interface in node_interfaces['interfaces']:
+                properties_clock['nets'].append({'node_name':node_interfaces['node_name'], 'type':'prop_interface', 'interface':interface})
+
+        fins_data['clocks'].append(properties_clock)
 
     if verbose:
         print('Property interfaces for "{}": {}'.format(fins_data['name'], fins_data['prop_interfaces']))

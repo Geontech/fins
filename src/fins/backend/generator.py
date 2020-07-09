@@ -59,6 +59,19 @@ class Generator:
             return os.path.dirname(path)
 
         def axisprefix(port, instance_index, reverse=False):
+            """
+            Given a port, construct its name with the AXI4-Lite prefix prepended.
+            Arguments:
+                port: the port dictionary containing the name, direction, and num_instances of the port
+                           name: the name of this port
+                           direction: is this an "in" or "out" port
+                           num_instances: int - how many instances are there of this port
+                instance_index: int - which port instance?
+                reverse: use the master prefix for input and slave for output
+
+            Returns:
+                The full port name with the prefix prepended
+            """
             prefix = ''
             if port['direction'].lower() == 'in':
                 if not reverse:
@@ -74,17 +87,36 @@ class Generator:
                 prefix += '{0:02d}'.format(instance_index)
             return prefix + '_axis_' + port['name'].lower()
 
-        def axi4liteprefix(interface, top=None, reverse=False):
+        def axi4liteprefix(interface, nodeset_external=False, master=False):
+            """
+            Given an interface, construct its name with an AXI4-Lite prefix prepended.
+            Arguments:
+                interface: the interface dictionary containing the name, extended name, and top
+                           name: the simple and short name of this interface
+                           extended_name: includes the parent-node name when inside a Nodeset
+                           top: is this the interface of the top-IP in a hierarchy (not a sub-IP)?
+                nodeset_external: should this function return the extended interface name
+                                  as it should be used when exported from a Nodeset?
+                master: use the master prefix instead of slave
+
+            Returns:
+                The full interface name with the prefix prepended
+            """
+
             prefix = ''
-            if not reverse:
+            if not master:
                 prefix += 'S'
             else:
                 prefix += 'M'
+
+            if nodeset_external:
+                return prefix + '_AXI_' + interface['extended_name'].upper()
+
             # The top-level interface of a node does not have a unique name (just 'M/S_AXI')
-            if interface == top:
+            if interface['top']:
                 return prefix + '_AXI'
             else:
-                return prefix + '_AXI_' + interface.upper()
+                return prefix + '_AXI_' + interface['name'].upper()
 
         # Create the Jinja Environment and load templates
         env = Environment(loader=FileSystemLoader(directory))

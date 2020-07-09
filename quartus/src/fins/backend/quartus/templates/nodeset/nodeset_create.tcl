@@ -34,7 +34,9 @@
 package require qsys
 
 # Set the fixed filepaths
-set IP_ROOT_RELATIVE_TO_PROJ "../.."
+set QUARTUS_TO_ROOT "../.."
+set FINS_OUTPUT_DIR "gen/quartus"
+
 
 # Run Pre-Build TCL Scripts
 # Note: These scripts can use parameters defined above since they are sourced by this script
@@ -43,7 +45,7 @@ set IP_ROOT_RELATIVE_TO_PROJ "../.."
 {%- if 'prebuild' in fins['filesets']['scripts'] %}
 {%- for prebuild_script in fins['filesets']['scripts']['prebuild'] %}
 {%- if prebuild_script['type']|lower == 'tcl' %}
-source ${IP_ROOT_RELATIVE_TO_PROJ}/{{ prebuild_script['path'] }}
+source ${QUARTUS_TO_ROOT}/{{ prebuild_script['path'] }}
 {%- endif %}
 {%- endfor %}
 {%- endif %}
@@ -58,55 +60,47 @@ set NODESET_DEVICE {{ fins['part'] }}
 set NODESET_DEVICE 10CX220YF780I5G
 {%- endif %}
 set_project_property DEVICE $NODESET_DEVICE
-#set_project_property DEVICE_FAMILY {Cyclone 10 GX}
 set_project_property HIDE_FROM_IP_CATALOG {false}
 set_use_testbench_naming_pattern 0 {}
 
-# Add the components
+{% for clock in fins['clocks'] %}
+{%- set clock_bridge_name = clock['base_name'] + '_clock_bridge' %}
+{%- set reset_bridge_name = clock['base_name'] + '_reset_bridge' %}
+# Add "{{ clock_bridge_name }}" clock bridge
+add_component {{ clock_bridge_name }} ip/{{ fins['name'] }}/{{ clock_bridge_name }}_clock_in.ip altera_clock_bridge clock_in 19.1
+load_component {{ clock_bridge_name }}
 
-# Add clock bridge
-# TODO do I need version here for add_component?
-add_component clock_in ip/{{ fins['name'] }}/{{ fins['name'] }}_clock_in.ip altera_clock_bridge clock_in 19.1
-load_component clock_in
-# TODO clock rate?
-set_component_parameter_value EXPLICIT_CLOCK_RATE {50000000.0}
 set_component_parameter_value NUM_CLOCK_OUTPUTS {1}
 set_component_project_property HIDE_FROM_IP_CATALOG {false}
 save_component
-load_instantiation clock_in
+load_instantiation {{ clock_bridge_name }}
 #remove_instantiation_interfaces_and_ports
 add_instantiation_interface in_clk clock INPUT
-set_instantiation_interface_parameter_value in_clk clockRate {0}
-set_instantiation_interface_parameter_value in_clk externallyDriven {false}
-set_instantiation_interface_parameter_value in_clk ptfSchematicName {}
+#set_instantiation_interface_parameter_value in_clk ptfSchematicName {}
 add_instantiation_interface_port in_clk in_clk clk 1 STD_LOGIC Input
 add_instantiation_interface out_clk clock OUTPUT
 set_instantiation_interface_parameter_value out_clk associatedDirectClock {in_clk}
-set_instantiation_interface_parameter_value out_clk clockRate {50000000}
-set_instantiation_interface_parameter_value out_clk clockRateKnown {true}
-set_instantiation_interface_parameter_value out_clk externallyDriven {false}
-set_instantiation_interface_parameter_value out_clk ptfSchematicName {}
-set_instantiation_interface_sysinfo_parameter_value out_clk clock_rate {50000000}
+#set_instantiation_interface_parameter_value out_clk ptfSchematicName {}
 add_instantiation_interface_port out_clk out_clk clk 1 STD_LOGIC Output
 save_instantiation
 
 # Add reset bridge
+{#
 # TODO do I need version here for add_component?
-add_component reset_in ip/{{ fins['name'] }}/{{ fins['name'] }}_reset_in.ip altera_reset_bridge reset_in 19.1
-load_component reset_in
+#}
+add_component {{ reset_bridge_name }} ip/{{ fins['name'] }}/{{ reset_bridge_name }}_reset_in.ip altera_reset_bridge reset_in 19.1
+load_component {{ reset_bridge_name }}
 set_component_parameter_value ACTIVE_LOW_RESET {1}
 set_component_parameter_value NUM_RESET_OUTPUTS {1}
 set_component_parameter_value SYNCHRONOUS_EDGES {deassert}
 set_component_parameter_value SYNC_RESET {0}
 set_component_parameter_value USE_RESET_REQUEST {0}
-set_component_project_property HIDE_FROM_IP_CATALOG {false}
+#set_component_project_property HIDE_FROM_IP_CATALOG {false}
 save_component
-load_instantiation reset_in
+load_instantiation {{ reset_bridge_name }}
 #remove_instantiation_interfaces_and_ports
 add_instantiation_interface clk clock INPUT
-set_instantiation_interface_parameter_value clk clockRate {0}
-set_instantiation_interface_parameter_value clk externallyDriven {false}
-set_instantiation_interface_parameter_value clk ptfSchematicName {}
+#set_instantiation_interface_parameter_value clk ptfSchematicName {}
 add_instantiation_interface_port clk clk clk 1 STD_LOGIC Input
 add_instantiation_interface in_reset reset INPUT
 set_instantiation_interface_parameter_value in_reset associatedClock {clk}
@@ -120,25 +114,23 @@ set_instantiation_interface_parameter_value out_reset synchronousEdges {DEASSERT
 add_instantiation_interface_port out_reset out_reset_n reset_n 1 STD_LOGIC Output
 save_instantiation
 
-add_connection clock_in.out_clk/reset_in.clk
+add_connection {{ clock_bridge_name }}.out_clk/{{ reset_bridge_name }}.clk
+
+# add the exports
+set_interface_property {{ clock['clock'] }} EXPORT_OF {{ clock_bridge_name }}.in_clk
+set_interface_port_property {{ clock['clock'] }} {{ clock['clock'] }}_clk NAME {{ clock['clock'] }}
+set_interface_property {{ clock['reset'] }} EXPORT_OF {{ reset_bridge_name }}.in_reset
+set_interface_port_property {{ clock['reset'] }} {{ clock['reset'] }}_reset_n NAME {{ clock['reset'] }}
+{%- endfor %}{#### for clock in fins['clocks'] ####}
 
 # Source FINS nodeset Tcl to instantiate FINS nodes and make connections to/between them
 source ../../gen/quartus/nodes_instantiate.tcl
 
-# add the exports
-set_interface_property clk EXPORT_OF clock_in.in_clk
-#set_exported_interface_sysinfo_parameter_value clk clock_domain {-1}
-#set_exported_interface_sysinfo_parameter_value clk clock_rate {-1}
-#set_exported_interface_sysinfo_parameter_value clk reset_domain {-1}
-set_interface_property reset EXPORT_OF reset_in.in_reset
-
 {%- if 'ports' in fins %}
-{%-  if 'ports' in fins['ports'] %}
+{%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
 # The following ports were exported (made external) from the nodeset
 {%-   for port in fins['ports']['ports'] %}
 {%-    for i in range(port['num_instances']) %}
-#set_interface_property {{ port|axisprefix(i) }}_aclk EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']|axisprefix(i) }}_aclk
-#set_interface_property {{ port|axisprefix(i) }}_aresetn EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']|axisprefix(i) }}_aresetn
 set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']|axisprefix(i) }}
 {%-    endfor %}
 {%-   endfor %}
@@ -150,14 +142,33 @@ set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }
 {%-  for node_interfaces in fins['prop_interfaces'] %}
 {%-   set node_name = node_interfaces['node_name'] %}
 {%-   for interface in node_interfaces['interfaces'] %}
-{%-    set external_iface_name = (node_name + '_' + interface)|axi4liteprefix() %}
-{%-    set internal_iface_name = node_name + '.' + interface|axi4liteprefix(node_interfaces['top']) %}
-#set_interface_property {{ external_iface_name }}_ACLK    EXPORT_OF {{ internal_iface_name }}_ACLK
-#set_interface_property {{ external_iface_name }}_ARESETN EXPORT_OF {{ internal_iface_name }}_ARESETN
-set_interface_property {{ external_iface_name }}         EXPORT_OF {{ internal_iface_name }}
+{%-    set external_iface_name = interface|axi4liteprefix(nodeset_external=True) %}
+{%-    set internal_iface_name = node_name + '.' + interface|axi4liteprefix() %}
+set_interface_property {{ external_iface_name }} EXPORT_OF {{ internal_iface_name }}
 {%-   endfor %}
 {%-  endfor %}
 {%- endif %}
+
+# Wiring clock domains
+{%- for clock in fins['clocks'] %}
+# Connecting clocks and resets for "{{ clock['base_name'] }}" clock domain
+{%-  set clock_name = clock['clock'] %}
+{%-  set reset_name = clock['reset'] %}
+{%-  set clock_bridge_name = clock['base_name'] + '_clock_bridge' %}
+{%-  set reset_bridge_name = clock['base_name'] + '_reset_bridge' %}
+{%-  for net in clock['nets'] %}
+{%-   if net['type'] == 'port' %}
+{%-    set port = net['port'] %}
+{%-    for i in range(port['num_instances']) %}
+add_connection {{ clock_bridge_name }}.out_clk/{{ net['node_name'] }}.{{ port|axisprefix(i) }}_aclk
+add_connection {{ reset_bridge_name }}.out_reset/{{ net['node_name'] }}.{{ port|axisprefix(i) }}_aresetn
+{%-    endfor %}
+{%-   elif net['type'] == 'prop_interface' %}
+add_connection {{ clock_bridge_name }}.out_clk/{{ net['node_name'] }}.{{ net['interface']|axi4liteprefix() }}_ACLK
+add_connection {{ reset_bridge_name }}.out_reset/{{ net['node_name'] }}.{{ net['interface']|axi4liteprefix() }}_ARESETN
+{%-   endif %}
+{%-  endfor %}
+{%- endfor %}
 
 # save the system
 sync_sysinfo_parameters

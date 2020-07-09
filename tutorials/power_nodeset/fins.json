@@ -29,25 +29,21 @@
       "destinations":[
         {"node_name":"power_passthrough_0", "net":"power_in"}
       ]
-    },
+    }
+  ],
+  "clocks":[
     {
-      "source":{"net":"clock_in.out_clk"},
-      "destinations":[
-        {"node_name":"power_converter_0",   "net":"iq"},
-        {"node_name":"power_converter_0",   "net":"power"},
-        {"node_name":"power_passthrough_0", "net":"power_in"},
-        {"node_name":"power_passthrough_0", "net":"power_out"},
-        {"node_name":"power_converter_0",   "net":"S_AXI_ACLK"}
+      "clock":"iq",
+      "nets":[
+        {"node_name":"power_converter_0",   "net":"iq"}
       ]
     },
     {
-      "source":{"net":"reset_in.out_reset"},
-      "destinations":[
-        {"node_name":"power_converter_0",   "net":"iq"},
+      "clock":"power",
+      "nets":[
         {"node_name":"power_converter_0",   "net":"power"},
         {"node_name":"power_passthrough_0", "net":"power_in"},
-        {"node_name":"power_passthrough_0", "net":"power_out"},
-        {"node_name":"power_converter_0",   "net":"S_AXI_ARESETN"}
+        {"node_name":"power_passthrough_0", "net":"power_out"}
       ]
     }
   ],

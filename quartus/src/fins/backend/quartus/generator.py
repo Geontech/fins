@@ -42,6 +42,7 @@ class QuartusGenerator(Generator):
 
             # Generate Quartus targets
             self.render_jinja_template(jinja_env,'Makefile',root_directory+'Makefile',fins_data)
+            self.render_jinja_template(jinja_env,'nodeset_project.tcl',output_directory+'nodeset_project.tcl',fins_data)
             self.render_jinja_template(jinja_env,'nodes_instantiate.tcl',output_directory+'nodes_instantiate.tcl',fins_data)
             self.render_jinja_template(jinja_env,'nodeset_create.tcl',output_directory+'nodeset_create.tcl',fins_data)
             self.render_jinja_template(jinja_env,'nodeset_simulate.tcl',output_directory+'nodeset_simulate.tcl',fins_data)

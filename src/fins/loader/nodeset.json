@@ -178,6 +178,36 @@
         }
       }
     },
+    "clocks":{
+      "is_required":true,
+      "types":["list"],
+      "list_types":["dict"],
+      "fields":{
+        "clock":{
+          "is_required":true,
+          "types":["str"]
+        },
+        "reset":{
+          "is_required":false,
+          "types":["str"]
+        },
+        "nets":{
+          "is_required":true,
+          "types":["list"],
+          "list_types":["dict"],
+          "fields":{
+            "node_name":{
+              "is_required":true,
+              "types":["str"]
+            },
+            "net":{
+              "is_required":true,
+              "types":["str"]
+            }
+          }
+        }
+      }
+    },
     "filesets":{
       "is_required":false,
       "types":["dict"],

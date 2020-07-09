@@ -73,7 +73,7 @@ def run_generator(generator,filepath,backend,verbose):
         if 'nodes' in fins_data:
             # This is a FINS nodeset file
             is_nodeset = True
-            fins_data = loader.validate_and_convert_fins_nodeset(fins_data, filename, verbose)
+            fins_data = loader.validate_and_convert_fins_nodeset(fins_data, filename, backend, verbose)
             # Recursively call function on all nodes
             # and then populate their contents in fins_data via loader.populate_fins_node
             for node in fins_data['nodes']:
@@ -88,9 +88,10 @@ def run_generator(generator,filepath,backend,verbose):
                 loader.populate_fins_node(node, verbose)
 
             if fins_data['is_app_nodeset']:
-                # Now that all nodes and their ports are loaded into fins_data, populate each connection in
-                # the nodeset with important metadata based on the signals and ports being connected.
-                loader.populate_connections(fins_data, verbose)
+                # Now that all nodes and their ports are loaded into fins_data,
+                # populate Nodeset-specific content like port-connections,
+                # clock domains and connections, and port exports
+                loader.populate_fins_app_nodeset(fins_data, verbose)
 
         else:
             # This is a FINS file

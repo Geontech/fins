@@ -92,30 +92,32 @@ CONSTRAINTS_FILES+= {{ constraints_file['path'] }}
 # Additional variables
 #-------------------------------------------------------------------------------
 
-# Search paths of this IP's _hw.tcl and sub-IP
+# Search paths of this Nodesets Nodes
 IP_SEARCH_PATHS:=$(QUARTUS_TO_ROOT)/$(FINS_OUTPUT_DIR),
 {%- if 'nodes' in fins %}
 {%- for node in fins['nodes'] %}
 IP_SEARCH_PATHS:=$(IP_SEARCH_PATHS)$(QUARTUS_TO_ROOT)/{{ node['fins_path']|dirname }}/**/*,
 {%- endfor %}
 {%- endif %}
-{%- if 'user_ip_catalog' in fins %}
-IP_SEARCH_PATHS:=$(IP_SEARCH_PATHS)$(QUARTUS_TO_ROOT)/{{ fins['user_ip_catalog'] }}/**/*,
-{%- endif %}
 
 # Filenames
 PROJECT_FILENAME:={{ fins['name'] }}.qpf
 QSYS_NODESET_FILENAME:={{ fins['name'] }}.qsys
+NODESET_PROJECT_SCRIPT_FILENAME:=nodeset_project.tcl
+NODESET_PROJECT_LOG_FILENAME:=nodeset_project.log
 NODESET_CREATE_SCRIPT_FILENAME:=nodeset_create.tcl
 NODESET_CREATE_LOG_FILENAME:=nodeset_create.log
 NODESET_SIMULATE_SCRIPT_FILENAME:=nodeset_simulate.tcl
 NODESET_SIMULATE_LOG_FILENAME:=nodeset_simulate.log
 
 # Paths relative to the IP root
+NODESET_PROJECT_LOG_PATH:=$(LOGS_DIR)/$(NODESET_PROJECT_LOG_FILENAME)
 NODESET_CREATE_LOG_PATH:=$(LOGS_DIR)/$(NODESET_CREATE_LOG_FILENAME)
 NODESET_SIMULATE_LOG_PATH:=$(LOGS_DIR)/$(NODESET_SIMULATE_LOG_FILENAME)
 
 # Paths relative to the other paths
+QUARTUS_TO_NODESET_PROJECT_SCRIPT_PATH:=$(QUARTUS_TO_ROOT)/$(FINS_OUTPUT_DIR)/$(NODESET_PROJECT_SCRIPT_FILENAME)
+QUARTUS_TO_NODESET_PROJECT_LOG_PATH:=$(QUARTUS_TO_ROOT)/$(NODESET_PROJECT_LOG_PATH)
 QUARTUS_TO_NODESET_CREATE_SCRIPT_PATH:=$(QUARTUS_TO_ROOT)/$(FINS_OUTPUT_DIR)/$(NODESET_CREATE_SCRIPT_FILENAME)
 QUARTUS_TO_NODESET_CREATE_LOG_PATH:=$(QUARTUS_TO_ROOT)/$(NODESET_CREATE_LOG_PATH)
 QUARTUS_TO_NODESET_SIMULATE_LOG_PATH:=$(QUARTUS_TO_ROOT)/$(NODESET_SIMULATE_LOG_PATH)
@@ -209,7 +211,8 @@ endif
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
-	cd $(QUARTUS_DIR) && qsys-script --search-path=$(IP_SEARCH_PATHS)$$ --new-quartus-project=$(PROJECT_FILENAME) --script=$(QUARTUS_TO_NODESET_CREATE_SCRIPT_PATH) $(if $(UseBatch),>> $(QUARTUS_TO_NODESET_CREATE_LOG_PATH) 2>&1)
+	cd $(QUARTUS_DIR) && quartus_sh -t $(QUARTUS_TO_NODESET_PROJECT_SCRIPT_PATH)$ $(if $(UseBatch),>> $(QUARTUS_TO_NODESET_PROJECT_LOG_PATH) 2>&1)
+	cd $(QUARTUS_DIR) && qsys-script --search-path=$(IP_SEARCH_PATHS)$$ --quartus-project=$(PROJECT_FILENAME) --script=$(QUARTUS_TO_NODESET_CREATE_SCRIPT_PATH) $(if $(UseBatch),>> $(QUARTUS_TO_NODESET_CREATE_LOG_PATH) 2>&1)
 	cd $(QUARTUS_DIR) && qsys-generate --search-path=$(IP_SEARCH_PATHS)$$ --quartus-project=$(PROJECT_FILENAME) --synthesis=$(SYNTH_LANGUAGE) {% if 'filesets' in fins %}{% if 'sim' in fins['filesets'] %}--simulation=$(SIM_LANGUAGE){% endif %}{% endif %} --ipxact $(QSYS_NODESET_FILENAME) $(if $(UseBatch),>> $(QUARTUS_TO_NODESET_CREATE_LOG_PATH) 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}

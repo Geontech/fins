@@ -44,7 +44,7 @@ library work;
 {%-  for node_interfaces in fins['prop_interfaces'] %}
 -- HDL imports for property-interfaces on node '{{ node_interfaces['node_name'] }}'
 {%-   for interface in node_interfaces['interfaces'] %}
-use work.{{ interface }}_axilite_verify.all;
+use work.{{ interface['name'] }}_axilite_verify.all;
 {%-   endfor %}
 {%-  endfor %}
 {%  endif %}
@@ -52,7 +52,7 @@ use work.{{ interface }}_axilite_verify.all;
 -- Entity
 entity {{ fins['name'] }}_tb is
   {%- if 'ports' in fins %}
-  {%-  if 'ports' in fins['ports'] %}
+  {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
   generic (
     -- TODO codegen based on generics of component nodes? or params of nodeset?
     {%- for port in fins['ports']['ports'] %}
@@ -88,6 +88,12 @@ architecture behav of {{ fins['name'] }}_tb is
   --------------------------------------------------------------------------------
   -- Device Under Test Interface Signals
   --------------------------------------------------------------------------------
+  -- Clocks and resets
+  {%- for clock in fins['clocks'] %}
+  signal {{ clock['clock'] }} : std_logic;
+  signal {{ clock['reset'] }} : std_logic;
+  {%- endfor %}
+
   -- AXI4-Lite Properties Buses
 
   {%- if 'prop_interfaces' in fins %}
@@ -101,10 +107,8 @@ architecture behav of {{ fins['name'] }}_tb is
   {%-   set data_width = node_interfaces['data_width'] %}
 
   {%-   for interface in node_interfaces['interfaces'] %}
-  {%-    set iface_name = (node_name + '_' + interface)|axi4liteprefix() %}
+  {%-    set iface_name = interface|axi4liteprefix(nodeset_external=True) %}
   -- AXILite Interface "{{ iface_name }}" on node "{{ node_name }}"
-  signal {{ iface_name }}_ACLK    : std_logic;
-  signal {{ iface_name }}_ARESETN : std_logic;
   signal {{ iface_name }}_AWADDR  : std_logic_vector({{ addr_width }}-1 downto 0);
   signal {{ iface_name }}_AWPROT  : std_logic_vector(2 downto 0);
   signal {{ iface_name }}_AWVALID : std_logic;
@@ -130,7 +134,7 @@ architecture behav of {{ fins['name'] }}_tb is
 
 
   {%- if 'ports' in fins %}
-  {%-  if 'hdl_ports' in fins['ports'] %}
+  {%-  if 'hdl_ports' in fins['ports'] and fins['ports']['hdl_ports']|length > 0 %}
   -- Discrete HDL Ports
   {%-   for hdl_port in fins['ports']['hdl_ports'] %}
   {%-    if hdl_port['bit_width'] > 1 %}
@@ -141,12 +145,10 @@ architecture behav of {{ fins['name'] }}_tb is
   {%-   endfor %}
   {%-  endif %}
 
-  {%-  if 'ports' in fins['ports'] %}
+  {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
   {%-   for port in fins['ports']['ports'] %}
   -- AXI4-Stream Port {{ port['direction']|upper }}: {{ port['name']|lower }}
   {%-    for i in range(port['num_instances']) %}
-  signal {{ port|axisprefix(i) }}_aclk    : std_logic;
-  signal {{ port|axisprefix(i) }}_aresetn : std_logic;
   {%-     if port['supports_backpressure'] %}
   signal {{ port|axisprefix(i) }}_tready  : std_logic;
   {%-     endif %}
@@ -173,7 +175,7 @@ architecture behav of {{ fins['name'] }}_tb is
   signal clock           : std_logic := '0';
   signal resetn          : std_logic := '1';
   {%- if 'ports' in fins %}
-  {%-  if 'ports' in fins['ports'] %}
+  {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
   {%-   for port in fins['ports']['ports'] %}
   {%-    for i in range(port['num_instances']) %}
   {%-     if port['direction']|lower == 'in' %}
@@ -193,14 +195,11 @@ begin
   -- TODO last comma? three different possible loops
   u_dut : entity work.{{ fins['name'] }}
     port map (
-      clk_clk => clock,
       {%- if 'prop_interfaces' in fins %}
       {%-  for node_interfaces in fins['prop_interfaces'] %}
       {%-   set node_name = node_interfaces['node_name'] %}
       {%-   for interface in node_interfaces['interfaces'] %}
-      {%-    set iface_name = (node_name + '_' + interface)|axi4liteprefix() %}
-      --{{ iface_name }}_ACLK    => {{ iface_name }}_ACLK   ,
-      --{{ iface_name }}_ARESETN => {{ iface_name }}_ARESETN,
+      {%-    set iface_name = interface|axi4liteprefix(nodeset_external=True) %}
       {{ iface_name }}_AWADDR  => {{ iface_name }}_AWADDR ,
       {{ iface_name }}_AWPROT  => {{ iface_name }}_AWPROT ,
       {{ iface_name }}_AWVALID => {{ iface_name }}_AWVALID,
@@ -225,18 +224,16 @@ begin
       {%- endif %}{#### if 'prop_interfaces' in fins ####}
 
       {%- if 'ports' in fins %}
-      {%-  if 'hdl_ports' in fins['ports'] %}
+      {%-  if 'hdl_ports' in fins['ports'] and fins['ports']['hdl_ports']|length > 0 %}
       -- Discrete HDL Ports
       {%-   for hdl_port in fins['ports']['hdl_ports'] %}
       {{ hdl_port['name'] }} => {{ hdl_port['name'] }} ,
       {%-   endfor %}{#### for hdl_port in fins['ports']['hdl_ports'] ####}
       {%-  endif  %}{#### if 'hdl_ports' in fins['ports'] ####}
 
-      {%-  if 'ports' in fins['ports'] %}
+      {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
       {%-   for port in fins['ports']['ports'] %}
       {%-    for i in range(port['num_instances']) %}
-      --{{ port|axisprefix(i) }}_aclk    => {{ port|axisprefix(i) }}_aclk    ,
-      --{{ port|axisprefix(i) }}_aresetn => {{ port|axisprefix(i) }}_aresetn ,
       {%-     if port['supports_backpressure'] %}
       {{ port|axisprefix(i) }}_tready  => {{ port|axisprefix(i) }}_tready  ,
       {%-     endif %}
@@ -252,11 +249,15 @@ begin
 
       {%- endif  %}{#### if 'ports' in fins ####}
 
-      reset_reset_n => resetn
+      {%- for clock in fins['clocks'] %}
+      {%-  set outer_loop = loop %}
+      {{ clock['clock'] }} => clock,
+      {{ clock['reset'] }} => resetn{% if not (outer_loop.last and loop.last) %},{% endif %}
+      {%- endfor %}
     );
 
   {%- if 'ports' in fins %}
-  {%-  if 'ports' in fins['ports'] %}
+  {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
   --------------------------------------------------------------------------------
   -- File Input/Output AXI4-Stream Port Verification
   --------------------------------------------------------------------------------
@@ -284,7 +285,7 @@ begin
       {%-  set outer_loop = loop %}
       {%-  for i in range(port['num_instances']) %}
       {%-   if port['direction']|lower == 'out' %}
-      {{ port|axisprefix(i,True) }}_aclk    => {{ port|axisprefix(i) }}_aclk,
+      {{ port|axisprefix(i,True) }}_aclk    => {{ port['clock'] }},
       {%-    if port['supports_backpressure'] %}
       {{ port|axisprefix(i,True) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%-    endif %}
@@ -295,7 +296,7 @@ begin
       {{ port|axisprefix(i,True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
       {{ port|axisprefix(i,True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%-   else %}
-      {{ port|axisprefix(i,True) }}_aclk    => {{ port|axisprefix(i) }}_aclk,
+      {{ port|axisprefix(i,True) }}_aclk    => {{ port['clock'] }},
       {{ port|axisprefix(i,True) }}_enable  => {{ port|axisprefix(i) }}_enable,
       {%-    if port['supports_backpressure'] %}
       {{ port|axisprefix(i,True) }}_tready  => {{ port|axisprefix(i) }}_tready,
@@ -331,29 +332,23 @@ begin
 
   -- By default, copy the clock and reset for the Ports and Properties interfaces
   {%- if 'prop_interfaces' in fins %}
-  {%-  for node_interfaces in fins['prop_interfaces'] %}
-  {%-   set node_name = node_interfaces['node_name'] %}
-  {%-   for interface in node_interfaces['interfaces'] %}
-  {%-    set iface_name = (node_name + '_' + interface)|axi4liteprefix() %}
-  {{ iface_name }}_ACLK    <= clock;
-  {{ iface_name }}_ARESETN <= resetn;
-  {%-   endfor %}{#### for interface in node_interfaces['interfaces'] ####}
-  {%-  endfor %}{#### for node_interfaces in fins['prop_interfaces'] ####}
+  properties_aclk    <= clock;
+  properties_aresetn <= resetn;
   {%- endif %}{#### if 'prop_interfaces' in fins ####}
 
   {%- if 'ports' in fins %}
-  {%-  if 'ports' in fins['ports'] %}
+  {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
   {%-   for port in fins['ports']['ports'] %}
   {%-    for i in range(port['num_instances']) %}
-  {{ port|axisprefix(i) }}_aclk    <= clock;
-  {{ port|axisprefix(i) }}_aresetn <= resetn;
+  {{ port['clock'] }} <= clock;
+  {{ port['reset'] }} <= resetn;
   {%-    endfor %}{#### for i in range(port['num_instances']) ####}
   {%-   endfor %}{#### for port in fins['ports']['ports'] ####}
   {%-  endif  %}{#### if 'ports' in fins['ports'] ####}
   {%- endif  %}{#### if 'ports' in fins ####}
 
   {%  if 'ports' in fins %}
-  {%-  if 'ports' in fins['ports'] %}
+  {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
   --------------------------------------------------------------------------------
   -- Port Verification Procedures
   --------------------------------------------------------------------------------
@@ -371,7 +366,7 @@ begin
     end if;
     -- Wait for all expected packets using the TLAST signal
     while (packets_received < G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_NUM_PACKETS_EXPECTED) loop
-      wait until falling_edge({{ port|axisprefix(i) }}_aclk);
+      wait until falling_edge({{ port['clock'] }});
       {%-  if port['supports_backpressure'] %}
       if (({{ port|axisprefix(i) }}_tvalid = '1') AND ({{ port|axisprefix(i) }}_tlast = '1') AND ({{ port|axisprefix(i) }}_tready = '1')) then
       {%-  else %}
@@ -415,9 +410,9 @@ begin
     {%-  for node_interfaces in fins['prop_interfaces'] %}
     {%-   set node_name = node_interfaces['node_name'] %}
     {%-   for interface in node_interfaces['interfaces'] %}
-    {%-    set iface_name = (node_name + '_' + interface)|axi4liteprefix() %}
-    {{ interface|lower }}_axilite_verify (
-      {{ iface_name }}_ACLK,   {{ iface_name }}_ARESETN,
+    {%-    set iface_name = interface|axi4liteprefix(nodeset_external=True) %}
+    {{ interface['name']|lower }}_axilite_verify (
+      properties_aclk,   properties_aresetn,
       {{ iface_name }}_AWADDR, {{ iface_name }}_AWPROT, {{ iface_name }}_AWVALID, {{ iface_name }}_AWREADY,
       {{ iface_name }}_WDATA,  {{ iface_name }}_WSTRB,  {{ iface_name }}_WVALID,  {{ iface_name }}_WREADY,
       {{ iface_name }}_BRESP,  {{ iface_name }}_BVALID, {{ iface_name }}_BREADY,
@@ -429,7 +424,7 @@ begin
     {%- endif %}{#### if 'prop_interfaces' in fins ####}
 
     {%- if 'ports' in fins %}
-    {%-  if 'ports' in fins['ports'] %}
+    {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
     --**************************************************
     -- Verify Ports
     --**************************************************
