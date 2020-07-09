@@ -31,8 +31,8 @@ __all__ = (
 
 SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/node.json'
 NODESET_SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/nodeset.json'
-SCHEMA_TYPES = ['int', 'bool', 'str', 'list', 'dict']
-SCHEMA_LIST_TYPES = ['int', 'bool', 'str', 'dict']
+SCHEMA_TYPES = ['int', 'float', 'bool', 'str', 'list', 'dict']
+SCHEMA_LIST_TYPES = ['int', 'float', 'bool', 'str', 'dict']
 SCHEMA_KEYS = ['is_required', 'types', 'list_types', 'fields']
 PROPERTY_TYPES = [
     'read-only-constant',
@@ -331,8 +331,12 @@ def validate_fins(parent_key,fins_object,schema_object,verbose):
             print('ERROR:',parent_key,'incorrectly has a str type')
             sys.exit(1)
     elif type(fins_object) is int:
-        if not 'int' in schema_object['types']:
+        if not 'int' in schema_object['types'] and not 'float' in schema_object['types']:
             print('ERROR:',parent_key,'incorrectly has a int type')
+            sys.exit(1)
+    elif type(fins_object) is float:
+        if not 'float' in schema_object['types']:
+            print('ERROR:',parent_key,'incorrectly has a float type')
             sys.exit(1)
     elif type(fins_object) is bool:
         if not 'bool' in schema_object['types']:
@@ -353,8 +357,12 @@ def validate_fins(parent_key,fins_object,schema_object,verbose):
                     print('ERROR:',parent_key,'incorrectly has a str list type')
                     sys.exit(1)
             elif type(fins_object_element) is int:
-                if not 'int' in schema_object['list_types']:
+                if not 'int' in schema_object['list_types'] and not 'float' in schema_object['list_types']:
                     print('ERROR:',parent_key,'incorrectly has a int list type')
+                    sys.exit(1)
+            elif type(fins_object_element) is float:
+                if not 'float' in schema_object['list_types']:
+                    print('ERROR:',parent_key,'incorrectly has a float list type')
                     sys.exit(1)
             elif type(fins_object_element) is bool:
                 if not 'bool' in schema_object['list_types']:
@@ -1775,7 +1783,10 @@ def populate_app_nodeset_clocks(fins_data, verbose):
             #reset_name = clock['base_name'] + '_aresetn'
 
         if 'resetn' not in clock:
-            clock['resetn'] =  clock['base_name'] + '_aresetn'
+            clock['resetn'] = clock['base_name'] + '_aresetn'
+
+        if 'period_ns' not in clock:
+            clock['period_ns'] = 5
 
         nets = clock['nets']
         for net in nets:
@@ -1787,7 +1798,6 @@ def populate_app_nodeset_clocks(fins_data, verbose):
             elif net['type'] == 'port':
                 net['port']['clock'] = clock['clock']
                 net['port']['resetn'] = clock['resetn']
-                net['port']['clock_base_name'] = clock['base_name']
 
 
 def populate_app_nodeset_exports(fins_data, verbose):
@@ -2001,6 +2011,7 @@ def populate_property_interfaces(fins_data, verbose):
                             'base_name':'properties',
                             'clock':'properties_aclk',
                             'resetn':'properties_aresetn',
+                            'period_ns':5,
                             'nets':[]
                            }
         for node_interfaces in fins_data['prop_interfaces']:

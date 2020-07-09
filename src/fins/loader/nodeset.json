@@ -187,9 +187,13 @@
           "is_required":true,
           "types":["str"]
         },
-        "reset":{
+        "resetn":{
           "is_required":false,
           "types":["str"]
+        },
+        "period_ns":{
+          "is_required":false,
+          "types":["float"]
         },
         "nets":{
           "is_required":true,

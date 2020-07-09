@@ -89,6 +89,7 @@
   "clocks":[
     {
       "clock":"input",
+      "period_ns":2.5,
       "nets":[
         {"node_name":"fins_test_ip_0", "net":"myinput"},
         {"node_name":"fins_test_ip_0", "net":"test_in"},
@@ -97,6 +98,7 @@
     },
     {
       "clock":"processing",
+      "period_ns":2.5,
       "nets":[
         {"node_name":"fins_test_ip_0", "net":"myoutput"},
         {"node_name":"fins_test_ip_0", "net":"test_out"},
@@ -108,7 +110,8 @@
     },
     {
       "clock":"output_aclk",
-      "reset":"output_aresetn",
+      "period_ns":2.5,
+      "resetn":"output_aresetn",
       "nets":[
         {"node_name":"fins_test_ip_1", "net":"myoutput"},
         {"node_name":"fins_test_ip_1", "net":"test_out"},

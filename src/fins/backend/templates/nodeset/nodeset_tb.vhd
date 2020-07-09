@@ -166,7 +166,7 @@ architecture behav of {{ fins['name'] }}_tb is
   --------------------------------------------------------------------------------
   -- Constants
   {%- for clock in fins['clocks'] %}
-  constant {{ clock['base_name'] }}_CLOCK_PERIOD  : time := 5 ns; -- 200MHz
+  constant {{ clock['base_name'] }}_CLOCK_PERIOD  : time := {{ clock['period_ns'] }} ns;
   {%- endfor %}
 
   -- Signals
