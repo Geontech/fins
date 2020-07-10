@@ -49,9 +49,8 @@
   ],
   "filesets":{
     "sim":[
-      { "path":"../power_converter/gen/core/power_converter_pkg.vhd" },
       { "path":"../power_converter/gen/core/power_converter_axilite_verify.vhd" },
-      { "path":"../power_passthrough/gen/core/power_passthrough_pkg.vhd" },
+      { "path":"./gen/core/power_nodeset_pkg.vhd" },
       { "path":"./gen/core/power_nodeset_axis_verify.vhd" },
       { "path":"./gen/core/power_nodeset_tb.vhd" }
     ],

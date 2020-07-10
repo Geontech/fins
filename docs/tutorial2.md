@@ -113,9 +113,8 @@ Modify your **fins.json** file to add the following code after the `connections`
 ```json
   "filesets":{
     "sim":[
-      { "path":"../power_converter/gen/core/power_converter_pkg.vhd" },
       { "path":"../power_converter/gen/core/power_converter_axilite_verify.vhd" },
-      { "path":"../power_passthrough/gen/core/power_passthrough_pkg.vhd" },
+      { "path":"./gen/core/power_nodeset_pkg.vhd" },
       { "path":"./gen/core/power_nodeset_axis_verify.vhd" },
       { "path":"./gen/core/power_nodeset_tb.vhd" }
     ],
@@ -125,7 +124,6 @@ Modify your **fins.json** file to add the following code after the `connections`
       ]
     }
   }
-}
 ```
 
 The `filesets` top-level key indicates which files are used in the Nodeset project. For Nodesets in particular, HDL files can only be added for simulation purposes. Notice that a few of the files are located in the **gen/core/** directory. These files are auto-generated and accordingly updated with the `fins` code generator executable. Since FINS manages these files, the burden of creating and maintaining these files is removed from the developer!
@@ -205,6 +203,5 @@ Verify all the commands completed without error, and check the log files after e
 ## Solution
 
 The solution files for this tutorial are located in the **tutorials/power_nodeset** directory of the FINS repository.
-
 
 **[RETURN TO TOP LEVEL README](../README.md)**

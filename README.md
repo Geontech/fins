@@ -30,26 +30,18 @@ $ python3 -m pip install ./vivado
 # Install the "quartus" generator plugin
 $ python3 -m pip install ./quartus
 ```
----
-**NOTE**
-You may not have permissions to run these `python3 -m pip` commands. To resolve this you can either use a python virtual environment, the `--user` option (`python3 -m pip --user`), or `sudo`.
-
----
+> NOTE: You may not have permissions to run these `python3 -m pip` commands. To resolve this you can either use a python virtual environment, the `--user` option (`python3 -m pip --user`), or `sudo`.
 
 To uninstall FINS, run the following commands:
 
 ```bash
 $ python3 -m pip uninstall fins fins-quartus fins-vivado
 ```
----
-**NOTE**
-Again, you may not have permissions to run these `python3 -m pip` commands. To resolve this you can either use a python virtual environment, the `--user` option (`python3 -m pip --user`), or `sudo`.
-
----
+> NOTE: Again, you may not have permissions to run these `python3 -m pip` commands. To resolve this you can either use a python virtual environment, the `--user` option (`python3 -m pip --user`), or `sudo`.
 
 To verify your installation and run an example of a FINS Node, execute the following commands to build and simulate the test IP with Vivado:
 
-> NOTES: Make sure you have sourced the Xilinx "settings64.sh" script for the version of Vivado you are using. This test requires GNU Octave or Mathworks MATLAB.
+> NOTE: Make sure you have sourced the Xilinx "settings64.sh" script for the version of Vivado you are using. This test requires GNU Octave or Mathworks MATLAB.
 
 ```bash
 # Enter the test IP directory
@@ -115,11 +107,7 @@ $ pip3 install -e .
 $ pip3 install -e ./vivado
 $ pip3 install -e ./quartus
 ```
----
-**NOTE**
-You may not have permissions to run the first `pip3` command here. To resolve this you can use the `--user` option or `sudo`.
-
----
+> NOTE: You may not have permissions to run the first `pip3` command here. To resolve this you can use the `--user` option or `sudo`.
 
 Any new code must be able to build and simulate the test IP for both Vivado and Quartus. To run both tests, execute the following commands:
 

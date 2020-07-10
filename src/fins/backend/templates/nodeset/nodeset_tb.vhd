@@ -39,8 +39,9 @@ use std.textio.all;
 
 -- User Libraries
 library work;
+use work.{{ fins['name']|lower }}_pkg.all;
 
-{%- if 'prop_interfaces' in fins %}
+{%  if 'prop_interfaces' in fins %}
 {%-  for node_interfaces in fins['prop_interfaces'] %}
 -- HDL imports for property-interfaces on node '{{ node_interfaces['node_name'] }}'
 {%-   for interface in node_interfaces['interfaces'] %}
@@ -143,7 +144,7 @@ architecture behav of {{ fins['name'] }}_tb is
   {%-   endfor %}
   {%-  endif %}
 
-  {%  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
+  {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
   {%-   for port in fins['ports']['ports'] %}
   -- AXI4-Stream Port {{ port['direction']|upper }}: {{ port['name']|lower }}
   {%-    for i in range(port['num_instances']) %}
@@ -329,7 +330,7 @@ begin
   end process w_{{ clock['clock'] }};
   {%- endfor %}
 
-  {%  if 'ports' in fins %}
+  {%- if 'ports' in fins %}
   {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
   --------------------------------------------------------------------------------
   -- Port Verification Procedures
@@ -364,7 +365,7 @@ begin
     wait;
   end process w_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_verify;
 
-  {%      endfor %}{#### for i in range(port['num_instances']) ####}
+  {%-     endfor %}{#### for i in range(port['num_instances']) ####}
   {%-    endif %}
   {%-   endfor %}{#### for port in fins['ports']['ports'] ####}
   {%-  endif  %}{#### if 'ports' in fins['ports'] ####}

@@ -1,3 +1,14 @@
+#===============================================================================
+# Firmware IP Node Specification (FINS) Auto-Generated File
+# ---------------------------------------------------------
+# Template:    .gitignore
+# Backend:     quartus
+# Generated:   2020-07-10 13:05:13.919110
+# ---------------------------------------------------------
+# Description: Default .gitignore file for FINS IP. Only auto-generated if
+#              file does not already exist.
+#===============================================================================
+
 # FINS Output Files
 /gen/*
 /project/*
