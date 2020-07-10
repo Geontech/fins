@@ -141,16 +141,56 @@ First we need to create a data-source file called **sim_source_power_converter_0
 
 Create a directory **./sim_data** in the Nodeset root to contain our simulation files. **./sim_data** is the generated testbench's default location for source/sink files. Since this Nodeset is just a **power_converter** Node connected to a passthrough Node, just copy over the simulation data from the **power_converter** tutorial.
 
-```
+```bash
 $ mkdir sim_data
 $ cp ../power_converter/sim_data/sim_source_iq.txt sim_data/sim_source_power_converter_0_iq.txt
 ```
 
 Again, since the second Node in this Nodeset is just a passthrough, we can use the same python verification script used by the **power_converter**. Copy it over.
 
-```
+```bash
 $ mkdir scripts
-$ cp ../power_converter/scripts/verify_sim.py scripts/
+```
+
+Within the **scripts** directory, create a file called **verify_sim.py** with the contents below. This file is nearly identical to the **power_converter** tutorial's verification script except for the imported module name and the source/sink filenames.
+
+```python
+#!/usr/bin/env python3
+import sys
+
+# Import auto-generated parameters file
+sys.path.append('gen/core/')
+import power_nodeset_pkg
+
+# Open our simulation input
+sim_source_data = {'last':[], 'data':{'i':[], 'q':[]} }
+with open('sim_data/sim_source_power_converter_0_iq.txt', 'r') as sim_source_file:
+    for sim_source_line in sim_source_file:
+        line_data = sim_source_line.split(' ')
+        sim_source_data['last'].append(int(line_data[0], 16))
+        sim_source_data['data']['q'].append(int(line_data[1][0:4], 16))
+        sim_source_data['data']['i'].append(int(line_data[1][4:8], 16))
+
+# Open our simulation output
+sim_sink_data = {'last':[], 'data':[]}
+with open('sim_data/sim_sink_power_passthrough_0_power_out.txt', 'r') as sim_sink_file:
+    for sim_sink_line in sim_sink_file:
+        line_data = sim_sink_line.split(' ')
+        sim_sink_data['last'].append(int(line_data[0], 16))
+        sim_sink_data['data'].append(int(line_data[1], 16))
+
+# Implement the algorithm
+sim_expected_data = []
+for ix in range(len(sim_source_data['data']['i'])):
+    sim_expected_data.append(sim_source_data['data']['i'][ix]**2 + sim_source_data['data']['q'][ix]**2)
+
+if sim_expected_data == sim_sink_data['data']:
+    print('PASS: power simulation data is correct')
+else:
+    print('ERROR: power simulation data is incorrect')
+    print('    * Expected: {}'.format(sim_expected_data))
+    print('    * Received: {}'.format(sim_sink_data['data']))
+    sys.exit(1)
 ```
 
 This script is referenced as `postsim` in the JSON's `filesets`, so it will run _after_ simulation completes.

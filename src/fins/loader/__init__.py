@@ -1980,7 +1980,13 @@ def populate_property_interfaces(fins_data, verbose):
                     # name of the parent-IP (the one explicitly included in the Nodeset)
                     # For example, if the Nodeset includes a Node name "top" with a sub-IP named "bottom", and
                     # both have properties interfaces, the extended name will be "top_bottom"
-                    interface['extended_name'] = node['module_name'] + '_' + interface['name']
+                    #
+                    # A Node with only a single interface will be named only by the module name
+                    # (e.g. just "top" in the above example)
+                    if len(prop_interface['interfaces']) > 1:
+                        interface['extended_name'] = node['module_name'] + '_' + interface['name']
+                    else:
+                        interface['extended_name'] = node['module_name']
 
                 fins_data['prop_interfaces'].append(prop_interface)
 
