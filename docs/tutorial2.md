@@ -146,13 +146,13 @@ $ mkdir sim_data
 $ cp ../power_converter/sim_data/sim_source_iq.txt sim_data/sim_source_power_converter_0_iq.txt
 ```
 
-Again, since the second Node in this Nodeset is just a passthrough, we can use the same python verification script used by the **power_converter**. Copy it over.
+We now create a verification script with contents nearly identical to that of the **power_converter** tutorial except for the imported module name and source/sink filenames.
 
 ```bash
 $ mkdir scripts
 ```
 
-Within the **scripts** directory, create a file called **verify_sim.py** with the contents below. This file is nearly identical to the **power_converter** tutorial's verification script except for the imported module name and the source/sink filenames.
+Within the **scripts** directory, create a file called **verify_sim.py** with the contents below.
 
 ```python
 #!/usr/bin/env python3
