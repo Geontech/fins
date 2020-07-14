@@ -61,37 +61,45 @@ Using your favorite text editor, create a file called **fins.json** in the **pow
       "destinations":[
         {"node_name":"power_passthrough_0", "net":"power_in"}
       ]
-    },
+    }
+  ],
+  "clocks":[
     {
-      "source":{"net":"clock_in.out_clk"},
-      "destinations":[
-        {"node_name":"power_converter_0",   "net":"iq"},
-        {"node_name":"power_converter_0",   "net":"power"},
-        {"node_name":"power_passthrough_0", "net":"power_in"},
-        {"node_name":"power_passthrough_0", "net":"power_out"},
-        {"node_name":"power_converter_0",   "net":"S_AXI_ACLK"}
+      "clock":"iq",
+      "nets":[
+        {"node_name":"power_converter_0",   "net":"iq"}
       ]
     },
     {
-      "source":{"net":"reset_in.out_reset"},
-      "destinations":[
-        {"node_name":"power_converter_0",   "net":"iq"},
+      "clock":"power",
+      "nets":[
         {"node_name":"power_converter_0",   "net":"power"},
         {"node_name":"power_passthrough_0", "net":"power_in"},
-        {"node_name":"power_passthrough_0", "net":"power_out"},
-        {"node_name":"power_converter_0",   "net":"S_AXI_ARESETN"}
+        {"node_name":"power_passthrough_0", "net":"power_out"}
       ]
     }
-  ]
+  ],
+  "filesets":{
+    "sim":[
+      { "path":"../power_converter/gen/core/power_converter_axilite_verify.vhd" },
+      { "path":"./gen/core/power_nodeset_pkg.vhd" },
+      { "path":"./gen/core/power_nodeset_axis_verify.vhd" },
+      { "path":"./gen/core/power_nodeset_tb.vhd" }
+    ],
+    "scripts":{
+      "postsim":[
+        { "path":"scripts/verify_sim.py" }
+      ]
+    }
+  }
 }
 ```
 
 In the **fins.json** file we just created, we have defined:
 1. Two "params" which override params of the Nodes in this Nodeset. See [here](parameters.md) for more information about parameters.
 2. A list of FINS "nodes" to be instantiated and connected in this Nodeset. Each Node's property interface is assigned a meaningful name, and Node parameters are overwritten by parameters of the Nodeset. FINS code-generation instantiates the nodes listed here in a backend/tool-specific block design (Vivado Block Design or Quartus Platform Designer System). For more information on the fields of each "nodes" entry see [here](integration.md).
-3. Connections between Node ports, and connections to clocks and resets. For more information on "connections" see [here](integration.md).
-
-> NOTE: The way clocks are exported and connected is in flux and will likely change in the short term.
+3. Connections between Node ports. For more information on "connections" see [here](integration.md).
+3. Clock domains and their assignments to ports. For more information on "clocks" see [here](integration.md).
 
 ## Step 3: Auto-generating Block Designs and HDL
 
