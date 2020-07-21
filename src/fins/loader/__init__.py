@@ -1436,15 +1436,15 @@ def validate_and_convert_nodeset_fins_data(fins_data,filename,backend,verbose):
     fins_data = populate_filesets(fins_data,verbose)
 
     # Set defaults for nodeset-specific top-level keys
-    if 'is_app_nodeset' not in fins_data:
-        fins_data['is_app_nodeset'] = False
+    if 'is_application' not in fins_data:
+        fins_data['is_application'] = False
 
     if 'base_offset' not in fins_data:
         fins_data['base_offset'] = 0
 
     for node in fins_data['nodes']:
         # Ensure that mandatory per-node keys are present
-        if not fins_data['is_app_nodeset'] and 'properties_offset' not in node:
+        if not fins_data['is_application'] and 'properties_offset' not in node:
             print('ERROR: Required key properties_offset does not exist for node', node['module_name'])
 
         # Set per-node defaults
@@ -1452,7 +1452,7 @@ def validate_and_convert_nodeset_fins_data(fins_data,filename,backend,verbose):
         # By default, a node is descriptive for System-level Nodesets,
         # and standard/non-descriptive for Application-level Nodesets
         if 'descriptive_node' not in node:
-            if fins_data['is_app_nodeset']:
+            if fins_data['is_application']:
                 node['descriptive_node'] = False
             else:
                 node['descriptive_node'] = True

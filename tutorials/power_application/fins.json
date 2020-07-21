@@ -1,6 +1,6 @@
 {
-  "name":"power_nodeset",
-  "is_app_nodeset":true,
+  "name":"power_application",
+  "is_application":true,
   "params": [
     { "name":"IQ_DATA_WIDTH",    "value":32 },
     { "name":"POWER_DATA_WIDTH", "value":16 }
@@ -50,9 +50,9 @@
   "filesets":{
     "sim":[
       { "path":"../power_converter/gen/core/power_converter_axilite_verify.vhd" },
-      { "path":"./gen/core/power_nodeset_pkg.vhd" },
-      { "path":"./gen/core/power_nodeset_axis_verify.vhd" },
-      { "path":"./gen/core/power_nodeset_tb.vhd" }
+      { "path":"./gen/core/power_application_pkg.vhd" },
+      { "path":"./gen/core/power_application_axis_verify.vhd" },
+      { "path":"./gen/core/power_application_tb.vhd" }
     ],
     "scripts":{
       "postsim":[

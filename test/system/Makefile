@@ -19,7 +19,7 @@ project/quartus/system.qsys: scripts/stratix10_system.tcl
 	mkdir -p project/quartus
 	mkdir -p log/
 	cd project/quartus && \
-	qsys-script --script=../../scripts/stratix10_system.tcl --new-quartus-project=stratix10_system.qpf --search-path=../../../nodeset/project/quartus/**/*,../../../node/**/*,$$ > ../../log/qsys-gen.log 2>&1
+	qsys-script --script=../../scripts/stratix10_system.tcl --new-quartus-project=stratix10_system.qpf --search-path=../../../application/project/quartus/**/*,../../../node/**/*,$$ > ../../log/qsys-gen.log 2>&1
 
 clean:
 	rm -rf project/ log/ gen/

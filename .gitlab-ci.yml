@@ -38,12 +38,12 @@ test:
         - 'cd test/node'
         - 'fins -b vivado fins.json && make sim && make clean-all'
         - 'fins -b quartus fins.json && make sim && make clean-all'
-        - 'cd ../nodeset'
-        - 'fins -b quartus nodeset_test.json && make sim && make clean-all'
+        - 'cd ../application'
+        - 'fins -b quartus application_test.json && make sim && make clean-all'
         - 'cd ../../tutorials/power_converter'
         - 'fins -b vivado fins.json && make sim && make clean-all'
         - 'fins -b quartus fins.json && make sim && make clean-all'
-        - 'cd ../power_nodeset'
+        - 'cd ../power_application'
         - 'fins -b quartus fins.json && make sim && make clean-all'
     tags:
         - fpga

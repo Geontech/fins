@@ -22,7 +22,7 @@ import sys
 
 # Import auto-generated parameters file
 sys.path.append('gen/core/')
-import nodeset_test_pkg
+import application_test_pkg
 
 ###################################################################################################
 # Path: myinput --> myoutput
@@ -47,7 +47,7 @@ with open('sim_data/sim_sink_fins_test_ip_1_myoutput.txt', 'r') as sim_sink_file
 
 # Implement the algorithm
 def mult_3times(data_in):
-    mult_const = nodeset_test_pkg.params['TEST_PARAM_INTEGER']
+    mult_const = application_test_pkg.params['TEST_PARAM_INTEGER']
     return data_in * mult_const * mult_const * mult_const
 
 

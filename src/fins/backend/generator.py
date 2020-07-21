@@ -193,7 +193,7 @@ class Generator:
 
             # Some operations only happen for Application-level nodesets
             # Run some HDL code generation and iterate into sub-nodes
-            if fins_data['is_app_nodeset']:
+            if fins_data['is_application']:
                 for node in fins_data['nodes']:
                     # Generate JSON override files for each node
                     if 'params' in node:

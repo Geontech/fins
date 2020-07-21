@@ -22,7 +22,7 @@ import sys
 
 # Import auto-generated parameters file
 sys.path.append('gen/core/')
-import power_nodeset_pkg
+import power_application_pkg
 
 # Open our simulation input
 sim_source_data = {'last':[], 'data':{'i':[], 'q':[]} }

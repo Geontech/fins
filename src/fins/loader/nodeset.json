@@ -30,7 +30,7 @@
       "is_required":false,
       "types":["str"]
     },
-    "is_app_nodeset":{
+    "is_application":{
       "is_required":false,
       "types":["bool"]
     },
