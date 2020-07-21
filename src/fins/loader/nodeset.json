@@ -179,7 +179,7 @@
       }
     },
     "clocks":{
-      "is_required":true,
+      "is_required":false,
       "types":["list"],
       "list_types":["dict"],
       "fields":{
