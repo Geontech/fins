@@ -1,0 +1,1685 @@
+package require -exact qsys 18.0
+
+# create the system "system"
+proc do_create_system {} {
+	# create the system
+	create_system system
+	set_project_property DEVICE {1SX280LU2F50E1VG}
+	set_project_property DEVICE_FAMILY {Stratix 10}
+	set_project_property HIDE_FROM_IP_CATALOG {false}
+	set_use_testbench_naming_pattern 0 {}
+
+	# add the components
+	add_component clock_in ip/system/system_clock_in.ip altera_clock_bridge clock_in 19.1
+	load_component clock_in
+	set_component_parameter_value EXPLICIT_CLOCK_RATE {50000000.0}
+	set_component_parameter_value NUM_CLOCK_OUTPUTS {1}
+	set_component_project_property HIDE_FROM_IP_CATALOG {false}
+	save_component
+	load_instantiation clock_in
+	remove_instantiation_interfaces_and_ports
+	add_instantiation_interface in_clk clock INPUT
+	set_instantiation_interface_parameter_value in_clk clockRate {0}
+	set_instantiation_interface_parameter_value in_clk externallyDriven {false}
+	set_instantiation_interface_parameter_value in_clk ptfSchematicName {}
+	add_instantiation_interface_port in_clk in_clk clk 1 STD_LOGIC Input
+	add_instantiation_interface out_clk clock OUTPUT
+	set_instantiation_interface_parameter_value out_clk associatedDirectClock {in_clk}
+	set_instantiation_interface_parameter_value out_clk clockRate {50000000}
+	set_instantiation_interface_parameter_value out_clk clockRateKnown {true}
+	set_instantiation_interface_parameter_value out_clk externallyDriven {false}
+	set_instantiation_interface_parameter_value out_clk ptfSchematicName {}
+	set_instantiation_interface_sysinfo_parameter_value out_clk clock_rate {50000000}
+	add_instantiation_interface_port out_clk out_clk clk 1 STD_LOGIC Output
+	save_instantiation
+	add_instance nodeset_test_0 nodeset_test
+	add_component reset_in ip/system/system_reset_in.ip altera_reset_bridge reset_in 19.1
+	load_component reset_in
+	set_component_parameter_value ACTIVE_LOW_RESET {0}
+	set_component_parameter_value NUM_RESET_OUTPUTS {1}
+	set_component_parameter_value SYNCHRONOUS_EDGES {deassert}
+	set_component_parameter_value SYNC_RESET {0}
+	set_component_parameter_value USE_RESET_REQUEST {0}
+	set_component_project_property HIDE_FROM_IP_CATALOG {false}
+	save_component
+	load_instantiation reset_in
+	remove_instantiation_interfaces_and_ports
+	add_instantiation_interface clk clock INPUT
+	set_instantiation_interface_parameter_value clk clockRate {0}
+	set_instantiation_interface_parameter_value clk externallyDriven {false}
+	set_instantiation_interface_parameter_value clk ptfSchematicName {}
+	add_instantiation_interface_port clk clk clk 1 STD_LOGIC Input
+	add_instantiation_interface in_reset reset INPUT
+	set_instantiation_interface_parameter_value in_reset associatedClock {clk}
+	set_instantiation_interface_parameter_value in_reset synchronousEdges {DEASSERT}
+	add_instantiation_interface_port in_reset in_reset reset 1 STD_LOGIC Input
+	add_instantiation_interface out_reset reset OUTPUT
+	set_instantiation_interface_parameter_value out_reset associatedClock {clk}
+	set_instantiation_interface_parameter_value out_reset associatedDirectReset {in_reset}
+	set_instantiation_interface_parameter_value out_reset associatedResetSinks {in_reset}
+	set_instantiation_interface_parameter_value out_reset synchronousEdges {DEASSERT}
+	add_instantiation_interface_port out_reset out_reset reset 1 STD_LOGIC Output
+	save_instantiation
+	add_component stratix10_hps_0 ip/system/system_stratix10_hps_0.ip altera_stratix10_hps stratix10_hps_0 19.1
+	load_component stratix10_hps_0
+	set_component_parameter_value CLK_EMACA_SOURCE {1}
+	set_component_parameter_value CLK_EMACB_SOURCE {1}
+	set_component_parameter_value CLK_EMAC_PTP_SOURCE {1}
+	set_component_parameter_value CLK_GPIO_SOURCE {1}
+	set_component_parameter_value CLK_MAIN_PLL_SOURCE2 {0}
+	set_component_parameter_value CLK_MPU_CNT {0}
+	set_component_parameter_value CLK_MPU_SOURCE {0}
+	set_component_parameter_value CLK_NOC_CNT {0}
+	set_component_parameter_value CLK_NOC_SOURCE {0}
+	set_component_parameter_value CLK_PERI_PLL_SOURCE2 {0}
+	set_component_parameter_value CLK_PSI_SOURCE {1}
+	set_component_parameter_value CLK_S2F_USER0_SOURCE {1}
+	set_component_parameter_value CLK_S2F_USER1_SOURCE {1}
+	set_component_parameter_value CLK_SDMMC_SOURCE {1}
+	set_component_parameter_value CM_Mode {N/A}
+	set_component_parameter_value CM_PinMuxing {Unused}
+	set_component_parameter_value CTI_Enable {0}
+	set_component_parameter_value CUSTOM_MPU_CLK {800}
+	set_component_parameter_value DDR_ATB_Enable {0}
+	set_component_parameter_value DEBUG_APB_Enable {0}
+	set_component_parameter_value DISABLE_PERI_PLL {0}
+	set_component_parameter_value DMA_Enable {No No No No No No No No}
+	set_component_parameter_value EMAC0_CLK {250}
+	set_component_parameter_value EMAC0_Mode {N/A}
+	set_component_parameter_value EMAC0_PTP {0}
+	set_component_parameter_value EMAC0_PinMuxing {Unused}
+	set_component_parameter_value EMAC0_SWITCH_Enable {0}
+	set_component_parameter_value EMAC1_CLK {250}
+	set_component_parameter_value EMAC1_Mode {N/A}
+	set_component_parameter_value EMAC1_PTP {0}
+	set_component_parameter_value EMAC1_PinMuxing {Unused}
+	set_component_parameter_value EMAC1_SWITCH_Enable {0}
+	set_component_parameter_value EMAC2_CLK {250}
+	set_component_parameter_value EMAC2_Mode {N/A}
+	set_component_parameter_value EMAC2_PTP {0}
+	set_component_parameter_value EMAC2_PinMuxing {Unused}
+	set_component_parameter_value EMAC2_SWITCH_Enable {0}
+	set_component_parameter_value EMAC_PTP_REF_CLK {100}
+	set_component_parameter_value EMIF_BYPASS_CHECK {0}
+	set_component_parameter_value EMIF_CONDUIT_Enable {0}
+	set_component_parameter_value F2H_FREE_CLK_Enable {0}
+	set_component_parameter_value F2H_FREE_CLK_FREQ {200}
+	set_component_parameter_value F2SDRAM0_Width {0}
+	set_component_parameter_value F2SDRAM0_ready_latency {1}
+	set_component_parameter_value F2SDRAM1_Width {0}
+	set_component_parameter_value F2SDRAM1_ready_latency {1}
+	set_component_parameter_value F2SDRAM2_Width {0}
+	set_component_parameter_value F2SDRAM2_ready_latency {1}
+	set_component_parameter_value F2SDRAM_ADDRESS_WIDTH {32}
+	set_component_parameter_value F2SINTERRUPT_Enable {0}
+	set_component_parameter_value F2S_ADDRESS_WIDTH {32}
+	set_component_parameter_value F2S_Width {0}
+	set_component_parameter_value F2S_mode {0}
+	set_component_parameter_value F2S_ready_latency {1}
+	set_component_parameter_value FPGA_PERIPHERAL_OUTPUT_CLOCK_FREQ_EMAC0_GTX_CLK {100}
+	set_component_parameter_value FPGA_PERIPHERAL_OUTPUT_CLOCK_FREQ_EMAC0_MD_CLK {2.5}
+	set_component_parameter_value FPGA_PERIPHERAL_OUTPUT_CLOCK_FREQ_EMAC1_GTX_CLK {100}
+	set_component_parameter_value FPGA_PERIPHERAL_OUTPUT_CLOCK_FREQ_EMAC1_MD_CLK {2.5}
+	set_component_parameter_value FPGA_PERIPHERAL_OUTPUT_CLOCK_FREQ_EMAC2_GTX_CLK {100}
+	set_component_parameter_value FPGA_PERIPHERAL_OUTPUT_CLOCK_FREQ_EMAC2_MD_CLK {2.5}
+	set_component_parameter_value FPGA_PERIPHERAL_OUTPUT_CLOCK_FREQ_I2C0_CLK {100}
+	set_component_parameter_value FPGA_PERIPHERAL_OUTPUT_CLOCK_FREQ_I2C1_CLK {100}
+	set_component_parameter_value FPGA_PERIPHERAL_OUTPUT_CLOCK_FREQ_I2CEMAC0_CLK {100}
+	set_component_parameter_value FPGA_PERIPHERAL_OUTPUT_CLOCK_FREQ_I2CEMAC1_CLK {100}
+	set_component_parameter_value FPGA_PERIPHERAL_OUTPUT_CLOCK_FREQ_I2CEMAC2_CLK {100}
+	set_component_parameter_value FPGA_PERIPHERAL_OUTPUT_CLOCK_FREQ_SDMMC_CCLK {100}
+	set_component_parameter_value FPGA_PERIPHERAL_OUTPUT_CLOCK_FREQ_SPIM0_SCLK_OUT {100}
+	set_component_parameter_value FPGA_PERIPHERAL_OUTPUT_CLOCK_FREQ_SPIM1_SCLK_OUT {100}
+	set_component_parameter_value GPIO_REF_CLK {4}
+	set_component_parameter_value GPIO_REF_CLK2 {200}
+	set_component_parameter_value GP_Enable {0}
+	set_component_parameter_value H2F_COLD_RST_Enable {0}
+	set_component_parameter_value H2F_PENDING_RST_Enable {0}
+	set_component_parameter_value H2F_USER0_CLK_Enable {0}
+	set_component_parameter_value H2F_USER0_CLK_FREQ {500}
+	set_component_parameter_value H2F_USER1_CLK_Enable {0}
+	set_component_parameter_value H2F_USER1_CLK_FREQ {500}
+	set_component_parameter_value HPS_BOOT {0}
+	set_component_parameter_value HPS_DIV_GPIO_FREQ {125}
+	set_component_parameter_value HPS_DIV_GPIO_FREQ2 {200}
+	set_component_parameter_value HPS_IO_Enable {unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused}
+	set_component_parameter_value I2C0_Mode {N/A}
+	set_component_parameter_value I2C0_PinMuxing {Unused}
+	set_component_parameter_value I2C1_Mode {N/A}
+	set_component_parameter_value I2C1_PinMuxing {Unused}
+	set_component_parameter_value I2CEMAC0_Mode {N/A}
+	set_component_parameter_value I2CEMAC0_PinMuxing {Unused}
+	set_component_parameter_value I2CEMAC1_Mode {N/A}
+	set_component_parameter_value I2CEMAC1_PinMuxing {Unused}
+	set_component_parameter_value I2CEMAC2_Mode {N/A}
+	set_component_parameter_value I2CEMAC2_PinMuxing {Unused}
+	set_component_parameter_value INTERNAL_OSCILLATOR_ENABLE {60}
+	set_component_parameter_value IO_INPUT_DELAY0 {0}
+	set_component_parameter_value IO_INPUT_DELAY1 {0}
+	set_component_parameter_value IO_INPUT_DELAY10 {0}
+	set_component_parameter_value IO_INPUT_DELAY11 {0}
+	set_component_parameter_value IO_INPUT_DELAY12 {0}
+	set_component_parameter_value IO_INPUT_DELAY13 {0}
+	set_component_parameter_value IO_INPUT_DELAY14 {0}
+	set_component_parameter_value IO_INPUT_DELAY15 {0}
+	set_component_parameter_value IO_INPUT_DELAY16 {0}
+	set_component_parameter_value IO_INPUT_DELAY17 {0}
+	set_component_parameter_value IO_INPUT_DELAY18 {0}
+	set_component_parameter_value IO_INPUT_DELAY19 {0}
+	set_component_parameter_value IO_INPUT_DELAY2 {0}
+	set_component_parameter_value IO_INPUT_DELAY20 {0}
+	set_component_parameter_value IO_INPUT_DELAY21 {0}
+	set_component_parameter_value IO_INPUT_DELAY22 {0}
+	set_component_parameter_value IO_INPUT_DELAY23 {0}
+	set_component_parameter_value IO_INPUT_DELAY24 {0}
+	set_component_parameter_value IO_INPUT_DELAY25 {0}
+	set_component_parameter_value IO_INPUT_DELAY26 {0}
+	set_component_parameter_value IO_INPUT_DELAY27 {0}
+	set_component_parameter_value IO_INPUT_DELAY28 {0}
+	set_component_parameter_value IO_INPUT_DELAY29 {0}
+	set_component_parameter_value IO_INPUT_DELAY3 {0}
+	set_component_parameter_value IO_INPUT_DELAY30 {0}
+	set_component_parameter_value IO_INPUT_DELAY31 {0}
+	set_component_parameter_value IO_INPUT_DELAY32 {0}
+	set_component_parameter_value IO_INPUT_DELAY33 {0}
+	set_component_parameter_value IO_INPUT_DELAY34 {0}
+	set_component_parameter_value IO_INPUT_DELAY35 {0}
+	set_component_parameter_value IO_INPUT_DELAY36 {0}
+	set_component_parameter_value IO_INPUT_DELAY37 {0}
+	set_component_parameter_value IO_INPUT_DELAY38 {0}
+	set_component_parameter_value IO_INPUT_DELAY39 {0}
+	set_component_parameter_value IO_INPUT_DELAY4 {0}
+	set_component_parameter_value IO_INPUT_DELAY40 {0}
+	set_component_parameter_value IO_INPUT_DELAY41 {0}
+	set_component_parameter_value IO_INPUT_DELAY42 {0}
+	set_component_parameter_value IO_INPUT_DELAY43 {0}
+	set_component_parameter_value IO_INPUT_DELAY44 {0}
+	set_component_parameter_value IO_INPUT_DELAY45 {0}
+	set_component_parameter_value IO_INPUT_DELAY46 {0}
+	set_component_parameter_value IO_INPUT_DELAY47 {0}
+	set_component_parameter_value IO_INPUT_DELAY5 {0}
+	set_component_parameter_value IO_INPUT_DELAY6 {0}
+	set_component_parameter_value IO_INPUT_DELAY7 {0}
+	set_component_parameter_value IO_INPUT_DELAY8 {0}
+	set_component_parameter_value IO_INPUT_DELAY9 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY0 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY1 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY10 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY11 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY12 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY13 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY14 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY15 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY16 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY17 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY18 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY19 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY2 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY20 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY21 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY22 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY23 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY24 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY25 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY26 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY27 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY28 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY29 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY3 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY30 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY31 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY32 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY33 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY34 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY35 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY36 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY37 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY38 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY39 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY4 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY40 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY41 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY42 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY43 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY44 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY45 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY46 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY47 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY5 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY6 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY7 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY8 {0}
+	set_component_parameter_value IO_OUTPUT_DELAY9 {0}
+	set_component_parameter_value L3_MAIN_FREE_CLK {400}
+	set_component_parameter_value L4_SYS_FREE_CLK {1}
+	set_component_parameter_value LWH2F_ADDRESS_WIDTH {21}
+	set_component_parameter_value LWH2F_Enable {1}
+	set_component_parameter_value LWH2F_ready_latency {1}
+	set_component_parameter_value MPU_CLK_VCCL {0}
+	set_component_parameter_value MPU_EVENTS_Enable {0}
+	set_component_parameter_value NAND_Mode {N/A}
+	set_component_parameter_value NAND_PinMuxing {Unused}
+	set_component_parameter_value NOCDIV_CS_ATCLK {0}
+	set_component_parameter_value NOCDIV_CS_PDBGCLK {1}
+	set_component_parameter_value NOCDIV_CS_TRACECLK {0}
+	set_component_parameter_value NOCDIV_L4MAINCLK {0}
+	set_component_parameter_value NOCDIV_L4MPCLK {1}
+	set_component_parameter_value NOCDIV_L4SPCLK {2}
+	set_component_parameter_value OVERIDE_PERI_PLL {0}
+	set_component_parameter_value PERI_PLL_MANUAL_VCO_FREQ {2000}
+	set_component_parameter_value PLL_CLK0 {Unused}
+	set_component_parameter_value PLL_CLK1 {Unused}
+	set_component_parameter_value PLL_CLK2 {Unused}
+	set_component_parameter_value PLL_CLK3 {Unused}
+	set_component_parameter_value PLL_CLK4 {Unused}
+	set_component_parameter_value PSI_CLK_FREQ {500}
+	set_component_parameter_value RUN_INTERNAL_BUILD_CHECKS {0}
+	set_component_parameter_value S2FINTERRUPT_CLOCKPERIPHERAL_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_DMA_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_EMAC0_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_EMAC1_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_EMAC2_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_GPIO_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_I2C0_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_I2C1_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_I2CEMAC0_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_I2CEMAC1_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_I2CEMAC2_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_L4TIMER_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_NAND_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_SDMMC_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_SPIM0_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_SPIM1_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_SPIS0_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_SPIS1_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_SYSTEMMANAGER_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_SYSTIMER_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_UART0_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_UART1_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_USB0_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_USB1_Enable {0}
+	set_component_parameter_value S2FINTERRUPT_WATCHDOG_Enable {0}
+	set_component_parameter_value S2F_ADDRESS_WIDTH {32}
+	set_component_parameter_value S2F_Width {0}
+	set_component_parameter_value S2F_ready_latency {1}
+	set_component_parameter_value SDMMC_Mode {N/A}
+	set_component_parameter_value SDMMC_PinMuxing {Unused}
+	set_component_parameter_value SDMMC_REF_CLK {200}
+	set_component_parameter_value SPIM0_Mode {N/A}
+	set_component_parameter_value SPIM0_PinMuxing {Unused}
+	set_component_parameter_value SPIM1_Mode {N/A}
+	set_component_parameter_value SPIM1_PinMuxing {Unused}
+	set_component_parameter_value SPIS0_Mode {N/A}
+	set_component_parameter_value SPIS0_PinMuxing {Unused}
+	set_component_parameter_value SPIS1_Mode {N/A}
+	set_component_parameter_value SPIS1_PinMuxing {Unused}
+	set_component_parameter_value STM_Enable {0}
+	set_component_parameter_value TESTIOCTRL_DEBUGCLKSEL {16}
+	set_component_parameter_value TESTIOCTRL_MAINCLKSEL {8}
+	set_component_parameter_value TESTIOCTRL_PERICLKSEL {8}
+	set_component_parameter_value TEST_Enable {0}
+	set_component_parameter_value TRACE_Mode {N/A}
+	set_component_parameter_value TRACE_PinMuxing {Unused}
+	set_component_parameter_value UART0_Mode {N/A}
+	set_component_parameter_value UART0_PinMuxing {Unused}
+	set_component_parameter_value UART1_Mode {N/A}
+	set_component_parameter_value UART1_PinMuxing {Unused}
+	set_component_parameter_value USB0_Mode {N/A}
+	set_component_parameter_value USB0_PinMuxing {Unused}
+	set_component_parameter_value USB1_Mode {N/A}
+	set_component_parameter_value USB1_PinMuxing {Unused}
+	set_component_parameter_value USE_DEFAULT_MPU_CLK {0}
+	set_component_parameter_value W_RESET_ACTION {0}
+	set_component_parameter_value eosc1_clk_mhz {25.0}
+	set_component_parameter_value watchdog_reset {0}
+	set_component_project_property HIDE_FROM_IP_CATALOG {false}
+	save_component
+	load_instantiation stratix10_hps_0
+	remove_instantiation_interfaces_and_ports
+	add_instantiation_interface h2f_reset reset OUTPUT
+	set_instantiation_interface_parameter_value h2f_reset associatedClock {}
+	set_instantiation_interface_parameter_value h2f_reset associatedDirectReset {}
+	set_instantiation_interface_parameter_value h2f_reset associatedResetSinks {none}
+	set_instantiation_interface_parameter_value h2f_reset synchronousEdges {NONE}
+	add_instantiation_interface_port h2f_reset h2f_rst reset 1 STD_LOGIC Output
+	add_instantiation_interface h2f_lw_axi_clock clock INPUT
+	set_instantiation_interface_parameter_value h2f_lw_axi_clock clockRate {0}
+	set_instantiation_interface_parameter_value h2f_lw_axi_clock externallyDriven {false}
+	set_instantiation_interface_parameter_value h2f_lw_axi_clock ptfSchematicName {}
+	add_instantiation_interface_port h2f_lw_axi_clock h2f_lw_axi_clk clk 1 STD_LOGIC Input
+	add_instantiation_interface h2f_lw_axi_reset reset INPUT
+	set_instantiation_interface_parameter_value h2f_lw_axi_reset associatedClock {h2f_lw_axi_clock}
+	set_instantiation_interface_parameter_value h2f_lw_axi_reset synchronousEdges {DEASSERT}
+	add_instantiation_interface_port h2f_lw_axi_reset h2f_lw_axi_rst_n reset_n 1 STD_LOGIC Input
+	add_instantiation_interface h2f_lw_axi_master axi4 OUTPUT
+	set_instantiation_interface_parameter_value h2f_lw_axi_master associatedClock {h2f_lw_axi_clock}
+	set_instantiation_interface_parameter_value h2f_lw_axi_master associatedReset {h2f_lw_axi_reset}
+	set_instantiation_interface_parameter_value h2f_lw_axi_master combinedIssuingCapability {16}
+	set_instantiation_interface_parameter_value h2f_lw_axi_master issuesFIXEDBursts {true}
+	set_instantiation_interface_parameter_value h2f_lw_axi_master issuesINCRBursts {true}
+	set_instantiation_interface_parameter_value h2f_lw_axi_master issuesWRAPBursts {true}
+	set_instantiation_interface_parameter_value h2f_lw_axi_master maximumOutstandingReads {1}
+	set_instantiation_interface_parameter_value h2f_lw_axi_master maximumOutstandingTransactions {1}
+	set_instantiation_interface_parameter_value h2f_lw_axi_master maximumOutstandingWrites {1}
+	set_instantiation_interface_parameter_value h2f_lw_axi_master readIssuingCapability {16}
+	set_instantiation_interface_parameter_value h2f_lw_axi_master trustzoneAware {true}
+	set_instantiation_interface_parameter_value h2f_lw_axi_master writeIssuingCapability {16}
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_AWID awid 4 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_AWADDR awaddr 21 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_AWLEN awlen 8 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_AWSIZE awsize 3 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_AWBURST awburst 2 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_AWLOCK awlock 1 STD_LOGIC Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_AWCACHE awcache 4 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_AWPROT awprot 3 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_AWVALID awvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_AWREADY awready 1 STD_LOGIC Input
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_WDATA wdata 32 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_WSTRB wstrb 4 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_WLAST wlast 1 STD_LOGIC Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_WVALID wvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_WREADY wready 1 STD_LOGIC Input
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_BID bid 4 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_BRESP bresp 2 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_BVALID bvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_BREADY bready 1 STD_LOGIC Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_ARID arid 4 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_ARADDR araddr 21 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_ARLEN arlen 8 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_ARSIZE arsize 3 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_ARBURST arburst 2 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_ARLOCK arlock 1 STD_LOGIC Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_ARCACHE arcache 4 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_ARPROT arprot 3 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_ARVALID arvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_ARREADY arready 1 STD_LOGIC Input
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_RID rid 4 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_RDATA rdata 32 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_RRESP rresp 2 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_RLAST rlast 1 STD_LOGIC Input
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_RVALID rvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port h2f_lw_axi_master h2f_lw_RREADY rready 1 STD_LOGIC Output
+	save_instantiation
+
+	# add wirelevel expressions
+
+	# add the connections
+	add_connection clock_in.out_clk/nodeset_test_0.input_aclk
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.input_aclk clockDomainSysInfo {1}
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.input_aclk clockRateSysInfo {50000000.0}
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.input_aclk clockResetSysInfo {}
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.input_aclk resetDomainSysInfo {1}
+	add_connection clock_in.out_clk/nodeset_test_0.output_aclk
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.output_aclk clockDomainSysInfo {1}
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.output_aclk clockRateSysInfo {50000000.0}
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.output_aclk clockResetSysInfo {}
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.output_aclk resetDomainSysInfo {1}
+	add_connection clock_in.out_clk/nodeset_test_0.processing_aclk
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.processing_aclk clockDomainSysInfo {1}
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.processing_aclk clockRateSysInfo {50000000.0}
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.processing_aclk clockResetSysInfo {}
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.processing_aclk resetDomainSysInfo {1}
+	add_connection clock_in.out_clk/nodeset_test_0.properties_aclk
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.properties_aclk clockDomainSysInfo {1}
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.properties_aclk clockRateSysInfo {50000000.0}
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.properties_aclk clockResetSysInfo {}
+	set_connection_parameter_value clock_in.out_clk/nodeset_test_0.properties_aclk resetDomainSysInfo {1}
+	add_connection clock_in.out_clk/reset_in.clk
+	set_connection_parameter_value clock_in.out_clk/reset_in.clk clockDomainSysInfo {1}
+	set_connection_parameter_value clock_in.out_clk/reset_in.clk clockRateSysInfo {50000000.0}
+	set_connection_parameter_value clock_in.out_clk/reset_in.clk clockResetSysInfo {}
+	set_connection_parameter_value clock_in.out_clk/reset_in.clk resetDomainSysInfo {1}
+	add_connection clock_in.out_clk/stratix10_hps_0.h2f_lw_axi_clock
+	set_connection_parameter_value clock_in.out_clk/stratix10_hps_0.h2f_lw_axi_clock clockDomainSysInfo {1}
+	set_connection_parameter_value clock_in.out_clk/stratix10_hps_0.h2f_lw_axi_clock clockRateSysInfo {50000000.0}
+	set_connection_parameter_value clock_in.out_clk/stratix10_hps_0.h2f_lw_axi_clock clockResetSysInfo {}
+	set_connection_parameter_value clock_in.out_clk/stratix10_hps_0.h2f_lw_axi_clock resetDomainSysInfo {1}
+	add_connection reset_in.out_reset/nodeset_test_0.input_aresetn
+	set_connection_parameter_value reset_in.out_reset/nodeset_test_0.input_aresetn clockDomainSysInfo {2}
+	set_connection_parameter_value reset_in.out_reset/nodeset_test_0.input_aresetn clockResetSysInfo {}
+	set_connection_parameter_value reset_in.out_reset/nodeset_test_0.input_aresetn resetDomainSysInfo {2}
+	add_connection reset_in.out_reset/nodeset_test_0.output_aresetn
+	set_connection_parameter_value reset_in.out_reset/nodeset_test_0.output_aresetn clockDomainSysInfo {2}
+	set_connection_parameter_value reset_in.out_reset/nodeset_test_0.output_aresetn clockResetSysInfo {}
+	set_connection_parameter_value reset_in.out_reset/nodeset_test_0.output_aresetn resetDomainSysInfo {2}
+	add_connection reset_in.out_reset/nodeset_test_0.processing_aresetn
+	set_connection_parameter_value reset_in.out_reset/nodeset_test_0.processing_aresetn clockDomainSysInfo {2}
+	set_connection_parameter_value reset_in.out_reset/nodeset_test_0.processing_aresetn clockResetSysInfo {}
+	set_connection_parameter_value reset_in.out_reset/nodeset_test_0.processing_aresetn resetDomainSysInfo {2}
+	add_connection reset_in.out_reset/nodeset_test_0.properties_aresetn
+	set_connection_parameter_value reset_in.out_reset/nodeset_test_0.properties_aresetn clockDomainSysInfo {2}
+	set_connection_parameter_value reset_in.out_reset/nodeset_test_0.properties_aresetn clockResetSysInfo {}
+	set_connection_parameter_value reset_in.out_reset/nodeset_test_0.properties_aresetn resetDomainSysInfo {2}
+	add_connection reset_in.out_reset/stratix10_hps_0.h2f_lw_axi_reset
+	set_connection_parameter_value reset_in.out_reset/stratix10_hps_0.h2f_lw_axi_reset clockDomainSysInfo {2}
+	set_connection_parameter_value reset_in.out_reset/stratix10_hps_0.h2f_lw_axi_reset clockResetSysInfo {}
+	set_connection_parameter_value reset_in.out_reset/stratix10_hps_0.h2f_lw_axi_reset resetDomainSysInfo {2}
+	add_connection stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM addressMapSysInfo {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM addressWidthSysInfo {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM arbitrationPriority {1}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM baseAddress {0x00050000}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM defaultConnection {0}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM domainAlias {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM qsys_mm.burstAdapterImplementation {GENERIC_CONVERTER}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM qsys_mm.clockCrossingAdapter {HANDSHAKE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM qsys_mm.enableEccProtection {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM qsys_mm.enableInstrumentation {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM qsys_mm.insertDefaultSlave {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM qsys_mm.interconnectResetSource {DEFAULT}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM qsys_mm.interconnectType {STANDARD}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM qsys_mm.maxAdditionalLatency {1}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM qsys_mm.syncResets {TRUE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM qsys_mm.widthAdapterImplementation {GENERIC_CONVERTER}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM slaveDataWidthSysInfo {-1}
+	add_connection stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE addressMapSysInfo {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE addressWidthSysInfo {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE arbitrationPriority {1}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE baseAddress {0x0000}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE defaultConnection {0}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE domainAlias {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE qsys_mm.burstAdapterImplementation {GENERIC_CONVERTER}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE qsys_mm.clockCrossingAdapter {HANDSHAKE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE qsys_mm.enableEccProtection {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE qsys_mm.enableInstrumentation {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE qsys_mm.insertDefaultSlave {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE qsys_mm.interconnectResetSource {DEFAULT}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE qsys_mm.interconnectType {STANDARD}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE qsys_mm.maxAdditionalLatency {1}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE qsys_mm.syncResets {TRUE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE qsys_mm.widthAdapterImplementation {GENERIC_CONVERTER}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE slaveDataWidthSysInfo {-1}
+	add_connection stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP addressMapSysInfo {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP addressWidthSysInfo {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP arbitrationPriority {1}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP baseAddress {0x00010000}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP defaultConnection {0}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP domainAlias {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP qsys_mm.burstAdapterImplementation {GENERIC_CONVERTER}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP qsys_mm.clockCrossingAdapter {HANDSHAKE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP qsys_mm.enableEccProtection {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP qsys_mm.enableInstrumentation {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP qsys_mm.insertDefaultSlave {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP qsys_mm.interconnectResetSource {DEFAULT}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP qsys_mm.interconnectType {STANDARD}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP qsys_mm.maxAdditionalLatency {1}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP qsys_mm.syncResets {TRUE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP qsys_mm.widthAdapterImplementation {GENERIC_CONVERTER}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP slaveDataWidthSysInfo {-1}
+	add_connection stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM addressMapSysInfo {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM addressWidthSysInfo {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM arbitrationPriority {1}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM baseAddress {0x00020000}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM defaultConnection {0}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM domainAlias {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM qsys_mm.burstAdapterImplementation {GENERIC_CONVERTER}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM qsys_mm.clockCrossingAdapter {HANDSHAKE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM qsys_mm.enableEccProtection {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM qsys_mm.enableInstrumentation {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM qsys_mm.insertDefaultSlave {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM qsys_mm.interconnectResetSource {DEFAULT}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM qsys_mm.interconnectType {STANDARD}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM qsys_mm.maxAdditionalLatency {1}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM qsys_mm.syncResets {TRUE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM qsys_mm.widthAdapterImplementation {GENERIC_CONVERTER}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM slaveDataWidthSysInfo {-1}
+	add_connection stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE addressMapSysInfo {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE addressWidthSysInfo {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE arbitrationPriority {1}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE baseAddress {0x00030000}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE defaultConnection {0}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE domainAlias {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE qsys_mm.burstAdapterImplementation {GENERIC_CONVERTER}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE qsys_mm.clockCrossingAdapter {HANDSHAKE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE qsys_mm.enableEccProtection {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE qsys_mm.enableInstrumentation {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE qsys_mm.insertDefaultSlave {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE qsys_mm.interconnectResetSource {DEFAULT}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE qsys_mm.interconnectType {STANDARD}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE qsys_mm.maxAdditionalLatency {1}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE qsys_mm.syncResets {TRUE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE qsys_mm.widthAdapterImplementation {GENERIC_CONVERTER}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE slaveDataWidthSysInfo {-1}
+	add_connection stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP addressMapSysInfo {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP addressWidthSysInfo {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP arbitrationPriority {1}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP baseAddress {0x00040000}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP defaultConnection {0}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP domainAlias {}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP qsys_mm.burstAdapterImplementation {GENERIC_CONVERTER}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP qsys_mm.clockCrossingAdapter {HANDSHAKE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP qsys_mm.enableEccProtection {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP qsys_mm.enableInstrumentation {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP qsys_mm.insertDefaultSlave {FALSE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP qsys_mm.interconnectResetSource {DEFAULT}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP qsys_mm.interconnectType {STANDARD}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP qsys_mm.maxAdditionalLatency {1}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP qsys_mm.syncResets {TRUE}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP qsys_mm.widthAdapterImplementation {GENERIC_CONVERTER}
+	set_connection_parameter_value stratix10_hps_0.h2f_lw_axi_master/nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP slaveDataWidthSysInfo {-1}
+	add_connection stratix10_hps_0.h2f_reset/reset_in.in_reset
+	set_connection_parameter_value stratix10_hps_0.h2f_reset/reset_in.in_reset clockDomainSysInfo {2}
+	set_connection_parameter_value stratix10_hps_0.h2f_reset/reset_in.in_reset clockResetSysInfo {}
+	set_connection_parameter_value stratix10_hps_0.h2f_reset/reset_in.in_reset resetDomainSysInfo {2}
+
+	# add the exports
+	set_interface_property clk EXPORT_OF clock_in.in_clk
+	set_interface_property nodeset_test_0_s_axis_fins_test_ip_0_myinput EXPORT_OF nodeset_test_0.s_axis_fins_test_ip_0_myinput
+	set_interface_property nodeset_test_0_s00_axis_fins_test_ip_0_test_in EXPORT_OF nodeset_test_0.s00_axis_fins_test_ip_0_test_in
+	set_interface_property nodeset_test_0_s01_axis_fins_test_ip_0_test_in EXPORT_OF nodeset_test_0.s01_axis_fins_test_ip_0_test_in
+	set_interface_property nodeset_test_0_s_axis_fins_test_ip_0_sfix_cpx_in EXPORT_OF nodeset_test_0.s_axis_fins_test_ip_0_sfix_cpx_in
+	set_interface_property nodeset_test_0_m_axis_fins_test_ip_1_myoutput EXPORT_OF nodeset_test_0.m_axis_fins_test_ip_1_myoutput
+	set_interface_property nodeset_test_0_m00_axis_fins_test_ip_1_test_out EXPORT_OF nodeset_test_0.m00_axis_fins_test_ip_1_test_out
+	set_interface_property nodeset_test_0_m01_axis_fins_test_ip_1_test_out EXPORT_OF nodeset_test_0.m01_axis_fins_test_ip_1_test_out
+	set_interface_property nodeset_test_0_m_axis_fins_test_ip_1_sfix_cpx_out EXPORT_OF nodeset_test_0.m_axis_fins_test_ip_1_sfix_cpx_out
+
+	# set the the module properties
+	set_module_property BONUS_DATA {<?xml version="1.0" encoding="UTF-8"?>
+<bonusData>
+ <element __value="clock_in">
+  <datum __value="_sortIndex" value="0" type="int" />
+ </element>
+ <element __value="nodeset_test_0">
+  <datum __value="_sortIndex" value="2" type="int" />
+ </element>
+ <element __value="nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_BOTTOM">
+  <datum __value="baseAddress" value="327680" type="String" />
+ </element>
+ <element __value="nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_MIDDLE">
+  <datum __value="baseAddress" value="0" type="String" />
+ </element>
+ <element __value="nodeset_test_0.S_AXI_FINS_TEST_IP_0_TEST_TOP">
+  <datum __value="baseAddress" value="65536" type="String" />
+ </element>
+ <element __value="nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_BOTTOM">
+  <datum __value="baseAddress" value="131072" type="String" />
+ </element>
+ <element __value="nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_MIDDLE">
+  <datum __value="baseAddress" value="196608" type="String" />
+ </element>
+ <element __value="nodeset_test_0.S_AXI_FINS_TEST_IP_1_TEST_TOP">
+  <datum __value="baseAddress" value="262144" type="String" />
+ </element>
+ <element __value="reset_in">
+  <datum __value="_sortIndex" value="1" type="int" />
+ </element>
+ <element __value="stratix10_hps_0">
+  <datum __value="_sortIndex" value="3" type="int" />
+ </element>
+</bonusData>
+}
+	set_module_property FILE {nodeset_test.qsys}
+	set_module_property GENERATION_ID {0x00000000}
+	set_module_property NAME {system}
+
+	# save the system
+	sync_sysinfo_parameters
+	save_system system
+}
+
+# create the system "nodeset_test"
+proc do_create_nodeset_test {} {
+	# create the system
+	create_system nodeset_test
+	set_project_property DEVICE {1SX280LU2F50E1VG}
+	set_project_property DEVICE_FAMILY {Stratix 10}
+	set_project_property HIDE_FROM_IP_CATALOG {false}
+	set_use_testbench_naming_pattern 0 {}
+
+	# add the components
+	add_component fins_test_ip_0 ip/nodeset_test/fins_test_ip_0.ip test_top test_top_inst 0.0
+	load_component fins_test_ip_0
+	set_component_parameter_value PORTS_IS_COMPLEX {0}
+	set_component_parameter_value PORTS_IS_SIGNED {0}
+	set_component_parameter_value PORTS_PACKET_SIZE {8}
+	set_component_parameter_value PORTS_WIDTH {16}
+	set_component_parameter_value PROPS_ADDR_WIDTH {16}
+	set_component_parameter_value PROPS_DATA_WIDTH {32}
+	set_component_parameter_value PROPS_IS_ADDR_BYTE_INDEXED {1}
+	set_component_parameter_value TEST_FIFO_DEPTH {16}
+	set_component_parameter_value TEST_PARAM_BOOLEAN {0}
+	set_component_parameter_value TEST_PARAM_INTEGER {4}
+	set_component_parameter_value TEST_PARAM_INTEGER_LIST {0 1 2 3}
+	set_component_parameter_value TEST_PARAM_STRING {my_nodeset_string}
+	set_component_parameter_value TEST_RAM_DEPTH {16}
+	set_component_project_property HIDE_FROM_IP_CATALOG {false}
+	save_component
+	load_instantiation fins_test_ip_0
+	remove_instantiation_interfaces_and_ports
+	add_instantiation_interface s_axis_myinput_aclk clock INPUT
+	set_instantiation_interface_parameter_value s_axis_myinput_aclk clockRate {0}
+	set_instantiation_interface_parameter_value s_axis_myinput_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value s_axis_myinput_aclk ptfSchematicName {}
+	add_instantiation_interface_port s_axis_myinput_aclk s_axis_myinput_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface s_axis_myinput axi4stream INPUT
+	set_instantiation_interface_parameter_value s_axis_myinput associatedClock {s_axis_myinput_aclk}
+	set_instantiation_interface_parameter_value s_axis_myinput associatedReset {s_axis_myinput_aresetn}
+	add_instantiation_interface_port s_axis_myinput s_axis_myinput_tdata tdata 16 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s_axis_myinput s_axis_myinput_tuser tuser 128 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s_axis_myinput s_axis_myinput_tvalid tvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port s_axis_myinput s_axis_myinput_tlast tlast 1 STD_LOGIC Input
+	add_instantiation_interface s_axis_myinput_aresetn reset INPUT
+	set_instantiation_interface_parameter_value s_axis_myinput_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value s_axis_myinput_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port s_axis_myinput_aresetn s_axis_myinput_aresetn reset_n 1 STD_LOGIC Input
+	add_instantiation_interface m_axis_myoutput_aclk clock INPUT
+	set_instantiation_interface_parameter_value m_axis_myoutput_aclk clockRate {0}
+	set_instantiation_interface_parameter_value m_axis_myoutput_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value m_axis_myoutput_aclk ptfSchematicName {}
+	add_instantiation_interface_port m_axis_myoutput_aclk m_axis_myoutput_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface m_axis_myoutput axi4stream OUTPUT
+	set_instantiation_interface_parameter_value m_axis_myoutput associatedClock {m_axis_myoutput_aclk}
+	set_instantiation_interface_parameter_value m_axis_myoutput associatedReset {m_axis_myoutput_aresetn}
+	add_instantiation_interface_port m_axis_myoutput m_axis_myoutput_tdata tdata 16 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m_axis_myoutput m_axis_myoutput_tuser tuser 128 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m_axis_myoutput m_axis_myoutput_tvalid tvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port m_axis_myoutput m_axis_myoutput_tlast tlast 1 STD_LOGIC Output
+	add_instantiation_interface m_axis_myoutput_aresetn reset INPUT
+	set_instantiation_interface_parameter_value m_axis_myoutput_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value m_axis_myoutput_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port m_axis_myoutput_aresetn m_axis_myoutput_aresetn reset_n 1 STD_LOGIC Input
+	add_instantiation_interface s00_axis_test_in_aclk clock INPUT
+	set_instantiation_interface_parameter_value s00_axis_test_in_aclk clockRate {0}
+	set_instantiation_interface_parameter_value s00_axis_test_in_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value s00_axis_test_in_aclk ptfSchematicName {}
+	add_instantiation_interface_port s00_axis_test_in_aclk s00_axis_test_in_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface s00_axis_test_in axi4stream INPUT
+	set_instantiation_interface_parameter_value s00_axis_test_in associatedClock {s00_axis_test_in_aclk}
+	set_instantiation_interface_parameter_value s00_axis_test_in associatedReset {s00_axis_test_in_aresetn}
+	add_instantiation_interface_port s00_axis_test_in s00_axis_test_in_tdata tdata 160 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s00_axis_test_in s00_axis_test_in_tuser tuser 128 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s00_axis_test_in s00_axis_test_in_tvalid tvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port s00_axis_test_in s00_axis_test_in_tlast tlast 1 STD_LOGIC Input
+	add_instantiation_interface_port s00_axis_test_in s00_axis_test_in_tready tready 1 STD_LOGIC Output
+	add_instantiation_interface s00_axis_test_in_aresetn reset INPUT
+	set_instantiation_interface_parameter_value s00_axis_test_in_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value s00_axis_test_in_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port s00_axis_test_in_aresetn s00_axis_test_in_aresetn reset_n 1 STD_LOGIC Input
+	add_instantiation_interface s01_axis_test_in_aclk clock INPUT
+	set_instantiation_interface_parameter_value s01_axis_test_in_aclk clockRate {0}
+	set_instantiation_interface_parameter_value s01_axis_test_in_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value s01_axis_test_in_aclk ptfSchematicName {}
+	add_instantiation_interface_port s01_axis_test_in_aclk s01_axis_test_in_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface s01_axis_test_in axi4stream INPUT
+	set_instantiation_interface_parameter_value s01_axis_test_in associatedClock {s01_axis_test_in_aclk}
+	set_instantiation_interface_parameter_value s01_axis_test_in associatedReset {s01_axis_test_in_aresetn}
+	add_instantiation_interface_port s01_axis_test_in s01_axis_test_in_tdata tdata 160 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s01_axis_test_in s01_axis_test_in_tuser tuser 128 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s01_axis_test_in s01_axis_test_in_tvalid tvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port s01_axis_test_in s01_axis_test_in_tlast tlast 1 STD_LOGIC Input
+	add_instantiation_interface_port s01_axis_test_in s01_axis_test_in_tready tready 1 STD_LOGIC Output
+	add_instantiation_interface s01_axis_test_in_aresetn reset INPUT
+	set_instantiation_interface_parameter_value s01_axis_test_in_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value s01_axis_test_in_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port s01_axis_test_in_aresetn s01_axis_test_in_aresetn reset_n 1 STD_LOGIC Input
+	add_instantiation_interface m00_axis_test_out_aclk clock INPUT
+	set_instantiation_interface_parameter_value m00_axis_test_out_aclk clockRate {0}
+	set_instantiation_interface_parameter_value m00_axis_test_out_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value m00_axis_test_out_aclk ptfSchematicName {}
+	add_instantiation_interface_port m00_axis_test_out_aclk m00_axis_test_out_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface m00_axis_test_out axi4stream OUTPUT
+	set_instantiation_interface_parameter_value m00_axis_test_out associatedClock {m00_axis_test_out_aclk}
+	set_instantiation_interface_parameter_value m00_axis_test_out associatedReset {m00_axis_test_out_aresetn}
+	add_instantiation_interface_port m00_axis_test_out m00_axis_test_out_tready tready 1 STD_LOGIC Input
+	add_instantiation_interface_port m00_axis_test_out m00_axis_test_out_tdata tdata 160 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m00_axis_test_out m00_axis_test_out_tuser tuser 128 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m00_axis_test_out m00_axis_test_out_tvalid tvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port m00_axis_test_out m00_axis_test_out_tlast tlast 1 STD_LOGIC Output
+	add_instantiation_interface m00_axis_test_out_aresetn reset INPUT
+	set_instantiation_interface_parameter_value m00_axis_test_out_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value m00_axis_test_out_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port m00_axis_test_out_aresetn m00_axis_test_out_aresetn reset_n 1 STD_LOGIC Input
+	add_instantiation_interface m01_axis_test_out_aclk clock INPUT
+	set_instantiation_interface_parameter_value m01_axis_test_out_aclk clockRate {0}
+	set_instantiation_interface_parameter_value m01_axis_test_out_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value m01_axis_test_out_aclk ptfSchematicName {}
+	add_instantiation_interface_port m01_axis_test_out_aclk m01_axis_test_out_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface m01_axis_test_out axi4stream OUTPUT
+	set_instantiation_interface_parameter_value m01_axis_test_out associatedClock {m01_axis_test_out_aclk}
+	set_instantiation_interface_parameter_value m01_axis_test_out associatedReset {m01_axis_test_out_aresetn}
+	add_instantiation_interface_port m01_axis_test_out m01_axis_test_out_tready tready 1 STD_LOGIC Input
+	add_instantiation_interface_port m01_axis_test_out m01_axis_test_out_tdata tdata 160 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m01_axis_test_out m01_axis_test_out_tuser tuser 128 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m01_axis_test_out m01_axis_test_out_tvalid tvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port m01_axis_test_out m01_axis_test_out_tlast tlast 1 STD_LOGIC Output
+	add_instantiation_interface m01_axis_test_out_aresetn reset INPUT
+	set_instantiation_interface_parameter_value m01_axis_test_out_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value m01_axis_test_out_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port m01_axis_test_out_aresetn m01_axis_test_out_aresetn reset_n 1 STD_LOGIC Input
+	add_instantiation_interface S_AXI_ACLK clock INPUT
+	set_instantiation_interface_parameter_value S_AXI_ACLK clockRate {0}
+	set_instantiation_interface_parameter_value S_AXI_ACLK externallyDriven {false}
+	set_instantiation_interface_parameter_value S_AXI_ACLK ptfSchematicName {}
+	add_instantiation_interface_port S_AXI_ACLK S_AXI_ACLK clk 1 STD_LOGIC Input
+	add_instantiation_interface S_AXI axi4lite INPUT
+	set_instantiation_interface_parameter_value S_AXI associatedClock {S_AXI_ACLK}
+	set_instantiation_interface_parameter_value S_AXI associatedReset {S_AXI_ARESETN}
+	set_instantiation_interface_parameter_value S_AXI bridgesToMaster {}
+	set_instantiation_interface_parameter_value S_AXI combinedAcceptanceCapability {1}
+	set_instantiation_interface_parameter_value S_AXI maximumOutstandingReads {1}
+	set_instantiation_interface_parameter_value S_AXI maximumOutstandingTransactions {1}
+	set_instantiation_interface_parameter_value S_AXI maximumOutstandingWrites {1}
+	set_instantiation_interface_parameter_value S_AXI readAcceptanceCapability {1}
+	set_instantiation_interface_parameter_value S_AXI readDataReorderingDepth {1}
+	set_instantiation_interface_parameter_value S_AXI trustzoneAware {true}
+	set_instantiation_interface_parameter_value S_AXI writeAcceptanceCapability {1}
+	add_instantiation_interface_port S_AXI S_AXI_AWADDR awaddr 16 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI S_AXI_AWPROT awprot 3 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI S_AXI_AWVALID awvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI S_AXI_WDATA wdata 32 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI S_AXI_WSTRB wstrb 4 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI S_AXI_WVALID wvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI S_AXI_BREADY bready 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI S_AXI_ARADDR araddr 16 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI S_AXI_ARPROT arprot 3 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI S_AXI_ARVALID arvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI S_AXI_RREADY rready 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI S_AXI_AWREADY awready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI S_AXI_WREADY wready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI S_AXI_BRESP bresp 2 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI S_AXI_BVALID bvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI S_AXI_ARREADY arready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI S_AXI_RDATA rdata 32 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI S_AXI_RRESP rresp 2 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI S_AXI_RVALID rvalid 1 STD_LOGIC Output
+	add_instantiation_interface S_AXI_ARESETN reset INPUT
+	set_instantiation_interface_parameter_value S_AXI_ARESETN associatedClock {}
+	set_instantiation_interface_parameter_value S_AXI_ARESETN synchronousEdges {NONE}
+	add_instantiation_interface_port S_AXI_ARESETN S_AXI_ARESETN reset_n 1 STD_LOGIC Input
+	add_instantiation_interface S_AXI_TEST_MIDDLE_ACLK clock INPUT
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE_ACLK clockRate {0}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE_ACLK externallyDriven {false}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE_ACLK ptfSchematicName {}
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE_ACLK S_AXI_TEST_MIDDLE_ACLK clk 1 STD_LOGIC Input
+	add_instantiation_interface S_AXI_TEST_MIDDLE axi4lite INPUT
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE associatedClock {S_AXI_TEST_MIDDLE_ACLK}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE associatedReset {S_AXI_TEST_MIDDLE_ARESETN}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE bridgesToMaster {}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE combinedAcceptanceCapability {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE maximumOutstandingReads {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE maximumOutstandingTransactions {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE maximumOutstandingWrites {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE readAcceptanceCapability {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE readDataReorderingDepth {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE trustzoneAware {true}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE writeAcceptanceCapability {1}
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_AWADDR awaddr 16 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_AWPROT awprot 3 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_AWVALID awvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_WDATA wdata 32 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_WSTRB wstrb 4 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_WVALID wvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_BREADY bready 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_ARADDR araddr 16 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_ARPROT arprot 3 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_ARVALID arvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_RREADY rready 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_AWREADY awready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_WREADY wready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_BRESP bresp 2 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_BVALID bvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_ARREADY arready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_RDATA rdata 32 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_RRESP rresp 2 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_RVALID rvalid 1 STD_LOGIC Output
+	add_instantiation_interface S_AXI_TEST_MIDDLE_ARESETN reset INPUT
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE_ARESETN associatedClock {}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE_ARESETN synchronousEdges {NONE}
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE_ARESETN S_AXI_TEST_MIDDLE_ARESETN reset_n 1 STD_LOGIC Input
+	add_instantiation_interface S_AXI_TEST_BOTTOM_ACLK clock INPUT
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM_ACLK clockRate {0}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM_ACLK externallyDriven {false}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM_ACLK ptfSchematicName {}
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM_ACLK S_AXI_TEST_BOTTOM_ACLK clk 1 STD_LOGIC Input
+	add_instantiation_interface S_AXI_TEST_BOTTOM axi4lite INPUT
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM associatedClock {S_AXI_TEST_BOTTOM_ACLK}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM associatedReset {S_AXI_TEST_BOTTOM_ARESETN}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM bridgesToMaster {}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM combinedAcceptanceCapability {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM maximumOutstandingReads {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM maximumOutstandingTransactions {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM maximumOutstandingWrites {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM readAcceptanceCapability {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM readDataReorderingDepth {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM trustzoneAware {true}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM writeAcceptanceCapability {1}
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_AWADDR awaddr 16 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_AWPROT awprot 3 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_AWVALID awvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_WDATA wdata 32 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_WSTRB wstrb 4 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_WVALID wvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_BREADY bready 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_ARADDR araddr 16 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_ARPROT arprot 3 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_ARVALID arvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_RREADY rready 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_AWREADY awready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_WREADY wready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_BRESP bresp 2 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_BVALID bvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_ARREADY arready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_RDATA rdata 32 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_RRESP rresp 2 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_RVALID rvalid 1 STD_LOGIC Output
+	add_instantiation_interface S_AXI_TEST_BOTTOM_ARESETN reset INPUT
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM_ARESETN associatedClock {}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM_ARESETN synchronousEdges {NONE}
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM_ARESETN S_AXI_TEST_BOTTOM_ARESETN reset_n 1 STD_LOGIC Input
+	add_instantiation_interface s_axis_sfix_cpx_in_aclk clock INPUT
+	set_instantiation_interface_parameter_value s_axis_sfix_cpx_in_aclk clockRate {0}
+	set_instantiation_interface_parameter_value s_axis_sfix_cpx_in_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value s_axis_sfix_cpx_in_aclk ptfSchematicName {}
+	add_instantiation_interface_port s_axis_sfix_cpx_in_aclk s_axis_sfix_cpx_in_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface s_axis_sfix_cpx_in axi4stream INPUT
+	set_instantiation_interface_parameter_value s_axis_sfix_cpx_in associatedClock {s_axis_sfix_cpx_in_aclk}
+	set_instantiation_interface_parameter_value s_axis_sfix_cpx_in associatedReset {s_axis_sfix_cpx_in_aresetn}
+	add_instantiation_interface_port s_axis_sfix_cpx_in s_axis_sfix_cpx_in_tdata tdata 32 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s_axis_sfix_cpx_in s_axis_sfix_cpx_in_tuser tuser 121 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s_axis_sfix_cpx_in s_axis_sfix_cpx_in_tvalid tvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port s_axis_sfix_cpx_in s_axis_sfix_cpx_in_tlast tlast 1 STD_LOGIC Input
+	add_instantiation_interface_port s_axis_sfix_cpx_in s_axis_sfix_cpx_in_tready tready 1 STD_LOGIC Output
+	add_instantiation_interface s_axis_sfix_cpx_in_aresetn reset INPUT
+	set_instantiation_interface_parameter_value s_axis_sfix_cpx_in_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value s_axis_sfix_cpx_in_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port s_axis_sfix_cpx_in_aresetn s_axis_sfix_cpx_in_aresetn reset_n 1 STD_LOGIC Input
+	add_instantiation_interface m_axis_sfix_cpx_out_aclk clock INPUT
+	set_instantiation_interface_parameter_value m_axis_sfix_cpx_out_aclk clockRate {0}
+	set_instantiation_interface_parameter_value m_axis_sfix_cpx_out_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value m_axis_sfix_cpx_out_aclk ptfSchematicName {}
+	add_instantiation_interface_port m_axis_sfix_cpx_out_aclk m_axis_sfix_cpx_out_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface m_axis_sfix_cpx_out axi4stream OUTPUT
+	set_instantiation_interface_parameter_value m_axis_sfix_cpx_out associatedClock {m_axis_sfix_cpx_out_aclk}
+	set_instantiation_interface_parameter_value m_axis_sfix_cpx_out associatedReset {m_axis_sfix_cpx_out_aresetn}
+	add_instantiation_interface_port m_axis_sfix_cpx_out m_axis_sfix_cpx_out_tready tready 1 STD_LOGIC Input
+	add_instantiation_interface_port m_axis_sfix_cpx_out m_axis_sfix_cpx_out_tdata tdata 32 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m_axis_sfix_cpx_out m_axis_sfix_cpx_out_tuser tuser 121 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m_axis_sfix_cpx_out m_axis_sfix_cpx_out_tvalid tvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port m_axis_sfix_cpx_out m_axis_sfix_cpx_out_tlast tlast 1 STD_LOGIC Output
+	add_instantiation_interface m_axis_sfix_cpx_out_aresetn reset INPUT
+	set_instantiation_interface_parameter_value m_axis_sfix_cpx_out_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value m_axis_sfix_cpx_out_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port m_axis_sfix_cpx_out_aresetn m_axis_sfix_cpx_out_aresetn reset_n 1 STD_LOGIC Input
+	save_instantiation
+	add_component fins_test_ip_1 ip/nodeset_test/fins_test_ip_1.ip test_top test_top_inst 0.0
+	load_component fins_test_ip_1
+	set_component_parameter_value PORTS_IS_COMPLEX {0}
+	set_component_parameter_value PORTS_IS_SIGNED {0}
+	set_component_parameter_value PORTS_PACKET_SIZE {8}
+	set_component_parameter_value PORTS_WIDTH {16}
+	set_component_parameter_value PROPS_ADDR_WIDTH {16}
+	set_component_parameter_value PROPS_DATA_WIDTH {32}
+	set_component_parameter_value PROPS_IS_ADDR_BYTE_INDEXED {1}
+	set_component_parameter_value TEST_FIFO_DEPTH {16}
+	set_component_parameter_value TEST_PARAM_BOOLEAN {0}
+	set_component_parameter_value TEST_PARAM_INTEGER {4}
+	set_component_parameter_value TEST_PARAM_INTEGER_LIST {0 1 2 3}
+	set_component_parameter_value TEST_PARAM_STRING {my_nodeset_string}
+	set_component_parameter_value TEST_RAM_DEPTH {16}
+	set_component_project_property HIDE_FROM_IP_CATALOG {false}
+	save_component
+	load_instantiation fins_test_ip_1
+	remove_instantiation_interfaces_and_ports
+	add_instantiation_interface s_axis_myinput_aclk clock INPUT
+	set_instantiation_interface_parameter_value s_axis_myinput_aclk clockRate {0}
+	set_instantiation_interface_parameter_value s_axis_myinput_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value s_axis_myinput_aclk ptfSchematicName {}
+	add_instantiation_interface_port s_axis_myinput_aclk s_axis_myinput_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface s_axis_myinput axi4stream INPUT
+	set_instantiation_interface_parameter_value s_axis_myinput associatedClock {s_axis_myinput_aclk}
+	set_instantiation_interface_parameter_value s_axis_myinput associatedReset {s_axis_myinput_aresetn}
+	add_instantiation_interface_port s_axis_myinput s_axis_myinput_tdata tdata 16 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s_axis_myinput s_axis_myinput_tuser tuser 128 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s_axis_myinput s_axis_myinput_tvalid tvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port s_axis_myinput s_axis_myinput_tlast tlast 1 STD_LOGIC Input
+	add_instantiation_interface s_axis_myinput_aresetn reset INPUT
+	set_instantiation_interface_parameter_value s_axis_myinput_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value s_axis_myinput_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port s_axis_myinput_aresetn s_axis_myinput_aresetn reset_n 1 STD_LOGIC Input
+	add_instantiation_interface m_axis_myoutput_aclk clock INPUT
+	set_instantiation_interface_parameter_value m_axis_myoutput_aclk clockRate {0}
+	set_instantiation_interface_parameter_value m_axis_myoutput_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value m_axis_myoutput_aclk ptfSchematicName {}
+	add_instantiation_interface_port m_axis_myoutput_aclk m_axis_myoutput_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface m_axis_myoutput axi4stream OUTPUT
+	set_instantiation_interface_parameter_value m_axis_myoutput associatedClock {m_axis_myoutput_aclk}
+	set_instantiation_interface_parameter_value m_axis_myoutput associatedReset {m_axis_myoutput_aresetn}
+	add_instantiation_interface_port m_axis_myoutput m_axis_myoutput_tdata tdata 16 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m_axis_myoutput m_axis_myoutput_tuser tuser 128 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m_axis_myoutput m_axis_myoutput_tvalid tvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port m_axis_myoutput m_axis_myoutput_tlast tlast 1 STD_LOGIC Output
+	add_instantiation_interface m_axis_myoutput_aresetn reset INPUT
+	set_instantiation_interface_parameter_value m_axis_myoutput_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value m_axis_myoutput_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port m_axis_myoutput_aresetn m_axis_myoutput_aresetn reset_n 1 STD_LOGIC Input
+	add_instantiation_interface s00_axis_test_in_aclk clock INPUT
+	set_instantiation_interface_parameter_value s00_axis_test_in_aclk clockRate {0}
+	set_instantiation_interface_parameter_value s00_axis_test_in_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value s00_axis_test_in_aclk ptfSchematicName {}
+	add_instantiation_interface_port s00_axis_test_in_aclk s00_axis_test_in_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface s00_axis_test_in axi4stream INPUT
+	set_instantiation_interface_parameter_value s00_axis_test_in associatedClock {s00_axis_test_in_aclk}
+	set_instantiation_interface_parameter_value s00_axis_test_in associatedReset {s00_axis_test_in_aresetn}
+	add_instantiation_interface_port s00_axis_test_in s00_axis_test_in_tdata tdata 160 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s00_axis_test_in s00_axis_test_in_tuser tuser 128 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s00_axis_test_in s00_axis_test_in_tvalid tvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port s00_axis_test_in s00_axis_test_in_tlast tlast 1 STD_LOGIC Input
+	add_instantiation_interface_port s00_axis_test_in s00_axis_test_in_tready tready 1 STD_LOGIC Output
+	add_instantiation_interface s00_axis_test_in_aresetn reset INPUT
+	set_instantiation_interface_parameter_value s00_axis_test_in_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value s00_axis_test_in_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port s00_axis_test_in_aresetn s00_axis_test_in_aresetn reset_n 1 STD_LOGIC Input
+	add_instantiation_interface s01_axis_test_in_aclk clock INPUT
+	set_instantiation_interface_parameter_value s01_axis_test_in_aclk clockRate {0}
+	set_instantiation_interface_parameter_value s01_axis_test_in_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value s01_axis_test_in_aclk ptfSchematicName {}
+	add_instantiation_interface_port s01_axis_test_in_aclk s01_axis_test_in_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface s01_axis_test_in axi4stream INPUT
+	set_instantiation_interface_parameter_value s01_axis_test_in associatedClock {s01_axis_test_in_aclk}
+	set_instantiation_interface_parameter_value s01_axis_test_in associatedReset {s01_axis_test_in_aresetn}
+	add_instantiation_interface_port s01_axis_test_in s01_axis_test_in_tdata tdata 160 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s01_axis_test_in s01_axis_test_in_tuser tuser 128 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s01_axis_test_in s01_axis_test_in_tvalid tvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port s01_axis_test_in s01_axis_test_in_tlast tlast 1 STD_LOGIC Input
+	add_instantiation_interface_port s01_axis_test_in s01_axis_test_in_tready tready 1 STD_LOGIC Output
+	add_instantiation_interface s01_axis_test_in_aresetn reset INPUT
+	set_instantiation_interface_parameter_value s01_axis_test_in_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value s01_axis_test_in_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port s01_axis_test_in_aresetn s01_axis_test_in_aresetn reset_n 1 STD_LOGIC Input
+	add_instantiation_interface m00_axis_test_out_aclk clock INPUT
+	set_instantiation_interface_parameter_value m00_axis_test_out_aclk clockRate {0}
+	set_instantiation_interface_parameter_value m00_axis_test_out_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value m00_axis_test_out_aclk ptfSchematicName {}
+	add_instantiation_interface_port m00_axis_test_out_aclk m00_axis_test_out_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface m00_axis_test_out axi4stream OUTPUT
+	set_instantiation_interface_parameter_value m00_axis_test_out associatedClock {m00_axis_test_out_aclk}
+	set_instantiation_interface_parameter_value m00_axis_test_out associatedReset {m00_axis_test_out_aresetn}
+	add_instantiation_interface_port m00_axis_test_out m00_axis_test_out_tready tready 1 STD_LOGIC Input
+	add_instantiation_interface_port m00_axis_test_out m00_axis_test_out_tdata tdata 160 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m00_axis_test_out m00_axis_test_out_tuser tuser 128 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m00_axis_test_out m00_axis_test_out_tvalid tvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port m00_axis_test_out m00_axis_test_out_tlast tlast 1 STD_LOGIC Output
+	add_instantiation_interface m00_axis_test_out_aresetn reset INPUT
+	set_instantiation_interface_parameter_value m00_axis_test_out_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value m00_axis_test_out_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port m00_axis_test_out_aresetn m00_axis_test_out_aresetn reset_n 1 STD_LOGIC Input
+	add_instantiation_interface m01_axis_test_out_aclk clock INPUT
+	set_instantiation_interface_parameter_value m01_axis_test_out_aclk clockRate {0}
+	set_instantiation_interface_parameter_value m01_axis_test_out_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value m01_axis_test_out_aclk ptfSchematicName {}
+	add_instantiation_interface_port m01_axis_test_out_aclk m01_axis_test_out_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface m01_axis_test_out axi4stream OUTPUT
+	set_instantiation_interface_parameter_value m01_axis_test_out associatedClock {m01_axis_test_out_aclk}
+	set_instantiation_interface_parameter_value m01_axis_test_out associatedReset {m01_axis_test_out_aresetn}
+	add_instantiation_interface_port m01_axis_test_out m01_axis_test_out_tready tready 1 STD_LOGIC Input
+	add_instantiation_interface_port m01_axis_test_out m01_axis_test_out_tdata tdata 160 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m01_axis_test_out m01_axis_test_out_tuser tuser 128 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m01_axis_test_out m01_axis_test_out_tvalid tvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port m01_axis_test_out m01_axis_test_out_tlast tlast 1 STD_LOGIC Output
+	add_instantiation_interface m01_axis_test_out_aresetn reset INPUT
+	set_instantiation_interface_parameter_value m01_axis_test_out_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value m01_axis_test_out_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port m01_axis_test_out_aresetn m01_axis_test_out_aresetn reset_n 1 STD_LOGIC Input
+	add_instantiation_interface S_AXI_ACLK clock INPUT
+	set_instantiation_interface_parameter_value S_AXI_ACLK clockRate {0}
+	set_instantiation_interface_parameter_value S_AXI_ACLK externallyDriven {false}
+	set_instantiation_interface_parameter_value S_AXI_ACLK ptfSchematicName {}
+	add_instantiation_interface_port S_AXI_ACLK S_AXI_ACLK clk 1 STD_LOGIC Input
+	add_instantiation_interface S_AXI axi4lite INPUT
+	set_instantiation_interface_parameter_value S_AXI associatedClock {S_AXI_ACLK}
+	set_instantiation_interface_parameter_value S_AXI associatedReset {S_AXI_ARESETN}
+	set_instantiation_interface_parameter_value S_AXI bridgesToMaster {}
+	set_instantiation_interface_parameter_value S_AXI combinedAcceptanceCapability {1}
+	set_instantiation_interface_parameter_value S_AXI maximumOutstandingReads {1}
+	set_instantiation_interface_parameter_value S_AXI maximumOutstandingTransactions {1}
+	set_instantiation_interface_parameter_value S_AXI maximumOutstandingWrites {1}
+	set_instantiation_interface_parameter_value S_AXI readAcceptanceCapability {1}
+	set_instantiation_interface_parameter_value S_AXI readDataReorderingDepth {1}
+	set_instantiation_interface_parameter_value S_AXI trustzoneAware {true}
+	set_instantiation_interface_parameter_value S_AXI writeAcceptanceCapability {1}
+	add_instantiation_interface_port S_AXI S_AXI_AWADDR awaddr 16 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI S_AXI_AWPROT awprot 3 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI S_AXI_AWVALID awvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI S_AXI_WDATA wdata 32 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI S_AXI_WSTRB wstrb 4 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI S_AXI_WVALID wvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI S_AXI_BREADY bready 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI S_AXI_ARADDR araddr 16 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI S_AXI_ARPROT arprot 3 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI S_AXI_ARVALID arvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI S_AXI_RREADY rready 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI S_AXI_AWREADY awready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI S_AXI_WREADY wready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI S_AXI_BRESP bresp 2 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI S_AXI_BVALID bvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI S_AXI_ARREADY arready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI S_AXI_RDATA rdata 32 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI S_AXI_RRESP rresp 2 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI S_AXI_RVALID rvalid 1 STD_LOGIC Output
+	add_instantiation_interface S_AXI_ARESETN reset INPUT
+	set_instantiation_interface_parameter_value S_AXI_ARESETN associatedClock {}
+	set_instantiation_interface_parameter_value S_AXI_ARESETN synchronousEdges {NONE}
+	add_instantiation_interface_port S_AXI_ARESETN S_AXI_ARESETN reset_n 1 STD_LOGIC Input
+	add_instantiation_interface S_AXI_TEST_MIDDLE_ACLK clock INPUT
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE_ACLK clockRate {0}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE_ACLK externallyDriven {false}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE_ACLK ptfSchematicName {}
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE_ACLK S_AXI_TEST_MIDDLE_ACLK clk 1 STD_LOGIC Input
+	add_instantiation_interface S_AXI_TEST_MIDDLE axi4lite INPUT
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE associatedClock {S_AXI_TEST_MIDDLE_ACLK}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE associatedReset {S_AXI_TEST_MIDDLE_ARESETN}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE bridgesToMaster {}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE combinedAcceptanceCapability {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE maximumOutstandingReads {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE maximumOutstandingTransactions {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE maximumOutstandingWrites {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE readAcceptanceCapability {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE readDataReorderingDepth {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE trustzoneAware {true}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE writeAcceptanceCapability {1}
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_AWADDR awaddr 16 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_AWPROT awprot 3 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_AWVALID awvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_WDATA wdata 32 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_WSTRB wstrb 4 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_WVALID wvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_BREADY bready 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_ARADDR araddr 16 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_ARPROT arprot 3 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_ARVALID arvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_RREADY rready 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_AWREADY awready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_WREADY wready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_BRESP bresp 2 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_BVALID bvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_ARREADY arready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_RDATA rdata 32 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_RRESP rresp 2 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE S_AXI_TEST_MIDDLE_RVALID rvalid 1 STD_LOGIC Output
+	add_instantiation_interface S_AXI_TEST_MIDDLE_ARESETN reset INPUT
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE_ARESETN associatedClock {}
+	set_instantiation_interface_parameter_value S_AXI_TEST_MIDDLE_ARESETN synchronousEdges {NONE}
+	add_instantiation_interface_port S_AXI_TEST_MIDDLE_ARESETN S_AXI_TEST_MIDDLE_ARESETN reset_n 1 STD_LOGIC Input
+	add_instantiation_interface S_AXI_TEST_BOTTOM_ACLK clock INPUT
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM_ACLK clockRate {0}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM_ACLK externallyDriven {false}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM_ACLK ptfSchematicName {}
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM_ACLK S_AXI_TEST_BOTTOM_ACLK clk 1 STD_LOGIC Input
+	add_instantiation_interface S_AXI_TEST_BOTTOM axi4lite INPUT
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM associatedClock {S_AXI_TEST_BOTTOM_ACLK}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM associatedReset {S_AXI_TEST_BOTTOM_ARESETN}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM bridgesToMaster {}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM combinedAcceptanceCapability {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM maximumOutstandingReads {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM maximumOutstandingTransactions {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM maximumOutstandingWrites {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM readAcceptanceCapability {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM readDataReorderingDepth {1}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM trustzoneAware {true}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM writeAcceptanceCapability {1}
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_AWADDR awaddr 16 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_AWPROT awprot 3 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_AWVALID awvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_WDATA wdata 32 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_WSTRB wstrb 4 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_WVALID wvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_BREADY bready 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_ARADDR araddr 16 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_ARPROT arprot 3 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_ARVALID arvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_RREADY rready 1 STD_LOGIC Input
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_AWREADY awready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_WREADY wready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_BRESP bresp 2 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_BVALID bvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_ARREADY arready 1 STD_LOGIC Output
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_RDATA rdata 32 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_RRESP rresp 2 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM S_AXI_TEST_BOTTOM_RVALID rvalid 1 STD_LOGIC Output
+	add_instantiation_interface S_AXI_TEST_BOTTOM_ARESETN reset INPUT
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM_ARESETN associatedClock {}
+	set_instantiation_interface_parameter_value S_AXI_TEST_BOTTOM_ARESETN synchronousEdges {NONE}
+	add_instantiation_interface_port S_AXI_TEST_BOTTOM_ARESETN S_AXI_TEST_BOTTOM_ARESETN reset_n 1 STD_LOGIC Input
+	add_instantiation_interface s_axis_sfix_cpx_in_aclk clock INPUT
+	set_instantiation_interface_parameter_value s_axis_sfix_cpx_in_aclk clockRate {0}
+	set_instantiation_interface_parameter_value s_axis_sfix_cpx_in_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value s_axis_sfix_cpx_in_aclk ptfSchematicName {}
+	add_instantiation_interface_port s_axis_sfix_cpx_in_aclk s_axis_sfix_cpx_in_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface s_axis_sfix_cpx_in axi4stream INPUT
+	set_instantiation_interface_parameter_value s_axis_sfix_cpx_in associatedClock {s_axis_sfix_cpx_in_aclk}
+	set_instantiation_interface_parameter_value s_axis_sfix_cpx_in associatedReset {s_axis_sfix_cpx_in_aresetn}
+	add_instantiation_interface_port s_axis_sfix_cpx_in s_axis_sfix_cpx_in_tdata tdata 32 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s_axis_sfix_cpx_in s_axis_sfix_cpx_in_tuser tuser 121 STD_LOGIC_VECTOR Input
+	add_instantiation_interface_port s_axis_sfix_cpx_in s_axis_sfix_cpx_in_tvalid tvalid 1 STD_LOGIC Input
+	add_instantiation_interface_port s_axis_sfix_cpx_in s_axis_sfix_cpx_in_tlast tlast 1 STD_LOGIC Input
+	add_instantiation_interface_port s_axis_sfix_cpx_in s_axis_sfix_cpx_in_tready tready 1 STD_LOGIC Output
+	add_instantiation_interface s_axis_sfix_cpx_in_aresetn reset INPUT
+	set_instantiation_interface_parameter_value s_axis_sfix_cpx_in_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value s_axis_sfix_cpx_in_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port s_axis_sfix_cpx_in_aresetn s_axis_sfix_cpx_in_aresetn reset_n 1 STD_LOGIC Input
+	add_instantiation_interface m_axis_sfix_cpx_out_aclk clock INPUT
+	set_instantiation_interface_parameter_value m_axis_sfix_cpx_out_aclk clockRate {0}
+	set_instantiation_interface_parameter_value m_axis_sfix_cpx_out_aclk externallyDriven {false}
+	set_instantiation_interface_parameter_value m_axis_sfix_cpx_out_aclk ptfSchematicName {}
+	add_instantiation_interface_port m_axis_sfix_cpx_out_aclk m_axis_sfix_cpx_out_aclk clk 1 STD_LOGIC Input
+	add_instantiation_interface m_axis_sfix_cpx_out axi4stream OUTPUT
+	set_instantiation_interface_parameter_value m_axis_sfix_cpx_out associatedClock {m_axis_sfix_cpx_out_aclk}
+	set_instantiation_interface_parameter_value m_axis_sfix_cpx_out associatedReset {m_axis_sfix_cpx_out_aresetn}
+	add_instantiation_interface_port m_axis_sfix_cpx_out m_axis_sfix_cpx_out_tready tready 1 STD_LOGIC Input
+	add_instantiation_interface_port m_axis_sfix_cpx_out m_axis_sfix_cpx_out_tdata tdata 32 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m_axis_sfix_cpx_out m_axis_sfix_cpx_out_tuser tuser 121 STD_LOGIC_VECTOR Output
+	add_instantiation_interface_port m_axis_sfix_cpx_out m_axis_sfix_cpx_out_tvalid tvalid 1 STD_LOGIC Output
+	add_instantiation_interface_port m_axis_sfix_cpx_out m_axis_sfix_cpx_out_tlast tlast 1 STD_LOGIC Output
+	add_instantiation_interface m_axis_sfix_cpx_out_aresetn reset INPUT
+	set_instantiation_interface_parameter_value m_axis_sfix_cpx_out_aresetn associatedClock {}
+	set_instantiation_interface_parameter_value m_axis_sfix_cpx_out_aresetn synchronousEdges {NONE}
+	add_instantiation_interface_port m_axis_sfix_cpx_out_aresetn m_axis_sfix_cpx_out_aresetn reset_n 1 STD_LOGIC Input
+	save_instantiation
+	add_component input_clock_bridge ip/nodeset_test/input_clock_bridge_clock_in.ip altera_clock_bridge clock_in 19.1
+	load_component input_clock_bridge
+	set_component_parameter_value EXPLICIT_CLOCK_RATE {0.0}
+	set_component_parameter_value NUM_CLOCK_OUTPUTS {1}
+	set_component_project_property HIDE_FROM_IP_CATALOG {false}
+	save_component
+	load_instantiation input_clock_bridge
+	remove_instantiation_interfaces_and_ports
+	add_instantiation_interface in_clk clock INPUT
+	set_instantiation_interface_parameter_value in_clk clockRate {0}
+	set_instantiation_interface_parameter_value in_clk externallyDriven {false}
+	set_instantiation_interface_parameter_value in_clk ptfSchematicName {}
+	add_instantiation_interface_port in_clk in_clk clk 1 STD_LOGIC Input
+	add_instantiation_interface out_clk clock OUTPUT
+	set_instantiation_interface_parameter_value out_clk associatedDirectClock {in_clk}
+	set_instantiation_interface_parameter_value out_clk clockRate {0}
+	set_instantiation_interface_parameter_value out_clk clockRateKnown {false}
+	set_instantiation_interface_parameter_value out_clk externallyDriven {false}
+	set_instantiation_interface_parameter_value out_clk ptfSchematicName {}
+	set_instantiation_interface_sysinfo_parameter_value out_clk clock_rate {0}
+	add_instantiation_interface_port out_clk out_clk clk 1 STD_LOGIC Output
+	save_instantiation
+	add_component input_reset_bridge ip/nodeset_test/input_reset_bridge_reset_in.ip altera_reset_bridge reset_in 19.1
+	load_component input_reset_bridge
+	set_component_parameter_value ACTIVE_LOW_RESET {1}
+	set_component_parameter_value NUM_RESET_OUTPUTS {1}
+	set_component_parameter_value SYNCHRONOUS_EDGES {deassert}
+	set_component_parameter_value SYNC_RESET {0}
+	set_component_parameter_value USE_RESET_REQUEST {0}
+	set_component_project_property HIDE_FROM_IP_CATALOG {false}
+	save_component
+	load_instantiation input_reset_bridge
+	remove_instantiation_interfaces_and_ports
+	add_instantiation_interface clk clock INPUT
+	set_instantiation_interface_parameter_value clk clockRate {0}
+	set_instantiation_interface_parameter_value clk externallyDriven {false}
+	set_instantiation_interface_parameter_value clk ptfSchematicName {}
+	add_instantiation_interface_port clk clk clk 1 STD_LOGIC Input
+	add_instantiation_interface in_reset reset INPUT
+	set_instantiation_interface_parameter_value in_reset associatedClock {clk}
+	set_instantiation_interface_parameter_value in_reset synchronousEdges {DEASSERT}
+	add_instantiation_interface_port in_reset in_reset_n reset_n 1 STD_LOGIC Input
+	add_instantiation_interface out_reset reset OUTPUT
+	set_instantiation_interface_parameter_value out_reset associatedClock {clk}
+	set_instantiation_interface_parameter_value out_reset associatedDirectReset {in_reset}
+	set_instantiation_interface_parameter_value out_reset associatedResetSinks {in_reset}
+	set_instantiation_interface_parameter_value out_reset synchronousEdges {DEASSERT}
+	add_instantiation_interface_port out_reset out_reset_n reset_n 1 STD_LOGIC Output
+	save_instantiation
+	add_component output_aclk_clock_bridge ip/nodeset_test/output_aclk_clock_bridge_clock_in.ip altera_clock_bridge clock_in 19.1
+	load_component output_aclk_clock_bridge
+	set_component_parameter_value EXPLICIT_CLOCK_RATE {0.0}
+	set_component_parameter_value NUM_CLOCK_OUTPUTS {1}
+	set_component_project_property HIDE_FROM_IP_CATALOG {false}
+	save_component
+	load_instantiation output_aclk_clock_bridge
+	remove_instantiation_interfaces_and_ports
+	add_instantiation_interface in_clk clock INPUT
+	set_instantiation_interface_parameter_value in_clk clockRate {0}
+	set_instantiation_interface_parameter_value in_clk externallyDriven {false}
+	set_instantiation_interface_parameter_value in_clk ptfSchematicName {}
+	add_instantiation_interface_port in_clk in_clk clk 1 STD_LOGIC Input
+	add_instantiation_interface out_clk clock OUTPUT
+	set_instantiation_interface_parameter_value out_clk associatedDirectClock {in_clk}
+	set_instantiation_interface_parameter_value out_clk clockRate {0}
+	set_instantiation_interface_parameter_value out_clk clockRateKnown {false}
+	set_instantiation_interface_parameter_value out_clk externallyDriven {false}
+	set_instantiation_interface_parameter_value out_clk ptfSchematicName {}
+	set_instantiation_interface_sysinfo_parameter_value out_clk clock_rate {0}
+	add_instantiation_interface_port out_clk out_clk clk 1 STD_LOGIC Output
+	save_instantiation
+	add_component output_aclk_reset_bridge ip/nodeset_test/output_aclk_reset_bridge_reset_in.ip altera_reset_bridge reset_in 19.1
+	load_component output_aclk_reset_bridge
+	set_component_parameter_value ACTIVE_LOW_RESET {1}
+	set_component_parameter_value NUM_RESET_OUTPUTS {1}
+	set_component_parameter_value SYNCHRONOUS_EDGES {deassert}
+	set_component_parameter_value SYNC_RESET {0}
+	set_component_parameter_value USE_RESET_REQUEST {0}
+	set_component_project_property HIDE_FROM_IP_CATALOG {false}
+	save_component
+	load_instantiation output_aclk_reset_bridge
+	remove_instantiation_interfaces_and_ports
+	add_instantiation_interface clk clock INPUT
+	set_instantiation_interface_parameter_value clk clockRate {0}
+	set_instantiation_interface_parameter_value clk externallyDriven {false}
+	set_instantiation_interface_parameter_value clk ptfSchematicName {}
+	add_instantiation_interface_port clk clk clk 1 STD_LOGIC Input
+	add_instantiation_interface in_reset reset INPUT
+	set_instantiation_interface_parameter_value in_reset associatedClock {clk}
+	set_instantiation_interface_parameter_value in_reset synchronousEdges {DEASSERT}
+	add_instantiation_interface_port in_reset in_reset_n reset_n 1 STD_LOGIC Input
+	add_instantiation_interface out_reset reset OUTPUT
+	set_instantiation_interface_parameter_value out_reset associatedClock {clk}
+	set_instantiation_interface_parameter_value out_reset associatedDirectReset {in_reset}
+	set_instantiation_interface_parameter_value out_reset associatedResetSinks {in_reset}
+	set_instantiation_interface_parameter_value out_reset synchronousEdges {DEASSERT}
+	add_instantiation_interface_port out_reset out_reset_n reset_n 1 STD_LOGIC Output
+	save_instantiation
+	add_component processing_clock_bridge ip/nodeset_test/processing_clock_bridge_clock_in.ip altera_clock_bridge clock_in 19.1
+	load_component processing_clock_bridge
+	set_component_parameter_value EXPLICIT_CLOCK_RATE {0.0}
+	set_component_parameter_value NUM_CLOCK_OUTPUTS {1}
+	set_component_project_property HIDE_FROM_IP_CATALOG {false}
+	save_component
+	load_instantiation processing_clock_bridge
+	remove_instantiation_interfaces_and_ports
+	add_instantiation_interface in_clk clock INPUT
+	set_instantiation_interface_parameter_value in_clk clockRate {0}
+	set_instantiation_interface_parameter_value in_clk externallyDriven {false}
+	set_instantiation_interface_parameter_value in_clk ptfSchematicName {}
+	add_instantiation_interface_port in_clk in_clk clk 1 STD_LOGIC Input
+	add_instantiation_interface out_clk clock OUTPUT
+	set_instantiation_interface_parameter_value out_clk associatedDirectClock {in_clk}
+	set_instantiation_interface_parameter_value out_clk clockRate {0}
+	set_instantiation_interface_parameter_value out_clk clockRateKnown {false}
+	set_instantiation_interface_parameter_value out_clk externallyDriven {false}
+	set_instantiation_interface_parameter_value out_clk ptfSchematicName {}
+	set_instantiation_interface_sysinfo_parameter_value out_clk clock_rate {0}
+	add_instantiation_interface_port out_clk out_clk clk 1 STD_LOGIC Output
+	save_instantiation
+	add_component processing_reset_bridge ip/nodeset_test/processing_reset_bridge_reset_in.ip altera_reset_bridge reset_in 19.1
+	load_component processing_reset_bridge
+	set_component_parameter_value ACTIVE_LOW_RESET {1}
+	set_component_parameter_value NUM_RESET_OUTPUTS {1}
+	set_component_parameter_value SYNCHRONOUS_EDGES {deassert}
+	set_component_parameter_value SYNC_RESET {0}
+	set_component_parameter_value USE_RESET_REQUEST {0}
+	set_component_project_property HIDE_FROM_IP_CATALOG {false}
+	save_component
+	load_instantiation processing_reset_bridge
+	remove_instantiation_interfaces_and_ports
+	add_instantiation_interface clk clock INPUT
+	set_instantiation_interface_parameter_value clk clockRate {0}
+	set_instantiation_interface_parameter_value clk externallyDriven {false}
+	set_instantiation_interface_parameter_value clk ptfSchematicName {}
+	add_instantiation_interface_port clk clk clk 1 STD_LOGIC Input
+	add_instantiation_interface in_reset reset INPUT
+	set_instantiation_interface_parameter_value in_reset associatedClock {clk}
+	set_instantiation_interface_parameter_value in_reset synchronousEdges {DEASSERT}
+	add_instantiation_interface_port in_reset in_reset_n reset_n 1 STD_LOGIC Input
+	add_instantiation_interface out_reset reset OUTPUT
+	set_instantiation_interface_parameter_value out_reset associatedClock {clk}
+	set_instantiation_interface_parameter_value out_reset associatedDirectReset {in_reset}
+	set_instantiation_interface_parameter_value out_reset associatedResetSinks {in_reset}
+	set_instantiation_interface_parameter_value out_reset synchronousEdges {DEASSERT}
+	add_instantiation_interface_port out_reset out_reset_n reset_n 1 STD_LOGIC Output
+	save_instantiation
+	add_component properties_clock_bridge ip/nodeset_test/properties_clock_bridge_clock_in.ip altera_clock_bridge clock_in 19.1
+	load_component properties_clock_bridge
+	set_component_parameter_value EXPLICIT_CLOCK_RATE {0.0}
+	set_component_parameter_value NUM_CLOCK_OUTPUTS {1}
+	set_component_project_property HIDE_FROM_IP_CATALOG {false}
+	save_component
+	load_instantiation properties_clock_bridge
+	remove_instantiation_interfaces_and_ports
+	add_instantiation_interface in_clk clock INPUT
+	set_instantiation_interface_parameter_value in_clk clockRate {0}
+	set_instantiation_interface_parameter_value in_clk externallyDriven {false}
+	set_instantiation_interface_parameter_value in_clk ptfSchematicName {}
+	add_instantiation_interface_port in_clk in_clk clk 1 STD_LOGIC Input
+	add_instantiation_interface out_clk clock OUTPUT
+	set_instantiation_interface_parameter_value out_clk associatedDirectClock {in_clk}
+	set_instantiation_interface_parameter_value out_clk clockRate {0}
+	set_instantiation_interface_parameter_value out_clk clockRateKnown {false}
+	set_instantiation_interface_parameter_value out_clk externallyDriven {false}
+	set_instantiation_interface_parameter_value out_clk ptfSchematicName {}
+	set_instantiation_interface_sysinfo_parameter_value out_clk clock_rate {0}
+	add_instantiation_interface_port out_clk out_clk clk 1 STD_LOGIC Output
+	save_instantiation
+	add_component properties_reset_bridge ip/nodeset_test/properties_reset_bridge_reset_in.ip altera_reset_bridge reset_in 19.1
+	load_component properties_reset_bridge
+	set_component_parameter_value ACTIVE_LOW_RESET {1}
+	set_component_parameter_value NUM_RESET_OUTPUTS {1}
+	set_component_parameter_value SYNCHRONOUS_EDGES {deassert}
+	set_component_parameter_value SYNC_RESET {0}
+	set_component_parameter_value USE_RESET_REQUEST {0}
+	set_component_project_property HIDE_FROM_IP_CATALOG {false}
+	save_component
+	load_instantiation properties_reset_bridge
+	remove_instantiation_interfaces_and_ports
+	add_instantiation_interface clk clock INPUT
+	set_instantiation_interface_parameter_value clk clockRate {0}
+	set_instantiation_interface_parameter_value clk externallyDriven {false}
+	set_instantiation_interface_parameter_value clk ptfSchematicName {}
+	add_instantiation_interface_port clk clk clk 1 STD_LOGIC Input
+	add_instantiation_interface in_reset reset INPUT
+	set_instantiation_interface_parameter_value in_reset associatedClock {clk}
+	set_instantiation_interface_parameter_value in_reset synchronousEdges {DEASSERT}
+	add_instantiation_interface_port in_reset in_reset_n reset_n 1 STD_LOGIC Input
+	add_instantiation_interface out_reset reset OUTPUT
+	set_instantiation_interface_parameter_value out_reset associatedClock {clk}
+	set_instantiation_interface_parameter_value out_reset associatedDirectReset {in_reset}
+	set_instantiation_interface_parameter_value out_reset associatedResetSinks {in_reset}
+	set_instantiation_interface_parameter_value out_reset synchronousEdges {DEASSERT}
+	add_instantiation_interface_port out_reset out_reset_n reset_n 1 STD_LOGIC Output
+	save_instantiation
+
+	# add wirelevel expressions
+
+	# add the connections
+	add_connection fins_test_ip_0.m00_axis_test_out/fins_test_ip_1.s00_axis_test_in
+	add_connection fins_test_ip_0.m01_axis_test_out/fins_test_ip_1.s01_axis_test_in
+	add_connection fins_test_ip_0.m_axis_myoutput/fins_test_ip_1.s_axis_myinput
+	add_connection fins_test_ip_0.m_axis_sfix_cpx_out/fins_test_ip_1.s_axis_sfix_cpx_in
+	add_connection input_clock_bridge.out_clk/fins_test_ip_0.s00_axis_test_in_aclk
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s00_axis_test_in_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s00_axis_test_in_aclk clockRateSysInfo {}
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s00_axis_test_in_aclk clockResetSysInfo {}
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s00_axis_test_in_aclk resetDomainSysInfo {-1}
+	add_connection input_clock_bridge.out_clk/fins_test_ip_0.s01_axis_test_in_aclk
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s01_axis_test_in_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s01_axis_test_in_aclk clockRateSysInfo {}
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s01_axis_test_in_aclk clockResetSysInfo {}
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s01_axis_test_in_aclk resetDomainSysInfo {-1}
+	add_connection input_clock_bridge.out_clk/fins_test_ip_0.s_axis_myinput_aclk
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s_axis_myinput_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s_axis_myinput_aclk clockRateSysInfo {}
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s_axis_myinput_aclk clockResetSysInfo {}
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s_axis_myinput_aclk resetDomainSysInfo {-1}
+	add_connection input_clock_bridge.out_clk/fins_test_ip_0.s_axis_sfix_cpx_in_aclk
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s_axis_sfix_cpx_in_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s_axis_sfix_cpx_in_aclk clockRateSysInfo {}
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s_axis_sfix_cpx_in_aclk clockResetSysInfo {}
+	set_connection_parameter_value input_clock_bridge.out_clk/fins_test_ip_0.s_axis_sfix_cpx_in_aclk resetDomainSysInfo {-1}
+	add_connection input_clock_bridge.out_clk/input_reset_bridge.clk
+	set_connection_parameter_value input_clock_bridge.out_clk/input_reset_bridge.clk clockDomainSysInfo {-1}
+	set_connection_parameter_value input_clock_bridge.out_clk/input_reset_bridge.clk clockRateSysInfo {}
+	set_connection_parameter_value input_clock_bridge.out_clk/input_reset_bridge.clk clockResetSysInfo {}
+	set_connection_parameter_value input_clock_bridge.out_clk/input_reset_bridge.clk resetDomainSysInfo {-1}
+	add_connection input_reset_bridge.out_reset/fins_test_ip_0.s00_axis_test_in_aresetn
+	set_connection_parameter_value input_reset_bridge.out_reset/fins_test_ip_0.s00_axis_test_in_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value input_reset_bridge.out_reset/fins_test_ip_0.s00_axis_test_in_aresetn clockResetSysInfo {}
+	set_connection_parameter_value input_reset_bridge.out_reset/fins_test_ip_0.s00_axis_test_in_aresetn resetDomainSysInfo {-1}
+	add_connection input_reset_bridge.out_reset/fins_test_ip_0.s01_axis_test_in_aresetn
+	set_connection_parameter_value input_reset_bridge.out_reset/fins_test_ip_0.s01_axis_test_in_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value input_reset_bridge.out_reset/fins_test_ip_0.s01_axis_test_in_aresetn clockResetSysInfo {}
+	set_connection_parameter_value input_reset_bridge.out_reset/fins_test_ip_0.s01_axis_test_in_aresetn resetDomainSysInfo {-1}
+	add_connection input_reset_bridge.out_reset/fins_test_ip_0.s_axis_myinput_aresetn
+	set_connection_parameter_value input_reset_bridge.out_reset/fins_test_ip_0.s_axis_myinput_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value input_reset_bridge.out_reset/fins_test_ip_0.s_axis_myinput_aresetn clockResetSysInfo {}
+	set_connection_parameter_value input_reset_bridge.out_reset/fins_test_ip_0.s_axis_myinput_aresetn resetDomainSysInfo {-1}
+	add_connection input_reset_bridge.out_reset/fins_test_ip_0.s_axis_sfix_cpx_in_aresetn
+	set_connection_parameter_value input_reset_bridge.out_reset/fins_test_ip_0.s_axis_sfix_cpx_in_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value input_reset_bridge.out_reset/fins_test_ip_0.s_axis_sfix_cpx_in_aresetn clockResetSysInfo {}
+	set_connection_parameter_value input_reset_bridge.out_reset/fins_test_ip_0.s_axis_sfix_cpx_in_aresetn resetDomainSysInfo {-1}
+	add_connection output_aclk_clock_bridge.out_clk/fins_test_ip_1.m00_axis_test_out_aclk
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m00_axis_test_out_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m00_axis_test_out_aclk clockRateSysInfo {}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m00_axis_test_out_aclk clockResetSysInfo {}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m00_axis_test_out_aclk resetDomainSysInfo {-1}
+	add_connection output_aclk_clock_bridge.out_clk/fins_test_ip_1.m01_axis_test_out_aclk
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m01_axis_test_out_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m01_axis_test_out_aclk clockRateSysInfo {}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m01_axis_test_out_aclk clockResetSysInfo {}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m01_axis_test_out_aclk resetDomainSysInfo {-1}
+	add_connection output_aclk_clock_bridge.out_clk/fins_test_ip_1.m_axis_myoutput_aclk
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m_axis_myoutput_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m_axis_myoutput_aclk clockRateSysInfo {}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m_axis_myoutput_aclk clockResetSysInfo {}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m_axis_myoutput_aclk resetDomainSysInfo {-1}
+	add_connection output_aclk_clock_bridge.out_clk/fins_test_ip_1.m_axis_sfix_cpx_out_aclk
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m_axis_sfix_cpx_out_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m_axis_sfix_cpx_out_aclk clockRateSysInfo {}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m_axis_sfix_cpx_out_aclk clockResetSysInfo {}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/fins_test_ip_1.m_axis_sfix_cpx_out_aclk resetDomainSysInfo {-1}
+	add_connection output_aclk_clock_bridge.out_clk/output_aclk_reset_bridge.clk
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/output_aclk_reset_bridge.clk clockDomainSysInfo {-1}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/output_aclk_reset_bridge.clk clockRateSysInfo {}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/output_aclk_reset_bridge.clk clockResetSysInfo {}
+	set_connection_parameter_value output_aclk_clock_bridge.out_clk/output_aclk_reset_bridge.clk resetDomainSysInfo {-1}
+	add_connection output_aclk_reset_bridge.out_reset/fins_test_ip_1.m00_axis_test_out_aresetn
+	set_connection_parameter_value output_aclk_reset_bridge.out_reset/fins_test_ip_1.m00_axis_test_out_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value output_aclk_reset_bridge.out_reset/fins_test_ip_1.m00_axis_test_out_aresetn clockResetSysInfo {}
+	set_connection_parameter_value output_aclk_reset_bridge.out_reset/fins_test_ip_1.m00_axis_test_out_aresetn resetDomainSysInfo {-1}
+	add_connection output_aclk_reset_bridge.out_reset/fins_test_ip_1.m01_axis_test_out_aresetn
+	set_connection_parameter_value output_aclk_reset_bridge.out_reset/fins_test_ip_1.m01_axis_test_out_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value output_aclk_reset_bridge.out_reset/fins_test_ip_1.m01_axis_test_out_aresetn clockResetSysInfo {}
+	set_connection_parameter_value output_aclk_reset_bridge.out_reset/fins_test_ip_1.m01_axis_test_out_aresetn resetDomainSysInfo {-1}
+	add_connection output_aclk_reset_bridge.out_reset/fins_test_ip_1.m_axis_myoutput_aresetn
+	set_connection_parameter_value output_aclk_reset_bridge.out_reset/fins_test_ip_1.m_axis_myoutput_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value output_aclk_reset_bridge.out_reset/fins_test_ip_1.m_axis_myoutput_aresetn clockResetSysInfo {}
+	set_connection_parameter_value output_aclk_reset_bridge.out_reset/fins_test_ip_1.m_axis_myoutput_aresetn resetDomainSysInfo {-1}
+	add_connection output_aclk_reset_bridge.out_reset/fins_test_ip_1.m_axis_sfix_cpx_out_aresetn
+	set_connection_parameter_value output_aclk_reset_bridge.out_reset/fins_test_ip_1.m_axis_sfix_cpx_out_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value output_aclk_reset_bridge.out_reset/fins_test_ip_1.m_axis_sfix_cpx_out_aresetn clockResetSysInfo {}
+	set_connection_parameter_value output_aclk_reset_bridge.out_reset/fins_test_ip_1.m_axis_sfix_cpx_out_aresetn resetDomainSysInfo {-1}
+	add_connection processing_clock_bridge.out_clk/fins_test_ip_0.m00_axis_test_out_aclk
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m00_axis_test_out_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m00_axis_test_out_aclk clockRateSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m00_axis_test_out_aclk clockResetSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m00_axis_test_out_aclk resetDomainSysInfo {-1}
+	add_connection processing_clock_bridge.out_clk/fins_test_ip_0.m01_axis_test_out_aclk
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m01_axis_test_out_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m01_axis_test_out_aclk clockRateSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m01_axis_test_out_aclk clockResetSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m01_axis_test_out_aclk resetDomainSysInfo {-1}
+	add_connection processing_clock_bridge.out_clk/fins_test_ip_0.m_axis_myoutput_aclk
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m_axis_myoutput_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m_axis_myoutput_aclk clockRateSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m_axis_myoutput_aclk clockResetSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m_axis_myoutput_aclk resetDomainSysInfo {-1}
+	add_connection processing_clock_bridge.out_clk/fins_test_ip_0.m_axis_sfix_cpx_out_aclk
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m_axis_sfix_cpx_out_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m_axis_sfix_cpx_out_aclk clockRateSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m_axis_sfix_cpx_out_aclk clockResetSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_0.m_axis_sfix_cpx_out_aclk resetDomainSysInfo {-1}
+	add_connection processing_clock_bridge.out_clk/fins_test_ip_1.s00_axis_test_in_aclk
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s00_axis_test_in_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s00_axis_test_in_aclk clockRateSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s00_axis_test_in_aclk clockResetSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s00_axis_test_in_aclk resetDomainSysInfo {-1}
+	add_connection processing_clock_bridge.out_clk/fins_test_ip_1.s01_axis_test_in_aclk
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s01_axis_test_in_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s01_axis_test_in_aclk clockRateSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s01_axis_test_in_aclk clockResetSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s01_axis_test_in_aclk resetDomainSysInfo {-1}
+	add_connection processing_clock_bridge.out_clk/fins_test_ip_1.s_axis_myinput_aclk
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s_axis_myinput_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s_axis_myinput_aclk clockRateSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s_axis_myinput_aclk clockResetSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s_axis_myinput_aclk resetDomainSysInfo {-1}
+	add_connection processing_clock_bridge.out_clk/fins_test_ip_1.s_axis_sfix_cpx_in_aclk
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s_axis_sfix_cpx_in_aclk clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s_axis_sfix_cpx_in_aclk clockRateSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s_axis_sfix_cpx_in_aclk clockResetSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/fins_test_ip_1.s_axis_sfix_cpx_in_aclk resetDomainSysInfo {-1}
+	add_connection processing_clock_bridge.out_clk/processing_reset_bridge.clk
+	set_connection_parameter_value processing_clock_bridge.out_clk/processing_reset_bridge.clk clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_clock_bridge.out_clk/processing_reset_bridge.clk clockRateSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/processing_reset_bridge.clk clockResetSysInfo {}
+	set_connection_parameter_value processing_clock_bridge.out_clk/processing_reset_bridge.clk resetDomainSysInfo {-1}
+	add_connection processing_reset_bridge.out_reset/fins_test_ip_0.m00_axis_test_out_aresetn
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_0.m00_axis_test_out_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_0.m00_axis_test_out_aresetn clockResetSysInfo {}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_0.m00_axis_test_out_aresetn resetDomainSysInfo {-1}
+	add_connection processing_reset_bridge.out_reset/fins_test_ip_0.m01_axis_test_out_aresetn
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_0.m01_axis_test_out_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_0.m01_axis_test_out_aresetn clockResetSysInfo {}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_0.m01_axis_test_out_aresetn resetDomainSysInfo {-1}
+	add_connection processing_reset_bridge.out_reset/fins_test_ip_0.m_axis_myoutput_aresetn
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_0.m_axis_myoutput_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_0.m_axis_myoutput_aresetn clockResetSysInfo {}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_0.m_axis_myoutput_aresetn resetDomainSysInfo {-1}
+	add_connection processing_reset_bridge.out_reset/fins_test_ip_0.m_axis_sfix_cpx_out_aresetn
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_0.m_axis_sfix_cpx_out_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_0.m_axis_sfix_cpx_out_aresetn clockResetSysInfo {}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_0.m_axis_sfix_cpx_out_aresetn resetDomainSysInfo {-1}
+	add_connection processing_reset_bridge.out_reset/fins_test_ip_1.s00_axis_test_in_aresetn
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_1.s00_axis_test_in_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_1.s00_axis_test_in_aresetn clockResetSysInfo {}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_1.s00_axis_test_in_aresetn resetDomainSysInfo {-1}
+	add_connection processing_reset_bridge.out_reset/fins_test_ip_1.s01_axis_test_in_aresetn
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_1.s01_axis_test_in_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_1.s01_axis_test_in_aresetn clockResetSysInfo {}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_1.s01_axis_test_in_aresetn resetDomainSysInfo {-1}
+	add_connection processing_reset_bridge.out_reset/fins_test_ip_1.s_axis_myinput_aresetn
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_1.s_axis_myinput_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_1.s_axis_myinput_aresetn clockResetSysInfo {}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_1.s_axis_myinput_aresetn resetDomainSysInfo {-1}
+	add_connection processing_reset_bridge.out_reset/fins_test_ip_1.s_axis_sfix_cpx_in_aresetn
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_1.s_axis_sfix_cpx_in_aresetn clockDomainSysInfo {-1}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_1.s_axis_sfix_cpx_in_aresetn clockResetSysInfo {}
+	set_connection_parameter_value processing_reset_bridge.out_reset/fins_test_ip_1.s_axis_sfix_cpx_in_aresetn resetDomainSysInfo {-1}
+	add_connection properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_ACLK
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_ACLK clockDomainSysInfo {-1}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_ACLK clockRateSysInfo {}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_ACLK clockResetSysInfo {}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_ACLK resetDomainSysInfo {-1}
+	add_connection properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_TEST_BOTTOM_ACLK
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_TEST_BOTTOM_ACLK clockDomainSysInfo {-1}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_TEST_BOTTOM_ACLK clockRateSysInfo {}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_TEST_BOTTOM_ACLK clockResetSysInfo {}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_TEST_BOTTOM_ACLK resetDomainSysInfo {-1}
+	add_connection properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_TEST_MIDDLE_ACLK
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_TEST_MIDDLE_ACLK clockDomainSysInfo {-1}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_TEST_MIDDLE_ACLK clockRateSysInfo {}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_TEST_MIDDLE_ACLK clockResetSysInfo {}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_0.S_AXI_TEST_MIDDLE_ACLK resetDomainSysInfo {-1}
+	add_connection properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_ACLK
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_ACLK clockDomainSysInfo {-1}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_ACLK clockRateSysInfo {}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_ACLK clockResetSysInfo {}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_ACLK resetDomainSysInfo {-1}
+	add_connection properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_TEST_BOTTOM_ACLK
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_TEST_BOTTOM_ACLK clockDomainSysInfo {-1}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_TEST_BOTTOM_ACLK clockRateSysInfo {}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_TEST_BOTTOM_ACLK clockResetSysInfo {}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_TEST_BOTTOM_ACLK resetDomainSysInfo {-1}
+	add_connection properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_TEST_MIDDLE_ACLK
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_TEST_MIDDLE_ACLK clockDomainSysInfo {-1}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_TEST_MIDDLE_ACLK clockRateSysInfo {}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_TEST_MIDDLE_ACLK clockResetSysInfo {}
+	set_connection_parameter_value properties_clock_bridge.out_clk/fins_test_ip_1.S_AXI_TEST_MIDDLE_ACLK resetDomainSysInfo {-1}
+	add_connection properties_clock_bridge.out_clk/properties_reset_bridge.clk
+	set_connection_parameter_value properties_clock_bridge.out_clk/properties_reset_bridge.clk clockDomainSysInfo {-1}
+	set_connection_parameter_value properties_clock_bridge.out_clk/properties_reset_bridge.clk clockRateSysInfo {}
+	set_connection_parameter_value properties_clock_bridge.out_clk/properties_reset_bridge.clk clockResetSysInfo {}
+	set_connection_parameter_value properties_clock_bridge.out_clk/properties_reset_bridge.clk resetDomainSysInfo {-1}
+	add_connection properties_reset_bridge.out_reset/fins_test_ip_0.S_AXI_ARESETN
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_0.S_AXI_ARESETN clockDomainSysInfo {-1}
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_0.S_AXI_ARESETN clockResetSysInfo {}
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_0.S_AXI_ARESETN resetDomainSysInfo {-1}
+	add_connection properties_reset_bridge.out_reset/fins_test_ip_0.S_AXI_TEST_BOTTOM_ARESETN
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_0.S_AXI_TEST_BOTTOM_ARESETN clockDomainSysInfo {-1}
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_0.S_AXI_TEST_BOTTOM_ARESETN clockResetSysInfo {}
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_0.S_AXI_TEST_BOTTOM_ARESETN resetDomainSysInfo {-1}
+	add_connection properties_reset_bridge.out_reset/fins_test_ip_0.S_AXI_TEST_MIDDLE_ARESETN
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_0.S_AXI_TEST_MIDDLE_ARESETN clockDomainSysInfo {-1}
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_0.S_AXI_TEST_MIDDLE_ARESETN clockResetSysInfo {}
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_0.S_AXI_TEST_MIDDLE_ARESETN resetDomainSysInfo {-1}
+	add_connection properties_reset_bridge.out_reset/fins_test_ip_1.S_AXI_ARESETN
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_1.S_AXI_ARESETN clockDomainSysInfo {-1}
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_1.S_AXI_ARESETN clockResetSysInfo {}
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_1.S_AXI_ARESETN resetDomainSysInfo {-1}
+	add_connection properties_reset_bridge.out_reset/fins_test_ip_1.S_AXI_TEST_BOTTOM_ARESETN
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_1.S_AXI_TEST_BOTTOM_ARESETN clockDomainSysInfo {-1}
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_1.S_AXI_TEST_BOTTOM_ARESETN clockResetSysInfo {}
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_1.S_AXI_TEST_BOTTOM_ARESETN resetDomainSysInfo {-1}
+	add_connection properties_reset_bridge.out_reset/fins_test_ip_1.S_AXI_TEST_MIDDLE_ARESETN
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_1.S_AXI_TEST_MIDDLE_ARESETN clockDomainSysInfo {-1}
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_1.S_AXI_TEST_MIDDLE_ARESETN clockResetSysInfo {}
+	set_connection_parameter_value properties_reset_bridge.out_reset/fins_test_ip_1.S_AXI_TEST_MIDDLE_ARESETN resetDomainSysInfo {-1}
+
+	# add the exports
+	set_interface_property s_axis_fins_test_ip_0_myinput EXPORT_OF fins_test_ip_0.s_axis_myinput
+	set_interface_property s00_axis_fins_test_ip_0_test_in EXPORT_OF fins_test_ip_0.s00_axis_test_in
+	set_interface_property s01_axis_fins_test_ip_0_test_in EXPORT_OF fins_test_ip_0.s01_axis_test_in
+	set_interface_property S_AXI_FINS_TEST_IP_0_TEST_TOP EXPORT_OF fins_test_ip_0.S_AXI
+	set_interface_property S_AXI_FINS_TEST_IP_0_TEST_MIDDLE EXPORT_OF fins_test_ip_0.S_AXI_TEST_MIDDLE
+	set_interface_property S_AXI_FINS_TEST_IP_0_TEST_BOTTOM EXPORT_OF fins_test_ip_0.S_AXI_TEST_BOTTOM
+	set_interface_property s_axis_fins_test_ip_0_sfix_cpx_in EXPORT_OF fins_test_ip_0.s_axis_sfix_cpx_in
+	set_interface_property m_axis_fins_test_ip_1_myoutput EXPORT_OF fins_test_ip_1.m_axis_myoutput
+	set_interface_property m00_axis_fins_test_ip_1_test_out EXPORT_OF fins_test_ip_1.m00_axis_test_out
+	set_interface_property m01_axis_fins_test_ip_1_test_out EXPORT_OF fins_test_ip_1.m01_axis_test_out
+	set_interface_property S_AXI_FINS_TEST_IP_1_TEST_TOP EXPORT_OF fins_test_ip_1.S_AXI
+	set_interface_property S_AXI_FINS_TEST_IP_1_TEST_MIDDLE EXPORT_OF fins_test_ip_1.S_AXI_TEST_MIDDLE
+	set_interface_property S_AXI_FINS_TEST_IP_1_TEST_BOTTOM EXPORT_OF fins_test_ip_1.S_AXI_TEST_BOTTOM
+	set_interface_property m_axis_fins_test_ip_1_sfix_cpx_out EXPORT_OF fins_test_ip_1.m_axis_sfix_cpx_out
+	set_interface_property input_aclk EXPORT_OF input_clock_bridge.in_clk
+	set_interface_port_property input_aclk input_aclk_clk NAME input_aclk
+	set_interface_property input_aresetn EXPORT_OF input_reset_bridge.in_reset
+	set_interface_port_property input_aresetn input_aresetn_reset_n NAME input_aresetn
+	set_interface_property output_aclk EXPORT_OF output_aclk_clock_bridge.in_clk
+	set_interface_port_property output_aclk output_aclk_clk NAME output_aclk
+	set_interface_property output_aresetn EXPORT_OF output_aclk_reset_bridge.in_reset
+	set_interface_port_property output_aresetn output_aresetn_reset_n NAME output_aresetn
+	set_interface_property processing_aclk EXPORT_OF processing_clock_bridge.in_clk
+	set_interface_port_property processing_aclk processing_aclk_clk NAME processing_aclk
+	set_interface_property processing_aresetn EXPORT_OF processing_reset_bridge.in_reset
+	set_interface_port_property processing_aresetn processing_aresetn_reset_n NAME processing_aresetn
+	set_interface_property properties_aclk EXPORT_OF properties_clock_bridge.in_clk
+	set_interface_port_property properties_aclk properties_aclk_clk NAME properties_aclk
+	set_interface_property properties_aresetn EXPORT_OF properties_reset_bridge.in_reset
+	set_interface_port_property properties_aresetn properties_aresetn_reset_n NAME properties_aresetn
+
+	# set the the module properties
+	set_module_property BONUS_DATA {<?xml version="1.0" encoding="UTF-8"?>
+<bonusData>
+ <element __value="fins_test_ip_0">
+  <datum __value="_sortIndex" value="8" type="int" />
+ </element>
+ <element __value="fins_test_ip_1">
+  <datum __value="_sortIndex" value="9" type="int" />
+ </element>
+ <element __value="input_clock_bridge">
+  <datum __value="_sortIndex" value="0" type="int" />
+ </element>
+ <element __value="input_reset_bridge">
+  <datum __value="_sortIndex" value="1" type="int" />
+ </element>
+ <element __value="output_aclk_clock_bridge">
+  <datum __value="_sortIndex" value="4" type="int" />
+ </element>
+ <element __value="output_aclk_reset_bridge">
+  <datum __value="_sortIndex" value="5" type="int" />
+ </element>
+ <element __value="processing_clock_bridge">
+  <datum __value="_sortIndex" value="2" type="int" />
+ </element>
+ <element __value="processing_reset_bridge">
+  <datum __value="_sortIndex" value="3" type="int" />
+ </element>
+ <element __value="properties_clock_bridge">
+  <datum __value="_sortIndex" value="6" type="int" />
+ </element>
+ <element __value="properties_reset_bridge">
+  <datum __value="_sortIndex" value="7" type="int" />
+ </element>
+</bonusData>
+}
+	set_module_property FILE {nodeset_test.qsys}
+	set_module_property GENERATION_ID {0x00000000}
+	set_module_property NAME {nodeset_test}
+
+	# save the system
+	sync_sysinfo_parameters
+	save_system nodeset_test
+}
+
+# create all the systems, from bottom up
+do_create_nodeset_test
+reload_ip_catalog
+do_create_system
