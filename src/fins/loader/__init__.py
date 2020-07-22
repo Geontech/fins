@@ -237,8 +237,29 @@ INTERFACE_PORT_INFERENCE = {
     ]
 }
 
+################################################################################
+# Loader Utility Functions
+################################################################################
+
+def load_json_file(filename,verbose):
+    """
+    Loads data from a JSON file
+    """
+    # Load JSON
+    if os.path.exists(filename):
+        with open(filename) as fins_file:
+            json_data = json.load(fins_file)
+    else:
+        print('ERROR: No file',filename,'exists')
+        sys.exit(1)
+
+    # Return
+    return json_data
+
+
 def get_interface_name(interface_type, hdl_port):
     return get_str_interface_name(interface_type, hdl_port['name'])
+
 
 def get_str_interface_name(interface_type, name):
     if interface_type == 'reset':
@@ -255,6 +276,7 @@ def get_str_interface_name(interface_type, name):
         print('ERROR: Unsupported interface type', interface_type)
         sys.exit(1)
 
+
 def get_interface_mode(interface_type, hdl_port, signal_def):
     if interface_type == 'reset':
         if 'in' in hdl_port['direction']:
@@ -269,259 +291,6 @@ def get_interface_mode(interface_type, hdl_port, signal_def):
     else:
         return signal_def['properties']['mode']
 
-
-################################################################################
-# FINS JSON Schema Validation
-################################################################################
-
-def validate_schema(parent_key,schema_object,verbose):
-    # Check the keys
-    found_is_required = False
-    found_types = False
-    for key, value in schema_object.items():
-        if not key in SCHEMA_KEYS:
-            print('ERROR:',parent_key,'has an invalid key:', key)
-            sys.exit(1)
-        if key.lower() == 'is_required':
-            found_is_required = True
-        if key.lower() == 'types':
-            found_types = True
-    if not (found_is_required and found_types):
-        print('ERROR:',parent_key,'is missing the is_required or types key')
-        sys.exit(1)
-    # Check the types and the dependent keys
-    for schema_object_type in schema_object['types']:
-        if not schema_object_type in SCHEMA_TYPES:
-            print('ERROR:',parent_key,'has an invalid type:', schema_object_type)
-            sys.exit(1)
-    if 'list' in schema_object['types']:
-        if not 'list_types' in schema_object:
-            print('ERROR:',parent_key,'has no definition for the list types')
-            sys.exit(1)
-        for schema_list_type in schema_object['list_types']:
-            if not schema_list_type in SCHEMA_LIST_TYPES:
-                print('ERROR:',parent_key,'has an invalid list type:', schema_list_type)
-                sys.exit(1)
-        if 'dict' in schema_object['list_types']:
-            if not 'fields' in schema_object:
-                print('ERROR:',parent_key,'has no definition for the fields in the dict list type')
-                sys.exit(1)
-    if 'dict' in schema_object['types']:
-        if not 'fields' in schema_object:
-            print('ERROR:',parent_key,'has no definition for the fields in the dict type')
-            sys.exit(1)
-    if ('list' in schema_object['types']) and ('dict' in schema_object['types']):
-        print('ERROR:',parent_key,'cannot have both dict and list in the valid types')
-        sys.exit(1)
-    # Recursively check the fields
-    if 'fields' in schema_object:
-        if not (('list' in schema_object['types']) or ('dict' in schema_object['types'])):
-            print('ERROR:',parent_key,'has a fields key but no dict or list type')
-            sys.exit(1)
-        for key, value in schema_object['fields'].items():
-            validate_schema(key,value,verbose)
-    # Notify of success
-    if verbose:
-        print('PASS:',parent_key)
-
-def validate_fins(parent_key,fins_object,schema_object,verbose):
-    # Check type
-    if type(fins_object) is list:
-        if not 'list' in schema_object['types']:
-            print('ERROR:',parent_key,'incorrectly has a list type')
-            sys.exit(1)
-    elif type(fins_object) is dict:
-        if not 'dict' in schema_object['types']:
-            print('ERROR:',parent_key,'incorrectly has a dict type')
-            sys.exit(1)
-    elif type(fins_object) is str:
-        if not 'str' in schema_object['types']:
-            print('ERROR:',parent_key,'incorrectly has a str type')
-            sys.exit(1)
-    elif type(fins_object) is int:
-        if not 'int' in schema_object['types'] and not 'float' in schema_object['types']:
-            print('ERROR:',parent_key,'incorrectly has a int type')
-            sys.exit(1)
-    elif type(fins_object) is float:
-        if not 'float' in schema_object['types']:
-            print('ERROR:',parent_key,'incorrectly has a float type')
-            sys.exit(1)
-    elif type(fins_object) is bool:
-        if not 'bool' in schema_object['types']:
-            print('ERROR:',parent_key,'incorrectly has a bool type')
-            sys.exit(1)
-    else:
-        print('ERROR:',parent_key,'has an unknown type')
-        sys.exit(1)
-    # Check list types
-    if type(fins_object) is list:
-        for fins_object_element in fins_object:
-            if type(fins_object_element) is dict:
-                if not 'dict' in schema_object['list_types']:
-                    print('ERROR:',parent_key,'incorrectly has a dict list type')
-                    sys.exit(1)
-            elif type(fins_object_element) is str:
-                if not 'str' in schema_object['list_types']:
-                    print('ERROR:',parent_key,'incorrectly has a str list type')
-                    sys.exit(1)
-            elif type(fins_object_element) is int:
-                if not 'int' in schema_object['list_types'] and not 'float' in schema_object['list_types']:
-                    print('ERROR:',parent_key,'incorrectly has a int list type')
-                    sys.exit(1)
-            elif type(fins_object_element) is float:
-                if not 'float' in schema_object['list_types']:
-                    print('ERROR:',parent_key,'incorrectly has a float list type')
-                    sys.exit(1)
-            elif type(fins_object_element) is bool:
-                if not 'bool' in schema_object['list_types']:
-                    print('ERROR:',parent_key,'incorrectly has a bool list type')
-                    sys.exit(1)
-            else:
-                print('ERROR:',parent_key,'has an unknown list type')
-                sys.exit(1)
-    # Check the fields
-    if 'dict' in schema_object['types']:
-        # Check that the required schema keys are in the fins object
-        for key, value in schema_object['fields'].items():
-            if value['is_required'] and not (key in fins_object):
-                print('ERROR: Required key',key,'does not exist in',parent_key)
-                sys.exit(1)
-        # Check for fins object keys that are not in the schema object
-        for key, value in fins_object.items():
-            if not key in schema_object['fields'].keys():
-                print('WARNING: Undefined key',key,'in',parent_key)
-                continue
-            # Recursively call this function on the fields
-            validate_fins(key,value,schema_object['fields'][key],verbose)
-    elif ('list' in schema_object['types']) and ('dict' in schema_object['list_types']):
-        for fins_object_element in fins_object:
-            # Check that the required schema keys are in the fins object
-            for key, value in schema_object['fields'].items():
-                if value['is_required'] and not (key in fins_object_element):
-                    print('ERROR: Required key',key,'does not exist in',parent_key)
-                    sys.exit(1)
-            # Check for fins object keys that are not in the schema object
-            for key, value in fins_object_element.items():
-                if not key in schema_object['fields'].keys():
-                    print('WARNING: Undefined key',key,'in',parent_key)
-                    continue
-                # Recursively call this function on the fields
-                validate_fins(key,value,schema_object['fields'][key],verbose)
-    # Notify of success
-    if verbose:
-        print('PASS:',parent_key)
-
-def validate_files(fins_name,filename,file_list,allowed_types,verbose):
-    # Iterate through the files
-    for fins_file in file_list:
-        # Assemble the path name
-        if os.path.dirname(filename):
-            filepath = os.path.dirname(filename)+'/'+fins_file['path']
-        else:
-            filepath = fins_file['path']
-        # Check that the file exists
-        if not os.path.isfile(filepath):
-            print('ERROR: File does not exist or path is incorrect',filepath)
-            sys.exit(1)
-        # Check the type
-        if 'type' in fins_file:
-            if not (fins_file['type'].lower() in [allowed_type.lower() for allowed_type in allowed_types]):
-                print('WARNING: Unknown type',fins_file['type'],'for file',filepath)
-        # Notify of success
-        if verbose:
-            print('PASS:',filepath)
-
-def validate_ip(fins_data,verbose):
-    # Collect parent parameter names
-    parent_names = []
-    if 'params' in fins_data:
-        for param in fins_data['params']:
-            parent_names.append(param['name'])
-    # Iterate through the IP
-    for ip in fins_data['ip']:
-        # Make sure the IP file exists
-        if not os.path.isfile(ip['fins_path']):
-            print('ERROR: IP does not exist or path',ip['fins_path'],'is incorrect')
-            sys.exit(1)
-        # Make sure all parameters have a parent
-        for param in ip['params']:
-            if not param['parent'] in parent_names:
-                print('ERROR: The parent for parameter',param['name'],'in IP',ip['fins_path'],'does not exist')
-                sys.exit(1)
-        # Notify of success
-        if verbose:
-            print('PASS:',ip['fins_path'])
-
-def validate_properties(fins_data,verbose):
-    # Iterate through all properties
-    prop_names = []
-    for prop in fins_data['properties']['properties']:
-        # Append to list of names
-        prop_names.append(prop['name'])
-        # Validate the property type
-        if not prop['type'] in PROPERTY_TYPES:
-            print('ERROR: Property',prop['name'],'type',prop['type'],'is invalid')
-            sys.exit(1)
-        # Notify of success
-        if verbose:
-            print('PASS: Property',prop['name'])
-
-    # Check for name duplicates
-    if (len(prop_names) != len(set(prop_names))):
-        print('ERROR: Duplicate property names detected')
-        sys.exit(1)
-
-    # Set top-level defaults for properties interface
-    if 'is_addr_byte_indexed' not in fins_data['properties']:
-        fins_data['properties']['is_addr_byte_indexed'] = True
-
-def validate_ports(fins_data,verbose):
-    # Iterate through all FINS ports
-    if 'ports' in fins_data['ports']:
-        port_names = []
-        for port in fins_data['ports']['ports']:
-            # Add to the list of names
-            port_names.append(port['name'])
-            # Check the direction
-            if not port['direction'] in PORT_DIRECTIONS:
-                print('ERROR: Port',port['name'],'direction',port['direction'],'is invalid')
-                sys.exit(1)
-            # Neither data nor metadata are required, but we must have at least one
-            if not 'data' in port and not 'metadata' in port:
-                print('ERROR: Port',port['name'],'must have either metadata or data')
-                sys.exit(1)
-            # Notify of success
-            if verbose:
-                print('PASS: Port',port['name'],'with direction',port['direction'])
-
-        # Check for name duplicates
-        if (len(port_names) != len(set(port_names))):
-            print('ERROR: Duplicate port names detected')
-            sys.exit(1)
-
-    # Iterate through all FINS ports HDL
-    if 'hdl' in fins_data['ports']:
-        port_hdl_names = []
-        for port_hdl in fins_data['ports']['hdl']:
-            # Add to the list of names
-            port_hdl_names.append(port_hdl['name'])
-            # Check the direction
-            if not port_hdl['direction'] in PORT_HDL_DIRECTIONS:
-                print('ERROR: Port HDL',port_hdl['name'],'direction',port_hdl['direction'],'is invalid')
-                sys.exit(1)
-            # Check that bit width is > 0
-            bit_width = get_param_value(fins_data['params'], port_hdl['bit_width'])
-            if bit_width < 1:
-                print('ERROR: Port HDL',port_hdl['name'],'must have a bit_width > 0')
-                sys.exit(1)
-            # Notify of success
-            if verbose:
-                print('PASS: Port HDL',port_hdl['name'],'with direction',port_hdl['direction'])
-
-        # Check for name duplicates
-        if (len(port_hdl_names) != len(set(port_hdl_names))):
-            print('ERROR: Duplicate port HDL names detected')
-            sys.exit(1)
 
 def get_param_value(params,key_or_value):
     if isinstance(key_or_value, str):
@@ -633,6 +402,188 @@ def convert_parameters_to_literal(fins_data,verbose):
 
     return fins_data
 
+
+def find_base_address_from_qsys(filename, module_name, interface_name):
+    # Assemble the name of the connection end where the address space is mapped
+    connection_end = module_name + '.' + interface_name
+
+    # Parse the Qsys XML file
+    if not os.path.exists(filename):
+        print('ERROR: No file',filename,'exists')
+        sys.exit(1)
+    tree = ET.parse(filename)
+    root = tree.getroot()
+
+    # Loop through all connections in the design
+    for connection in root.findall('connection'):
+        # Initialize to the attributes
+        connection_def = connection.attrib
+
+        # Only collect avalon memory-mapped connections
+        if connection_def['kind'].lower() != 'avalon':
+            continue
+
+        # Check for connection match against connection end module_name.interface syntax
+        if connection_def['end'].lower() != connection_end.lower():
+            continue
+
+        # Find the base_address
+        for parameter in connection.findall('parameter'):
+            if parameter.get('name') == 'baseAddress':
+                try:
+                    base_address = int(parameter.get('value'), 16)
+                    return base_address
+                except ValueError:
+                    print('ERROR: Unable to convert the base address from hex to int. Problem string:',parameter.get('value'))
+                    sys.exit(1)
+
+        # If we haven't returned, it is an error
+        print('ERROR: Unable to find baseAddress parameter in qsys file',filename)
+        sys.exit(1)
+
+    # If we haven't returned, it is an error
+    print('ERROR: Unable to find memory-mapped connection that matches',connection_end)
+    sys.exit(1)
+
+
+def find_base_address_from_bd(filename, module_name, interface_name):
+    # Open and load the vivado file
+    with open(filename) as bd_file:
+        bd_data = json.load(bd_file)
+
+    # Find the base address
+    for master_module in bd_data['design']['addressing'].values():
+        for address_space in master_module['address_spaces'].values():
+            for segment in address_space['segments'].values():
+                if (module_name + '/' + interface_name) in segment['address_block']:
+                    try:
+                        base_address = int(segment['offset'], 16)
+                        return base_address
+                    except ValueError:
+                        print('ERROR: Unable to convert the base address from hex to int. Problem string:',segment['offset'])
+                        sys.exit(1)
+
+    # If we haven't returned, it is an error
+    print('ERROR: Unable to find address space for',interface_name,'of',module_name,'in',filename)
+    sys.exit(1)
+
+
+def get_elem_with_name(fins_list, name, name_key="name"):
+    """
+    For a given list of fins dicts, find the element with the specified name.
+
+    For example, get_elem_with_name(fins_ports, "myinput") will return the port in 'fins_ports'
+    that is named "myinput", where 'fins_ports' is a list of dicts where each dict represents a
+    port and has a 'name' field.
+    """
+    name_list = [n[name_key] for n in fins_list]
+    if name not in name_list:
+        #raise ValueError("No element exists with {}={}'", name_key, name)
+        return None
+    elem_index = name_list.index(name)
+    return fins_list[elem_index]
+
+
+def get_signal_type(signal_name, verbose):
+    """
+    Given the name of a signal, determine whether it matches one of the type patterns (clock, reset...)
+    If so, return that type, else return None
+    """
+    # Loop through the interface port inference dictionary
+    for interface_type, signal_defs in INTERFACE_PORT_INFERENCE.items():
+        for signal_def in signal_defs:
+            # Search for an interface match for this signal name
+            match_found = False
+            if signal_def['regex']:
+                # The pattern is a regular expression so search for match
+                if re.search(signal_def['pattern'], signal_name, flags=re.IGNORECASE):
+                    match_found = True
+            else:
+                # The pattern is not a regular expression so do a string compare
+                if signal_def['pattern'].lower() == signal_name.lower():
+                    match_found = True
+            # Parse the interface
+            if match_found:
+                if verbose:
+                    print('INFO: Signal', signal_name, 'was determined to have type', interface_type)
+                return interface_type
+    return None
+
+
+def get_port(node_name, port_name, fins_data, port_type='ports'):
+    """
+    Get the port on the specified node in fins_data
+        node_name : node of interest in fins_data
+        port_name : port being searched for in the node specified by node_name
+        fins_data : fins_data which may contain the specified node and its port
+    """
+    # If a node is associated with the net, get the corresponding node in fins_data
+    node = get_elem_with_name(fins_data['nodes'], node_name, name_key='module_name')
+
+    # Get the port in this node if it exists
+    if port_type not in node['node_details']['ports']:
+        return None
+    node_ports = node['node_details']['ports'][port_type]
+    return get_elem_with_name(node_ports, port_name)
+
+
+def get_hdl_port(node_name, port_name, fins_data):
+    """
+    Get the HDL port on the specified node in fins_data
+        node_name : node of interest in fins_data
+        port_name : port being searched for in the node specified by node_name
+        fins_data : fins_data which may contain the specified node and its port
+    """
+    return get_port(node_name, port_name, fins_data, port_type='hdl')
+
+
+def get_any_port(node_name, port_name, fins_data):
+    """
+    Get the any port on the specified node in fins_data (AXIS or HDL)
+        node_name : node of interest in fins_data
+        port_name : port being searched for in the node specified by node_name
+        fins_dataa: fins_data which may contain the specified node and its port
+    """
+    hdl_port = get_port(node_name, port_name, fins_data, port_type='hdl')
+    if hdl_port is not None:
+        return hdl_port
+    return get_port(node_name, port_name, fins_data, port_type='hdl')
+
+
+def get_net_type(net, fins_data, verbose):
+    """
+    Given a net, return its type and its port (if the type is 'port' or 'hdl_port')
+        net_type : 'port' if the net is actually a node's port, 'hdl_port' if the net is an HDL port on a node,
+                     otherwise the signal-type of this net ('clock' or 'reset')
+                    None if the net is just a type-less signal
+        port     : the port that this net matches based on its node and name (None if this "net" is not a port in the Application)
+
+    """
+    # TODO once clocks are exported/automated, there should be no connection nets without an associated 'node_name'
+    net_type = None
+    port = None
+    if 'node_name' in net:
+        port = get_port(net['node_name'], net['net'], fins_data)
+
+        if port is not None:
+            net_type = 'port'
+            #return 'port', port
+        else:
+            port = get_hdl_port(net['node_name'], net['net'], fins_data)
+            if port is not None:
+                net_type = 'hdl_port'
+                #return 'hdl_port', port
+
+    if net_type is None:
+        # Determine if the source net has an associated type (clock/reset...) and if so, get it
+        net_type = get_signal_type(net['net'], verbose)
+
+    return net_type, port
+
+
+################################################################################
+# Populate Entries in the FINS Data Dictionary
+################################################################################
 
 def populate_properties(fins_data,base_offset,verbose):
     # Make sure there are properties first
@@ -1252,534 +1203,117 @@ def populate_hdl_inferences(fins_data,verbose):
     return fins_data
 
 
-def override_fins_data(fins_data,origfile,filename,verbose):
-    '''
-    Looks for a <filename>.json.override file in the same directory and overrides params/part of the fins data
-    '''
-    if (os.path.exists(filename)):
-        # Open .override file
-        with open(filename) as override_file:
-            origpath = os.path.join(os.path.abspath(origfile))
-            if verbose:
-                print('INFO: FINS JSON file "{}" is overridden by "{}"'.format(origpath, filename))
-            override_data = json.load(override_file)
-        # Override parameters
-        if 'params' in override_data:
-            for param_ix, param in enumerate(fins_data['params']):
-                for edit_param in override_data['params']:
-                    if (edit_param['name'].lower() == param['name'].lower()):
-                        fins_data['params'][param_ix]['value'] = edit_param['value']
-        # Override the part
-        if 'part' in override_data:
-            fins_data['part'] = override_data['part']
-    return fins_data
+def populate_property_interfaces(fins_data, verbose):
+    """
+    Modifies the contents of fins_data. Must be run after generator has been run for all sub-IPs/Nodes.
+
+    Can only be called for Nodes and Applications (not Systems)
+
+    Populate the per-node lists of property interfaces fins_data['prop_interfaces']
+    and create the 'properties' clock domain with connections to each interface.
+
+    A Node/IP's or an Application's prop_interfaces maps a node_name to a list of property interfaces
+    on that Node:
+        [
+         {'name': <node-name>,
+          'top':<top-interface>,
+          'addr_width': <addr-width>,
+          'data-width': <data-width>,
+          'interfaces': [interface-dict, ...]
+         }, ...
+        ]
+
+        Here, [interface-dict, ...] includes the interface dictionary of each sub-IP.
+        An interface-dict contains:
+            name: the simple and short name of this interface - same as name of containing IP/Node
+            extended_name: includes the parent-Node name when inside an Application
+            top: is this the interface of the top-IP in a hierarchy (not a sub-IP)?
+                 Necessary because the top-IP's interface does not include the Node's name
+                 (e.g. just S_AXI not S_AXI_TEST_MIDDLE)
+
+    For Applications, this function adds a 'properties' clock domain dictionary to the fins_data['clocks'] list:
+        [
+         {
+          'base_name': 'properties'
+          'clock': 'properties_aclk'
+          'resetn': 'properties_aresetn'
+          'nets': [interface-net, ...]
+         }
+        ]
+
+        Here, each interface-net is a dict  that contains the node_name, type=prop_interface
+        and the actual interface (interface-dict explained above)
+    """
+
+    # Initialize the list of interfaces for this IP/Node: this is a list where each entry maps a node_name to a list of
+    # property interfaces on that Node. A Node can have more than one prop interface when it has sub-IPs
+    if fins_data['schema_type'] == SchemaType.NODE:
+
+        fins_data['prop_interfaces'] = \
+            [{
+              'node_name': fins_data['name'],
+              'addr_width': fins_data['properties']['addr_width'],
+              'data_width': fins_data['properties']['data_width'],
+              'interfaces': [{'name':fins_data['name'], 'top':True}]
+            }] if 'properties' in fins_data else []
+
+        if 'ip' in fins_data:
+            for ip in fins_data['ip']:
+                if 'prop_interfaces' in ip['ip_details']:
+                    # Update the list of interfaces for this IP
+                    # NOTE:
+                    #     'ip_details' should have the interfaces of this IP's sub-IPs.
+                    #     They were set by the above dictionary when this function was called for the sub-IP
+                    ip_interfaces = ip['ip_details']['prop_interfaces'][0]['interfaces']
+                    # These are sub-IPs so set their 'top' attribute to False
+                    for interface in ip_interfaces:
+                        interface['top'] = False
+
+                    fins_data['prop_interfaces'][0]['interfaces'] += ip_interfaces
+
+    elif fins_data['schema_type'] == SchemaType.APPLICATION:
+        # If this is an Application, collect all of the properties interfaces for its Nodes
+        fins_data['prop_interfaces'] = []
+        for node in fins_data['nodes']:
+            if not node['descriptive_node'] and 'properties' in node['node_details']:
+                prop_interface = {}
+                prop_interface['node_name'] = node['module_name']
+                prop_interface['addr_width'] = node['node_details']['properties']['addr_width']
+                prop_interface['data_width'] = node['node_details']['properties']['data_width']
+                prop_interface['interfaces'] = node['node_details']['prop_interfaces'][0]['interfaces']
+                for interface in prop_interface['interfaces']:
+                    # The extended name is used when exporting an interface from an Application and includes the
+                    # name of the parent-IP (the one explicitly included in the Application)
+                    # For example, if the Application includes a Node name "top" with a sub-IP named "bottom", and
+                    # both have properties interfaces, the extended name will be "top_bottom"
+                    #
+                    # A Node with only a single interface will be named only by the module name
+                    # (e.g. just "top" in the above example)
+                    if len(prop_interface['interfaces']) > 1:
+                        interface['extended_name'] = node['module_name'] + '_' + interface['name']
+                    else:
+                        interface['extended_name'] = node['module_name']
+
+                fins_data['prop_interfaces'].append(prop_interface)
 
 
-def validate_filesets(fins_data,filename,verbose):
-    # Validate filesets
-    if verbose:
-        print('+++++ Validating filesets of {} ...'.format(filename))
-    if 'source' in fins_data['filesets']:
-        # TODO error if 'source' is not present for a Node
-        validate_files(fins_data['name'],filename,fins_data['filesets']['source'],QUARTUS_DESIGN_FILE_TYPES,verbose)
-    if 'sim' in fins_data['filesets']:
-        validate_files(fins_data['name'],filename,fins_data['filesets']['sim'],QUARTUS_DESIGN_FILE_TYPES,verbose)
-    if 'constraints' in fins_data['filesets']:
-        validate_files(fins_data['name'],filename,fins_data['filesets']['constraints'],CONSTRAINT_FILE_TYPES,verbose)
-    if 'scripts' in fins_data['filesets']:
-        if 'vendor_ip' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['vendor_ip'],VENDOR_SCRIPT_FILE_TYPES,verbose)
-        if 'presim' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['presim'],SCRIPT_FILE_TYPES,verbose)
-        if 'postsim' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['postsim'],SCRIPT_FILE_TYPES,verbose)
-        if 'prebuild' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['prebuild'],SCRIPT_FILE_TYPES,verbose)
-        if 'postbuild' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['postbuild'],SCRIPT_FILE_TYPES,verbose)
-    if verbose:
-        print('+++++ Done.')
+        if len(fins_data['prop_interfaces']) > 0:
+            # For an Application, create the properties clock domain and connect it to all properties interfaces
+            properties_clock = {
+                                'base_name':'properties',
+                                'clock':'properties_aclk',
+                                'resetn':'properties_aresetn',
+                                'period_ns':5,
+                                'nets':[]
+                               }
+            for node_interfaces in fins_data['prop_interfaces']:
+                for interface in node_interfaces['interfaces']:
+                    properties_clock['nets'].append({'node_name':node_interfaces['node_name'], 'type':'prop_interface', 'interface':interface})
 
+            fins_data['clocks'].append(properties_clock)
 
-def validate_fins_data(fins_data,filename,verbose):
-    if verbose:
-        print('+++++ Loading node.json ...')
-    with open(SCHEMA_FILENAME) as schema_data:
-        fins_schema = json.load(schema_data)
-    if verbose:
-        print('+++++ Done.')
-
-    # Validate the schema itself
-    if verbose:
-        print('+++++ Validating node.json ...')
-    validate_schema('schema',fins_schema,verbose)
-    if verbose:
-        print('+++++ Done.')
-
-    # Validate the FINS Node JSON file with the schema
-    if verbose:
-        print('+++++ Validating {} ...'.format(filename))
-    validate_fins('node',fins_data,fins_schema,verbose)
-    if verbose:
-        print('+++++ Done.')
-
-    # Validate sub-IP
-    if 'ip' in fins_data:
         if verbose:
-            print('+++++ Validating ip of {} ...'.format(filename))
-        validate_ip(fins_data,verbose)
-        if verbose:
-            print('+++++ Done.')
-
-    # Validate properties
-    if 'properties' in fins_data:
-        if verbose:
-            print('+++++ Validating properties of {} ...'.format(filename))
-        validate_properties(fins_data,verbose)
-        if verbose:
-            print('+++++ Done.')
-
-    # Validate ports
-    if 'ports' in fins_data:
-        if verbose:
-            print('+++++ Validating ports of {} ...'.format(filename))
-        validate_ports(fins_data,verbose)
-        if verbose:
-            print('+++++ Done.')
-
-
-def load_json_file(filename,verbose):
-    """
-    Loads data from a JSON file
-    """
-    # Load JSON
-    if os.path.exists(filename):
-        with open(filename) as fins_file:
-            json_data = json.load(fins_file)
-    else:
-        print('ERROR: No file',filename,'exists')
-        sys.exit(1)
-
-    # Return
-    return json_data
-
-
-def find_base_address_from_qsys(filename, module_name, interface_name):
-    # Assemble the name of the connection end where the address space is mapped
-    connection_end = module_name + '.' + interface_name
-
-    # Parse the Qsys XML file
-    if not os.path.exists(filename):
-        print('ERROR: No file',filename,'exists')
-        sys.exit(1)
-    tree = ET.parse(filename)
-    root = tree.getroot()
-
-    # Loop through all connections in the design
-    for connection in root.findall('connection'):
-        # Initialize to the attributes
-        connection_def = connection.attrib
-
-        # Only collect avalon memory-mapped connections
-        if connection_def['kind'].lower() != 'avalon':
-            continue
-
-        # Check for connection match against connection end module_name.interface syntax
-        if connection_def['end'].lower() != connection_end.lower():
-            continue
-
-        # Find the base_address
-        for parameter in connection.findall('parameter'):
-            if parameter.get('name') == 'baseAddress':
-                try:
-                    base_address = int(parameter.get('value'), 16)
-                    return base_address
-                except ValueError:
-                    print('ERROR: Unable to convert the base address from hex to int. Problem string:',parameter.get('value'))
-                    sys.exit(1)
-
-        # If we haven't returned, it is an error
-        print('ERROR: Unable to find baseAddress parameter in qsys file',filename)
-        sys.exit(1)
-
-    # If we haven't returned, it is an error
-    print('ERROR: Unable to find memory-mapped connection that matches',connection_end)
-    sys.exit(1)
-
-
-def find_base_address_from_bd(filename, module_name, interface_name):
-    # Open and load the vivado file
-    with open(filename) as bd_file:
-        bd_data = json.load(bd_file)
-
-    # Find the base address
-    for master_module in bd_data['design']['addressing'].values():
-        for address_space in master_module['address_spaces'].values():
-            for segment in address_space['segments'].values():
-                if (module_name + '/' + interface_name) in segment['address_block']:
-                    try:
-                        base_address = int(segment['offset'], 16)
-                        return base_address
-                    except ValueError:
-                        print('ERROR: Unable to convert the base address from hex to int. Problem string:',segment['offset'])
-                        sys.exit(1)
-
-    # If we haven't returned, it is an error
-    print('ERROR: Unable to find address space for',interface_name,'of',module_name,'in',filename)
-    sys.exit(1)
-
-
-def validate_and_convert_application_fins_data(fins_data,filename,backend,verbose):
-    """
-    Validates and converts data from a Firmware Application Specification JSON build file
-    """
-    # Read the Application schema data
-    if verbose:
-        print('+++++ Loading Application JSON ...')
-    with open(APPLICATION_SCHEMA_FILENAME) as schema_data:
-        fins_schema = json.load(schema_data)
-    if verbose:
-        print('+++++ Done.')
-
-    # Validate the FINS Node JSON file with the schema
-    if verbose:
-        print('+++++ Validating {} ...'.format(filename))
-    validate_fins('application',fins_data,fins_schema,verbose)
-    if verbose:
-        print('+++++ Done.')
-
-    # Set the backend used for generation
-    fins_data['backend'] = backend
-
-    # Set defaults for top-level keys
-    fins_data = populate_fins_fields(fins_data,verbose)
-
-    # Auto-detect file types
-    fins_data = populate_filesets(fins_data,verbose)
-
-    for node in fins_data['nodes']:
-        # Set per-node defaults
-
-        # By default, a node is standard/non-descriptive for Applications
-        if 'descriptive_node' not in node:
-            node['descriptive_node'] = False
-
-    # Override the FINS Node JSON data with a .override file if it exists
-    fins_data = override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
-
-    # Replace any linked parameters with their literal values
-    fins_data = convert_parameters_to_literal(fins_data,verbose)
-
-    return fins_data
-
-
-def validate_and_convert_system_fins_data(fins_data,filename,backend,verbose):
-    """
-    Validates and converts data from a Firmware System Specification JSON build file
-    """
-    # Read the System schema data
-    if verbose:
-        print('+++++ Loading System JSON ...')
-    with open(SYSTEM_SCHEMA_FILENAME) as schema_data:
-        fins_schema = json.load(schema_data)
-    if verbose:
-        print('+++++ Done.')
-
-    # Validate the FINS Node JSON file with the schema
-    if verbose:
-        print('+++++ Validating {} ...'.format(filename))
-    validate_fins('system',fins_data,fins_schema,verbose)
-    if verbose:
-        print('+++++ Done.')
-
-    # Set the backend used for generation
-    fins_data['backend'] = backend
-
-    # Set defaults for top-level keys
-    fins_data = populate_fins_fields(fins_data,verbose)
-
-    # Set defaults for System-specific top-level keys
-    if 'base_offset' not in fins_data:
-        fins_data['base_offset'] = 0
-
-    for node in fins_data['nodes']:
-        # Ensure that mandatory per-node keys are present
-        if 'properties_offset' not in node:
-            print('ERROR: Required key properties_offset does not exist for node', node['module_name'])
-
-        # Set per-node defaults
-
-        # By default, a node is descriptive for Systems,
-        if 'descriptive_node' not in node:
-            node['descriptive_node'] = True
-
-    # Replace any linked parameters with their literal values
-    fins_data = convert_parameters_to_literal(fins_data,verbose)
-
-    return fins_data
-
-
-def populate_fins_application_node(node, verbose):
-    """
-    Modifies the contents of 'node' dictionary. Must be run after run_generator has been for this Node.
-
-    Determines/sets the following in the node dictionary:
-        fins_dir:  is the source directory where this Node/IP originates
-        node_name: original name of the node (not instance/module name) - comes from the Node itself
-    """
-    # In order to construct the path to the generated JSON for this node,
-    # the user-authored JSON must first be loaded to determine its name
-    # which is part of the file-path to the generated file
-
-    node['fins_dir'] = os.path.dirname(node['fins_path']) #node_dir
-    node['node_name'] = node['node_details']['name']
-
-
-def populate_fins_system_node(node, verbose):
-    """
-    Modifies the contents of 'node' dictionary.
-
-    Determines/sets various information relating to the node:
-        node_name
-        properties_offset
-        properties
-        node_id
-        ports_producer/consumer
-    """
-    # Load the generated FINS JSON for the Node
-    # and get the node_name from it
-    node_fins_data = load_json_file(node['fins_path'], verbose)
-    node['node_name'] = node_fins_data['name']
-
-    ports_producer_name_defined = False
-    ports_consumer_name_defined = False
-
-    # Convert dictionary to uint
-    if 'properties_offset' in node and isinstance(node['properties_offset'], str):
-        if os.path.exists(node['properties_offset']):
-            _, bd_extension = os.path.splitext(node['properties_offset'])
-            if bd_extension.lower() == '.qsys':
-                base_address = find_base_address_from_qsys(node['properties_offset'],node['module_name'],node['interface_name'])
-            elif bd_extension.lower() == '.bd':
-                base_address = find_base_address_from_bd(node['properties_offset'],node['module_name'],node['interface_name'])
-            else:
-                print('ERROR: Unknown block design extension in FINS System:',bd_extension)
-                sys.exit(1)
-            node['properties_offset'] = base_address
-        else:
-            print('WARNING: Properties offset path',node['properties_offset'],'for',node['module_name'],'does not exist')
-
-    if 'properties' in node_fins_data and 'interface_name' not in node:
-        print('ERROR: a node with a properties interface must have an "interface_name" specified in the System')
-        sys.exit(1)
-
-    if 'properties' in node_fins_data:
-        node['properties'] = node_fins_data['properties']['properties']
-        node['node_id'] = node['node_name'] + '::' + node['module_name'] + '::' + node['interface_name']
-
-    # Find the port listed in ports_producer_name
-    if 'ports_producer_name' in node:
-        # Make sure ports_producer_name is in only one node
-        if ports_producer_name_defined:
-            print('ERROR: ports_producer_name can only be defined in one node')
-            sys.exit(1)
-        ports_producer_name_defined = True
-        # Find the port
-        ports_producer_found = False
-        for port in node_fins_data['ports']['ports']:
-            if node['ports_producer_name'].lower() == port['name'].lower():
-                if port['direction'].lower() == 'in':
-                    print('ERROR: ports_producer was incorrectly assigned to an input port')
-                    sys.exit(1)
-                node['ports_producer'] = port
-                ports_producer_found = True
-        if not ports_producer_found:
-            print('ERROR: ports_producer_name',node['ports_producer_name'],'not found in node',node['node_name'])
-            sys.exit(1)
-    else:
-        node['ports_producer_name'] = ''
-        node['ports_producer'] = {}
-
-    # Find the port listed in ports_consumer_name
-    if 'ports_consumer_name' in node:
-        # Make sure ports_consumer_name is in only one node
-        if ports_consumer_name_defined:
-            print('ERROR: ports_consumer_name can only be defined in one node')
-            sys.exit(1)
-        ports_consumer_name_defined = True
-        # Find the port
-        ports_consumer_found = False
-        for port in node_fins_data['ports']['ports']:
-            if node['ports_consumer_name'].lower() == port['name'].lower():
-                if port['direction'].lower() == 'out':
-                    print('ERROR: ports_consumer was incorrectly assigned to an output port')
-                    sys.exit(1)
-                node['ports_consumer'] = port
-                ports_consumer_found = True
-        if not ports_consumer_found:
-            print('ERROR: ports_consumer_name',node['ports_consumer_name'],'not found in node',node['node_name'])
-            sys.exit(1)
-    else:
-        node['ports_consumer_name'] = ''
-        node['ports_consumer'] = {}
-
-
-def get_elem_with_name(fins_list, name, name_key="name"):
-    """
-    For a given list of fins dicts, find the element with the specified name.
-
-    For example, get_elem_with_name(fins_ports, "myinput") will return the port in 'fins_ports'
-    that is named "myinput", where 'fins_ports' is a list of dicts where each dict represents a
-    port and has a 'name' field.
-    """
-    name_list = [n[name_key] for n in fins_list]
-    if name not in name_list:
-        #raise ValueError("No element exists with {}={}'", name_key, name)
-        return None
-    elem_index = name_list.index(name)
-    return fins_list[elem_index]
-
-
-def get_signal_type(signal_name, verbose):
-    """
-    Given the name of a signal, determine whether it matches one of the type patterns (clock, reset...)
-    If so, return that type, else return None
-    """
-    # Loop through the interface port inference dictionary
-    for interface_type, signal_defs in INTERFACE_PORT_INFERENCE.items():
-        for signal_def in signal_defs:
-            # Search for an interface match for this signal name
-            match_found = False
-            if signal_def['regex']:
-                # The pattern is a regular expression so search for match
-                if re.search(signal_def['pattern'], signal_name, flags=re.IGNORECASE):
-                    match_found = True
-            else:
-                # The pattern is not a regular expression so do a string compare
-                if signal_def['pattern'].lower() == signal_name.lower():
-                    match_found = True
-            # Parse the interface
-            if match_found:
-                if verbose:
-                    print('INFO: Signal', signal_name, 'was determined to have type', interface_type)
-                return interface_type
-    return None
-
-
-def get_port(node_name, port_name, fins_data, port_type='ports'):
-    """
-    Get the port on the specified node in fins_data
-        node_name : node of interest in fins_data
-        port_name : port being searched for in the node specified by node_name
-        fins_data : fins_data which may contain the specified node and its port
-    """
-    # If a node is associated with the net, get the corresponding node in fins_data
-    node = get_elem_with_name(fins_data['nodes'], node_name, name_key='module_name')
-
-    # Get the port in this node if it exists
-    if port_type not in node['node_details']['ports']:
-        return None
-    node_ports = node['node_details']['ports'][port_type]
-    return get_elem_with_name(node_ports, port_name)
-
-
-def get_hdl_port(node_name, port_name, fins_data):
-    """
-    Get the HDL port on the specified node in fins_data
-        node_name : node of interest in fins_data
-        port_name : port being searched for in the node specified by node_name
-        fins_data : fins_data which may contain the specified node and its port
-    """
-    return get_port(node_name, port_name, fins_data, port_type='hdl')
-
-
-def get_any_port(node_name, port_name, fins_data):
-    """
-    Get the any port on the specified node in fins_data (AXIS or HDL)
-        node_name : node of interest in fins_data
-        port_name : port being searched for in the node specified by node_name
-        fins_dataa: fins_data which may contain the specified node and its port
-    """
-    hdl_port = get_port(node_name, port_name, fins_data, port_type='hdl')
-    if hdl_port is not None:
-        return hdl_port
-    return get_port(node_name, port_name, fins_data, port_type='hdl')
-
-
-def get_net_type(net, fins_data, verbose):
-    """
-    Given a net, return its type and its port (if the type is 'port' or 'hdl_port')
-        net_type : 'port' if the net is actually a node's port, 'hdl_port' if the net is an HDL port on a node,
-                     otherwise the signal-type of this net ('clock' or 'reset')
-                    None if the net is just a type-less signal
-        port     : the port that this net matches based on its node and name (None if this "net" is not a port in the Application)
-
-    """
-    # TODO once clocks are exported/automated, there should be no connection nets without an associated 'node_name'
-    net_type = None
-    port = None
-    if 'node_name' in net:
-        port = get_port(net['node_name'], net['net'], fins_data)
-
-        if port is not None:
-            net_type = 'port'
-            #return 'port', port
-        else:
-            port = get_hdl_port(net['node_name'], net['net'], fins_data)
-            if port is not None:
-                net_type = 'hdl_port'
-                #return 'hdl_port', port
-
-    if net_type is None:
-        # Determine if the source net has an associated type (clock/reset...) and if so, get it
-        net_type = get_signal_type(net['net'], verbose)
-
-    return net_type, port
-
-
-def validate_connected_ports(source, destination, verbose):
-    """
-    Given two connection endpoints that are both ports, confirm that a connection between these ports
-    would be valid
-
-    Check that the following fields match between the two ports:
-        supports_backpressure, num_instances, metadata, and data fields
-    Confirm that the 'direction' field is opposite between the two connections.
-
-    If the source and destination ports are a mistmatch, print a helpful error message and exit.
-    """
-    src_port = source['port']
-    dst_port = destination['port']
-    src_name = source['node_name'] + '.' + source['net']
-    dst_name = destination['node_name'] + '.' + destination['net']
-    src_type = source['type']
-    dst_type = destination['type']
-
-    if ((src_type == 'hdl_port' and dst_type == 'hdl_port') and
-        src_port['bit_width'] != dst_port['bit_width']):
-        print('ERROR: HDL Ports in connection ({}->{}) do not have the same width'.format(src_name, dst_name))
-        sys.exit(1)
-    elif ((src_type == 'hdl_port' and dst_type == 'port') or
-          (src_type == 'port' and dst_type == 'hdl_port')):
-        print('ERROR: One port is HDL and the other is AXIS in connection ({}->{})'.format(src_name, dst_name))
-        sys.exit(1)
-    elif src_port['supports_backpressure'] != dst_port['supports_backpressure']:
-        print('ERROR: One port in connection ({}->{}) supports backpressure, but the other does not'.format(src_name, dst_name))
-        sys.exit(1)
-    elif src_port['num_instances'] != dst_port['num_instances']:
-        print('ERROR: Ports in connection ({}->{}) have different number of instances'.format(src_name, dst_name))
-        sys.exit(1)
-    elif (('metadata' in src_port and 'metadata' not in dst_port) or
-          ('metadata' not in src_port and 'metadata' in dst_port) or
-          ('metadata' in src_port and 'metadata' in dst_port and src_port['metadata'] != dst_port['metadata'])):
-        print('ERROR: Metadata does not match on ports in connection ({}->{})'.format(src_name, dst_name))
-        sys.exit(1)
-    elif src_port['direction'] == dst_port['direction']:
-        print('ERROR: Ports of the same direction cannot be connected ({}->{})'.format(src_name, dst_name))
-        sys.exit(1)
-    elif src_port['data'] != dst_port['data']:
-        print('ERROR: Data type or width mismatch between ports in connection ({}->{})'.format(src_name, dst_name))
-        sys.exit(1)
+            print('Property interfaces for "{}": {}'.format(fins_data['name'], fins_data['prop_interfaces']))
 
 
 def populate_application_connections(fins_data, verbose):
@@ -1992,117 +1526,466 @@ def populate_fins_application(fins_data, verbose):
     populate_application_exports(fins_data, verbose)
 
 
-def populate_property_interfaces(fins_data, verbose):
+def populate_fins_application_node(node, verbose):
     """
-    Modifies the contents of fins_data. Must be run after generator has been run for all sub-IPs/Nodes.
+    Modifies the contents of 'node' dictionary. Must be run after run_generator has been for this Node.
 
-    Can only be called for Nodes and Applications (not Systems)
-
-    Populate the per-node lists of property interfaces fins_data['prop_interfaces']
-    and create the 'properties' clock domain with connections to each interface.
-
-    A Node/IP's or an Application's prop_interfaces maps a node_name to a list of property interfaces
-    on that Node:
-        [
-         {'name': <node-name>,
-          'top':<top-interface>,
-          'addr_width': <addr-width>,
-          'data-width': <data-width>,
-          'interfaces': [interface-dict, ...]
-         }, ...
-        ]
-
-        Here, [interface-dict, ...] includes the interface dictionary of each sub-IP.
-        An interface-dict contains:
-            name: the simple and short name of this interface - same as name of containing IP/Node
-            extended_name: includes the parent-Node name when inside an Application
-            top: is this the interface of the top-IP in a hierarchy (not a sub-IP)?
-                 Necessary because the top-IP's interface does not include the Node's name
-                 (e.g. just S_AXI not S_AXI_TEST_MIDDLE)
-
-    For Applications, this function adds a 'properties' clock domain dictionary to the fins_data['clocks'] list:
-        [
-         {
-          'base_name': 'properties'
-          'clock': 'properties_aclk'
-          'resetn': 'properties_aresetn'
-          'nets': [interface-net, ...]
-         }
-        ]
-
-        Here, each interface-net is a dict  that contains the node_name, type=prop_interface
-        and the actual interface (interface-dict explained above)
+    Determines/sets the following in the node dictionary:
+        fins_dir:  is the source directory where this Node/IP originates
+        node_name: original name of the node (not instance/module name) - comes from the Node itself
     """
+    # In order to construct the path to the generated JSON for this node,
+    # the user-authored JSON must first be loaded to determine its name
+    # which is part of the file-path to the generated file
 
-    # Initialize the list of interfaces for this IP/Node: this is a list where each entry maps a node_name to a list of
-    # property interfaces on that Node. A Node can have more than one prop interface when it has sub-IPs
-    if fins_data['schema_type'] == SchemaType.NODE:
-
-        fins_data['prop_interfaces'] = \
-            [{
-              'node_name': fins_data['name'],
-              'addr_width': fins_data['properties']['addr_width'],
-              'data_width': fins_data['properties']['data_width'],
-              'interfaces': [{'name':fins_data['name'], 'top':True}]
-            }] if 'properties' in fins_data else []
-
-        if 'ip' in fins_data:
-            for ip in fins_data['ip']:
-                if 'prop_interfaces' in ip['ip_details']:
-                    # Update the list of interfaces for this IP
-                    # NOTE:
-                    #     'ip_details' should have the interfaces of this IP's sub-IPs.
-                    #     They were set by the above dictionary when this function was called for the sub-IP
-                    ip_interfaces = ip['ip_details']['prop_interfaces'][0]['interfaces']
-                    # These are sub-IPs so set their 'top' attribute to False
-                    for interface in ip_interfaces:
-                        interface['top'] = False
-
-                    fins_data['prop_interfaces'][0]['interfaces'] += ip_interfaces
-
-    elif fins_data['schema_type'] == SchemaType.APPLICATION:
-        # If this is an Application, collect all of the properties interfaces for its Nodes
-        fins_data['prop_interfaces'] = []
-        for node in fins_data['nodes']:
-            if not node['descriptive_node'] and 'properties' in node['node_details']:
-                prop_interface = {}
-                prop_interface['node_name'] = node['module_name']
-                prop_interface['addr_width'] = node['node_details']['properties']['addr_width']
-                prop_interface['data_width'] = node['node_details']['properties']['data_width']
-                prop_interface['interfaces'] = node['node_details']['prop_interfaces'][0]['interfaces']
-                for interface in prop_interface['interfaces']:
-                    # The extended name is used when exporting an interface from an Application and includes the
-                    # name of the parent-IP (the one explicitly included in the Application)
-                    # For example, if the Application includes a Node name "top" with a sub-IP named "bottom", and
-                    # both have properties interfaces, the extended name will be "top_bottom"
-                    #
-                    # A Node with only a single interface will be named only by the module name
-                    # (e.g. just "top" in the above example)
-                    if len(prop_interface['interfaces']) > 1:
-                        interface['extended_name'] = node['module_name'] + '_' + interface['name']
-                    else:
-                        interface['extended_name'] = node['module_name']
-
-                fins_data['prop_interfaces'].append(prop_interface)
+    node['fins_dir'] = os.path.dirname(node['fins_path']) #node_dir
+    node['node_name'] = node['node_details']['name']
 
 
-        if len(fins_data['prop_interfaces']) > 0:
-            # For an Application, create the properties clock domain and connect it to all properties interfaces
-            properties_clock = {
-                                'base_name':'properties',
-                                'clock':'properties_aclk',
-                                'resetn':'properties_aresetn',
-                                'period_ns':5,
-                                'nets':[]
-                               }
-            for node_interfaces in fins_data['prop_interfaces']:
-                for interface in node_interfaces['interfaces']:
-                    properties_clock['nets'].append({'node_name':node_interfaces['node_name'], 'type':'prop_interface', 'interface':interface})
+def populate_fins_system_node(node, verbose):
+    """
+    Modifies the contents of 'node' dictionary.
 
-            fins_data['clocks'].append(properties_clock)
+    Determines/sets various information relating to the node:
+        node_name
+        properties_offset
+        properties
+        node_id
+        ports_producer/consumer
+    """
+    # Load the generated FINS JSON for the Node
+    # and get the node_name from it
+    node_fins_data = load_json_file(node['fins_path'], verbose)
+    node['node_name'] = node_fins_data['name']
 
+    ports_producer_name_defined = False
+    ports_consumer_name_defined = False
+
+    # Convert dictionary to uint
+    if 'properties_offset' in node and isinstance(node['properties_offset'], str):
+        if os.path.exists(node['properties_offset']):
+            _, bd_extension = os.path.splitext(node['properties_offset'])
+            if bd_extension.lower() == '.qsys':
+                base_address = find_base_address_from_qsys(node['properties_offset'],node['module_name'],node['interface_name'])
+            elif bd_extension.lower() == '.bd':
+                base_address = find_base_address_from_bd(node['properties_offset'],node['module_name'],node['interface_name'])
+            else:
+                print('ERROR: Unknown block design extension in FINS System:',bd_extension)
+                sys.exit(1)
+            node['properties_offset'] = base_address
+        else:
+            print('WARNING: Properties offset path',node['properties_offset'],'for',node['module_name'],'does not exist')
+
+    if 'properties' in node_fins_data and 'interface_name' not in node:
+        print('ERROR: a node with a properties interface must have an "interface_name" specified in the System')
+        sys.exit(1)
+
+    if 'properties' in node_fins_data:
+        node['properties'] = node_fins_data['properties']['properties']
+        node['node_id'] = node['node_name'] + '::' + node['module_name'] + '::' + node['interface_name']
+
+    # Find the port listed in ports_producer_name
+    if 'ports_producer_name' in node:
+        # Make sure ports_producer_name is in only one node
+        if ports_producer_name_defined:
+            print('ERROR: ports_producer_name can only be defined in one node')
+            sys.exit(1)
+        ports_producer_name_defined = True
+        # Find the port
+        ports_producer_found = False
+        for port in node_fins_data['ports']['ports']:
+            if node['ports_producer_name'].lower() == port['name'].lower():
+                if port['direction'].lower() == 'in':
+                    print('ERROR: ports_producer was incorrectly assigned to an input port')
+                    sys.exit(1)
+                node['ports_producer'] = port
+                ports_producer_found = True
+        if not ports_producer_found:
+            print('ERROR: ports_producer_name',node['ports_producer_name'],'not found in node',node['node_name'])
+            sys.exit(1)
+    else:
+        node['ports_producer_name'] = ''
+        node['ports_producer'] = {}
+
+    # Find the port listed in ports_consumer_name
+    if 'ports_consumer_name' in node:
+        # Make sure ports_consumer_name is in only one node
+        if ports_consumer_name_defined:
+            print('ERROR: ports_consumer_name can only be defined in one node')
+            sys.exit(1)
+        ports_consumer_name_defined = True
+        # Find the port
+        ports_consumer_found = False
+        for port in node_fins_data['ports']['ports']:
+            if node['ports_consumer_name'].lower() == port['name'].lower():
+                if port['direction'].lower() == 'out':
+                    print('ERROR: ports_consumer was incorrectly assigned to an output port')
+                    sys.exit(1)
+                node['ports_consumer'] = port
+                ports_consumer_found = True
+        if not ports_consumer_found:
+            print('ERROR: ports_consumer_name',node['ports_consumer_name'],'not found in node',node['node_name'])
+            sys.exit(1)
+    else:
+        node['ports_consumer_name'] = ''
+        node['ports_consumer'] = {}
+
+
+################################################################################
+# Validation of the FINS JSON Schema and the Populated FINS Data Dictionary
+################################################################################
+
+def validate_schema(parent_key,schema_object,verbose):
+    # Check the keys
+    found_is_required = False
+    found_types = False
+    for key, value in schema_object.items():
+        if not key in SCHEMA_KEYS:
+            print('ERROR:',parent_key,'has an invalid key:', key)
+            sys.exit(1)
+        if key.lower() == 'is_required':
+            found_is_required = True
+        if key.lower() == 'types':
+            found_types = True
+    if not (found_is_required and found_types):
+        print('ERROR:',parent_key,'is missing the is_required or types key')
+        sys.exit(1)
+    # Check the types and the dependent keys
+    for schema_object_type in schema_object['types']:
+        if not schema_object_type in SCHEMA_TYPES:
+            print('ERROR:',parent_key,'has an invalid type:', schema_object_type)
+            sys.exit(1)
+    if 'list' in schema_object['types']:
+        if not 'list_types' in schema_object:
+            print('ERROR:',parent_key,'has no definition for the list types')
+            sys.exit(1)
+        for schema_list_type in schema_object['list_types']:
+            if not schema_list_type in SCHEMA_LIST_TYPES:
+                print('ERROR:',parent_key,'has an invalid list type:', schema_list_type)
+                sys.exit(1)
+        if 'dict' in schema_object['list_types']:
+            if not 'fields' in schema_object:
+                print('ERROR:',parent_key,'has no definition for the fields in the dict list type')
+                sys.exit(1)
+    if 'dict' in schema_object['types']:
+        if not 'fields' in schema_object:
+            print('ERROR:',parent_key,'has no definition for the fields in the dict type')
+            sys.exit(1)
+    if ('list' in schema_object['types']) and ('dict' in schema_object['types']):
+        print('ERROR:',parent_key,'cannot have both dict and list in the valid types')
+        sys.exit(1)
+    # Recursively check the fields
+    if 'fields' in schema_object:
+        if not (('list' in schema_object['types']) or ('dict' in schema_object['types'])):
+            print('ERROR:',parent_key,'has a fields key but no dict or list type')
+            sys.exit(1)
+        for key, value in schema_object['fields'].items():
+            validate_schema(key,value,verbose)
+    # Notify of success
+    if verbose:
+        print('PASS:',parent_key)
+
+
+def validate_fins(parent_key,fins_object,schema_object,verbose):
+    # Check type
+    if type(fins_object) is list:
+        if not 'list' in schema_object['types']:
+            print('ERROR:',parent_key,'incorrectly has a list type')
+            sys.exit(1)
+    elif type(fins_object) is dict:
+        if not 'dict' in schema_object['types']:
+            print('ERROR:',parent_key,'incorrectly has a dict type')
+            sys.exit(1)
+    elif type(fins_object) is str:
+        if not 'str' in schema_object['types']:
+            print('ERROR:',parent_key,'incorrectly has a str type')
+            sys.exit(1)
+    elif type(fins_object) is int:
+        if not 'int' in schema_object['types'] and not 'float' in schema_object['types']:
+            print('ERROR:',parent_key,'incorrectly has a int type')
+            sys.exit(1)
+    elif type(fins_object) is float:
+        if not 'float' in schema_object['types']:
+            print('ERROR:',parent_key,'incorrectly has a float type')
+            sys.exit(1)
+    elif type(fins_object) is bool:
+        if not 'bool' in schema_object['types']:
+            print('ERROR:',parent_key,'incorrectly has a bool type')
+            sys.exit(1)
+    else:
+        print('ERROR:',parent_key,'has an unknown type')
+        sys.exit(1)
+    # Check list types
+    if type(fins_object) is list:
+        for fins_object_element in fins_object:
+            if type(fins_object_element) is dict:
+                if not 'dict' in schema_object['list_types']:
+                    print('ERROR:',parent_key,'incorrectly has a dict list type')
+                    sys.exit(1)
+            elif type(fins_object_element) is str:
+                if not 'str' in schema_object['list_types']:
+                    print('ERROR:',parent_key,'incorrectly has a str list type')
+                    sys.exit(1)
+            elif type(fins_object_element) is int:
+                if not 'int' in schema_object['list_types'] and not 'float' in schema_object['list_types']:
+                    print('ERROR:',parent_key,'incorrectly has a int list type')
+                    sys.exit(1)
+            elif type(fins_object_element) is float:
+                if not 'float' in schema_object['list_types']:
+                    print('ERROR:',parent_key,'incorrectly has a float list type')
+                    sys.exit(1)
+            elif type(fins_object_element) is bool:
+                if not 'bool' in schema_object['list_types']:
+                    print('ERROR:',parent_key,'incorrectly has a bool list type')
+                    sys.exit(1)
+            else:
+                print('ERROR:',parent_key,'has an unknown list type')
+                sys.exit(1)
+    # Check the fields
+    if 'dict' in schema_object['types']:
+        # Check that the required schema keys are in the fins object
+        for key, value in schema_object['fields'].items():
+            if value['is_required'] and not (key in fins_object):
+                print('ERROR: Required key',key,'does not exist in',parent_key)
+                sys.exit(1)
+        # Check for fins object keys that are not in the schema object
+        for key, value in fins_object.items():
+            if not key in schema_object['fields'].keys():
+                print('WARNING: Undefined key',key,'in',parent_key)
+                continue
+            # Recursively call this function on the fields
+            validate_fins(key,value,schema_object['fields'][key],verbose)
+    elif ('list' in schema_object['types']) and ('dict' in schema_object['list_types']):
+        for fins_object_element in fins_object:
+            # Check that the required schema keys are in the fins object
+            for key, value in schema_object['fields'].items():
+                if value['is_required'] and not (key in fins_object_element):
+                    print('ERROR: Required key',key,'does not exist in',parent_key)
+                    sys.exit(1)
+            # Check for fins object keys that are not in the schema object
+            for key, value in fins_object_element.items():
+                if not key in schema_object['fields'].keys():
+                    print('WARNING: Undefined key',key,'in',parent_key)
+                    continue
+                # Recursively call this function on the fields
+                validate_fins(key,value,schema_object['fields'][key],verbose)
+    # Notify of success
+    if verbose:
+        print('PASS:',parent_key)
+
+
+def validate_files(fins_name,filename,file_list,allowed_types,verbose):
+    # Iterate through the files
+    for fins_file in file_list:
+        # Assemble the path name
+        if os.path.dirname(filename):
+            filepath = os.path.dirname(filename)+'/'+fins_file['path']
+        else:
+            filepath = fins_file['path']
+        # Check that the file exists
+        if not os.path.isfile(filepath):
+            print('ERROR: File does not exist or path is incorrect',filepath)
+            sys.exit(1)
+        # Check the type
+        if 'type' in fins_file:
+            if not (fins_file['type'].lower() in [allowed_type.lower() for allowed_type in allowed_types]):
+                print('WARNING: Unknown type',fins_file['type'],'for file',filepath)
+        # Notify of success
         if verbose:
-            print('Property interfaces for "{}": {}'.format(fins_data['name'], fins_data['prop_interfaces']))
+            print('PASS:',filepath)
+
+
+def validate_ip(fins_data,verbose):
+    # Collect parent parameter names
+    parent_names = []
+    if 'params' in fins_data:
+        for param in fins_data['params']:
+            parent_names.append(param['name'])
+    # Iterate through the IP
+    for ip in fins_data['ip']:
+        # Make sure the IP file exists
+        if not os.path.isfile(ip['fins_path']):
+            print('ERROR: IP does not exist or path',ip['fins_path'],'is incorrect')
+            sys.exit(1)
+        # Make sure all parameters have a parent
+        for param in ip['params']:
+            if not param['parent'] in parent_names:
+                print('ERROR: The parent for parameter',param['name'],'in IP',ip['fins_path'],'does not exist')
+                sys.exit(1)
+        # Notify of success
+        if verbose:
+            print('PASS:',ip['fins_path'])
+
+
+def validate_properties(fins_data,verbose):
+    # Iterate through all properties
+    prop_names = []
+    for prop in fins_data['properties']['properties']:
+        # Append to list of names
+        prop_names.append(prop['name'])
+        # Validate the property type
+        if not prop['type'] in PROPERTY_TYPES:
+            print('ERROR: Property',prop['name'],'type',prop['type'],'is invalid')
+            sys.exit(1)
+        # Notify of success
+        if verbose:
+            print('PASS: Property',prop['name'])
+
+    # Check for name duplicates
+    if (len(prop_names) != len(set(prop_names))):
+        print('ERROR: Duplicate property names detected')
+        sys.exit(1)
+
+    # Set top-level defaults for properties interface
+    if 'is_addr_byte_indexed' not in fins_data['properties']:
+        fins_data['properties']['is_addr_byte_indexed'] = True
+
+
+def validate_ports(fins_data,verbose):
+    # Iterate through all FINS ports
+    if 'ports' in fins_data['ports']:
+        port_names = []
+        for port in fins_data['ports']['ports']:
+            # Add to the list of names
+            port_names.append(port['name'])
+            # Check the direction
+            if not port['direction'] in PORT_DIRECTIONS:
+                print('ERROR: Port',port['name'],'direction',port['direction'],'is invalid')
+                sys.exit(1)
+            # Neither data nor metadata are required, but we must have at least one
+            if not 'data' in port and not 'metadata' in port:
+                print('ERROR: Port',port['name'],'must have either metadata or data')
+                sys.exit(1)
+            # Notify of success
+            if verbose:
+                print('PASS: Port',port['name'],'with direction',port['direction'])
+
+        # Check for name duplicates
+        if (len(port_names) != len(set(port_names))):
+            print('ERROR: Duplicate port names detected')
+            sys.exit(1)
+
+    # Iterate through all FINS ports HDL
+    if 'hdl' in fins_data['ports']:
+        port_hdl_names = []
+        for port_hdl in fins_data['ports']['hdl']:
+            # Add to the list of names
+            port_hdl_names.append(port_hdl['name'])
+            # Check the direction
+            if not port_hdl['direction'] in PORT_HDL_DIRECTIONS:
+                print('ERROR: Port HDL',port_hdl['name'],'direction',port_hdl['direction'],'is invalid')
+                sys.exit(1)
+            # Check that bit width is > 0
+            bit_width = get_param_value(fins_data['params'], port_hdl['bit_width'])
+            if bit_width < 1:
+                print('ERROR: Port HDL',port_hdl['name'],'must have a bit_width > 0')
+                sys.exit(1)
+            # Notify of success
+            if verbose:
+                print('PASS: Port HDL',port_hdl['name'],'with direction',port_hdl['direction'])
+
+        # Check for name duplicates
+        if (len(port_hdl_names) != len(set(port_hdl_names))):
+            print('ERROR: Duplicate port HDL names detected')
+            sys.exit(1)
+
+
+def validate_filesets(fins_data,filename,verbose):
+    # Validate filesets
+    if verbose:
+        print('+++++ Validating filesets of {} ...'.format(filename))
+    if 'source' in fins_data['filesets']:
+        # TODO error if 'source' is not present for a Node
+        validate_files(fins_data['name'],filename,fins_data['filesets']['source'],QUARTUS_DESIGN_FILE_TYPES,verbose)
+    if 'sim' in fins_data['filesets']:
+        validate_files(fins_data['name'],filename,fins_data['filesets']['sim'],QUARTUS_DESIGN_FILE_TYPES,verbose)
+    if 'constraints' in fins_data['filesets']:
+        validate_files(fins_data['name'],filename,fins_data['filesets']['constraints'],CONSTRAINT_FILE_TYPES,verbose)
+    if 'scripts' in fins_data['filesets']:
+        if 'vendor_ip' in fins_data['filesets']['scripts']:
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['vendor_ip'],VENDOR_SCRIPT_FILE_TYPES,verbose)
+        if 'presim' in fins_data['filesets']['scripts']:
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['presim'],SCRIPT_FILE_TYPES,verbose)
+        if 'postsim' in fins_data['filesets']['scripts']:
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['postsim'],SCRIPT_FILE_TYPES,verbose)
+        if 'prebuild' in fins_data['filesets']['scripts']:
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['prebuild'],SCRIPT_FILE_TYPES,verbose)
+        if 'postbuild' in fins_data['filesets']['scripts']:
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['postbuild'],SCRIPT_FILE_TYPES,verbose)
+    if verbose:
+        print('+++++ Done.')
+
+
+def validate_fins_data(fins_data,filename,verbose):
+    if verbose:
+        print('+++++ Loading node.json ...')
+    with open(SCHEMA_FILENAME) as schema_data:
+        fins_schema = json.load(schema_data)
+    if verbose:
+        print('+++++ Done.')
+
+    # Validate the schema itself
+    if verbose:
+        print('+++++ Validating node.json ...')
+    validate_schema('schema',fins_schema,verbose)
+    if verbose:
+        print('+++++ Done.')
+
+    # Validate the FINS Node JSON file with the schema
+    if verbose:
+        print('+++++ Validating {} ...'.format(filename))
+    validate_fins('node',fins_data,fins_schema,verbose)
+    if verbose:
+        print('+++++ Done.')
+
+    # Validate sub-IP
+    if 'ip' in fins_data:
+        if verbose:
+            print('+++++ Validating ip of {} ...'.format(filename))
+        validate_ip(fins_data,verbose)
+        if verbose:
+            print('+++++ Done.')
+
+    # Validate properties
+    if 'properties' in fins_data:
+        if verbose:
+            print('+++++ Validating properties of {} ...'.format(filename))
+        validate_properties(fins_data,verbose)
+        if verbose:
+            print('+++++ Done.')
+
+    # Validate ports
+    if 'ports' in fins_data:
+        if verbose:
+            print('+++++ Validating ports of {} ...'.format(filename))
+        validate_ports(fins_data,verbose)
+        if verbose:
+            print('+++++ Done.')
+
+
+def _override_fins_data(fins_data,origfile,filename,verbose):
+    '''
+    Looks for a <filename>.json.override file in the same directory and overrides params/part of the fins data
+
+    Used to override the params/part of a Node in an Application or of a sub-IP of a Node
+    '''
+    if (os.path.exists(filename)):
+        # Open .override file
+        with open(filename) as override_file:
+            origpath = os.path.join(os.path.abspath(origfile))
+            if verbose:
+                print('INFO: FINS JSON file "{}" is overridden by "{}"'.format(origpath, filename))
+            override_data = json.load(override_file)
+        # Override parameters
+        if 'params' in override_data:
+            for param_ix, param in enumerate(fins_data['params']):
+                for edit_param in override_data['params']:
+                    if (edit_param['name'].lower() == param['name'].lower()):
+                        fins_data['params'][param_ix]['value'] = edit_param['value']
+        # Override the part
+        if 'part' in override_data:
+            fins_data['part'] = override_data['part']
+    return fins_data
 
 
 def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
@@ -2116,7 +1999,7 @@ def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
     fins_data['backend'] = backend
 
     # Override the FINS Node JSON data with a .override file if it exists
-    fins_data = override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
+    fins_data = _override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
 
     # Replace any linked parameters with their literal values
     fins_data = convert_parameters_to_literal(fins_data,verbose)
@@ -2138,6 +2021,142 @@ def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
 
     # Return
     return fins_data
+
+
+def validate_connected_ports(source, destination, verbose):
+    """
+    Given two connection endpoints that are both ports, confirm that a connection between these ports
+    would be valid
+
+    Check that the following fields match between the two ports:
+        supports_backpressure, num_instances, metadata, and data fields
+    Confirm that the 'direction' field is opposite between the two connections.
+
+    If the source and destination ports are a mistmatch, print a helpful error message and exit.
+    """
+    src_port = source['port']
+    dst_port = destination['port']
+    src_name = source['node_name'] + '.' + source['net']
+    dst_name = destination['node_name'] + '.' + destination['net']
+    src_type = source['type']
+    dst_type = destination['type']
+
+    if ((src_type == 'hdl_port' and dst_type == 'hdl_port') and
+        src_port['bit_width'] != dst_port['bit_width']):
+        print('ERROR: HDL Ports in connection ({}->{}) do not have the same width'.format(src_name, dst_name))
+        sys.exit(1)
+    elif ((src_type == 'hdl_port' and dst_type == 'port') or
+          (src_type == 'port' and dst_type == 'hdl_port')):
+        print('ERROR: One port is HDL and the other is AXIS in connection ({}->{})'.format(src_name, dst_name))
+        sys.exit(1)
+    elif src_port['supports_backpressure'] != dst_port['supports_backpressure']:
+        print('ERROR: One port in connection ({}->{}) supports backpressure, but the other does not'.format(src_name, dst_name))
+        sys.exit(1)
+    elif src_port['num_instances'] != dst_port['num_instances']:
+        print('ERROR: Ports in connection ({}->{}) have different number of instances'.format(src_name, dst_name))
+        sys.exit(1)
+    elif (('metadata' in src_port and 'metadata' not in dst_port) or
+          ('metadata' not in src_port and 'metadata' in dst_port) or
+          ('metadata' in src_port and 'metadata' in dst_port and src_port['metadata'] != dst_port['metadata'])):
+        print('ERROR: Metadata does not match on ports in connection ({}->{})'.format(src_name, dst_name))
+        sys.exit(1)
+    elif src_port['direction'] == dst_port['direction']:
+        print('ERROR: Ports of the same direction cannot be connected ({}->{})'.format(src_name, dst_name))
+        sys.exit(1)
+    elif src_port['data'] != dst_port['data']:
+        print('ERROR: Data type or width mismatch between ports in connection ({}->{})'.format(src_name, dst_name))
+        sys.exit(1)
+
+
+def validate_and_convert_application_fins_data(fins_data,filename,backend,verbose):
+    """
+    Validates and converts data from a Firmware Application Specification JSON build file
+    """
+    # Read the Application schema data
+    if verbose:
+        print('+++++ Loading Application JSON ...')
+    with open(APPLICATION_SCHEMA_FILENAME) as schema_data:
+        fins_schema = json.load(schema_data)
+    if verbose:
+        print('+++++ Done.')
+
+    # Validate the FINS Node JSON file with the schema
+    if verbose:
+        print('+++++ Validating {} ...'.format(filename))
+    validate_fins('application',fins_data,fins_schema,verbose)
+    if verbose:
+        print('+++++ Done.')
+
+    # Set the backend used for generation
+    fins_data['backend'] = backend
+
+    # Set defaults for top-level keys
+    fins_data = populate_fins_fields(fins_data,verbose)
+
+    # Auto-detect file types
+    fins_data = populate_filesets(fins_data,verbose)
+
+    for node in fins_data['nodes']:
+        # Set per-node defaults
+
+        # By default, a node is standard/non-descriptive for Applications
+        if 'descriptive_node' not in node:
+            node['descriptive_node'] = False
+
+    # Override the FINS Node JSON data with a .override file if it exists
+    fins_data = _override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
+
+    # Replace any linked parameters with their literal values
+    fins_data = convert_parameters_to_literal(fins_data,verbose)
+
+    return fins_data
+
+
+def validate_and_convert_system_fins_data(fins_data,filename,backend,verbose):
+    """
+    Validates and converts data from a Firmware System Specification JSON build file
+    """
+    # Read the System schema data
+    if verbose:
+        print('+++++ Loading System JSON ...')
+    with open(SYSTEM_SCHEMA_FILENAME) as schema_data:
+        fins_schema = json.load(schema_data)
+    if verbose:
+        print('+++++ Done.')
+
+    # Validate the FINS Node JSON file with the schema
+    if verbose:
+        print('+++++ Validating {} ...'.format(filename))
+    validate_fins('system',fins_data,fins_schema,verbose)
+    if verbose:
+        print('+++++ Done.')
+
+    # Set the backend used for generation
+    fins_data['backend'] = backend
+
+    # Set defaults for top-level keys
+    fins_data = populate_fins_fields(fins_data,verbose)
+
+    # Set defaults for System-specific top-level keys
+    if 'base_offset' not in fins_data:
+        fins_data['base_offset'] = 0
+
+    for node in fins_data['nodes']:
+        # Ensure that mandatory per-node keys are present
+        if 'properties_offset' not in node:
+            print('ERROR: Required key properties_offset does not exist for node', node['module_name'])
+
+        # Set per-node defaults
+
+        # By default, a node is descriptive for Systems,
+        if 'descriptive_node' not in node:
+            node['descriptive_node'] = True
+
+    # Replace any linked parameters with their literal values
+    fins_data = convert_parameters_to_literal(fins_data,verbose)
+
+    return fins_data
+
 
 def post_generate_node_core(fins_data, verbose):
     """
