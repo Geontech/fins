@@ -17,56 +17,20 @@
     {
       "fins_path":"../node/fins.json",
       "module_name":"fins_test_ip_0",
-      "interface_name":"S_AXI_0",
-      "properties_offset":0,
       "params": [
         { "name":"TEST_PARAM_BOOLEAN",         "parent": "TEST_PARAM_BOOLEAN" },
         { "name":"TEST_PARAM_INTEGER",         "parent": "TEST_PARAM_INTEGER" },
         { "name":"TEST_PARAM_STRING",          "parent": "TEST_PARAM_STRING" }
-      ],
-      "ports_consumer_name":"myinput",
-      "ports_producer_name":"myoutput"
-    },
-    {
-      "fins_path":"../node/ip/test_middle/fins.json",
-      "module_name":"fins_test_ip_0",
-      "interface_name":"S_AXI_TEST_MIDDLE_0",
-      "properties_offset":65536,
-      "descriptive_node":true
-    },
-    {
-      "fins_path":"../node/ip/test_middle/ip/test_bottom/fins.json",
-      "module_name":"fins_test_ip_0",
-      "interface_name":"S_AXI_TEST_BOTTOM_0",
-      "properties_offset":131072,
-      "descriptive_node":true
+      ]
     },
     {
       "fins_path":"../node/fins.json",
       "module_name":"fins_test_ip_1",
-      "interface_name":"S_AXI_1",
-      "properties_offset":196608,
       "params": [
         { "name":"TEST_PARAM_BOOLEAN",         "parent": "TEST_PARAM_BOOLEAN" },
         { "name":"TEST_PARAM_INTEGER",         "parent": "TEST_PARAM_INTEGER" },
         { "name":"TEST_PARAM_STRING",          "parent": "TEST_PARAM_STRING" }
-      ],
-      "ports_consumer_name":"myinput",
-      "ports_producer_name":"myoutput"
-    },
-    {
-      "fins_path":"../node/ip/test_middle/fins.json",
-      "module_name":"fins_test_ip_1",
-      "interface_name":"S_AXI_TEST_MIDDLE_1",
-      "properties_offset":262144,
-      "descriptive_node":true
-    },
-    {
-      "fins_path":"../node/ip/test_middle/ip/test_bottom/fins.json",
-      "module_name":"fins_test_ip_1",
-      "interface_name":"S_AXI_TEST_BOTTOM_1",
-      "properties_offset":327680,
-      "descriptive_node":true
+      ]
     }
   ],
   "connections":[

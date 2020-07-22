@@ -1466,24 +1466,17 @@ def validate_and_convert_nodeset_fins_data(fins_data,filename,backend,verbose):
     return fins_data
 
 def populate_fins_node(node, verbose):
-    ports_producer_name_defined = False
-    ports_consumer_name_defined = False
+    """
+    Modifies the contents of fins_data. Must be run after run_generator has been for this Node.
 
-    # Convert dictionary to uint
-    if 'properties_offset' in node and isinstance(node['properties_offset'], str):
-        if os.path.exists(node['properties_offset']):
-            _, bd_extension = os.path.splitext(node['properties_offset'])
-            if bd_extension.lower() == '.qsys':
-                base_address = find_base_address_from_qsys(node['properties_offset'],node['module_name'],node['interface_name'])
-            elif bd_extension.lower() == '.bd':
-                base_address = find_base_address_from_bd(node['properties_offset'],node['module_name'],node['interface_name'])
-            else:
-                print('ERROR: Unknown block design extension in FINS nodeset:',bd_extension)
-                sys.exit(1)
-            node['properties_offset'] = base_address
-        else:
-            print('WARNING: Properties offset path',node['properties_offset'],'for',node['module_name'],'does not exist')
+    Determines the path to the the generated JSON for this Node. Loads the generated JSON file
+    and uses it to determine the node_name and fins_dir.
 
+    fins_dir is the directory where this Node/IP originates.
+    fins_path is the path to the nodeset JSON
+        (source JSON usually, generated JSON for descriptive_nodes and FINS System)
+    node_name comes from the Node's JSON
+    """
     # In order to construct the path to the generated JSON for this node,
     # the user-authored JSON must first be loaded to determine its name
     # which is part of the file-path to the generated file
@@ -1503,7 +1496,27 @@ def populate_fins_node(node, verbose):
     node['fins_dir'] = node_dir
     node['node_name'] = node_fins_data['name']
 
-    if not node['descriptive_node'] and 'properties' in node_fins_data and 'interface_name' not in node:
+
+def populate_fins_system_node(node, verbose):
+    ports_producer_name_defined = False
+    ports_consumer_name_defined = False
+
+    # Convert dictionary to uint
+    if 'properties_offset' in node and isinstance(node['properties_offset'], str):
+        if os.path.exists(node['properties_offset']):
+            _, bd_extension = os.path.splitext(node['properties_offset'])
+            if bd_extension.lower() == '.qsys':
+                base_address = find_base_address_from_qsys(node['properties_offset'],node['module_name'],node['interface_name'])
+            elif bd_extension.lower() == '.bd':
+                base_address = find_base_address_from_bd(node['properties_offset'],node['module_name'],node['interface_name'])
+            else:
+                print('ERROR: Unknown block design extension in FINS nodeset:',bd_extension)
+                sys.exit(1)
+            node['properties_offset'] = base_address
+        else:
+            print('WARNING: Properties offset path',node['properties_offset'],'for',node['module_name'],'does not exist')
+
+    if 'properties' in node_fins_data and 'interface_name' not in node:
         print('ERROR: a node with a properties interface must have an "interface_name" specified in the nodeset')
         sys.exit(1)
 

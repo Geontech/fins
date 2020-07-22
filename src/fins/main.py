@@ -86,6 +86,8 @@ def run_generator(generator,filepath,backend,verbose):
                 # Now that node-json files have been generated for each component node
                 # load the node json files and import their node data
                 loader.populate_fins_node(node, verbose)
+                if not fins_data['is_application']:
+                    populate_fins_system_node(node, verbose)
 
             if fins_data['is_application']:
                 # Now that all nodes and their ports are loaded into fins_data,
