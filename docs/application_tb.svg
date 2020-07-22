@@ -34,7 +34,7 @@
       </text>
     </g>
     <text font-size="22.5778" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-300" y="-1412.18">
-      <tspan x="-300" y="-1412.18">NODESET TESTBENCH</tspan>
+      <tspan x="-300" y="-1412.18">APPLICATION TESTBENCH</tspan>
     </text>
     <g>
       <polyline style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" points="-360,-1248.03 -360,-1200 -460,-1200 -460,-1140 -460,-1111.97 "/>
@@ -69,7 +69,7 @@
     <line style="fill: none; stroke-opacity: 1; stroke-width: 8; stroke-dasharray: 8; stroke: #c41230" x1="-100" y1="-960" x2="-60" y2="-960"/>
     <line style="fill: none; stroke-opacity: 1; stroke-width: 8; stroke-dasharray: 8; stroke: #005596" x1="-260" y1="-1260" x2="-220" y2="-1260"/>
     <text font-size="22.5778" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-300" y="-1132.18">
-      <tspan x="-300" y="-1132.18">NODESET</tspan>
+      <tspan x="-300" y="-1132.18">APPLICATION</tspan>
     </text>
   </g>
 </svg>

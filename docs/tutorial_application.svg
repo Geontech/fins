@@ -33,8 +33,8 @@
         <tspan x="-180" y="-1244.28">VERIFY</tspan>
       </text>
     </g>
-    <text font-size="22.5778" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-200" y="-1372.51">
-      <tspan x="-200" y="-1372.51">POWER_NODESET_TB</tspan>
+    <text font-size="22.5778" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-200" y="-1372.18">
+      <tspan x="-200" y="-1372.18">POWER_APPLICATION_TB</tspan>
     </text>
     <g>
       <polyline style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" points="-200,-1208.03 -200,-1160 -320,-1160 -320,-1100 -320,-1071.97 "/>
@@ -67,7 +67,7 @@
       </text>
     </g>
     <text font-size="22.5778" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-200" y="-1092.18">
-      <tspan x="-200" y="-1092.18">POWER_NODESET</tspan>
+      <tspan x="-200" y="-1092.18">POWER_APPLICATION</tspan>
     </text>
   </g>
 </svg>

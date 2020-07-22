@@ -152,7 +152,7 @@
       </text>
     </g>
     <text font-size="16.9333" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-186" y="-972.138">
-      <tspan x="-186" y="-972.138">VIVADO NODESET_CREATE.TCL</tspan>
+      <tspan x="-186" y="-972.138">VIVADO APPLICATION_CREATE.TCL</tspan>
     </text>
     <text font-size="22.5778" style="fill: #7f7f7f; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-120" y="-599.043">
       <tspan x="-120" y="-599.043">$ make sim</tspan>
@@ -183,7 +183,7 @@
       <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="95.5279,-480 85.5279,-475 88.0279,-480 85.5279,-485 "/>
     </g>
     <text font-size="16.9333" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-120" y="-554.138">
-      <tspan x="-120" y="-554.138">VIVADO NODESET_SIMULATE.TCL</tspan>
+      <tspan x="-120" y="-554.138">VIVADO APPLICATION_SIMULATE.TCL</tspan>
     </text>
     <g>
       <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" x="-480" y="-1220" width="100.4" height="120" rx="0" ry="0"/>
@@ -223,7 +223,7 @@
       </text>
     </g>
     <text font-size="16.9333" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-183" y="-812.138">
-      <tspan x="-183" y="-812.138">QUARTUS NODESET_CREATE.TCL</tspan>
+      <tspan x="-183" y="-812.138">QUARTUS APPLICATION_CREATE.TCL</tspan>
     </text>
     <g>
       <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #005596" x="-420" y="-800" width="100.4" height="120" rx="0" ry="0"/>
@@ -267,7 +267,7 @@
       </text>
     </g>
     <text font-size="16.9333" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-120" y="-394.138">
-      <tspan x="-120" y="-394.138">QUARTUS NODESET_SIMULATE.TCL</tspan>
+      <tspan x="-120" y="-394.138">QUARTUS APPLICATION_SIMULATE.TCL</tspan>
     </text>
     <line style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #005596" x1="-199.6" y1="-320" x2="-180" y2="-320"/>
     <line style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #005596" x1="-79.6" y1="-320" x2="-60" y2="-320"/>
@@ -315,12 +315,12 @@
       </text>
     </g>
     <text font-size="11.2889" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="106" y="-807.092">
-      <tspan x="106" y="-807.092">NODESET_PROJECT.TCL</tspan>
+      <tspan x="106" y="-807.092">APPLICATION_PROJECT.TCL</tspan>
     </text>
     <line style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #005596" x1="60" y1="-740" x2="40.4" y2="-740"/>
     <line style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #c41230" x1="60" y1="-900" x2="40.4" y2="-900"/>
-    <text font-size="11.2889" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="108.631" y="-967.623">
-      <tspan x="108.631" y="-967.623">NODESET_PROJECT.TCL</tspan>
+    <text font-size="11.2889" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="108.631" y="-967.624">
+      <tspan x="108.631" y="-967.624">APPLICATION_PROJECT.TCL</tspan>
     </text>
   </g>
 </svg>
