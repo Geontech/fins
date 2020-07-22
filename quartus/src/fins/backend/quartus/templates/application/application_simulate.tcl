@@ -1,6 +1,6 @@
 {#-
  #
- # Copyright (C) 2019 Geon Technologies, LLC
+ # Copyright (C) 2020 Geon Technologies, LLC
  #
  # This file is part of FINS.
  #
@@ -21,14 +21,14 @@
 #===============================================================================
 # Firmware IP Node Specification (FINS) Auto-Generated File
 # ---------------------------------------------------------
-# Template:    nodeset_simulate.tcl
+# Template:    application_simulate.tcl
 # Backend:     {{ fins['backend'] }}
 # Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: TCL script to generate a simulation with Intel Quartus
 #              and run it with Intel ModelSim
 # Versions:    Tested with:
-#              * Intel Quartus Prime Pro 19.1
+#              * Intel Quartus Prime Pro 19.4
 #===============================================================================
 
 # Set the relative path back to the IP root directory

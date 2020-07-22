@@ -21,19 +21,33 @@
 #===============================================================================
 # Firmware IP Node Specification (FINS) Auto-Generated File
 # ---------------------------------------------------------
-# Template:    params.tcl
-# Backend:     core (Nodeset)
+# Template:    application_project.tcl
+# Backend:     {{ fins['backend'] }}
 # Generated:   {{ now }}
 # ---------------------------------------------------------
-# Description: TCL script for a Nodeset that defines parameters
+# Description: TCL script for creating a Application project compatible with
+#              Intel Quartus Platform Designer
+# Versions:    Tested with:
+#              * Intel Quartus Prime Pro 19.4
 #===============================================================================
 
-{% if 'params' in fins %}
-{% for param in fins['params'] -%}
-set {{ param['name'] }}
-{%- if param['value'] is iterable and param['value'] is not string %} [list {{ param['value']|join(' ') }}]
-{% elif param['value'] is string %} "{{ param['value'] }}"
-{% else %} {{ param['value'] }}
-{% endif -%}
-{% endfor %}
-{% endif %}
+# Quartus project Tcl package
+package require ::quartus::project
+
+# Create project
+project_new -revision {{ fins['name'] }} {{ fins['name'] }}
+
+# Path variables
+set QUARTUS_TO_ROOT "../../"
+set FINS_OUTPUT_DIR "gen/quartus/"
+
+# Add known IP locations to the search path
+set IP_SEARCH_PATHS "$QUARTUS_TO_ROOT/$FINS_OUTPUT_DIR"
+{%- for node in fins['nodes'] %}
+set IP_SEARCH_PATHS "$IP_SEARCH_PATHS;$QUARTUS_TO_ROOT/{{ node['fins_path']|dirname }}/**/*"
+{%- endfor %}
+set_global_assignment -name IP_SEARCH_PATHS "$IP_SEARCH_PATHS;"
+
+# Commit assignments and close project
+export_assignments
+project_close

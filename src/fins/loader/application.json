@@ -6,6 +6,10 @@
       "is_required":true,
       "types":["str"]
     },
+    "schema_type":{
+      "is_required":true,
+      "types":["int"]
+    },
     "description":{
       "is_required":false,
       "types":["str"]
@@ -31,12 +35,8 @@
       "types":["str"]
     },
     "is_application":{
-      "is_required":false,
+      "is_required":true,
       "types":["bool"]
-    },
-    "base_offset":{
-      "is_required":false,
-      "types":["int"]
     },
     "test_mode":{
       "is_required":false,
@@ -75,25 +75,9 @@
           "is_required":true,
           "types":["str"]
         },
-        "interface_name":{
-          "is_required":false,
-          "types":["str"]
-        },
         "descriptive_node":{
           "is_required":false,
           "types":["bool"]
-        },
-        "properties_offset":{
-          "is_required":false,
-          "types":["str","int"]
-        },
-        "ports_producer_name":{
-          "is_required":false,
-          "types":["str"]
-        },
-        "ports_consumer_name":{
-          "is_required":false,
-          "types":["str"]
         },
         "params":{
           "is_required":false,
@@ -179,7 +163,7 @@
       }
     },
     "clocks":{
-      "is_required":false,
+      "is_required":true,
       "types":["list"],
       "list_types":["dict"],
       "fields":{
@@ -217,7 +201,7 @@
       "types":["dict"],
       "fields":{
         "sim":{
-          "is_required":false,
+          "is_required":true,
           "types":["list"],
           "list_types":["dict"],
           "fields":{

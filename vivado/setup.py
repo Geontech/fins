@@ -33,7 +33,8 @@ setup(
     package_data={
         'fins.backend.vivado':[
             'templates/node/*',
-            'templates/nodeset/*'
+            'templates/application/*',
+            'templates/system/*'
         ]
     },
     entry_points={

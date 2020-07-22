@@ -21,12 +21,12 @@
 --==============================================================================
 -- Firmware IP Node Specification (FINS) Auto-Generated File
 -- ---------------------------------------------------------
--- Template:    axis_tdm_to_parallel.vhd
--- Backend:     core (Nodeset)
+-- Template:    avalonst_tdm_to_parallel.vhd
+-- Backend:     core (Application)
 -- Generated:   {{ now }}
 -- ---------------------------------------------------------
--- Description: Converts FINS Port from AXI4-Stream time-division multiplexed
---              to AXI4-Stream fully parallel
+-- Description: Converts FINS Port from Avalon-ST time-division multiplexed
+--              bus (Big Endian) to AXI4-Stream fully parallel bus
 -- Reset Type:  Synchronous
 -- Clocks:      Although there are two different input clocks, they are assumed
 --              to be on the same clock domain
@@ -43,46 +43,47 @@ use ieee.numeric_std.all;
 use ieee.math_real.all;
 
 -- Entity
-entity {{ fins['name']|lower }}_axis_tdm_to_parallel is
+entity {{ fins['name']|lower }}_avalonst_tdm_to_parallel is
   generic (
     G_SAMPLE_COUNTER_WIDTH : natural := 16; -- This value MUST be >= ceil(log2(MAX_SAMPLES_IN_PACKET))
     G_TDM_WORD_WIDTH       : natural := 32  -- LIMITATION: This value MUST be >= fins['data']['bit_width']
   );
   port (
-    -- Parallel Bus
-    m_axis_aclk    : in  std_logic;
-    m_axis_aresetn : in  std_logic;
+    -- AXI4-Stream Parallel Bus
+    m_axis_aclk       : in  std_logic;
+    m_axis_aresetn    : in  std_logic;
     {%- if fins['supports_backpressure'] %}
-    m_axis_tready  : in  std_logic;
+    m_axis_tready     : in  std_logic;
     {%- endif %}
-    m_axis_tdata   : out std_logic_vector({{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] }}-1 downto 0);
+    m_axis_tdata      : out std_logic_vector({{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in fins %}
-    m_axis_tuser   : out std_logic_vector({{ fins['metadata']|sum(attribute='bit_width') }}-1 downto 0);
+    m_axis_tuser      : out std_logic_vector({{ fins['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
-    m_axis_tvalid  : out std_logic;
-    m_axis_tlast   : out std_logic;
-    -- Time-Division Multiplexed Bus
-    s_axis_aclk    : in  std_logic;
-    s_axis_aresetn : in  std_logic;
-    s_axis_tready  : out std_logic;
-    s_axis_tdata   : in  std_logic_vector(G_TDM_WORD_WIDTH-1 downto 0);
-    s_axis_tvalid  : in  std_logic;
-    s_axis_tlast   : in  std_logic
+    m_axis_tvalid     : out std_logic;
+    m_axis_tlast      : out std_logic;
+    -- Avalon-ST Time-Division Multiplexed Bus (Big Endian)
+    asi_clock         : in  std_logic;
+    asi_reset         : in  std_logic;
+    asi_ready         : out std_logic;
+    asi_data          : in  std_logic_vector(G_TDM_WORD_WIDTH-1 downto 0);
+    asi_valid         : in  std_logic;
+    asi_startofpacket : in  std_logic;
+    asi_endofpacket   : in  std_logic
   );
-end {{ fins['name']|lower }}_axis_tdm_to_parallel;
+end {{ fins['name']|lower }}_avalonst_tdm_to_parallel;
 
 -- Architecture
-architecture rtl of {{ fins['name']|lower }}_axis_tdm_to_parallel is
+architecture rtl of {{ fins['name']|lower }}_avalonst_tdm_to_parallel is
 
   --------------------------------------------------------------------------------
   -- Constants
   --------------------------------------------------------------------------------
-  constant G_DATA_WIDTH : natural := {{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] }};
   {%- if 'metadata' in fins %}
-  constant G_METADATA_WIDTH : natural := {{ fins['metadata']|sum(attribute='bit_width') }};
-  constant NUM_METADATA_WORDS : natural := integer(ceil(real(G_METADATA_WIDTH) / real(G_TDM_WORD_WIDTH)));
-  constant METADATA_REMAINDER_BITS : natural := (NUM_METADATA_WORDS*G_TDM_WORD_WIDTH) - G_METADATA_WIDTH;
+  constant TOTAL_METADATA_WIDTH : natural := {{ fins['metadata']|sum(attribute='bit_width') }};
+  constant NUM_METADATA_WORDS : natural := integer(ceil(real(TOTAL_METADATA_WIDTH) / real(G_TDM_WORD_WIDTH)));
+  constant METADATA_REMAINDER_BITS : natural := (NUM_METADATA_WORDS*G_TDM_WORD_WIDTH) - TOTAL_METADATA_WIDTH;
   {%- endif %}
+  constant TOTAL_DATA_WIDTH : natural := {{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] }};
 
   --------------------------------------------------------------------------------
   -- Types
@@ -94,9 +95,10 @@ architecture rtl of {{ fins['name']|lower }}_axis_tdm_to_parallel is
   --------------------------------------------------------------------------------
   -- Signals
   --------------------------------------------------------------------------------
-  -- Internal control signals
+  -- Internal signals
   signal internal_m_axis_tvalid : std_logic;
-  signal internal_s_axis_tready : std_logic;
+  signal internal_asi_ready : std_logic;
+  signal internal_asi_data : std_logic_vector(G_TDM_WORD_WIDTH-1 downto 0);
   {%- if 'metadata' in fins %}
   -- Signals for demuxing the metadata
   signal tdm_word_counter       : unsigned(G_SAMPLE_COUNTER_WIDTH-1 downto 0);
@@ -110,22 +112,22 @@ begin
   -- Metadata
   --------------------------------------------------------------------------------
   -- Synchronous process for serialized word counting and capturing metadata
-  s_capture_metadata : process (s_axis_aclk)
+  s_capture_metadata : process (asi_clock)
   begin
-    if (rising_edge(s_axis_aclk)) then
-      if (s_axis_aresetn = '0') then
+    if (rising_edge(asi_clock)) then
+      if (asi_reset = '1') then
         tdm_word_counter  <= (others => '0');
       else
-        if ((s_axis_tvalid = '1') AND (internal_s_axis_tready = '1')) then
+        if ((asi_valid = '1') AND (internal_asi_ready = '1')) then
           -- Count the word index
-          if (s_axis_tlast = '1') then
+          if (asi_endofpacket = '1') then
             tdm_word_counter <= (others => '0');
           else
             tdm_word_counter <= tdm_word_counter + 1;
           end if;
           -- Capture the metadata
           if (tdm_word_counter < NUM_METADATA_WORDS) then
-            metadata_array(to_integer(tdm_word_counter)) <= s_axis_tdata;
+            metadata_array(to_integer(tdm_word_counter)) <= internal_asi_data;
           end if;
         end if;
       end if;
@@ -151,12 +153,12 @@ begin
   --------------------------------------------------------------------------------
   {%- if 'metadata' in fins %}
   -- Combinatorial process to assign data TVALID
-  c_data_tvalid : process (s_axis_tvalid, tdm_word_counter)
+  c_data_tvalid : process (asi_valid, tdm_word_counter)
   begin
     -- Set defaults
     internal_m_axis_tvalid <= '0';
     -- Assign value
-    if (s_axis_tvalid = '1') then
+    if (asi_valid = '1') then
       if (tdm_word_counter > NUM_METADATA_WORDS-1) then
         internal_m_axis_tvalid <= '1';
       end if;
@@ -164,20 +166,32 @@ begin
   end process c_data_tvalid;
   {%- else %}
   -- TVALID is passed through directly
-  internal_m_axis_tvalid <= s_axis_tvalid;
+  internal_m_axis_tvalid <= asi_valid;
   {%- endif %}
 
+  -- Combinatorial process to convert the input data to Little Endian
+  c_convert_data_to_little_endian : process (asi_data)
+  begin
+    -- Set defaults
+    internal_asi_data <= (others => '0');
+
+    -- Convert from Big Endian to Little Endian
+    for n in 0 to G_TDM_WORD_WIDTH/8-1 loop
+      internal_asi_data((n+1)*8-1 downto n*8) <= asi_data(G_TDM_WORD_WIDTH-1-n*8 downto G_TDM_WORD_WIDTH-(n+1)*8);
+    end loop;
+  end process c_convert_data_to_little_endian;
+
   -- Concurrent signal assignments to set outputs and signals
-  m_axis_tdata  <= s_axis_tdata(G_DATA_WIDTH-1 downto 0);
-  m_axis_tlast  <= s_axis_tlast;
+  m_axis_tdata  <= internal_asi_data(TOTAL_DATA_WIDTH-1 downto 0);
+  m_axis_tlast  <= asi_endofpacket;
   {%- if fins['supports_backpressure'] %}
-  internal_s_axis_tready <= m_axis_tready;
+  internal_asi_ready <= m_axis_tready;
   {%- else %}
-  internal_s_axis_tready <= '1';
+  internal_asi_ready <= '1';
   {%- endif %}
 
   -- Assign control signal outputs
-  s_axis_tready <= internal_s_axis_tready;
+  asi_ready <= internal_asi_ready;
   m_axis_tvalid <= internal_m_axis_tvalid;
 
 end rtl;

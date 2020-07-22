@@ -1,6 +1,6 @@
 {#-
  #
- # Copyright (C) 2019 Geon Technologies, LLC
+ # Copyright (C) 2020 Geon Technologies, LLC
  #
  # This file is part of FINS.
  #
@@ -28,11 +28,11 @@
 # Description: Intel Quartus Platform Designer Hardware Component
 #              Definition TCL Script
 # Versions:    Tested with:
-#              * Intel Quartus Prime Pro 19.1
+#              * Intel Quartus Prime Pro 19.4
 #===============================================================================
 
 {#-
-# Instantiate all nodes in nodeset
+# Instantiate all nodes in the Application
 -#}
 {%  for node in fins['nodes'] %}
 {%- if not node['descriptive_node'] %}

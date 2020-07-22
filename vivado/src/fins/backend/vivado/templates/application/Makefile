@@ -49,7 +49,7 @@ all:
 	$(MAKE) -C {{ node['fins_dir'] }} all
 	{%- endfor %}
 
-# Clean phony target that cleans only this nodeset
+# Clean phony target that cleans only this Application
 clean:
 	rm -rf $(TEMP_FILES)
 
@@ -59,6 +59,6 @@ clean-nodes:
 	$(MAKE) -C {{ node['fins_dir'] }} clean-all
 {%- endfor %}
 
-# Clean-all phony target that cleans this nodeset and all nodes
+# Clean-all phony target that cleans this Application and all nodes
 clean-all: clean-nodes clean
 

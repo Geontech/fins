@@ -25,12 +25,15 @@ import json
 import re
 import xml.etree.ElementTree as ET
 
+from fins.utils import SchemaType
+
 __all__ = (
     'load_fins_data'
 )
 
 SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/node.json'
-NODESET_SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/nodeset.json'
+APPLICATION_SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/application.json'
+SYSTEM_SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/system.json'
 SCHEMA_TYPES = ['int', 'float', 'bool', 'str', 'list', 'dict']
 SCHEMA_LIST_TYPES = ['int', 'float', 'bool', 'str', 'dict']
 SCHEMA_KEYS = ['is_required', 'types', 'list_types', 'fields']
@@ -265,6 +268,11 @@ def get_interface_mode(interface_type, hdl_port, signal_def):
             return 'source'
     else:
         return signal_def['properties']['mode']
+
+
+################################################################################
+# FINS JSON Schema Validation
+################################################################################
 
 def validate_schema(parent_key,schema_object,verbose):
     # Check the keys
@@ -526,6 +534,7 @@ def get_param_value(params,key_or_value):
     else:
         return key_or_value
 
+
 def convert_parameters_to_literal(fins_data,verbose):
     # Get the parameters
     params = []
@@ -623,6 +632,7 @@ def convert_parameters_to_literal(fins_data,verbose):
                     ip['params'][param_ix]['parent_ip'] = fins_data['name']
 
     return fins_data
+
 
 def populate_properties(fins_data,base_offset,verbose):
     # Make sure there are properties first
@@ -723,6 +733,7 @@ def populate_properties(fins_data,base_offset,verbose):
     # Return the modified dictionary
     return fins_data
 
+
 def populate_ports(fins_data,verbose):
     # Loop through ports
     if 'ports' in fins_data:
@@ -775,6 +786,7 @@ def populate_ports(fins_data,verbose):
 
     # Return the modified dictionary
     return fins_data
+
 
 def populate_filesets(fins_data,verbose):
     if not 'filesets' in fins_data:
@@ -842,6 +854,7 @@ def populate_filesets(fins_data,verbose):
 
     return fins_data
 
+
 def populate_ip(fins_data,verbose):
     # Only continue if this is applicable
     if not 'ip' in fins_data:
@@ -874,6 +887,7 @@ def populate_ip(fins_data,verbose):
 
     return fins_data
 
+
 def populate_fins_fields(fins_data,verbose):
     if not 'version' in fins_data:
         fins_data['version'] = '1.0'
@@ -896,6 +910,7 @@ def populate_fins_fields(fins_data,verbose):
         if verbose:
             print('INFO: Setting default top_sim to',fins_data['top_sim'])
     return fins_data
+
 
 def populate_hdl_inferences(fins_data,verbose):
     # Make sure the fins_data has the correct keys
@@ -1236,6 +1251,7 @@ def populate_hdl_inferences(fins_data,verbose):
 
     return fins_data
 
+
 def override_fins_data(fins_data,origfile,filename,verbose):
     '''
     Looks for a <filename>.json.override file in the same directory and overrides params/part of the fins data
@@ -1257,6 +1273,7 @@ def override_fins_data(fins_data,origfile,filename,verbose):
         if 'part' in override_data:
             fins_data['part'] = override_data['part']
     return fins_data
+
 
 def validate_filesets(fins_data,filename,verbose):
     # Validate filesets
@@ -1282,6 +1299,7 @@ def validate_filesets(fins_data,filename,verbose):
             validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['postbuild'],SCRIPT_FILE_TYPES,verbose)
     if verbose:
         print('+++++ Done.')
+
 
 def validate_fins_data(fins_data,filename,verbose):
     if verbose:
@@ -1329,6 +1347,7 @@ def validate_fins_data(fins_data,filename,verbose):
         if verbose:
             print('+++++ Done.')
 
+
 def load_json_file(filename,verbose):
     """
     Loads data from a JSON file
@@ -1343,6 +1362,7 @@ def load_json_file(filename,verbose):
 
     # Return
     return json_data
+
 
 def find_base_address_from_qsys(filename, module_name, interface_name):
     # Assemble the name of the connection end where the address space is mapped
@@ -1386,6 +1406,7 @@ def find_base_address_from_qsys(filename, module_name, interface_name):
     print('ERROR: Unable to find memory-mapped connection that matches',connection_end)
     sys.exit(1)
 
+
 def find_base_address_from_bd(filename, module_name, interface_name):
     # Open and load the vivado file
     with open(filename) as bd_file:
@@ -1407,14 +1428,15 @@ def find_base_address_from_bd(filename, module_name, interface_name):
     print('ERROR: Unable to find address space for',interface_name,'of',module_name,'in',filename)
     sys.exit(1)
 
-def validate_and_convert_nodeset_fins_data(fins_data,filename,backend,verbose):
+
+def validate_and_convert_application_fins_data(fins_data,filename,backend,verbose):
     """
-    Validates and converts data from a Firmware Nodeset Specification JSON build file
+    Validates and converts data from a Firmware Application Specification JSON build file
     """
-    # Read the nodeset schema data
+    # Read the Application schema data
     if verbose:
-        print('+++++ Loading nodeset.json ...')
-    with open(NODESET_SCHEMA_FILENAME) as schema_data:
+        print('+++++ Loading Application JSON ...')
+    with open(APPLICATION_SCHEMA_FILENAME) as schema_data:
         fins_schema = json.load(schema_data)
     if verbose:
         print('+++++ Done.')
@@ -1422,7 +1444,7 @@ def validate_and_convert_nodeset_fins_data(fins_data,filename,backend,verbose):
     # Validate the FINS Node JSON file with the schema
     if verbose:
         print('+++++ Validating {} ...'.format(filename))
-    validate_fins('nodeset',fins_data,fins_schema,verbose)
+    validate_fins('application',fins_data,fins_schema,verbose)
     if verbose:
         print('+++++ Done.')
 
@@ -1435,27 +1457,12 @@ def validate_and_convert_nodeset_fins_data(fins_data,filename,backend,verbose):
     # Auto-detect file types
     fins_data = populate_filesets(fins_data,verbose)
 
-    # Set defaults for nodeset-specific top-level keys
-    if 'is_application' not in fins_data:
-        fins_data['is_application'] = False
-
-    if 'base_offset' not in fins_data:
-        fins_data['base_offset'] = 0
-
     for node in fins_data['nodes']:
-        # Ensure that mandatory per-node keys are present
-        if not fins_data['is_application'] and 'properties_offset' not in node:
-            print('ERROR: Required key properties_offset does not exist for node', node['module_name'])
-
         # Set per-node defaults
 
-        # By default, a node is descriptive for System-level Nodesets,
-        # and standard/non-descriptive for Application-level Nodesets
+        # By default, a node is standard/non-descriptive for Applications
         if 'descriptive_node' not in node:
-            if fins_data['is_application']:
-                node['descriptive_node'] = False
-            else:
-                node['descriptive_node'] = True
+            node['descriptive_node'] = False
 
     # Override the FINS Node JSON data with a .override file if it exists
     fins_data = override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
@@ -1465,39 +1472,85 @@ def validate_and_convert_nodeset_fins_data(fins_data,filename,backend,verbose):
 
     return fins_data
 
-def populate_fins_node(node, verbose):
+
+def validate_and_convert_system_fins_data(fins_data,filename,backend,verbose):
     """
-    Modifies the contents of fins_data. Must be run after run_generator has been for this Node.
+    Validates and converts data from a Firmware System Specification JSON build file
+    """
+    # Read the System schema data
+    if verbose:
+        print('+++++ Loading System JSON ...')
+    with open(SYSTEM_SCHEMA_FILENAME) as schema_data:
+        fins_schema = json.load(schema_data)
+    if verbose:
+        print('+++++ Done.')
 
-    Determines the path to the the generated JSON for this Node. Loads the generated JSON file
-    and uses it to determine the node_name and fins_dir.
+    # Validate the FINS Node JSON file with the schema
+    if verbose:
+        print('+++++ Validating {} ...'.format(filename))
+    validate_fins('system',fins_data,fins_schema,verbose)
+    if verbose:
+        print('+++++ Done.')
 
-    fins_dir is the directory where this Node/IP originates.
-    fins_path is the path to the nodeset JSON
-        (source JSON usually, generated JSON for descriptive_nodes and FINS System)
-    node_name comes from the Node's JSON
+    # Set the backend used for generation
+    fins_data['backend'] = backend
+
+    # Set defaults for top-level keys
+    fins_data = populate_fins_fields(fins_data,verbose)
+
+    # Set defaults for System-specific top-level keys
+    if 'base_offset' not in fins_data:
+        fins_data['base_offset'] = 0
+
+    for node in fins_data['nodes']:
+        # Ensure that mandatory per-node keys are present
+        if 'properties_offset' not in node:
+            print('ERROR: Required key properties_offset does not exist for node', node['module_name'])
+
+        # Set per-node defaults
+
+        # By default, a node is descriptive for Systems,
+        if 'descriptive_node' not in node:
+            node['descriptive_node'] = True
+
+    # Replace any linked parameters with their literal values
+    fins_data = convert_parameters_to_literal(fins_data,verbose)
+
+    return fins_data
+
+
+def populate_fins_application_node(node, verbose):
+    """
+    Modifies the contents of 'node' dictionary. Must be run after run_generator has been for this Node.
+
+    Determines/sets the following in the node dictionary:
+        fins_dir:  is the source directory where this Node/IP originates
+        node_name: original name of the node (not instance/module name) - comes from the Node itself
     """
     # In order to construct the path to the generated JSON for this node,
     # the user-authored JSON must first be loaded to determine its name
     # which is part of the file-path to the generated file
-    node_fins_data_tmp = load_json_file(node['fins_path'],verbose)
-    node_name = node_fins_data_tmp['name']
 
-    # Path to generated JSON file for node
-    node_dir = os.path.dirname(node['fins_path'])
-    if node['descriptive_node']:
-        gen_node_path = node['fins_path']
-    else:
-        gen_node_path = os.path.join(node_dir, 'gen/core/', node_name + '.json')
-
-    # Load FINS Node JSON for each node
-    node_fins_data = load_json_file(gen_node_path, verbose)
-
-    node['fins_dir'] = node_dir
-    node['node_name'] = node_fins_data['name']
+    node['fins_dir'] = os.path.dirname(node['fins_path']) #node_dir
+    node['node_name'] = node['node_details']['name']
 
 
 def populate_fins_system_node(node, verbose):
+    """
+    Modifies the contents of 'node' dictionary.
+
+    Determines/sets various information relating to the node:
+        node_name
+        properties_offset
+        properties
+        node_id
+        ports_producer/consumer
+    """
+    # Load the generated FINS JSON for the Node
+    # and get the node_name from it
+    node_fins_data = load_json_file(node['fins_path'], verbose)
+    node['node_name'] = node_fins_data['name']
+
     ports_producer_name_defined = False
     ports_consumer_name_defined = False
 
@@ -1510,14 +1563,14 @@ def populate_fins_system_node(node, verbose):
             elif bd_extension.lower() == '.bd':
                 base_address = find_base_address_from_bd(node['properties_offset'],node['module_name'],node['interface_name'])
             else:
-                print('ERROR: Unknown block design extension in FINS nodeset:',bd_extension)
+                print('ERROR: Unknown block design extension in FINS System:',bd_extension)
                 sys.exit(1)
             node['properties_offset'] = base_address
         else:
             print('WARNING: Properties offset path',node['properties_offset'],'for',node['module_name'],'does not exist')
 
     if 'properties' in node_fins_data and 'interface_name' not in node:
-        print('ERROR: a node with a properties interface must have an "interface_name" specified in the nodeset')
+        print('ERROR: a node with a properties interface must have an "interface_name" specified in the System')
         sys.exit(1)
 
     if 'properties' in node_fins_data:
@@ -1612,6 +1665,7 @@ def get_signal_type(signal_name, verbose):
                 return interface_type
     return None
 
+
 def get_port(node_name, port_name, fins_data, port_type='ports'):
     """
     Get the port on the specified node in fins_data
@@ -1658,7 +1712,7 @@ def get_net_type(net, fins_data, verbose):
         net_type : 'port' if the net is actually a node's port, 'hdl_port' if the net is an HDL port on a node,
                      otherwise the signal-type of this net ('clock' or 'reset')
                     None if the net is just a type-less signal
-        port     : the port that this net matches based on its node and name (None if this "net" is not a port in the nodeset)
+        port     : the port that this net matches based on its node and name (None if this "net" is not a port in the Application)
 
     """
     # TODO once clocks are exported/automated, there should be no connection nets without an associated 'node_name'
@@ -1728,11 +1782,11 @@ def validate_connected_ports(source, destination, verbose):
         sys.exit(1)
 
 
-def populate_app_nodeset_connections(fins_data, verbose):
+def populate_application_connections(fins_data, verbose):
     """
-    Modifies the contents of fins_data for a FINS Nodeset.
+    Modifies the contents of fins_data for a FINS Application.
 
-    Populate each connection in the Nodeset so that each source and destination
+    Populate each connection in the Application so that each source and destination
     is associated with a type and port (if applicable).
 
     The fins_data['connections'] list is populated as follows:
@@ -1750,7 +1804,7 @@ def populate_app_nodeset_connections(fins_data, verbose):
             connected = flagged as True for any ports that have one or more connections
     """
 
-    # if this nodeset has connections, iterate over the connections,
+    # if this Application has connections, iterate over the connections,
     # get and set the type and port (if applicable) of each source and destination net
     # TODO make connections between hdl ports
     if 'connections' in fins_data:
@@ -1769,9 +1823,9 @@ def populate_app_nodeset_connections(fins_data, verbose):
                     destination['port']['connected'] = True
 
 
-def populate_app_nodeset_clocks(fins_data, verbose):
+def populate_application_clocks(fins_data, verbose):
     """
-    Modifies the contents of fins_data for a FINS Nodeset.
+    Modifies the contents of fins_data for a FINS Application.
 
     Populate clock domains (fins_data['clocks']) and which nets they connect to:
         [
@@ -1816,16 +1870,16 @@ def populate_app_nodeset_clocks(fins_data, verbose):
                 net['port']['resetn'] = clock['resetn']
 
 
-def populate_app_nodeset_exports(fins_data, verbose):
+def populate_application_exports(fins_data, verbose):
     """
-    Modifies the contents of fins_data for a FINS Nodeset.
+    Modifies the contents of fins_data for a FINS Application.
 
-    Export ports that should be exposed externally from the nodeset.
-    "Exporting" is another way of saying "make this an external port/interface of this Nodeset"
+    Export ports that should be exposed externally from the Application.
+    "Exporting" is another way of saying "make this an external port/interface of this Application"
     Exported ports are added to the fins_data['ports']['ports'] or fins_data['ports']['hdl_ports'] lists
 
     By default, export all unconnected ports (ports and hdl_ports). If port_exports
-    or hdl_port_exports is specified in the Nodeset JSON, only export the ports listed
+    or hdl_port_exports is specified in the Application JSON, only export the ports listed
     in those fields.
 
     An exported port is a copied version of the original Node port with a few modified/extra fields:
@@ -1834,7 +1888,7 @@ def populate_app_nodeset_exports(fins_data, verbose):
         node_port: the original node port
 
     """
-    # Export ports as ports of the nodeset itself
+    # Export ports as ports of the Application itself
     if 'port_exports' in fins_data:
         if 'ports' not in fins_data:
             fins['ports'] = {}
@@ -1842,17 +1896,17 @@ def populate_app_nodeset_exports(fins_data, verbose):
 
         for net in fins_data['port_exports']:
             # Get the port to export, copy it, change/add some information,
-            # and add it to the Nodeset's ports list
+            # and add it to the Application's ports list
             port = get_port(net['node_name'], net['net'], fins_data)
             if port is None:
                 print('ERROR: Exported port not found {}'.format(net['net']))
                 sys.exit(1)
 
-            nodeset_port = port.copy()
-            nodeset_port['name'] = net['node_name'] + '_' + port['name']
-            nodeset_port['node_name'] = net['node_name']
-            nodeset_port['node_port'] = port
-            fins_data['ports']['ports'].append(nodeset_port)
+            application_port = port.copy()
+            application_port['name'] = net['node_name'] + '_' + port['name']
+            application_port['node_name'] = net['node_name']
+            application_port['node_port'] = port
+            fins_data['ports']['ports'].append(application_port)
 
     else:
         # If port_exports isn't present in the JSON, export all unconnected ports
@@ -1877,13 +1931,13 @@ def populate_app_nodeset_exports(fins_data, verbose):
                         # if port is unconnected, export it
                         #     if in test-mode and this is an output port, export it even if it is connected
                         if port_unconnected or (test_mode and port['direction'] == 'out'):
-                            nodeset_port = port.copy()
-                            nodeset_port['name'] = node['module_name'] + '_' + port['name']
-                            nodeset_port['node_name'] = node['module_name']
-                            nodeset_port['node_port'] = port
-                            fins_data['ports']['ports'].append(nodeset_port)
+                            application_port = port.copy()
+                            application_port['name'] = node['module_name'] + '_' + port['name']
+                            application_port['node_name'] = node['module_name']
+                            application_port['node_port'] = port
+                            fins_data['ports']['ports'].append(application_port)
 
-    # Export hdl_ports as hdl_ports of the nodeset itself
+    # Export hdl_ports as hdl_ports of the Application itself
     if 'hdl_port_exports' in fins_data:
         if 'ports' not in fins_data:
             fins_data['ports'] = {}
@@ -1891,17 +1945,17 @@ def populate_app_nodeset_exports(fins_data, verbose):
 
         for net in fins_data['hdl_port_exports']:
             # Get the hdl_port to export, copy it, change/add some information,
-            # and add it to the Nodeset's hdl_ports list
+            # and add it to the Application's hdl_ports list
             port = get_port(net['node_name'], net['net'], fins_data, port_type='hdl_ports')
             if port is None:
                 print('ERROR: Exported port not found {}'.format(net['net']))
                 sys.exit(1)
 
-            nodeset_port = port.copy()
-            nodeset_port['name'] = net['node_name'] + '_' + port['name']
-            nodeset_port['node_name'] = net['node_name']
-            nodeset_port['node_port'] = port
-            fins_data['ports']['hdl_ports'].append(nodeset_port)
+            application_port = port.copy()
+            application_port['name'] = net['node_name'] + '_' + port['name']
+            application_port['node_name'] = net['node_name']
+            application_port['node_port'] = port
+            fins_data['ports']['hdl_ports'].append(application_port)
     else:
         # If hdl_port_exports isn't present in the JSON, export all unconnected ports
         if 'ports' not in fins_data:
@@ -1920,32 +1974,34 @@ def populate_app_nodeset_exports(fins_data, verbose):
                         # if port is unconnected, export it
                         #     if in test-mode and this is an output port, export it even if it is connected
                         if port_unconnected or (test_mode and port['direction'] == 'out'):
-                            nodeset_port = port.copy()
-                            nodeset_port['name'] = node['module_name'] + '_' + port['name']
-                            nodeset_port['node_name'] = node['module_name']
-                            nodeset_port['node_port'] = port
-                            fins_data['ports']['hdl_ports'].append(nodeset_port)
+                            application_port = port.copy()
+                            application_port['name'] = node['module_name'] + '_' + port['name']
+                            application_port['node_name'] = node['module_name']
+                            application_port['node_port'] = port
+                            fins_data['ports']['hdl_ports'].append(application_port)
 
 
-def populate_fins_app_nodeset(fins_data, verbose):
+def populate_fins_application(fins_data, verbose):
     """
-    Modifies the contents of fins_data for a FINS nodeset.
+    Modifies the contents of fins_data for a FINS Application.
 
-    Populate contents specific to an Application-level Nodeset.
+    Populate contents specific to an Application-level Application.
     """
-    populate_app_nodeset_connections(fins_data, verbose)
-    populate_app_nodeset_clocks(fins_data, verbose)
-    populate_app_nodeset_exports(fins_data, verbose)
+    populate_application_connections(fins_data, verbose)
+    populate_application_clocks(fins_data, verbose)
+    populate_application_exports(fins_data, verbose)
 
 
 def populate_property_interfaces(fins_data, verbose):
     """
     Modifies the contents of fins_data. Must be run after generator has been run for all sub-IPs/Nodes.
 
+    Can only be called for Nodes and Applications (not Systems)
+
     Populate the per-node lists of property interfaces fins_data['prop_interfaces']
     and create the 'properties' clock domain with connections to each interface.
 
-    A Node/IP's or a Nodeset's prop_interfaces maps a node_name to a list of property interfaces
+    A Node/IP's or an Application's prop_interfaces maps a node_name to a list of property interfaces
     on that Node:
         [
          {'name': <node-name>,
@@ -1959,12 +2015,12 @@ def populate_property_interfaces(fins_data, verbose):
         Here, [interface-dict, ...] includes the interface dictionary of each sub-IP.
         An interface-dict contains:
             name: the simple and short name of this interface - same as name of containing IP/Node
-            extended_name: includes the parent-Node name when inside a Nodeset
+            extended_name: includes the parent-Node name when inside an Application
             top: is this the interface of the top-IP in a hierarchy (not a sub-IP)?
                  Necessary because the top-IP's interface does not include the Node's name
                  (e.g. just S_AXI not S_AXI_TEST_MIDDLE)
 
-    For Nodesets, this function adds a 'properties' clock domain dictionary to the fins_data['clocks'] list:
+    For Applications, this function adds a 'properties' clock domain dictionary to the fins_data['clocks'] list:
         [
          {
           'base_name': 'properties'
@@ -1978,36 +2034,10 @@ def populate_property_interfaces(fins_data, verbose):
         and the actual interface (interface-dict explained above)
     """
 
-    # If this is a Nodeset, collect all of the properties interfaces for its Nodes
-    if 'nodes' in fins_data:
-        fins_data['prop_interfaces'] = []
-        for node in fins_data['nodes']:
-            if not node['descriptive_node'] and 'properties' in node['node_details']:
-                prop_interface = {}
-                prop_interface['node_name'] = node['module_name']
-                prop_interface['addr_width'] = node['node_details']['properties']['addr_width']
-                prop_interface['data_width'] = node['node_details']['properties']['data_width']
-                prop_interface['interfaces'] = node['node_details']['prop_interfaces'][0]['interfaces']
-                for interface in prop_interface['interfaces']:
-                    # The extended name is used when exporting an interface from a Nodeset and includes the
-                    # name of the parent-IP (the one explicitly included in the Nodeset)
-                    # For example, if the Nodeset includes a Node name "top" with a sub-IP named "bottom", and
-                    # both have properties interfaces, the extended name will be "top_bottom"
-                    #
-                    # A Node with only a single interface will be named only by the module name
-                    # (e.g. just "top" in the above example)
-                    if len(prop_interface['interfaces']) > 1:
-                        interface['extended_name'] = node['module_name'] + '_' + interface['name']
-                    else:
-                        interface['extended_name'] = node['module_name']
+    # Initialize the list of interfaces for this IP/Node: this is a list where each entry maps a node_name to a list of
+    # property interfaces on that Node. A Node can have more than one prop interface when it has sub-IPs
+    if fins_data['schema_type'] == SchemaType.NODE:
 
-                fins_data['prop_interfaces'].append(prop_interface)
-
-    else:
-
-        # Initialize the list of interfaces for this IP/Node: this is a list where each entry maps a node_name to a list of
-        # property interfaces on that Node. A Node can have more than one prop interface when it has sub-IPs
-        # TODO IP/Node instance name instead of IP/Node name?
         fins_data['prop_interfaces'] = \
             [{
               'node_name': fins_data['name'],
@@ -2020,6 +2050,9 @@ def populate_property_interfaces(fins_data, verbose):
             for ip in fins_data['ip']:
                 if 'prop_interfaces' in ip['ip_details']:
                     # Update the list of interfaces for this IP
+                    # NOTE:
+                    #     'ip_details' should have the interfaces of this IP's sub-IPs.
+                    #     They were set by the above dictionary when this function was called for the sub-IP
                     ip_interfaces = ip['ip_details']['prop_interfaces'][0]['interfaces']
                     # These are sub-IPs so set their 'top' attribute to False
                     for interface in ip_interfaces:
@@ -2027,23 +2060,49 @@ def populate_property_interfaces(fins_data, verbose):
 
                     fins_data['prop_interfaces'][0]['interfaces'] += ip_interfaces
 
-    if 'nodes' in fins_data and len(fins_data['prop_interfaces']) > 0:
-        # For a Nodeset, create the properties clock domain and connect it to all properties interfaces
-        properties_clock = {
-                            'base_name':'properties',
-                            'clock':'properties_aclk',
-                            'resetn':'properties_aresetn',
-                            'period_ns':5,
-                            'nets':[]
-                           }
-        for node_interfaces in fins_data['prop_interfaces']:
-            for interface in node_interfaces['interfaces']:
-                properties_clock['nets'].append({'node_name':node_interfaces['node_name'], 'type':'prop_interface', 'interface':interface})
+    elif fins_data['schema_type'] == SchemaType.APPLICATION:
+        # If this is an Application, collect all of the properties interfaces for its Nodes
+        fins_data['prop_interfaces'] = []
+        for node in fins_data['nodes']:
+            if not node['descriptive_node'] and 'properties' in node['node_details']:
+                prop_interface = {}
+                prop_interface['node_name'] = node['module_name']
+                prop_interface['addr_width'] = node['node_details']['properties']['addr_width']
+                prop_interface['data_width'] = node['node_details']['properties']['data_width']
+                prop_interface['interfaces'] = node['node_details']['prop_interfaces'][0]['interfaces']
+                for interface in prop_interface['interfaces']:
+                    # The extended name is used when exporting an interface from an Application and includes the
+                    # name of the parent-IP (the one explicitly included in the Application)
+                    # For example, if the Application includes a Node name "top" with a sub-IP named "bottom", and
+                    # both have properties interfaces, the extended name will be "top_bottom"
+                    #
+                    # A Node with only a single interface will be named only by the module name
+                    # (e.g. just "top" in the above example)
+                    if len(prop_interface['interfaces']) > 1:
+                        interface['extended_name'] = node['module_name'] + '_' + interface['name']
+                    else:
+                        interface['extended_name'] = node['module_name']
 
-        fins_data['clocks'].append(properties_clock)
+                fins_data['prop_interfaces'].append(prop_interface)
 
-    if verbose:
-        print('Property interfaces for "{}": {}'.format(fins_data['name'], fins_data['prop_interfaces']))
+
+        if len(fins_data['prop_interfaces']) > 0:
+            # For an Application, create the properties clock domain and connect it to all properties interfaces
+            properties_clock = {
+                                'base_name':'properties',
+                                'clock':'properties_aclk',
+                                'resetn':'properties_aresetn',
+                                'period_ns':5,
+                                'nets':[]
+                               }
+            for node_interfaces in fins_data['prop_interfaces']:
+                for interface in node_interfaces['interfaces']:
+                    properties_clock['nets'].append({'node_name':node_interfaces['node_name'], 'type':'prop_interface', 'interface':interface})
+
+            fins_data['clocks'].append(properties_clock)
+
+        if verbose:
+            print('Property interfaces for "{}": {}'.format(fins_data['name'], fins_data['prop_interfaces']))
 
 
 def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
@@ -2080,13 +2139,12 @@ def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
     # Return
     return fins_data
 
-def post_generate_core_operations(fins_data, verbose):
+def post_generate_node_core(fins_data, verbose):
     """
-    Operations that must occur after the 'core' generation is complete, but before
-    backend generation starts
+    Operations that must occur after the 'core' generation is complete for a Node,
+    but before backend generation starts
     """
     # Read top-level HDL code and find the ports
     # NOTE: Must be executed after populate_fins_fields() and after populate_filesets()
-    if 'nodes' not in fins_data:
-        fins_data = populate_hdl_inferences(fins_data,verbose)
+    fins_data = populate_hdl_inferences(fins_data,verbose)
     return fins_data

@@ -1,6 +1,6 @@
 {#-
 --
--- Copyright (C) 2019 Geon Technologies, LLC
+-- Copyright (C) 2020 Geon Technologies, LLC
 --
 -- This file is part of FINS.
 --
@@ -25,7 +25,7 @@
 -- Backend:     {{ fins['backend'] }}
 -- Generated:   {{ now }}
 -- -------------------------------------------------------------
--- Description: Top-level testbench code stub for a FINS nodeset
+-- Description: Top-level testbench code stub for a FINS Application
 --==============================================================================
 
 -- Standard Libraries
@@ -55,7 +55,6 @@ entity {{ fins['name'] }}_tb is
   {%- if 'ports' in fins %}
   {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
   generic (
-    -- TODO codegen based on generics of component nodes? or params of nodeset?
     {%- for port in fins['ports']['ports'] %}
     {%-  set outer_loop = loop %}
     {%-  for i in range(port['num_instances']) %}
@@ -107,7 +106,7 @@ architecture behav of {{ fins['name'] }}_tb is
   {%-   set data_width = node_interfaces['data_width'] %}
 
   {%-   for interface in node_interfaces['interfaces'] %}
-  {%-    set iface_name = interface|axi4liteprefix(nodeset_external=True) %}
+  {%-    set iface_name = interface|axi4liteprefix(application_external=True) %}
   -- AXILite Interface "{{ iface_name }}" on node "{{ node_name }}"
   signal {{ iface_name }}_AWADDR  : std_logic_vector({{ addr_width }}-1 downto 0);
   signal {{ iface_name }}_AWPROT  : std_logic_vector(2 downto 0);
@@ -197,7 +196,7 @@ begin
       {%-  for node_interfaces in fins['prop_interfaces'] %}
       {%-   set node_name = node_interfaces['node_name'] %}
       {%-   for interface in node_interfaces['interfaces'] %}
-      {%-    set iface_name = interface|axi4liteprefix(nodeset_external=True) %}
+      {%-    set iface_name = interface|axi4liteprefix(application_external=True) %}
       {{ iface_name }}_AWADDR  => {{ iface_name }}_AWADDR ,
       {{ iface_name }}_AWPROT  => {{ iface_name }}_AWPROT ,
       {{ iface_name }}_AWVALID => {{ iface_name }}_AWVALID,
@@ -395,7 +394,7 @@ begin
     {%-  for node_interfaces in fins['prop_interfaces'] %}
     {%-   set node_name = node_interfaces['node_name'] %}
     {%-   for interface in node_interfaces['interfaces'] %}
-    {%-    set iface_name = interface|axi4liteprefix(nodeset_external=True) %}
+    {%-    set iface_name = interface|axi4liteprefix(application_external=True) %}
     {{ interface['name']|lower }}_axilite_verify (
       properties_aclk,   properties_aresetn,
       {{ iface_name }}_AWADDR, {{ iface_name }}_AWPROT, {{ iface_name }}_AWVALID, {{ iface_name }}_AWREADY,

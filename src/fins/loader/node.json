@@ -6,6 +6,10 @@
       "is_required":true,
       "types":["str"]
     },
+    "schema_type":{
+      "is_required":true,
+      "types":["int"]
+    },
     "description":{
       "is_required":false,
       "types":["str"]

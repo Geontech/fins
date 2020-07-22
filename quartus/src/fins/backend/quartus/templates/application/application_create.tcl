@@ -1,6 +1,6 @@
 {#-
  #
- # Copyright (C) 2019 Geon Technologies, LLC
+ # Copyright (C) 2020 Geon Technologies, LLC
  #
  # This file is part of FINS.
  #
@@ -21,14 +21,14 @@
 #===============================================================================
 # Firmware IP Node Specification (FINS) Auto-Generated File
 # ---------------------------------------------------------
-# Template:    nodeset_create.tcl
+# Template:    application_create.tcl
 # Backend:     {{ fins['backend'] }}
 # Generated:   {{ now }}
 # ---------------------------------------------------------
-# Description: TCL script for creating a nodeset compatible with
+# Description: TCL script for creating a Application compatible with
 #              Intel Quartus Platform Designer
 # Versions:    Tested with:
-#              * Intel Quartus Prime Pro 19.1
+#              * Intel Quartus Prime Pro 19.4
 #===============================================================================
 
 package require qsys
@@ -52,14 +52,14 @@ source ${QUARTUS_TO_ROOT}/{{ prebuild_script['path'] }}
 {%- endif %}
 {%- endif %}
 
-# Create the nodeset system and set the project properties
+# Create the Application Quartus system and set the project properties
 create_system {{ fins['name'] }}
 {%- if 'part' in fins %}
-set NODESET_DEVICE {{ fins['part'] }}
+set APPLICATION_DEVICE {{ fins['part'] }}
 {%- else %}
-set NODESET_DEVICE 10CX220YF780I5G
+set APPLICATION_DEVICE 10CX220YF780I5G
 {%- endif %}
-set_project_property DEVICE $NODESET_DEVICE
+set_project_property DEVICE $APPLICATION_DEVICE
 set_project_property HIDE_FROM_IP_CATALOG {false}
 set_use_testbench_naming_pattern 0 {}
 
@@ -123,12 +123,12 @@ set_interface_property {{ clock['resetn'] }} EXPORT_OF {{ reset_bridge_name }}.i
 set_interface_port_property {{ clock['resetn'] }} {{ clock['resetn'] }}_reset_n NAME {{ clock['resetn'] }}
 {%- endfor %}{#### for clock in fins['clocks'] ####}
 
-# Source FINS nodeset Tcl to instantiate FINS nodes and make connections to/between them
+# Source FINS Application Tcl to instantiate FINS nodes and make connections to/between them
 source ../../gen/quartus/nodes_instantiate.tcl
 
 {%- if 'ports' in fins %}
 {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
-# The following ports were exported (made external) from the nodeset
+# The following ports were exported (made external) from the Application
 {%-   for port in fins['ports']['ports'] %}
 {%-    for i in range(port['num_instances']) %}
 set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']|axisprefix(i) }}
@@ -138,11 +138,11 @@ set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }
 {%- endif %}
 
 {%- if 'prop_interfaces' in fins %}
-# The following property interfaces are exported for this nodeset
+# The following property interfaces are exported for this Application
 {%-  for node_interfaces in fins['prop_interfaces'] %}
 {%-   set node_name = node_interfaces['node_name'] %}
 {%-   for interface in node_interfaces['interfaces'] %}
-{%-    set external_iface_name = interface|axi4liteprefix(nodeset_external=True) %}
+{%-    set external_iface_name = interface|axi4liteprefix(application_external=True) %}
 {%-    set internal_iface_name = node_name + '.' + interface|axi4liteprefix() %}
 set_interface_property {{ external_iface_name }} EXPORT_OF {{ internal_iface_name }}
 {%-   endfor %}
