@@ -18,8 +18,8 @@
 #
 
 variables:
-    VIVADO_ENABLE: true
-    QUARTUS_ENABLE: true
+    VIVADO_ENABLE: 'true'
+    QUARTUS_ENABLE: 'true'
     VIVADO_VERSION: '2019.1'
     QUARTUS_VERSION: '19.4'
 stages:
@@ -51,7 +51,7 @@ vivado-test:
     extends: core-test
     only:
         variables:
-            [ $VIVADO_ENABLE ]
+            [ $VIVADO_ENABLE == 'true' ]
     script:
         - 'source /opt/fpga/Xilinx/Vivado/$VIVADO_VERSION/settings64.sh'
         - 'cd test/node'
@@ -67,7 +67,7 @@ quartus-test:
     extends: core-test
     only:
         variables:
-            [ $QUARTUS_ENABLE ]
+            [ $QUARTUS_ENABLE == 'true' ]
     script:
         - 'export PATH=$PATH:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/quartus/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/modelsim_ase/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/qsys/bin'
         - 'cd test/node'
