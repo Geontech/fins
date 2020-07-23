@@ -100,14 +100,14 @@ The AXI4-Lite buses and AXI4-Stream buses used in the top-level source file have
 To develop FINS templates or Python code, it is strongly recommended to use a virtual environment with an "editable" install:
 
 ```bash
-$ pip3 install virtualenv
+$ python3 -m pip install virtualenv
 $ python3 -m venv env
 $ source env/bin/activate
-$ pip3 install -e .
-$ pip3 install -e ./vivado
-$ pip3 install -e ./quartus
+$ python3 -m pip install -e .
+$ python3 -m pip install -e ./vivado
+$ python3 -m pip install -e ./quartus
 ```
-> NOTE: You may not have permissions to run the first `pip3` command here. To resolve this you can use the `--user` option or `sudo`.
+> NOTE: You may not have permissions to run the first `python3 -m pip` command here. To resolve this you can use the `--user` option or `sudo`.
 
 Any new code must be able to build and simulate the test IP for both Vivado and Quartus. To run both tests, execute the following commands:
 
