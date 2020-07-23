@@ -65,30 +65,29 @@ def run_generator(generator, filepath, backend, verbose):
     if os.path.dirname(filepath):
         target_dir = os.path.dirname(filepath)
 
-    if target_dir != '.' and verbose:
-        print('-- Temporarily changing directories to', os.path.dirname(filepath))
+    if target_dir != '.':
+        logging.info('-- Temporarily changing directories to', os.path.dirname(filepath))
 
     with cd(target_dir):
         # Load the fins_data and generate the backend
         generator.start_file(filename)
         fins_data = loader.load_json_file(filename, verbose)
 
-        # Determin the schema type (NODE, APPLICATION, SYSTEM)
+        # Determine the schema type (NODE, APPLICATION, SYSTEM)
         fins_data['schema_type'] = int(SchemaType.get(fins_data))
 
         if fins_data['schema_type'] == SchemaType.NODE:
             # This is a FINS IP/Node
-            fins_data = loader.validate_and_convert_fins_data(fins_data, filename, backend, verbose)
+            fins_data = loader.validate_and_convert_node_fins_data(fins_data, filename, backend, verbose)
 
             # Recursively call function on all sub-ip
             if 'ip' in fins_data:
                 for ip in fins_data['ip']:
-                    if verbose:
-                        print('Recursing into IP at', ip['fins_path'])
+                    logging.info('Recursing into IP at', ip['fins_path'])
                     ip['ip_details'] = run_generator(generator, ip['fins_path'], backend, verbose)
 
-            # Populate property interfaces
-            loader.populate_property_interfaces(fins_data, verbose)
+            loader.populate_fins_node(fins_data, verbose)
+            loader.validate_node_fins_data_final(fins_data, verbose)
 
             try:
                 # Run core generation, post core generation ops, and finally backend generation
@@ -105,19 +104,11 @@ def run_generator(generator, filepath, backend, verbose):
             # and then populate their contents in fins_data via loader.populate_fins_node
             for node in fins_data['nodes']:
                 if not node['descriptive_node']:
-                    if verbose:
-                        print('INFO: Recursing into node at "{}"'.format(node['fins_path']))
+                    logging.info('INFO: Recursing into node at "{}"'.format(node['fins_path']))
                     node['node_details'] = run_generator(generator, node['fins_path'], backend, verbose)
 
-                loader.populate_fins_application_node(node, verbose)
-
-            # Now that all nodes and their ports are loaded into fins_data,
-            # populate Application-specific content like port-connections,
-            # clock domains and connections, and port exports
             loader.populate_fins_application(fins_data, verbose)
-
-            # Populate property interfaces
-            loader.populate_property_interfaces(fins_data, verbose)
+            loader.validate_application_fins_data_final(fins_data, verbose)
 
             try:
                 # Run core generation, post core generation ops, and finally backend generation
@@ -129,10 +120,8 @@ def run_generator(generator, filepath, backend, verbose):
         else:  # schema_type == SchemaType.SYSTEM:
             fins_data = loader.validate_and_convert_system_fins_data(fins_data, filename, backend, verbose)
 
-            # Now that Node-JSON files have been generated for each component node
-            # load the Node JSON files and import their node data
-            for node in fins_data['nodes']:
-                loader.populate_fins_system_node(node, verbose)
+            loader.populate_fins_system(fins_data, verbose)
+            loader.validate_system_fins_data_final(fins_data, verbose)
 
             try:
                 # Run core generation, post core generation ops, and finally backend generation

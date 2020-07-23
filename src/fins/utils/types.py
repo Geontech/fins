@@ -32,6 +32,18 @@ class SchemaType:
     SYSTEM      = 3
 
     @classmethod
+    def get_str(cls, fins_data):
+        """
+        Given a FINS data dictionary, return its Schema Type as a string
+        """
+        if 'nodes' not in fins_data:
+            return "node"
+        elif 'is_application' in fins_data and fins_data['is_application']:
+            return "application"
+        else:
+            return "system"
+
+    @classmethod
     def get(cls, fins_data):
         """
         Given a FINS data dictionary, return its Schema Type

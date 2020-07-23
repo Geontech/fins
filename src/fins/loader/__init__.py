@@ -31,9 +31,16 @@ __all__ = (
     'load_fins_data'
 )
 
-SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/node.json'
+NODE_SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/node.json'
 APPLICATION_SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/application.json'
 SYSTEM_SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/system.json'
+
+SCHEMA_FILENAME = {
+    SchemaType.NODE:        NODE_SCHEMA_FILENAME,
+    SchemaType.APPLICATION: APPLICATION_SCHEMA_FILENAME,
+    SchemaType.SYSTEM:      SYSTEM_SCHEMA_FILENAME
+}
+
 SCHEMA_TYPES = ['int', 'float', 'bool', 'str', 'list', 'dict']
 SCHEMA_LIST_TYPES = ['int', 'float', 'bool', 'str', 'dict']
 SCHEMA_KEYS = ['is_required', 'types', 'list_types', 'fields']
@@ -478,7 +485,6 @@ def get_elem_with_name(fins_list, name, name_key="name"):
     """
     name_list = [n[name_key] for n in fins_list]
     if name not in name_list:
-        #raise ValueError("No element exists with {}={}'", name_key, name)
         return None
     elem_index = name_list.index(name)
     return fins_list[elem_index]
@@ -559,7 +565,6 @@ def get_net_type(net, fins_data, verbose):
         port     : the port that this net matches based on its node and name (None if this "net" is not a port in the Application)
 
     """
-    # TODO once clocks are exported/automated, there should be no connection nets without an associated 'node_name'
     net_type = None
     port = None
     if 'node_name' in net:
@@ -1316,6 +1321,15 @@ def populate_property_interfaces(fins_data, verbose):
             print('Property interfaces for "{}": {}'.format(fins_data['name'], fins_data['prop_interfaces']))
 
 
+def populate_fins_node(fins_data, verbose):
+    """
+    Modifies the contents of fins_data for a FINS Node.
+
+    Populate contents specific to a FINS Node.
+    """
+    populate_property_interfaces(fins_data, verbose)
+
+
 def populate_application_connections(fins_data, verbose):
     """
     Modifies the contents of fins_data for a FINS Application.
@@ -1351,7 +1365,6 @@ def populate_application_connections(fins_data, verbose):
                 # For port-to-port connections, perform error checks to ensure connection would be valid
                 if ((source['type'] == 'port' and destination['type'] == 'port') or
                     (source['type'] == 'hdl_port' and destination['type'] == 'hdl_port')):
-                    validate_connected_ports(source, destination, verbose)
                     # Flag port as 'connected'
                     source['port']['connected'] = True
                     destination['port']['connected'] = True
@@ -1456,8 +1469,10 @@ def populate_application_exports(fins_data, verbose):
                     for port in node['node_details']['ports']['ports']:
                         # The point of test_mode is to export all possible ports for test-purposes
                         # (as opposed to just the unconnected ports)
-                        # FIXME test_mode is gimmicky and should probably just be removed
-                        test_mode = 'test_mode' in fins_data and fins_data['test_mode']
+                        # FIXME test_mode would require a second testbench, etc.
+                        #$      Need to iron that out before making it an option
+                        # test_mode = 'test_mode' in fins_data and fins_data['test_mode']
+                        test_mode = False
 
                         # is this port part of a connection?
                         port_unconnected = 'connected' not in port or not port['connected']
@@ -1515,17 +1530,6 @@ def populate_application_exports(fins_data, verbose):
                             fins_data['ports']['hdl_ports'].append(application_port)
 
 
-def populate_fins_application(fins_data, verbose):
-    """
-    Modifies the contents of fins_data for a FINS Application.
-
-    Populate contents specific to an Application-level Application.
-    """
-    populate_application_connections(fins_data, verbose)
-    populate_application_clocks(fins_data, verbose)
-    populate_application_exports(fins_data, verbose)
-
-
 def populate_fins_application_node(node, verbose):
     """
     Modifies the contents of 'node' dictionary. Must be run after run_generator has been for this Node.
@@ -1540,6 +1544,21 @@ def populate_fins_application_node(node, verbose):
 
     node['fins_dir'] = os.path.dirname(node['fins_path']) #node_dir
     node['node_name'] = node['node_details']['name']
+
+
+def populate_fins_application(fins_data, verbose):
+    """
+    Modifies the contents of fins_data for a FINS Application.
+
+    Populate contents specific to a FINS Application.
+    """
+    for node in fins_data['nodes']:
+        populate_fins_application_node(node, verbose)
+
+    populate_application_connections(fins_data, verbose)
+    populate_application_clocks(fins_data, verbose)
+    populate_application_exports(fins_data, verbose)
+    populate_property_interfaces(fins_data, verbose)
 
 
 def populate_fins_system_node(node, verbose):
@@ -1629,6 +1648,16 @@ def populate_fins_system_node(node, verbose):
     else:
         node['ports_consumer_name'] = ''
         node['ports_consumer'] = {}
+
+
+def populate_fins_system(fins_data, verbose):
+    """
+    Modifies the contents of fins_data for a FINS System.
+
+    Populate contents specific to a FINS System.
+    """
+    for node in fins_data['nodes']:
+        populate_fins_system_node(node, verbose)
 
 
 ################################################################################
@@ -1795,6 +1824,36 @@ def validate_files(fins_name,filename,file_list,allowed_types,verbose):
             print('PASS:',filepath)
 
 
+def validate_filesets(fins_data,filename,verbose):
+    # Validate filesets
+    if verbose:
+        print('+++++ Validating filesets of {} ...'.format(filename))
+
+    if 'source' in fins_data['filesets']:
+        validate_files(fins_data['name'],filename,fins_data['filesets']['source'],QUARTUS_DESIGN_FILE_TYPES,verbose)
+    elif fins_data['schema_type'] == SchemaType.NODE:
+        print('ERROR: Nodes must include the "source" fileset')
+        sys.exit(1)
+
+    if 'sim' in fins_data['filesets']:
+        validate_files(fins_data['name'],filename,fins_data['filesets']['sim'],QUARTUS_DESIGN_FILE_TYPES,verbose)
+    if 'constraints' in fins_data['filesets']:
+        validate_files(fins_data['name'],filename,fins_data['filesets']['constraints'],CONSTRAINT_FILE_TYPES,verbose)
+    if 'scripts' in fins_data['filesets']:
+        if 'vendor_ip' in fins_data['filesets']['scripts']:
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['vendor_ip'],VENDOR_SCRIPT_FILE_TYPES,verbose)
+        if 'presim' in fins_data['filesets']['scripts']:
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['presim'],SCRIPT_FILE_TYPES,verbose)
+        if 'postsim' in fins_data['filesets']['scripts']:
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['postsim'],SCRIPT_FILE_TYPES,verbose)
+        if 'prebuild' in fins_data['filesets']['scripts']:
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['prebuild'],SCRIPT_FILE_TYPES,verbose)
+        if 'postbuild' in fins_data['filesets']['scripts']:
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['postbuild'],SCRIPT_FILE_TYPES,verbose)
+    if verbose:
+        print('+++++ Done.')
+
+
 def validate_ip(fins_data,verbose):
     # Collect parent parameter names
     parent_names = []
@@ -1890,36 +1949,10 @@ def validate_ports(fins_data,verbose):
             sys.exit(1)
 
 
-def validate_filesets(fins_data,filename,verbose):
-    # Validate filesets
+def validate_fins_data(fins_data, filename, verbose):
     if verbose:
-        print('+++++ Validating filesets of {} ...'.format(filename))
-    if 'source' in fins_data['filesets']:
-        # TODO error if 'source' is not present for a Node
-        validate_files(fins_data['name'],filename,fins_data['filesets']['source'],QUARTUS_DESIGN_FILE_TYPES,verbose)
-    if 'sim' in fins_data['filesets']:
-        validate_files(fins_data['name'],filename,fins_data['filesets']['sim'],QUARTUS_DESIGN_FILE_TYPES,verbose)
-    if 'constraints' in fins_data['filesets']:
-        validate_files(fins_data['name'],filename,fins_data['filesets']['constraints'],CONSTRAINT_FILE_TYPES,verbose)
-    if 'scripts' in fins_data['filesets']:
-        if 'vendor_ip' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['vendor_ip'],VENDOR_SCRIPT_FILE_TYPES,verbose)
-        if 'presim' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['presim'],SCRIPT_FILE_TYPES,verbose)
-        if 'postsim' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['postsim'],SCRIPT_FILE_TYPES,verbose)
-        if 'prebuild' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['prebuild'],SCRIPT_FILE_TYPES,verbose)
-        if 'postbuild' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['postbuild'],SCRIPT_FILE_TYPES,verbose)
-    if verbose:
-        print('+++++ Done.')
-
-
-def validate_fins_data(fins_data,filename,verbose):
-    if verbose:
-        print('+++++ Loading node.json ...')
-    with open(SCHEMA_FILENAME) as schema_data:
+        print('+++++ Loading JSON ...')
+    with open(SCHEMA_FILENAME[fins_data['schema_type']]) as schema_data:
         fins_schema = json.load(schema_data)
     if verbose:
         print('+++++ Done.')
@@ -1927,14 +1960,14 @@ def validate_fins_data(fins_data,filename,verbose):
     # Validate the schema itself
     if verbose:
         print('+++++ Validating node.json ...')
-    validate_schema('schema',fins_schema,verbose)
+    validate_schema('schema', fins_schema, verbose)
     if verbose:
         print('+++++ Done.')
 
     # Validate the FINS Node JSON file with the schema
     if verbose:
         print('+++++ Validating {} ...'.format(filename))
-    validate_fins('node',fins_data,fins_schema,verbose)
+    validate_fins(SchemaType.get_str(fins_data), fins_data, fins_schema, verbose)
     if verbose:
         print('+++++ Done.')
 
@@ -1942,7 +1975,7 @@ def validate_fins_data(fins_data,filename,verbose):
     if 'ip' in fins_data:
         if verbose:
             print('+++++ Validating ip of {} ...'.format(filename))
-        validate_ip(fins_data,verbose)
+        validate_ip(fins_data, verbose)
         if verbose:
             print('+++++ Done.')
 
@@ -1950,7 +1983,7 @@ def validate_fins_data(fins_data,filename,verbose):
     if 'properties' in fins_data:
         if verbose:
             print('+++++ Validating properties of {} ...'.format(filename))
-        validate_properties(fins_data,verbose)
+        validate_properties(fins_data, verbose)
         if verbose:
             print('+++++ Done.')
 
@@ -1958,7 +1991,7 @@ def validate_fins_data(fins_data,filename,verbose):
     if 'ports' in fins_data:
         if verbose:
             print('+++++ Validating ports of {} ...'.format(filename))
-        validate_ports(fins_data,verbose)
+        validate_ports(fins_data, verbose)
         if verbose:
             print('+++++ Done.')
 
@@ -1988,9 +2021,9 @@ def _override_fins_data(fins_data,origfile,filename,verbose):
     return fins_data
 
 
-def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
+def validate_and_convert_node_fins_data(fins_data,filename,backend,verbose):
     """
-    Validates and converts data from a Firmware IP Node Specification JSON file
+    Validates and converts data from a FINS Node JSON file
     """
     # Validate the FINS Node JSON using the node.json file
     validate_fins_data(fins_data,filename,verbose)
@@ -2023,78 +2056,100 @@ def validate_and_convert_fins_data(fins_data,filename,backend,verbose):
     return fins_data
 
 
-def validate_connected_ports(source, destination, verbose):
+def validate_node_fins_data_final(fins_data, verbose):
     """
-    Given two connection endpoints that are both ports, confirm that a connection between these ports
-    would be valid
+    Final validation of the Node fins_data dictionary before
+    generation is run for the Node
+    """
+    # Placeholder function
+    pass
 
-    Check that the following fields match between the two ports:
+
+def validate_application_connections(fins_data, verbose):
+    """
+    For each pair of connection endpoints that are both ports,
+    confirm that a connection between these ports would be valid
+
+    Check that the following fields match within each pair of ports:
         supports_backpressure, num_instances, metadata, and data fields
     Confirm that the 'direction' field is opposite between the two connections.
 
     If the source and destination ports are a mistmatch, print a helpful error message and exit.
     """
-    src_port = source['port']
-    dst_port = destination['port']
-    src_name = source['node_name'] + '.' + source['net']
-    dst_name = destination['node_name'] + '.' + destination['net']
-    src_type = source['type']
-    dst_type = destination['type']
+    if 'connections' in fins_data:
+        for connection in fins_data['connections']:
+            source = connection['source']
+            for destination in connection['destinations']:
+                src_port = source['port']
+                dst_port = destination['port']
+                src_name = source['node_name'] + '.' + source['net']
+                dst_name = destination['node_name'] + '.' + destination['net']
+                src_type = source['type']
+                dst_type = destination['type']
 
-    if ((src_type == 'hdl_port' and dst_type == 'hdl_port') and
-        src_port['bit_width'] != dst_port['bit_width']):
-        print('ERROR: HDL Ports in connection ({}->{}) do not have the same width'.format(src_name, dst_name))
-        sys.exit(1)
-    elif ((src_type == 'hdl_port' and dst_type == 'port') or
-          (src_type == 'port' and dst_type == 'hdl_port')):
-        print('ERROR: One port is HDL and the other is AXIS in connection ({}->{})'.format(src_name, dst_name))
-        sys.exit(1)
-    elif src_port['supports_backpressure'] != dst_port['supports_backpressure']:
-        print('ERROR: One port in connection ({}->{}) supports backpressure, but the other does not'.format(src_name, dst_name))
-        sys.exit(1)
-    elif src_port['num_instances'] != dst_port['num_instances']:
-        print('ERROR: Ports in connection ({}->{}) have different number of instances'.format(src_name, dst_name))
-        sys.exit(1)
-    elif (('metadata' in src_port and 'metadata' not in dst_port) or
-          ('metadata' not in src_port and 'metadata' in dst_port) or
-          ('metadata' in src_port and 'metadata' in dst_port and src_port['metadata'] != dst_port['metadata'])):
-        print('ERROR: Metadata does not match on ports in connection ({}->{})'.format(src_name, dst_name))
-        sys.exit(1)
-    elif src_port['direction'] == dst_port['direction']:
-        print('ERROR: Ports of the same direction cannot be connected ({}->{})'.format(src_name, dst_name))
-        sys.exit(1)
-    elif src_port['data'] != dst_port['data']:
-        print('ERROR: Data type or width mismatch between ports in connection ({}->{})'.format(src_name, dst_name))
-        sys.exit(1)
+                if ((src_type == 'hdl_port' and dst_type == 'hdl_port') and
+                    src_port['bit_width'] != dst_port['bit_width']):
+                    print('ERROR: HDL Ports in connection ({}->{}) do not have the same width'.format(src_name, dst_name))
+                    sys.exit(1)
+                elif ((src_type == 'hdl_port' and dst_type == 'port') or
+                      (src_type == 'port' and dst_type == 'hdl_port')):
+                    print('ERROR: One port is HDL and the other is AXIS in connection ({}->{})'.format(src_name, dst_name))
+                    sys.exit(1)
+                elif src_port['supports_backpressure'] != dst_port['supports_backpressure']:
+                    print('ERROR: One port in connection ({}->{}) supports backpressure, but the other does not'.format(src_name, dst_name))
+                    sys.exit(1)
+                elif src_port['num_instances'] != dst_port['num_instances']:
+                    print('ERROR: Ports in connection ({}->{}) have different number of instances'.format(src_name, dst_name))
+                    sys.exit(1)
+                elif (('metadata' in src_port and 'metadata' not in dst_port) or
+                      ('metadata' not in src_port and 'metadata' in dst_port) or
+                      ('metadata' in src_port and 'metadata' in dst_port and src_port['metadata'] != dst_port['metadata'])):
+                    print('ERROR: Metadata does not match on ports in connection ({}->{})'.format(src_name, dst_name))
+                    sys.exit(1)
+                elif src_port['direction'] == dst_port['direction']:
+                    print('ERROR: Ports of the same direction cannot be connected ({}->{})'.format(src_name, dst_name))
+                    sys.exit(1)
+                elif src_port['data'] != dst_port['data']:
+                    print('ERROR: Data type or width mismatch between ports in connection ({}->{})'.format(src_name, dst_name))
+                    sys.exit(1)
 
 
-def validate_and_convert_application_fins_data(fins_data,filename,backend,verbose):
+def validate_application_ports(fins_data, verbose):
     """
-    Validates and converts data from a Firmware Application Specification JSON build file
+    Run port verification for Application ports.
+    This function first calls the standard (Node) validate_ports()
+    and then verifies that each port also has an associated Application clock
     """
-    # Read the Application schema data
-    if verbose:
-        print('+++++ Loading Application JSON ...')
-    with open(APPLICATION_SCHEMA_FILENAME) as schema_data:
-        fins_schema = json.load(schema_data)
-    if verbose:
-        print('+++++ Done.')
 
-    # Validate the FINS Node JSON file with the schema
-    if verbose:
-        print('+++++ Validating {} ...'.format(filename))
-    validate_fins('application',fins_data,fins_schema,verbose)
-    if verbose:
-        print('+++++ Done.')
+    validate_ports(fins_data, verbose)
+
+    if 'ports' in fins_data['ports']:
+        for port in fins_data['ports']['ports']:
+            # if this port has no clock, or if the clock is not found in fins_data's clocks list, error
+            if 'clock' not in port or get_elem_with_name(fins_data['clocks'], port['clock'], name_key='clock') is None:
+                print('ERROR: Port {} is not connected to a valid clock source'.format(port['name']))
+                sys.exit(1)
+
+def validate_and_convert_application_fins_data(fins_data, filename, backend, verbose):
+    """
+    Validates and converts data from a FINS Application JSON file
+    """
+    validate_fins_data(fins_data, filename, verbose)
 
     # Set the backend used for generation
     fins_data['backend'] = backend
 
+    # Override the FINS Node JSON data with a .override file if it exists
+    fins_data = _override_fins_data(fins_data, filename, os.path.basename(filename)+'.override', verbose)
+
+    # Replace any linked parameters with their literal values
+    fins_data = convert_parameters_to_literal(fins_data, verbose)
+
     # Set defaults for top-level keys
-    fins_data = populate_fins_fields(fins_data,verbose)
+    fins_data = populate_fins_fields(fins_data, verbose)
 
     # Auto-detect file types
-    fins_data = populate_filesets(fins_data,verbose)
+    fins_data = populate_filesets(fins_data, verbose)
 
     for node in fins_data['nodes']:
         # Set per-node defaults
@@ -2103,39 +2158,32 @@ def validate_and_convert_application_fins_data(fins_data,filename,backend,verbos
         if 'descriptive_node' not in node:
             node['descriptive_node'] = False
 
-    # Override the FINS Node JSON data with a .override file if it exists
-    fins_data = _override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
-
-    # Replace any linked parameters with their literal values
-    fins_data = convert_parameters_to_literal(fins_data,verbose)
-
     return fins_data
 
 
-def validate_and_convert_system_fins_data(fins_data,filename,backend,verbose):
+def validate_application_fins_data_final(fins_data, verbose):
     """
-    Validates and converts data from a Firmware System Specification JSON build file
+    Final validation of the Application fins_data dictionary before
+    generation is run for the Application
     """
-    # Read the System schema data
-    if verbose:
-        print('+++++ Loading System JSON ...')
-    with open(SYSTEM_SCHEMA_FILENAME) as schema_data:
-        fins_schema = json.load(schema_data)
-    if verbose:
-        print('+++++ Done.')
+    validate_application_ports(fins_data, verbose)
+    validate_application_connections(fins_data, verbose)
 
-    # Validate the FINS Node JSON file with the schema
-    if verbose:
-        print('+++++ Validating {} ...'.format(filename))
-    validate_fins('system',fins_data,fins_schema,verbose)
-    if verbose:
-        print('+++++ Done.')
+
+def validate_and_convert_system_fins_data(fins_data, filename, backend, verbose):
+    """
+    Validates and converts data from a FINS System JSON file
+    """
+    validate_fins_data(fins_data, filename, verbose)
 
     # Set the backend used for generation
     fins_data['backend'] = backend
 
+    # Replace any linked parameters with their literal values
+    fins_data = convert_parameters_to_literal(fins_data, verbose)
+
     # Set defaults for top-level keys
-    fins_data = populate_fins_fields(fins_data,verbose)
+    fins_data = populate_fins_fields(fins_data, verbose)
 
     # Set defaults for System-specific top-level keys
     if 'base_offset' not in fins_data:
@@ -2152,10 +2200,15 @@ def validate_and_convert_system_fins_data(fins_data,filename,backend,verbose):
         if 'descriptive_node' not in node:
             node['descriptive_node'] = True
 
-    # Replace any linked parameters with their literal values
-    fins_data = convert_parameters_to_literal(fins_data,verbose)
-
     return fins_data
+
+def validate_system_fins_data_final(fins_data, verbose):
+    """
+    Final validation of the System fins_data dictionary before
+    generation is run for the System
+    """
+    # Placeholder function
+    pass
 
 
 def post_generate_node_core(fins_data, verbose):
