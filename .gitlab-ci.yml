@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019 Geon Technologies, LLC
+# Copyright (C) 2020 Geon Technologies, LLC
 #
 # This file is part of FINS.
 #
@@ -18,12 +18,15 @@
 #
 
 variables:
+    VIVADO_ENABLE: true
+    QUARTUS_ENABLE: true
     VIVADO_VERSION: '2019.1'
     QUARTUS_VERSION: '19.4'
 stages:
     - test
 image: centos:7
-test:
+
+core-test:
     stage: test
     before_script:
         - 'yum install -y epel-release'
@@ -33,21 +36,42 @@ test:
         - 'python3 -m pip install ./vivado'
         - 'python3 -m pip install ./quartus'
     script:
-        - 'source /opt/fpga/Xilinx/Vivado/$VIVADO_VERSION/settings64.sh'
-        - 'export PATH=$PATH:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/quartus/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/modelsim_ase/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/qsys/bin'
         - 'cd test/node'
-        - 'fins -b vivado fins.json && make sim && make clean-all'
-        - 'fins -b quartus fins.json && make sim && make clean-all'
+        - 'fins fins.json'
         - 'cd ../application'
-        - 'fins -b vivado application_test.json'
-        - 'fins -b quartus application_test.json && make sim && make clean-all'
-        - 'cd ../system'
-        - 'make && fins stratix10_system.json && make clean'
+        - 'fins application_test.json'
         - 'cd ../../tutorials/power_converter'
-        - 'fins -b vivado fins.json && make sim && make clean-all'
-        - 'fins -b quartus fins.json && make sim && make clean-all'
+        - 'fins fins.json'
         - 'cd ../power_application'
-        - 'fins -b vivado fins.json'
-        - 'fins -b quartus fins.json && make sim && make clean-all'
+        - 'fins fins.json'
     tags:
         - fpga
+
+vivado-test:
+    extends: core-test
+    only:
+        variables: $VIVADO_ENABLE
+            - 'source /opt/fpga/Xilinx/Vivado/$VIVADO_VERSION/settings64.sh'
+            - 'cd test/node'
+            - 'fins -b vivado fins.json && make sim && make clean-all'
+            - 'cd ../application'
+            - 'fins -b vivado application_test.json'
+            - 'cd ../../tutorials/power_converter'
+            - 'fins -b vivado fins.json && make sim && make clean-all'
+            - 'cd ../power_application'
+            - 'fins -b vivado fins.json'
+
+quartus-test:
+    extends: core-test
+    only:
+        variables: $QUARTUS_ENABLE
+            - 'export PATH=$PATH:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/quartus/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/modelsim_ase/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/qsys/bin'
+            - 'cd test/node'
+            - 'fins -b quartus fins.json && make sim && make clean-all'
+            - 'cd ../application'
+            - 'fins -b quartus fins.json && make sim && make clean-all'
+            - 'cd ../../tutorials/power_converter'
+            - 'fins -b quartus fins.json && make sim && make clean-all'
+            - 'cd ../power_application'
+            - 'fins -b vivado fins.json'
+            - 'fins -b quartus fins.json && make sim && make clean-all'
