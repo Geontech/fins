@@ -132,13 +132,13 @@ architecture behav of {{ fins['name'] }}_tb is
   {%- endif %}{#### if 'prop_interfaces' in fins ####}
 
   {% if 'ports' in fins %}
-  {%-  if 'hdl_ports' in fins['ports'] and fins['ports']['hdl_ports']|length > 0 %}
+  {%-  if 'hdl' in fins['ports'] and fins['ports']['hdl']|length > 0 %}
   -- Discrete HDL Ports
-  {%-   for hdl_port in fins['ports']['hdl_ports'] %}
+  {%-   for hdl_port in fins['ports']['hdl'] %}
   {%-    if hdl_port['bit_width'] > 1 %}
-  signal {{ hdl_port['name'] }} : std_logic_vector({{ hdl_port['bit_width'] }}-1 downto 0);
+  signal {{ hdl_port['name'] }}_data : std_logic_vector({{ hdl_port['bit_width'] }}-1 downto 0);
   {%-    else %}
-  signal {{ hdl_port['name'] }} : std_logic;
+  signal {{ hdl_port['name'] }}_data : std_logic;
   {%-    endif %}
   {%-   endfor %}
   {%-  endif %}
@@ -189,7 +189,6 @@ begin
   --------------------------------------------------------------------------------
   -- Device Under Test
   --------------------------------------------------------------------------------
-  -- TODO last comma? three different possible loops
   u_dut : entity work.{{ fins['name'] }}
     port map (
       {%- if 'prop_interfaces' in fins %}
@@ -221,12 +220,12 @@ begin
       {%- endif %}{#### if 'prop_interfaces' in fins ####}
 
       {%- if 'ports' in fins %}
-      {%-  if 'hdl_ports' in fins['ports'] and fins['ports']['hdl_ports']|length > 0 %}
+      {%-  if 'hdl' in fins['ports'] and fins['ports']['hdl']|length > 0 %}
       -- Discrete HDL Ports
-      {%-   for hdl_port in fins['ports']['hdl_ports'] %}
-      {{ hdl_port['name'] }} => {{ hdl_port['name'] }} ,
-      {%-   endfor %}{#### for hdl_port in fins['ports']['hdl_ports'] ####}
-      {%-  endif  %}{#### if 'hdl_ports' in fins['ports'] ####}
+      {%-   for hdl_port in fins['ports']['hdl'] %}
+      {{ hdl_port['name'] }}_data => {{ hdl_port['name'] }}_data ,
+      {%-   endfor %}{#### for hdl_port in fins['ports']['hdl'] ####}
+      {%-  endif  %}{#### if 'hdl' in fins['ports'] ####}
 
       {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
       {%-   for port in fins['ports']['ports'] %}

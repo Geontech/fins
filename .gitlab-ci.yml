@@ -39,6 +39,7 @@ test:
         - 'fins -b vivado fins.json && make sim && make clean-all'
         - 'fins -b quartus fins.json && make sim && make clean-all'
         - 'cd ../application'
+        - 'fins -b vivado application_test.json'
         - 'fins -b quartus application_test.json && make sim && make clean-all'
         - 'cd ../system'
         - 'make && fins stratix10_system.json && make clean'
@@ -46,6 +47,7 @@ test:
         - 'fins -b vivado fins.json && make sim && make clean-all'
         - 'fins -b quartus fins.json && make sim && make clean-all'
         - 'cd ../power_application'
+        - 'fins -b vivado fins.json'
         - 'fins -b quartus fins.json && make sim && make clean-all'
     tags:
         - fpga

@@ -105,16 +105,21 @@ IP_SEARCH_PATHS:=$(IP_SEARCH_PATHS)$(QUARTUS_TO_ROOT)/{{ fins['user_ip_catalog']
 # Filenames
 PROJECT_FILENAME:={{ fins['name'] }}.qpf
 QSYS_IP_FILENAME:={{ fins['name'] }}.ip
+IP_PROJECT_SCRIPT_FILENAME:=ip_project.tcl
+IP_PROJECT_LOG_FILENAME:=ip_project.log
 IP_CREATE_SCRIPT_FILENAME:=ip_create.tcl
 IP_CREATE_LOG_FILENAME:=ip_create.log
 IP_SIMULATE_SCRIPT_FILENAME:=ip_simulate.tcl
 IP_SIMULATE_LOG_FILENAME:=ip_simulate.log
 
 # Paths relative to the IP root
+IP_PROJECT_LOG_PATH:=$(LOGS_DIR)/$(IP_PROJECT_LOG_FILENAME)
 IP_CREATE_LOG_PATH:=$(LOGS_DIR)/$(IP_CREATE_LOG_FILENAME)
 IP_SIMULATE_LOG_PATH:=$(LOGS_DIR)/$(IP_SIMULATE_LOG_FILENAME)
 
 # Paths relative to the other paths
+QUARTUS_TO_IP_PROJECT_SCRIPT_PATH:=$(QUARTUS_TO_ROOT)/$(FINS_OUTPUT_DIR)/$(IP_PROJECT_SCRIPT_FILENAME)
+QUARTUS_TO_IP_PROJECT_LOG_PATH:=$(QUARTUS_TO_ROOT)/$(IP_PROJECT_LOG_PATH)
 QUARTUS_TO_IP_CREATE_SCRIPT_PATH:=$(QUARTUS_TO_ROOT)/$(FINS_OUTPUT_DIR)/$(IP_CREATE_SCRIPT_FILENAME)
 QUARTUS_TO_IP_CREATE_LOG_PATH:=$(QUARTUS_TO_ROOT)/$(IP_CREATE_LOG_PATH)
 QUARTUS_TO_IP_SIMULATE_LOG_PATH:=$(QUARTUS_TO_ROOT)/$(IP_SIMULATE_LOG_PATH)
@@ -207,7 +212,8 @@ endif
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
-	cd $(QUARTUS_DIR) && qsys-script --search-path=$(IP_SEARCH_PATHS)$$ --new-quartus-project=$(PROJECT_FILENAME) --script=$(QUARTUS_TO_IP_CREATE_SCRIPT_PATH) $(if $(UseBatch),>> $(QUARTUS_TO_IP_CREATE_LOG_PATH) 2>&1)
+	cd $(QUARTUS_DIR) && quartus_sh -t $(QUARTUS_TO_IP_PROJECT_SCRIPT_PATH)$ $(if $(UseBatch),>> $(QUARTUS_TO_IP_PROJECT_LOG_PATH) 2>&1)
+	cd $(QUARTUS_DIR) && qsys-script --search-path=$(IP_SEARCH_PATHS)$$ --quartus-project=$(PROJECT_FILENAME) --script=$(QUARTUS_TO_IP_CREATE_SCRIPT_PATH) $(if $(UseBatch),>> $(QUARTUS_TO_IP_CREATE_LOG_PATH) 2>&1)
 	cd $(QUARTUS_DIR) && qsys-generate --search-path=$(IP_SEARCH_PATHS)$$ --quartus-project=$(PROJECT_FILENAME) --synthesis=$(SYNTH_LANGUAGE) {% if 'filesets' in fins %}{% if 'sim' in fins['filesets'] %}--simulation=$(SIM_LANGUAGE){% endif %}{% endif %} --ipxact $(QSYS_IP_FILENAME) $(if $(UseBatch),>> $(QUARTUS_TO_IP_CREATE_LOG_PATH) 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}

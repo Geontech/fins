@@ -41,6 +41,7 @@ class QuartusGenerator(Generator):
 
         # Generate Quartus targets
         self.render_jinja_template(jinja_env,'Makefile',root_dir+'Makefile',fins_data)
+        self.render_jinja_template(jinja_env,'ip_project.tcl',output_dir+'ip_project.tcl',fins_data)
         self.render_jinja_template(jinja_env,'ip_create.tcl',output_dir+'ip_create.tcl',fins_data)
         self.render_jinja_template(jinja_env,'ip_hw.tcl',output_dir+'ip_hw.tcl',fins_data)
         self.render_jinja_template(jinja_env,'ip_simulate.tcl',output_dir+'ip_simulate.tcl',fins_data)

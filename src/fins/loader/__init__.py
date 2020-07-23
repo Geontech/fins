@@ -558,8 +558,8 @@ def get_any_port(node_name, port_name, fins_data):
 
 def get_net_type(net, fins_data, verbose):
     """
-    Given a net, return its type and its port (if the type is 'port' or 'hdl_port')
-        net_type : 'port' if the net is actually a node's port, 'hdl_port' if the net is an HDL port on a node,
+    Given a net, return its type and its port (if the type is 'port' or 'hdl')
+        net_type : 'port' if the net is actually a node's port, 'hdl' if the net is an HDL port on a node,
                      otherwise the signal-type of this net ('clock' or 'reset')
                     None if the net is just a type-less signal
         port     : the port that this net matches based on its node and name (None if this "net" is not a port in the Application)
@@ -576,8 +576,7 @@ def get_net_type(net, fins_data, verbose):
         else:
             port = get_hdl_port(net['node_name'], net['net'], fins_data)
             if port is not None:
-                net_type = 'hdl_port'
-                #return 'hdl_port', port
+                net_type = 'hdl'
 
     if net_type is None:
         # Determine if the source net has an associated type (clock/reset...) and if so, get it
@@ -1347,8 +1346,8 @@ def populate_application_connections(fins_data, verbose):
         Here, each source-dict and destination-dict follows the same format:
             node_name
             net = which net on the node should be connected
-            type = port, hdl_port, or a signal
-            port = if type is port or hdl_port, this is the actual port (dict) as found in the containing node
+            type = port or hdl
+            port = if type is port or hdl, this is the actual port (dict) as found in the containing node
             connected = flagged as True for any ports that have one or more connections
     """
 
@@ -1364,7 +1363,7 @@ def populate_application_connections(fins_data, verbose):
                 destination['type'], destination['port'] = get_net_type(destination, fins_data, verbose)
                 # For port-to-port connections, perform error checks to ensure connection would be valid
                 if ((source['type'] == 'port' and destination['type'] == 'port') or
-                    (source['type'] == 'hdl_port' and destination['type'] == 'hdl_port')):
+                    (source['type'] == 'hdl' and destination['type'] == 'hdl')):
                     # Flag port as 'connected'
                     source['port']['connected'] = True
                     destination['port']['connected'] = True
@@ -1408,13 +1407,17 @@ def populate_application_clocks(fins_data, verbose):
         nets = clock['nets']
         for net in nets:
             net['type'], net['port'] = get_net_type(net, fins_data, verbose)
-            if (net['type'] == 'hdl_port' and
+            if verbose:
+                print('Connecting clock "{}" to port "{}" of type "{}"'.format(clock['clock'], net['port']['name'], net['type']))
+            if (net['type'] == 'hdl' and
                 (get_signal_type(net['net'], verbose) != 'clock' or net['port']['bit_width'] != 1)):
-                print('ERROR: To connect hdl_port "{}" to a clock it must be named as a clock and must have bit_width=1'.format(net['net']))
+                print('ERROR: To connect "hdl" port "{}" to a clock it must be named as a clock and must have bit_width=1'.format(net['net']))
                 sys.exit(1)
             elif net['type'] == 'port':
                 net['port']['clock'] = clock['clock']
                 net['port']['resetn'] = clock['resetn']
+            elif net['type'] == 'hdl':
+                net['port']['clock'] = clock['clock']
 
 
 def populate_application_exports(fins_data, verbose):
@@ -1423,10 +1426,10 @@ def populate_application_exports(fins_data, verbose):
 
     Export ports that should be exposed externally from the Application.
     "Exporting" is another way of saying "make this an external port/interface of this Application"
-    Exported ports are added to the fins_data['ports']['ports'] or fins_data['ports']['hdl_ports'] lists
+    Exported ports are added to the fins_data['ports']['ports'] or fins_data['ports']['hdl'] lists
 
-    By default, export all unconnected ports (ports and hdl_ports). If port_exports
-    or hdl_port_exports is specified in the Application JSON, only export the ports listed
+    By default, export all unconnected ports (ports and 'hdl' ports). If port_exports
+    or hdl_exports is specified in the Application JSON, only export the ports listed
     in those fields.
 
     An exported port is a copied version of the original Node port with a few modified/extra fields:
@@ -1467,35 +1470,27 @@ def populate_application_exports(fins_data, verbose):
 
                 if 'ports' in node['node_details']['ports']:
                     for port in node['node_details']['ports']['ports']:
-                        # The point of test_mode is to export all possible ports for test-purposes
-                        # (as opposed to just the unconnected ports)
-                        # FIXME test_mode would require a second testbench, etc.
-                        #$      Need to iron that out before making it an option
-                        # test_mode = 'test_mode' in fins_data and fins_data['test_mode']
-                        test_mode = False
-
                         # is this port part of a connection?
                         port_unconnected = 'connected' not in port or not port['connected']
 
                         # if port is unconnected, export it
-                        #     if in test-mode and this is an output port, export it even if it is connected
-                        if port_unconnected or (test_mode and port['direction'] == 'out'):
+                        if port_unconnected:
                             application_port = port.copy()
                             application_port['name'] = node['module_name'] + '_' + port['name']
                             application_port['node_name'] = node['module_name']
                             application_port['node_port'] = port
                             fins_data['ports']['ports'].append(application_port)
 
-    # Export hdl_ports as hdl_ports of the Application itself
-    if 'hdl_port_exports' in fins_data:
+    # Export hdl ports as hdl ports of the Application itself
+    if 'hdl_exports' in fins_data:
         if 'ports' not in fins_data:
             fins_data['ports'] = {}
-        fins_data['ports']['hdl_ports'] = []
+        fins_data['ports']['hdl'] = []
 
-        for net in fins_data['hdl_port_exports']:
-            # Get the hdl_port to export, copy it, change/add some information,
-            # and add it to the Application's hdl_ports list
-            port = get_port(net['node_name'], net['net'], fins_data, port_type='hdl_ports')
+        for net in fins_data['hdl_exports']:
+            # Get the hdl port to export, copy it, change/add some information,
+            # and add it to the Application's hdl ports list
+            port = get_port(net['node_name'], net['net'], fins_data, port_type='hdl')
             if port is None:
                 print('ERROR: Exported port not found {}'.format(net['net']))
                 sys.exit(1)
@@ -1504,30 +1499,34 @@ def populate_application_exports(fins_data, verbose):
             application_port['name'] = net['node_name'] + '_' + port['name']
             application_port['node_name'] = net['node_name']
             application_port['node_port'] = port
-            fins_data['ports']['hdl_ports'].append(application_port)
+            fins_data['ports']['hdl'].append(application_port)
     else:
-        # If hdl_port_exports isn't present in the JSON, export all unconnected ports
+        # If hdl_exports isn't present in the JSON, export all unconnected ports
         if 'ports' not in fins_data:
             fins_data['ports'] = {}
-        fins_data['ports']['hdl_ports'] = []
+        fins_data['ports']['hdl'] = []
 
         for node in fins_data['nodes']:
             # Only fully FINS-defined nodes are relevant here
             if not node['descriptive_node']:
-                if 'hdl_ports' in node['node_details']['ports']:
-                    for port in node['node_details']['ports']['hdl_ports']:
-                        test_mode = 'test_mode' in fins_data and fins_data['test_mode']
+                if 'hdl' in node['node_details']['ports']:
+                    for port in node['node_details']['ports']['hdl']:
                         # is this port part of a connection?
                         port_unconnected = 'connected' not in port or not port['connected']
 
-                        # if port is unconnected, export it
-                        #     if in test-mode and this is an output port, export it even if it is connected
-                        if port_unconnected or (test_mode and port['direction'] == 'out'):
+                        # if port is unconnected and is not tied to a clock source, export it
+                        if port_unconnected and 'clock' not in port:
                             application_port = port.copy()
                             application_port['name'] = node['module_name'] + '_' + port['name']
                             application_port['node_name'] = node['module_name']
                             application_port['node_port'] = port
-                            fins_data['ports']['hdl_ports'].append(application_port)
+                            fins_data['ports']['hdl'].append(application_port)
+
+    # If either list of ports is empty, delete it from the FINS data dictionary
+    if not fins_data['ports']['ports']:
+        del fins_data['ports']['ports']
+    if not fins_data['ports']['hdl']:
+        del fins_data['ports']['hdl']
 
 
 def populate_fins_application_node(node, verbose):
@@ -2087,30 +2086,43 @@ def validate_application_connections(fins_data, verbose):
                 src_type = source['type']
                 dst_type = destination['type']
 
-                if ((src_type == 'hdl_port' and dst_type == 'hdl_port') and
-                    src_port['bit_width'] != dst_port['bit_width']):
-                    print('ERROR: HDL Ports in connection ({}->{}) do not have the same width'.format(src_name, dst_name))
-                    sys.exit(1)
-                elif ((src_type == 'hdl_port' and dst_type == 'port') or
-                      (src_type == 'port' and dst_type == 'hdl_port')):
+                if ((src_type == 'hdl' and dst_type == 'port') or
+                      (src_type == 'port' and dst_type == 'hdl')):
                     print('ERROR: One port is HDL and the other is AXIS in connection ({}->{})'.format(src_name, dst_name))
-                    sys.exit(1)
-                elif src_port['supports_backpressure'] != dst_port['supports_backpressure']:
-                    print('ERROR: One port in connection ({}->{}) supports backpressure, but the other does not'.format(src_name, dst_name))
-                    sys.exit(1)
-                elif src_port['num_instances'] != dst_port['num_instances']:
-                    print('ERROR: Ports in connection ({}->{}) have different number of instances'.format(src_name, dst_name))
-                    sys.exit(1)
-                elif (('metadata' in src_port and 'metadata' not in dst_port) or
-                      ('metadata' not in src_port and 'metadata' in dst_port) or
-                      ('metadata' in src_port and 'metadata' in dst_port and src_port['metadata'] != dst_port['metadata'])):
-                    print('ERROR: Metadata does not match on ports in connection ({}->{})'.format(src_name, dst_name))
                     sys.exit(1)
                 elif src_port['direction'] == dst_port['direction']:
                     print('ERROR: Ports of the same direction cannot be connected ({}->{})'.format(src_name, dst_name))
                     sys.exit(1)
-                elif src_port['data'] != dst_port['data']:
-                    print('ERROR: Data type or width mismatch between ports in connection ({}->{})'.format(src_name, dst_name))
+                elif src_type == 'port' and dst_type == 'port':
+                    if src_port['supports_backpressure'] != dst_port['supports_backpressure']:
+                        print('ERROR: One port in connection ({}->{}) supports backpressure, but the other does not'.format(src_name, dst_name))
+                        sys.exit(1)
+                    elif src_port['num_instances'] != dst_port['num_instances']:
+                        print('ERROR: Ports in connection ({}->{}) have different number of instances'.format(src_name, dst_name))
+                        sys.exit(1)
+                    elif (('metadata' in src_port and 'metadata' not in dst_port) or
+                          ('metadata' not in src_port and 'metadata' in dst_port) or
+                          ('metadata' in src_port and 'metadata' in dst_port and src_port['metadata'] != dst_port['metadata'])):
+                        print('ERROR: Metadata does not match on ports in connection ({}->{})'.format(src_name, dst_name))
+                        sys.exit(1)
+                    elif src_port['data'] != dst_port['data']:
+                        if (src_port['data']['bit_width'] != dst_port['data']['bit_width'] or
+                            src_port['data']['num_samples'] != dst_port['data']['num_samples'] or
+                            src_port['data']['num_channels'] != dst_port['data']['num_channels']):
+
+                            src_total_width = src_port['data']['bit_width']*src_port['data']['bit_width']*src_port['data']['bit_width']
+                            dst_total_width = dst_port['data']['bit_width']*dst_port['data']['bit_width']*dst_port['data']['bit_width']
+                            if src_total_width != dst_total_width:
+                                print('ERROR: bit_width*num_samples*num_channels does not match between ports in connection ({}->{})'.format(src_name, dst_name))
+                            else:
+                                print('WARNING: bit_width, num_samples or num_channels do not match ports in connection ({}->{}). bit_width*num_samples*num_channels matches... OK'.format(src_name, dst_name))
+                            sys.exit(1)
+                        elif (src_port['data']['is_complex'] != dst_port['data']['is_complex'] or
+                              src_port['data']['is_signed'] != dst_port['data']['is_signed']):
+                            print('WARNING: is_complex or is_signed does not match between ports in connection ({}->{}). bit_width*num_samples*num_channels matches... OK.'.format(src_name, dst_name))
+                elif ((src_type == 'hdl' and dst_type == 'hdl') and
+                    src_port['bit_width'] != dst_port['bit_width']):
+                    print('ERROR: HDL Ports in connection ({}->{}) do not have the same width'.format(src_name, dst_name))
                     sys.exit(1)
 
 

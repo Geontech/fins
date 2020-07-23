@@ -170,6 +170,13 @@ architecture behav of test_top_tb is
   signal m_axis_sfix_cpx_out_tvalid  : std_logic;
   signal m_axis_sfix_cpx_out_tlast   : std_logic;
 
+    -- Discrete HDL Ports
+  signal test_hdl_clk : std_logic;
+  signal test_hdl_std_logic_vector_in : std_logic_vector(16-1 downto 0) := (others => '1');
+  signal test_hdl_std_logic_vector_out : std_logic_vector(16-1 downto 0);
+  signal test_hdl_std_logic_in : std_logic := '1';
+  signal test_hdl_std_logic_out : std_logic;
+
   --------------------------------------------------------------------------------
   -- Testbench
   --------------------------------------------------------------------------------
@@ -311,7 +318,12 @@ begin
       m_axis_sfix_cpx_out_tdata   => m_axis_sfix_cpx_out_tdata,
       m_axis_sfix_cpx_out_tuser   => m_axis_sfix_cpx_out_tuser,
       m_axis_sfix_cpx_out_tvalid  => m_axis_sfix_cpx_out_tvalid,
-      m_axis_sfix_cpx_out_tlast   => m_axis_sfix_cpx_out_tlast
+      m_axis_sfix_cpx_out_tlast   => m_axis_sfix_cpx_out_tlast,
+      test_hdl_clk                  => test_hdl_clk,
+      test_hdl_std_logic_vector_in  => test_hdl_std_logic_vector_in,
+      test_hdl_std_logic_vector_out => test_hdl_std_logic_vector_out,
+      test_hdl_std_logic_in         => test_hdl_std_logic_in,
+      test_hdl_std_logic_out        => test_hdl_std_logic_out
     );
   --------------------------------------------------------------------------------
   -- File Input/Output AXI4-Stream Port Verification
@@ -437,6 +449,8 @@ begin
   s_axis_sfix_cpx_in_aresetn <= resetn;
   m_axis_sfix_cpx_out_aclk    <= clock;
   m_axis_sfix_cpx_out_aresetn <= resetn;
+  test_hdl_clk <= clock;
+
 
   --------------------------------------------------------------------------------
   -- Port Verification Procedures

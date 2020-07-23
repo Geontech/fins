@@ -50,9 +50,29 @@
       "destinations":[
         {"node_name":"fins_test_ip_1", "net":"sfix_cpx_in"}
       ]
+    },
+    {
+      "source":{"node_name":"fins_test_ip_0", "net":"test_hdl_std_logic_vector_out"},
+      "destinations":[
+        {"node_name":"fins_test_ip_1", "net":"test_hdl_std_logic_vector_in"}
+      ]
+    },
+    {
+      "source":{"node_name":"fins_test_ip_0", "net":"test_hdl_std_logic_out"},
+      "destinations":[
+        {"node_name":"fins_test_ip_1", "net":"test_hdl_std_logic_in"}
+      ]
     }
   ],
   "clocks":[
+    {
+      "clock":"hdl",
+      "period_ns":2.5,
+      "nets":[
+        {"node_name":"fins_test_ip_0", "net":"test_hdl_clk"},
+        {"node_name":"fins_test_ip_1", "net":"test_hdl_clk"}
+      ]
+    },
     {
       "clock":"input",
       "period_ns":2.5,

@@ -135,6 +135,12 @@ set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }
 {%-    endfor %}
 {%-   endfor %}
 {%-  endif %}
+{%-  if 'hdl' in fins['ports'] and fins['ports']['hdl']|length > 0 %}
+{%-   for port in fins['ports']['hdl'] %}
+set_interface_property {{ port['name'] }} EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']['name'] }}
+{%-   endfor %}
+{%-  endif %}
+# The following ports were exported (made external) from the Application
 {%- endif %}
 
 {%- if 'prop_interfaces' in fins %}
@@ -163,6 +169,9 @@ set_interface_property {{ external_iface_name }} EXPORT_OF {{ internal_iface_nam
 add_connection {{ clock_bridge_name }}.out_clk/{{ net['node_name'] }}.{{ port|axisprefix(i) }}_aclk
 add_connection {{ reset_bridge_name }}.out_reset/{{ net['node_name'] }}.{{ port|axisprefix(i) }}_aresetn
 {%-    endfor %}
+{%-   elif net['type'] == 'hdl' %}
+{%-    set port = net['port'] %}
+add_connection {{ clock_bridge_name }}.out_clk/{{ net['node_name'] }}.{{ port['name'] }}
 {%-   elif net['type'] == 'prop_interface' %}
 add_connection {{ clock_bridge_name }}.out_clk/{{ net['node_name'] }}.{{ net['interface']|axi4liteprefix() }}_ACLK
 add_connection {{ reset_bridge_name }}.out_reset/{{ net['node_name'] }}.{{ net['interface']|axi4liteprefix() }}_ARESETN

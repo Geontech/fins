@@ -20,7 +20,6 @@
 import os
 import logging
 import argparse
-import datetime
 import pkg_resources
 
 # FINS Utilities
