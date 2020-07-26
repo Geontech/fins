@@ -147,9 +147,6 @@ begin
         --******************************************
         -- Calculate the values for the variables
         --******************************************
-        -- Initialize control signals, "hold" behavior for tdata and tuser is more appropriate
-        axis_tvalid := '0';
-        axis_tlast  := '0';
         -- Determine the values
         if (file_done) then
           -- When the file is done and a transaction occurs, reset signals to 0
@@ -174,6 +171,7 @@ begin
         else
           -- Check if there is already an active sample
           if(not sample_active) then
+            axis_tvalid := '0';
             -- Calculate if this sample is active based upon the sample period
             if (G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_RANDOMIZE_BUS) then
               -- Randomize the transaction activity based upon a duty cycle calculated from the sample period

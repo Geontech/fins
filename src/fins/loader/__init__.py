@@ -881,7 +881,7 @@ def populate_hdl_inferences(fins_data,verbose):
     top_file_descriptor = {}
     # Look for vhdl file in source filesets
     for source_file in fins_data['filesets']['source']:
-        if fins_data['top_source']+'.vhd' in source_file['path']:
+        if '/'+fins_data['top_source']+'.vhd' in source_file['path']:
             if top_file_descriptor:
                 print('ERROR: Multiple VHDL source files match the top_source key',fins_data['top_source'])
                 sys.exit(1)

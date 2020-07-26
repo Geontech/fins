@@ -10,7 +10,7 @@ Firmware Intellectual Property (IP) Node Specification (FINS) is an innovative s
 
 The software packages required to use FINS are:
 
-* Xilinx Vivado (Tested with 2019.1) and/or Intel Quartus Prime Pro (Tested with 19.1)
+* Xilinx Vivado (Tested with 2019.2) and/or Intel Quartus Prime Pro (Tested with 19.4)
 * GNU Make
 * Python 3.6 with setuptools 41.2.0
 * Jinja2
@@ -30,14 +30,14 @@ $ python3 -m pip install ./vivado
 # Install the "quartus" generator plugin
 $ python3 -m pip install ./quartus
 ```
-> NOTE: You may not have permissions to run these `python3 -m pip` commands. To resolve this you can either use a python virtual environment, the `--user` option (`python3 -m pip --user`), or `sudo`.
+> NOTE: You may not have permissions to run these `python3 -m pip` commands. To resolve this you can either use a python virtual environment, the `--user` option (`python3 -m pip install --user`), or `sudo`.
 
 To uninstall FINS, run the following commands:
 
 ```bash
 $ python3 -m pip uninstall fins fins-quartus fins-vivado
 ```
-> NOTE: Again, you may not have permissions to run these `python3 -m pip` commands. To resolve this you can either use a python virtual environment, the `--user` option (`python3 -m pip --user`), or `sudo`.
+> NOTE: Again, you may not have permissions to run these `python3 -m pip` commands. To resolve this you can either use a python virtual environment, the `--user` option, or `sudo`.
 
 To verify your installation and run an example of a FINS Node, execute the following commands to build and simulate the test IP with Vivado:
 
@@ -47,7 +47,7 @@ To verify your installation and run an example of a FINS Node, execute the follo
 # Enter the test IP directory
 $ cd ./test/node/
 # Run the fins executable to generate the Vivado backend
-$ fins -b vivado zynq.json
+$ fins -b vivado fins.json
 # Run the simulation in command line mode
 $ make sim
 ```
@@ -59,7 +59,7 @@ The log files below contain the details of operations in the FINS execution proc
 
 ## Learning FINS
 
-A FINS "Node" is a single modular, resuable firmware Intellectual Property (IP). A Node serves as the foundation of FINS. See the link below for more information on development of a "Node".
+A FINS "**Node**" is a single modular, resuable firmware Intellectual Property (IP). A Node serves as the foundation of FINS. See the link below for more information on development of a "Node".
 
 * [Node Development](./docs/development.md)
 
@@ -75,9 +75,21 @@ See the links below for detailed documentation on elements of a FINS Node.
 * [Node Filesets](./docs/filesets.md)
 * [Node Sub-IP](./docs/sub-ip.md)
 
-A FINS "Nodeset" is the collection of FINS Nodes that exist within a programmable logic build. See the link below for more information on integrating a FINS "Nodeset".
+There are two important FINS constructs used for integration: Applications and Systems. These are elaborated on below, but the overall integration process is introduced here:
 
-* [Nodeset Integration](./docs/integration.md)
+* [FINS Integration](./docs/integration.md)
+
+A FINS "**Application**" is a collection of connected FINS Nodes assembled into a single firmware Intellectual Property (IP). See the link below for more information on development of an "Application".
+
+* [Application Development](./docs/applications.md)
+
+To follow a tutorial on how to create a simple FINS Application, see the link below.
+
+* [Power Converter Tutorial](docs/tutorial2.md)
+
+A FINS "**System**" is the collection of FINS Nodes that exist within a programmable logic build. It describe the contents of an existing design to communicate such information to the FINS Software Package.  See the link below for more information on integrating a FINS "System".
+
+* [System Integration](./docs/systems.md)
 
 ## Notes
 
@@ -107,24 +119,47 @@ $ python3 -m pip install -e .
 $ python3 -m pip install -e ./vivado
 $ python3 -m pip install -e ./quartus
 ```
-> NOTE: You may not have permissions to run the first `python3 -m pip` command here. To resolve this you can use the `--user` option or `sudo`.
 
-Any new code must be able to build and simulate the test IP for both Vivado and Quartus. To run both tests, execute the following commands:
+### Testing Changes to FINS
+
+A few tests must be run through in order to validate changes to FINS. These tests cover FINS Nodes, Applications and Systems, and exercise both the Vivado and Quartus backends.
 
 > NOTE: These tests require both Octave and MATLAB. Make sure Quartus is in your `$PATH` environmental variable and the Vivado "settings64.sh" script is sourced!
 
+#### Testing FINS Nodes
+
+Test that FINS can successfully parse Node JSON, generate an IP and testbench, and simulate the result:
 ```bash
 $ cd ./test/node/
-$ fins -b vivado zynq.json
+$ fins -b vivado fins.json
 $ make sim
 $ make clean-all
-$ fins -b quartus cycloneV.json
+$ fins -b quartus fins.json
 $ make sim
+$ make clean-all
 ```
 
-New code must also be able to parse FINS Nodeset JSON files. To run the nodeset test, execute the following commands:
+#### Testing FINS Applications
 
+Test that FINS can successfully parse Application JSON, instantiate Nodes in an Application, and generate and simulate a testbench:
 ```bash
-$ cd ./test/nodeset/
-$ fins nodeset.json
+$ cd ./test/application/
+$ fins -b quartus application_test.json
+$ make sim
+$ make clean-all
 ```
+
+> NOTE: FINS Applications are not yet implemented in the Vivado backend.
+
+#### Testing FINS Systems
+
+Test that FINS can successfully parse a System JSON file:
+```bash
+$ cd ./test/system/
+$ make
+$ fins quartus_system.json
+```
+
+#### Additional Testing
+
+Additional FINS Nodes and an Application live in `tutorials/` and can be useful for testing.
