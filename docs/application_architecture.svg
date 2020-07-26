@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
-<svg width="37cm" height="28cm" viewBox="-664 -1244 727 547" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="37cm" height="33cm" viewBox="-664 -1344 727 647" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <g id="Background">
-    <rect style="fill: none; stroke-opacity: 1; stroke-width: 6; stroke: #005596" x="-660" y="-1240" width="720" height="540" rx="0" ry="0"/>
-    <rect style="fill: none; stroke-opacity: 1; stroke-width: 6; stroke: #c41230" x="-580" y="-1160" width="560" height="260" rx="0" ry="0"/>
+    <rect style="fill: none; stroke-opacity: 1; stroke-width: 6; stroke: #005596" x="-660" y="-1340" width="720" height="640" rx="0" ry="0"/>
+    <rect style="fill: none; stroke-opacity: 1; stroke-width: 6; stroke: #c41230" x="-580" y="-1280" width="560" height="380" rx="0" ry="0"/>
     <g>
       <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #c41230" x="-300" y="-1100" width="160" height="160" rx="0" ry="0"/>
       <text font-size="16.9333" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-220" y="-1014.87">
@@ -25,8 +25,8 @@
         <tspan x="-300" y="-781.699">AXI INTERCONNECT</tspan>
       </text>
     </g>
-    <text font-size="22.5778" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-300" y="-1212.18">
-      <tspan x="-300" y="-1212.18">PLATFORM</tspan>
+    <text font-size="22.5778" style="fill: #005596; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-300" y="-1312.18">
+      <tspan x="-300" y="-1312.18">PLATFORM</tspan>
     </text>
     <g>
       <polyline style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" points="-460,-928.028 -460,-831.972 "/>
@@ -52,8 +52,8 @@
       <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="15.5279,-1020 5.52786,-1015 8.02786,-1020 5.52786,-1025 "/>
     </g>
     <line style="fill: none; stroke-opacity: 1; stroke-width: 8; stroke-dasharray: 8; stroke: #c41230" x1="-100" y1="-960" x2="-60" y2="-960"/>
-    <text font-size="22.5778" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-300" y="-1132.51">
-      <tspan x="-300" y="-1132.51">APPLICATION</tspan>
+    <text font-size="22.5778" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-300" y="-1252.18">
+      <tspan x="-300" y="-1252.18">APPLICATION</tspan>
     </text>
     <g>
       <rect style="fill: #ffffff; fill-opacity: 1; stroke: none" x="-80" y="-1036.88" width="79" height="14.9"/>
@@ -82,6 +82,20 @@
     <g>
       <polyline style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" points="-551.972,-1000 -620,-1000 "/>
       <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-544.472,-1000 -554.472,-995 -551.972,-1000 -554.472,-1005 "/>
+    </g>
+    <g>
+      <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #c41230" x="-380" y="-1225.17" width="82.9" height="45.1667" rx="0" ry="0"/>
+      <text font-size="16.9333" style="fill: #c41230; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="-338.55" y="-1197.45">
+        <tspan x="-338.55" y="-1197.45">clocks</tspan>
+      </text>
+    </g>
+    <g>
+      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" points="-460,-1111.97 -460,-1140 -360,-1140 -360,-1180 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-460,-1104.47 -465,-1114.47 -460,-1111.97 -455,-1114.47 "/>
+    </g>
+    <g>
+      <polyline style="fill: none; stroke-opacity: 1; stroke-width: 4; stroke: #000000" points="-220,-1111.97 -220,-1140 -320,-1140 -320,-1180 "/>
+      <polygon style="fill: #000000; fill-opacity: 1; stroke-opacity: 1; stroke-width: 4; stroke: #000000" fill-rule="evenodd" points="-220,-1104.47 -225,-1114.47 -220,-1111.97 -215,-1114.47 "/>
     </g>
   </g>
 </svg>
