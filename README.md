@@ -85,7 +85,7 @@ A FINS "**Application**" is a collection of connected FINS Nodes assembled into 
 
 To follow a tutorial on how to create a simple FINS Application, see the link below.
 
-* [Power Converter Tutorial](docs/tutorial2.md)
+* [Power Converter Application Tutorial](docs/tutorial2.md)
 
 A FINS "**System**" is the collection of FINS Nodes that exist within a programmable logic build. It describe the contents of an existing design to communicate such information to the FINS Software Package.  See the link below for more information on integrating a FINS "System".
 
