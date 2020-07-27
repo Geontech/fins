@@ -44,7 +44,8 @@ setup(
             'backend/templates/node/*',
             'backend/templates/application/*',
             'backend/templates/system/*',
-            'backend/templates/node/.gitignore'
+            'backend/templates/node/.gitignore',
+            'backend/templates/application/.gitignore'
         ]
     },
     entry_points={
