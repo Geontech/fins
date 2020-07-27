@@ -78,20 +78,7 @@ Using your favorite text editor, create a file called **fins.json** in the **pow
         {"node_name":"power_passthrough_0", "net":"power_out"}
       ]
     }
-  ],
-  "filesets":{
-    "sim":[
-      { "path":"../power_converter/gen/core/power_converter_axilite_verify.vhd" },
-      { "path":"./gen/core/power_application_pkg.vhd" },
-      { "path":"./gen/core/power_application_axis_verify.vhd" },
-      { "path":"./gen/core/power_application_tb.vhd" }
-    ],
-    "scripts":{
-      "postsim":[
-        { "path":"scripts/verify_sim.py" }
-      ]
-    }
-  }
+  ]
 }
 ```
 
@@ -137,8 +124,6 @@ Modify your **fins.json** file to add the following code after the `connections`
 The `filesets` top-level key indicates which files are used in the Application project. For Applications in particular, HDL files can only be added for simulation purposes. Notice that a few of the files are located in the **gen/core/** directory. These files are auto-generated and accordingly updated with the `fins` code generator executable. Since FINS manages these files, the burden of creating and maintaining these files is removed from the developer!
 
 A few files pointed to here are from the Nodes in this Application. They are for property access and verification, and provide other utility in the Application testbench.
-
-The `filesets` key also contains a reference to a script that is executed after the simulation process `scripts/verify_sim.py`.
 
 The following diagram illustrates how the Application block design connects to the generated testbench for verification.
 ![](tutorial_application.png)
@@ -199,6 +184,16 @@ else:
     print('    * Expected: {}'.format(sim_expected_data))
     print('    * Received: {}'.format(sim_sink_data['data']))
     sys.exit(1)
+```
+
+We can tell FINS to add this script to the simulation process by adding it to the **fins.json** file. Modify your **fins.json** file to add the following code inside the `filesets` top-level key. Remember to use a comma after the closing curly brace (`}`) of `sim`!
+
+```json
+    "scripts":{
+      "postsim":[
+        { "path":"scripts/verify_sim.py" }
+      ]
+    }
 ```
 
 This script is referenced as `postsim` in the JSON's `filesets`, so it will run _after_ simulation completes.

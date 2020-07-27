@@ -170,12 +170,7 @@ Modify your **fins.json** file to add the following code after the `ports` top-l
       { "path":"gen/core/power_converter_axilite_verify.vhd" },
       { "path":"gen/core/power_converter_axis_verify.vhd" },
       { "path":"gen/core/power_converter_tb.vhd" }
-    ],
-    "scripts":{
-      "postsim":[
-        { "path":"scripts/verify_sim.py" }
-      ]
-    }
+    ]
   }
 ```
 
@@ -249,6 +244,8 @@ Create a text file called **sim_source_iq.txt** in the **sim_data** directory wi
 0 00070007
 1 00080008
 ```
+
+> NOTE: Make sure there is not an extra newline at the start or end of this file
 
 The data format used above for **sim_source_iq.txt** is a hex-character-only text file for AXI4-Stream. The first column is always the TLAST signal. If only data exists in the port, then the second column is the TDATA signal. If only metadata exists in the port, then the second column is the TUSER signal. If both data and metadata exist in the port, then the second column is the TDATA signal and the third column is the TUSER signal.
 
@@ -329,6 +326,8 @@ We can tell FINS to add this script to the simulation process by adding it to th
       ]
     }
 ```
+
+This script is referenced as `postsim` in the JSON's `filesets`, so it will run _after_ simulation completes.
 
 The next step is to regenerate the scripts and re-run the ModelSim (Quartus) and Vivado simulations.
 
