@@ -21,12 +21,12 @@
 --==============================================================================
 -- Firmware IP Node Specification (FINS) Auto-Generated File
 -- ---------------------------------------------------------
--- Template:    avalonst_parallel_to_tdm.vhd
--- Backend:     core (Nodeset)
+-- Template:    axis_parallel_to_tdm.vhd
+-- Backend:     core (Application)
 -- Generated:   {{ now }}
 -- ---------------------------------------------------------
--- Description: Converts FINS Port from AXI4-Stream fully parallel bus to
---              Avalon-ST time-division multiplexed bus (Big Endian)
+-- Description: Converts FINS Port from AXI4-Stream fully parallel to
+--              AXI4-Stream time-division multiplexed
 -- Reset Type:  Synchronous
 -- Clocks:      Although there are two different input clocks, they are assumed
 --              to be on the same clock domain
@@ -44,39 +44,38 @@ use ieee.math_real.all;
 
 -- User Libraries
 library work;
-use work.{{ fins['name']|lower }}_avalonst_parallel_to_tdm_pkg.all;
+use work.{{ fins['name']|lower }}_axis_parallel_to_tdm_pkg.all;
 
 -- Entity
-entity {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
+entity {{ fins['name']|lower }}_axis_parallel_to_tdm is
   generic (
     G_TDM_WORD_WIDTH : natural := 32  -- LIMITATION: This value MUST be >= fins['data']['bit_width']
   );
   port (
-    -- AXI4-Stream Parallel Bus
-    s_axis_aclk       : in  std_logic;
-    s_axis_aresetn    : in  std_logic;
+    -- Parallel Bus
+    s_axis_aclk    : in  std_logic;
+    s_axis_aresetn : in  std_logic;
     {%- if fins['supports_backpressure'] %}
-    s_axis_tready     : out std_logic;
+    s_axis_tready  : out std_logic;
     {%- endif %}
-    s_axis_tdata      : in  std_logic_vector({{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] }}-1 downto 0);
+    s_axis_tdata   : in  std_logic_vector({{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in fins %}
-    s_axis_tuser      : in  std_logic_vector({{ fins['metadata']|sum(attribute='bit_width') }}-1 downto 0);
+    s_axis_tuser   : in  std_logic_vector({{ fins['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
-    s_axis_tvalid     : in  std_logic;
-    s_axis_tlast      : in  std_logic;
-    -- Avalon-ST Time-Division Multiplexed Bus (Big Endian)
-    aso_clock         : in  std_logic;
-    aso_reset         : in  std_logic;
-    aso_ready         : in  std_logic;
-    aso_data          : out std_logic_vector(G_TDM_WORD_WIDTH-1 downto 0);
-    aso_valid         : out std_logic;
-    aso_startofpacket : out std_logic;
-    aso_endofpacket   : out std_logic
+    s_axis_tvalid  : in  std_logic;
+    s_axis_tlast   : in  std_logic;
+    -- Time-Division Multiplexed Bus
+    m_axis_aclk    : in  std_logic;
+    m_axis_aresetn : in  std_logic;
+    m_axis_tready  : in  std_logic;
+    m_axis_tdata   : out std_logic_vector(G_TDM_WORD_WIDTH-1 downto 0);
+    m_axis_tvalid  : out std_logic;
+    m_axis_tlast   : out std_logic
   );
-end {{ fins['name']|lower }}_avalonst_parallel_to_tdm;
+end {{ fins['name']|lower }}_axis_parallel_to_tdm;
 
 -- Architecture
-architecture rtl of {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
+architecture rtl of {{ fins['name']|lower }}_axis_parallel_to_tdm is
 
   --------------------------------------------------------------------------------
   -- Constants
@@ -128,9 +127,6 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   --------------------------------------------------------------------------------
   -- Signals
   --------------------------------------------------------------------------------
-  -- Internal signals
-  signal internal_aso_data : std_logic_vector(G_TDM_WORD_WIDTH-1 downto 0);
-
   -- FIFO signals
   signal fifo_din   : std_logic_vector(FIFO_WIDTH-1 downto 0);
   signal fifo_dout  : std_logic_vector(FIFO_WIDTH-1 downto 0);
@@ -207,7 +203,7 @@ begin
         metadata_mux_counter <= (others => '0');
       else
         -- Take action when there is a transaction
-        if ((aso_ready = '1') AND (fifo_empty = '0')) then
+        if ((m_axis_tready = '1') AND (fifo_empty = '0')) then
           -- Set send_metadata back to high when we detect tlast
           if (fifo_dout(FIFO_WIDTH-1) = '1') then
             send_metadata <= '1';
@@ -228,78 +224,46 @@ begin
   end process s_metadata;
 
   -- Combinatorial process to multiplex the TDM output
-  c_output : process (send_metadata, aso_ready, fifo_empty, fifo_dout, metadata_mux_counter, metadata, internal_aso_data)
+  c_output : process (send_metadata, m_axis_tready, fifo_empty, fifo_dout, metadata_mux_counter, metadata)
   begin
     -- Set defaults
-    fifo_rd_en <= aso_ready AND (NOT fifo_empty) AND (NOT send_metadata);
-    metadata <= (others => '0');
-    internal_aso_data <= (others => '0');
-    aso_data <= (others => '0');
-    aso_valid <= (NOT fifo_empty) OR send_metadata;
-    aso_endofpacket <= fifo_dout(FIFO_WIDTH-1) AND (NOT send_metadata);
-    aso_startofpacket <= '0';
-
-    -- Create the start of packet
-    if (send_metadata = '1') then
-      if (metadata_mux_counter = 0) then
-        aso_startofpacket <= '1';
-      end if;
-    end if;
+    fifo_rd_en    <= m_axis_tready AND (NOT fifo_empty) AND (NOT send_metadata);
+    metadata      <= (others => '0');
+    m_axis_tdata  <= (others => '0');
+    m_axis_tvalid <= (NOT fifo_empty) OR send_metadata;
+    m_axis_tlast  <= fifo_dout(FIFO_WIDTH-1) AND (NOT send_metadata);
 
     -- Zero pad the metadata
     metadata(G_METADATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH-1 downto 0);
 
-    -- Mux the data output
+    -- Determine the tdata output
     if (send_metadata = '1') then
-      -- Set as metadata
+      -- Mux the metadata
       for n in 0 to NUM_METADATA_WORDS-1 loop
         if (n = metadata_mux_counter) then
-          internal_aso_data <= metadata((n+1)*G_TDM_WORD_WIDTH-1 downto n*G_TDM_WORD_WIDTH);
+          m_axis_tdata <= metadata((n+1)*G_TDM_WORD_WIDTH-1 downto n*G_TDM_WORD_WIDTH);
         end if;
       end loop;
     else
-      -- Set as data
-      internal_aso_data(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH+G_DATA_WIDTH-1 downto G_METADATA_WIDTH);
+      -- Assign the data
+      m_axis_tdata(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH+G_DATA_WIDTH-1 downto G_METADATA_WIDTH);
     end if;
-
-    -- Convert the data output to Big Endian
-    for n in 0 to G_TDM_WORD_WIDTH/8-1 loop
-      aso_data((n+1)*8-1 downto n*8) <= internal_aso_data(G_TDM_WORD_WIDTH-1-n*8 downto G_TDM_WORD_WIDTH-(n+1)*8);
-    end loop;
   end process c_output;
 
   {%- else %}{# if 'metadata' in fins ########################################}
 
   -- Combinatorial process to set the TDM output
-  c_output : process (aso_ready, fifo_empty, fifo_dout)
+  c_output : process (m_axis_tready, fifo_empty, fifo_dout)
   begin
     -- Set defaults
-    fifo_rd_en <= aso_ready;
-    aso_valid <= NOT fifo_empty;
-    aso_endofpacket <= fifo_dout(FIFO_WIDTH-1);
-    aso_data <= (others => '0');
+    fifo_rd_en    <= m_axis_tready;
+    m_axis_tvalid <= NOT fifo_empty;
+    m_axis_tlast  <= fifo_dout(FIFO_WIDTH-1);
+    m_axis_tdata  <= (others => '0');
 
     -- Zero-pad tdata if applicable
-    aso_data(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_DATA_WIDTH-1 downto 0);
+    m_axis_tdata(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_DATA_WIDTH-1 downto 0);
   end process c_output;
-
-  -- Synchronous process to create the startofpacket
-  s_startofpacket : process (s_axis_aclk)
-  begin
-    if (rising_edge(s_axis_aclk)) then
-      if (s_axis_aresetn = '0') then
-        aso_startofpacket <= '1';
-      else
-        if ((fifo_empty = '0') AND (aso_ready = '1')) then
-          if (fifo_dout(FIFO_WIDTH-1) = '1') then
-            aso_startofpacket <= '1';
-          else
-            aso_startofpacket <= '0';
-          end if;
-        end if;
-      end if;
-    end if;
-  end process s_startofpacket;
 
   {%- endif %}{# if 'metadata' in fins #######################################}
 

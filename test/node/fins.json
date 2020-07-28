@@ -130,8 +130,11 @@
       }
     ],
     "hdl":[
-      { "name":"test_hdl_std_logic_vector", "direction":"in", "bit_width":16 },
-      { "name":"test_hdl_std_logic", "direction":"out", "bit_width":1 }
+      { "name":"test_hdl_clk", "direction":"in", "bit_width":1 },
+      { "name":"test_hdl_std_logic_vector_in", "direction":"in", "bit_width":16 },
+      { "name":"test_hdl_std_logic_vector_out", "direction":"out", "bit_width":16 },
+      { "name":"test_hdl_std_logic_in", "direction":"in", "bit_width":1 },
+      { "name":"test_hdl_std_logic_out", "direction":"out", "bit_width":1 }
     ]
   },
   "properties": {

@@ -23,24 +23,39 @@ from fins.backend.generator import Generator
 VIVADO_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/'
 VIVADO_OUTPUT_DIR = 'gen/vivado/'
 
-class VivadoGenerator(Generator):
-    def generate(self, fins_data, filename, is_nodeset):
-        # First generate the source files using base class
-        self.generate_core(fins_data, filename, is_nodeset)
 
+class VivadoGenerator(Generator):
+
+    def generate_node_backend(self, fins_data, filename):
         # Determine and create the root directory
         if os.path.dirname(filename):
-            root_directory = os.path.dirname(filename)+'/'
-            output_directory = root_directory+'/'+VIVADO_OUTPUT_DIR
+            root_dir = os.path.dirname(filename)+'/'
+            output_dir = root_dir+'/'+VIVADO_OUTPUT_DIR
         else:
-            root_directory = ''
-            output_directory = VIVADO_OUTPUT_DIR
-        os.makedirs(output_directory, exist_ok=True)
+            root_dir = ''
+            output_dir = VIVADO_OUTPUT_DIR
+        os.makedirs(output_dir, exist_ok=True)
 
         # Load JSON and Jinja
-        jinja_env = self.create_jinja_env(VIVADO_TEMPLATE_DIR)
+        jinja_env = self.create_jinja_env(os.path.join(VIVADO_TEMPLATE_DIR, 'node'))
 
         # Generate Vivado targets
-        self.render_jinja_template(jinja_env,'Makefile',root_directory+'Makefile',fins_data)
-        self.render_jinja_template(jinja_env,'ip_create.tcl',output_directory+'ip_create.tcl',fins_data)
-        self.render_jinja_template(jinja_env,'ip_simulate.tcl',output_directory+'ip_simulate.tcl',fins_data)
+        self.render_jinja_template(jinja_env,'Makefile',root_dir+'Makefile',fins_data)
+        self.render_jinja_template(jinja_env,'ip_create.tcl',output_dir+'ip_create.tcl',fins_data)
+        self.render_jinja_template(jinja_env,'ip_simulate.tcl',output_dir+'ip_simulate.tcl',fins_data)
+
+    def generate_application_backend(self, fins_data, filename):
+        # Determine and create the root directory
+        if os.path.dirname(filename):
+            root_dir = os.path.dirname(filename)+'/'
+            output_dir = root_dir+'/'+VIVADO_OUTPUT_DIR
+        else:
+            root_dir = ''
+            output_dir = VIVADO_OUTPUT_DIR
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Load JSON and Jinja
+        jinja_env = self.create_jinja_env(os.path.join(VIVADO_TEMPLATE_DIR, 'application'))
+
+        # Generate Quartus targets
+        self.render_jinja_template(jinja_env,'Makefile',root_dir+'Makefile',fins_data)

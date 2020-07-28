@@ -6,6 +6,30 @@
       "is_required":true,
       "types":["str"]
     },
+    "schema_type":{
+      "is_required":true,
+      "types":["int"]
+    },
+    "description":{
+      "is_required":false,
+      "types":["str"]
+    },
+    "version":{
+      "is_required":false,
+      "types":["str"]
+    },
+    "company_name":{
+      "is_required":false,
+      "types":["str"]
+    },
+    "company_url":{
+      "is_required":false,
+      "types":["str"]
+    },
+    "company_logo":{
+      "is_required":false,
+      "types":["str"]
+    },
     "base_offset":{
       "is_required":false,
       "types":["int"]
@@ -44,11 +68,11 @@
           "types":["str"]
         },
         "interface_name":{
-          "is_required":true,
+          "is_required":false,
           "types":["str"]
         },
         "properties_offset":{
-          "is_required":true,
+          "is_required":false,
           "types":["str","int"]
         },
         "ports_producer_name":{

@@ -537,11 +537,11 @@ package body {{ fins['name']|lower }}_axilite_verify is
     {%- endif %}
     {%- endfor %}
     {%- if prop['is_writable'] and prop['is_readable'] %}
-    -- Verify write width by writing all 1s and reading back correct width
+    -- Verify maximum value is able to be written
     {%- for n in range(prop['length']) %}
     {{ fins['name']|lower }}_write_reg(
       {{ fins['name']|upper }}_PROP_{{ prop['name'] | upper }}_OFFSET{{ n }},
-      {{ fins['name']|upper }}_MAX_DATA_VALUE(S_AXI_WDATA'length-1 downto 0),
+      x"{{ ("%%0%dx" | format(fins['properties']['data_width']/4)) | format(prop['range_max']) }}",
       S_AXI_ACLK,
       S_AXI_ARESETN,
       S_AXI_AWADDR,
@@ -589,10 +589,10 @@ package body {{ fins['name']|lower }}_axilite_verify is
       S_AXI_RREADY
     );
     {# maximum value for prop['width'] sized slv, front-padded with 0s to fit fins['properties']['data_width'] #}
-    assert ({{ ("x\"{:0" ~ fins['properties']['data_width']//4 ~ "x}\"").format(2**prop['width']-1) }} = S_AXI_RDATA)
-      report "ERROR: Incorrect write width for property {{ prop['name'] }} at address {{ '%0#10x' | format(prop['offset'] + n) }}"
+    assert ( x"{{ ("%%0%dx" | format(fins['properties']['data_width']/4)) | format(prop['range_max']) }}" = S_AXI_RDATA)
+      report "ERROR: Incorrect maximum value for property {{ prop['name'] }} at address {{ '%0#10x' | format(prop['offset'] + n) }}"
       severity failure;
-    write(my_line, string'("PASS: Correct write width for property {{ prop['name'] }} at address {{ '%0#10x' | format(prop['offset'] + n) }}"));
+    write(my_line, string'("PASS: Correct maximum value for property {{ prop['name'] }} at address {{ '%0#10x' | format(prop['offset'] + n) }}"));
     writeline(output, my_line);
     {%- endfor %}
     -- Write back to default value
