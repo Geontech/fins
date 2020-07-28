@@ -25,7 +25,6 @@ Using your favorite text editor, create a file called **fins.json** in the **pow
   "properties":{
     "addr_width":16,
     "data_width":32,
-    "is_addr_byte_indexed":false,
     "properties":[
       { "name":"gain", "type":"read-write-data", "width":16, "default_values":1 }
     ]

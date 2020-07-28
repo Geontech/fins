@@ -150,6 +150,7 @@ set_interface_property {{ port['name'] }} EXPORT_OF {{ port['node_name'] }}.{{ p
 {%-   for interface in node_interfaces['interfaces'] %}
 {%-    set external_iface_name = interface|axi4liteprefix(application_external=True) %}
 {%-    set internal_iface_name = node_name + '.' + interface|axi4liteprefix() %}
+add_interface {{ external_iface_name }} conduit end
 set_interface_property {{ external_iface_name }} EXPORT_OF {{ internal_iface_name }}
 {%-   endfor %}
 {%-  endfor %}

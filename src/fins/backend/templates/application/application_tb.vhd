@@ -136,9 +136,9 @@ architecture behav of {{ fins['name'] }}_tb is
   -- Discrete HDL Ports
   {%-   for hdl_port in fins['ports']['hdl'] %}
   {%-    if hdl_port['bit_width'] > 1 %}
-  signal {{ hdl_port['name'] }}_data : std_logic_vector({{ hdl_port['bit_width'] }}-1 downto 0);
+  signal {{ hdl_port['name'] }}_port : std_logic_vector({{ hdl_port['bit_width'] }}-1 downto 0);
   {%-    else %}
-  signal {{ hdl_port['name'] }}_data : std_logic;
+  signal {{ hdl_port['name'] }}_port : std_logic;
   {%-    endif %}
   {%-   endfor %}
   {%-  endif %}
@@ -223,7 +223,7 @@ begin
       {%-  if 'hdl' in fins['ports'] and fins['ports']['hdl']|length > 0 %}
       -- Discrete HDL Ports
       {%-   for hdl_port in fins['ports']['hdl'] %}
-      {{ hdl_port['name'] }}_data => {{ hdl_port['name'] }}_data ,
+      {{ hdl_port['name'] }}_port => {{ hdl_port['name'] }}_port ,
       {%-   endfor %}{#### for hdl_port in fins['ports']['hdl'] ####}
       {%-  endif  %}{#### if 'hdl' in fins['ports'] ####}
 

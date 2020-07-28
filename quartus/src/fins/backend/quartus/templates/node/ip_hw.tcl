@@ -158,8 +158,7 @@ add_interface_port {{ interface['name'] }} {{ hdl_port['name'] }} {{ hdl_port['i
 {%- if 'ports' in fins['hdl'] %}
 {%- for hdl_port in fins['hdl']['ports'] %}
 {%- if not 'interface_signal' in hdl_port %}
-add_interface {{ hdl_port['name'] }} conduit end
-add_interface_port {{ hdl_port['name'] }} {{ hdl_port['name'] }} data {% if hdl_port['direction']|lower == 'in' %}Input{% elif hdl_port['direction']|lower == 'out' %}Output{% else %}Bidir{% endif %} "{{ hdl_port['width'] }}"
+add_interface_port {{ hdl_port['name'] }} {{ hdl_port['name'] }} port {% if hdl_port['direction']|lower == 'in' %}Input{% elif hdl_port['direction']|lower == 'out' %}Output{% else %}Bidir{% endif %} "{{ hdl_port['width'] }}"
 {%- endif %}
 {%- endfor %}
 {%- endif %}
