@@ -46,46 +46,20 @@ save_instantiation
 {%- endfor %}
 
 {#-
-# For each connection, determine the 'type' of each source and destination (clock, reset or port)
+# For each connection, determine the 'type' of each source and destination (port, or other)
 # Make connections between ports or signals accordingly, and include '<node>.' as a signal prefix
 -#}
 {%- for connection in fins['connections'] %}
-{%- for destination in connection['destinations'] %}
-
-{%- set source = connection['source'] %}
-
-{#-
-# Determine whether each connection source and destination is associated with node
--#}
-{%- if 'node_name' in source and source['node_name'] is not none %}
-    {%- set snode = source['node_name'] + '.' %}
-{%- else %}
-    {%- set snode = '' %}
-{%- endif %}
-{%- if 'node_name' in destination and destination['node_name'] is not none %}
-    {%- set dnode = destination['node_name'] + '.' %}
-{%- else %}
-    {%- set dnode = '' %}
-{%- endif %}
-
-{%- if source['type'] == 'clock' and destination['type'] == 'port' %}
-# Connecting clock signal "{{ snode }}{{ source['net'] }}" to clock(s) on port "{{ dnode }}{{ destination['net'] }}"
-{%- for i in range(destination['port']['num_instances']) %}
-add_connection {{ snode }}{{ source['net'] }}/{{ dnode }}{{ destination['port']|axisprefix(i) }}_aclk
-{%- endfor %}
-{%- elif source['type'] == 'reset' and destination['type'] == 'port' %}
-# Connecting reset signal "{{ source['net'] }}" to reset(s) on port "{{ destination['net'] }}"
-{%- for i in range(destination['port']['num_instances']) %}
-add_connection {{ snode }}{{ source['net'] }}/{{ dnode }}{{ destination['port']|axisprefix(i) }}_aresetn
-{%- endfor %}
-{%- elif source['type'] == 'port' and destination['type'] == 'port' %}
-# Connecting port "{{ source['net'] }}" to port "{{ destination['net'] }}"
-{%- for i in range(source['port']['num_instances']) %}
-add_connection {{ snode }}{{ source['port']|axisprefix(i) }}/{{ dnode }}{{ destination['port']|axisprefix(i) }}
-{%- endfor %}
-{%- else %}
-# Connecting signal "{{ source['net'] }}" to signal "{{ destination['net'] }}"
-add_connection {{ snode }}{{ source['net'] }}/{{ dnode }}{{ destination['net'] }}
-{%- endif %}
-{%  endfor %}
+{%-  for destination in connection['destinations'] %}
+{%-   set source = connection['source'] %}
+{%-   if source['type'] == 'port' and destination['type'] == 'port' %}
+# Connecting port "{{ source['node_name'] }}.{{ source['net'] }}" to port "{{ destination['node_name'] }}.{{ destination['net'] }}"
+{%-    for i in range(source['port']['num_instances']) %}
+add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(i) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(i) }}
+{%-    endfor %}
+{%-   else %}
+# Connecting signal "{{ source['node_name'] }}.{{ source['net'] }}" to signal "{{ destination['node_name'] }}.{{ destination['net'] }}"
+add_connection {{ source['node_name'] }}.{{ source['net'] }}/{{ destination['node_name'] }}.{{ destination['net'] }}
+{%-   endif %}
+{%   endfor %}
 {%- endfor %}
