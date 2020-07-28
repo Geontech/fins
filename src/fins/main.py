@@ -18,15 +18,15 @@
 #
 
 import os
-import glob
 import logging
 import argparse
-import jinja2
-import json
-import datetime
-
 import pkg_resources
 
+# FINS Utilities
+from fins.utils import cd
+from fins.utils import SchemaType
+
+# FINS Loader and Generator
 from fins import loader
 from fins.backend.generator import Generator
 
@@ -34,12 +34,14 @@ from . import version
 
 ENTRY_POINT_ID = 'fins.backend.generators'
 
+
 class NullGenerator(Generator):
     """
     Default generator that produces no output.
     """
     def generate(self, packet):
         pass
+
 
 def load_generator(name):
     if name is None:
@@ -52,50 +54,89 @@ def load_generator(name):
 
     raise KeyError(name)
 
-def run_generator(generator,filepath,backend,verbose):
-    # Change execution directory to where json file is located
-    if os.path.dirname(filepath):
-        os.chdir(os.path.dirname(filepath))
-        if verbose:
-            print('-- Changing directories to',os.path.dirname(filepath))
+
+def run_generator(generator, filepath, backend, verbose):
+
     filename = os.path.basename(filepath)
-    working_directory = os.getcwd()
 
-    # Load the fins_data and generate the backend
-    generator.start_file(filename)
-    fins_data = loader.load_json_file(filename,verbose)
-    if 'nodes' in fins_data:
-        # This is a FINS nodeset file
-        is_nodeset = True
-        fins_data = loader.validate_and_convert_fins_nodeset(fins_data,filename,verbose)
-        if backend != 'core':
-            print('INFO: The',backend,'backend provided is ignored since this is a FINS build file')
-            generator = load_generator('core')
-    else:
-        # This is a FINS file
-        is_nodeset = False
-        fins_data = loader.validate_and_convert_fins_data(fins_data,filename,backend,verbose)
-    try:
-        generator.generate(fins_data,filename,is_nodeset)
-    except RuntimeError as exc:
-        logging.error('Generator error: %s', exc)
-    generator.end_file()
+    # Change execution directory to where json file is located
+    target_dir = '.'
+    if os.path.dirname(filepath):
+        target_dir = os.path.dirname(filepath)
 
-    # Recursively call function on all sub-ip
-    if 'ip' in fins_data:
-        for ip in fins_data['ip']:
-            run_generator(generator,ip['fins_path'],backend,verbose)
+    if target_dir != '.':
+        logging.info('-- Temporarily changing directories to', os.path.dirname(filepath))
 
-            # Reset working directory to the one used by this level of recursion
-            os.chdir(working_directory)
-            if verbose:
-                print('-- Changing directories to',working_directory)
+    with cd(target_dir):
+        # Load the fins_data and generate the backend
+        generator.start_file(filename)
+        fins_data = loader.load_json_file(filename, verbose)
 
-    # Validate filesets
-    # NOTE: This validate happens after the generator since some of the files referenced
-    #       may be generated files
-    if 'filesets' in fins_data:
-        loader.validate_filesets(fins_data,filename,verbose)
+        # Determine the schema type (NODE, APPLICATION, SYSTEM)
+        fins_data['schema_type'] = int(SchemaType.get(fins_data))
+
+        if fins_data['schema_type'] == SchemaType.NODE:
+            # This is a FINS IP/Node
+            fins_data = loader.validate_and_convert_node_fins_data(fins_data, filename, backend, verbose)
+
+            # Recursively call function on all sub-ip
+            if 'ip' in fins_data:
+                for ip in fins_data['ip']:
+                    logging.info('Recursing into IP at', ip['fins_path'])
+                    ip['ip_details'] = run_generator(generator, ip['fins_path'], backend, verbose)
+
+            loader.populate_fins_node(fins_data, verbose)
+            loader.validate_node_fins_data_final(fins_data, verbose)
+
+            try:
+                # Run core generation, post core generation ops, and finally backend generation
+                generator.generate_node_core(fins_data, filename)
+                loader.post_generate_node_core(fins_data, verbose)
+                generator.generate_node_backend(fins_data, filename)
+            except RuntimeError as exc:
+                logging.error('Generator error: %s', exc)
+
+        elif fins_data['schema_type'] == SchemaType.APPLICATION:
+            fins_data = loader.validate_and_convert_application_fins_data(fins_data, filename, backend, verbose)
+
+            # Recursively call function on all nodes
+            # and then populate their contents in fins_data via loader.populate_fins_node
+            for node in fins_data['nodes']:
+                if not node['descriptive_node']:
+                    logging.info('INFO: Recursing into node at "{}"'.format(node['fins_path']))
+                    node['node_details'] = run_generator(generator, node['fins_path'], backend, verbose)
+
+            loader.populate_fins_application(fins_data, verbose)
+            loader.validate_application_fins_data_final(fins_data, verbose)
+
+            try:
+                # Run core generation, post core generation ops, and finally backend generation
+                generator.generate_application_core(fins_data, filename)
+                generator.generate_application_backend(fins_data, filename)
+            except RuntimeError as exc:
+                logging.error('Generator error: %s', exc)
+
+        else:  # schema_type == SchemaType.SYSTEM:
+            fins_data = loader.validate_and_convert_system_fins_data(fins_data, filename, backend, verbose)
+
+            loader.populate_fins_system(fins_data, verbose)
+            loader.validate_system_fins_data_final(fins_data, verbose)
+
+            try:
+                # Run core generation, post core generation ops, and finally backend generation
+                generator.generate_system_core(fins_data, filename)
+            except RuntimeError as exc:
+                logging.error('Generator error: %s', exc)
+
+        generator.end_file()
+
+        # Validate filesets
+        # NOTE: This validate happens after the generator since some of the files referenced
+        #       may be generated files
+        if 'filesets' in fins_data:
+            loader.validate_filesets(fins_data, filename, verbose)
+
+        return fins_data
 
 def main():
     logging.basicConfig()

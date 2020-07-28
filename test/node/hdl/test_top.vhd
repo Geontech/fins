@@ -30,6 +30,12 @@ use work.test_top_pkg.all;
 -- Entity
 entity test_top is
   port (
+    -- Discrete HDL Ports
+    test_hdl_clk : in std_logic;
+    test_hdl_std_logic_vector_in : in std_logic_vector(16-1 downto 0);
+    test_hdl_std_logic_vector_out : out std_logic_vector(16-1 downto 0);
+    test_hdl_std_logic_in : in std_logic;
+    test_hdl_std_logic_out : out std_logic;
     -- AXI4-Stream Port IN: myinput
     s_axis_myinput_aclk    : in  std_logic;
     s_axis_myinput_aresetn : in  std_logic;
@@ -904,5 +910,17 @@ begin
   props_status.test_prop_read_only_data(1).rd_data <= std_logic_vector(to_unsigned(1, PROPS_DATA_WIDTH));
   props_status.test_prop_read_only_data(2).rd_data <= std_logic_vector(to_unsigned(2, PROPS_DATA_WIDTH));
   props_status.test_prop_read_only_data(3).rd_data <= std_logic_vector(to_unsigned(3, PROPS_DATA_WIDTH));
+
+
+
+  s_test_hdl : process(test_hdl_clk)
+  begin
+    if (rising_edge(test_hdl_clk)) then
+
+      test_hdl_std_logic_vector_out <= test_hdl_std_logic_vector_in;
+      test_hdl_std_logic_out <= test_hdl_std_logic_in;
+    end if;
+  end process s_test_hdl;
+
 
 end mixed;
