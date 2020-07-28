@@ -1353,7 +1353,6 @@ def populate_application_connections(fins_data, verbose):
 
     # if this Application has connections, iterate over the connections,
     # get and set the type and port (if applicable) of each source and destination net
-    # TODO make connections between hdl ports
     if 'connections' in fins_data:
         for connection in fins_data['connections']:
             source = connection['source']
@@ -1389,8 +1388,6 @@ def populate_application_clocks(fins_data, verbose):
 
     Sets the clock information on the actual port.
     """
-    # TODO connecting clocks to hdl_ports? Does this work? Test.
-
     for clock in fins_data['clocks']:
         clock['base_name'] = clock['clock']
 
