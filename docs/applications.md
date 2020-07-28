@@ -4,9 +4,11 @@
 
 A FINS Application JSON is used to construct a programmable-logic design that instantiates and connects a collection of FINS Nodes. FINS automation creates a simulation testbench for an Application and provides other utilities for rapid Application development.
 
-The diagram below shows a basic FINS Application. There are inter-node connections, exported ports, and exported AXI interfaces. Not shown here are the generated clock domains as well as the modules that connect to the Application's external ports in the platform. The `nodes`, `connections`, `clocks` and `port_exports` fields are detailed in the [FINS Application JSON Schema](#Application-Json-Schema).
+The diagram below shows a basic FINS Application. There are inter-node connections, exported ports, and exported AXI interfaces. Not shown here are the generated clock domains as well as the modules that connect to the Application's external ports in the platform. The `nodes`, `connections`, `clocks` and `port_exports` fields are detailed in the [FINS Application JSON Schema](#application-json-schema).
 
 ![](application_architecture.png)
+
+For a simple introduction to FINS Applications, follow the [Power Converter Application Tutorial](tutorial2.md).
 
 ## Description
 The FINS code generation process for Application roughly mirrors that of FINS IPs. FINS takes a JSON specification file as input along with the name of a FINS "backend". Using the information in that JSON file, FINS generates source code, vendor-specific automation scripts, and a JSON file for enabling communication with FINS software. The diagram below shows the templates used in each backend and the output directories of each template set.
@@ -19,7 +21,7 @@ As the diagram above demonstrates, the "core" backend only generates source code
 
 ```bash
 # Generates the "core" backend by default
-$ fins Application.json
+$ fins application.json
 # Generates the "core" and "quartus" backends
 $ fins -b quartus application.json
 ```
@@ -49,18 +51,18 @@ The following diagram shows the sequence of operations that takes place when run
 
 ## Workflow
 
-1. Determine which FINS Nodes will be included, how they will be connected, what clock domains should exist, and which ports should be exported from the Application. Reference [Nodes](#Application-Json-Schema:-Nodes), [Connections](#Application-Json-Schema:-Connections) and [Clocks](#Application-Json-Schema:-Clocks) sections for more information on insantiating nodes and making connections.
+1. Determine which FINS Nodes will be included, how they will be connected, what clock domains should exist, and which ports should be exported from the Application. Reference [Nodes](#application-json-schema-nodes), [Connections](#application-json-schema-connections) and [Clocks](#application-json-schema-clocks) sections for more information on insantiating nodes and making connections.
 2. Add parameters as necessary
 
 Using the information provided by these steps, FINS will generate a block design targeting whichever backend is specified. When targeting the Quartus backend, FINS will generate a Platform Desiginer system that contains any FINS Nodes and connections specified in the Application JSON.
 
-The FINS Application JSON is detailed in a [section below](#Application-Json-Schema), but here are some important notes:
+The FINS Application JSON is detailed in a [section below](#application-json-schema), but here are some important notes:
 1. Choose a unique and descriptive value for the `name` key.
 2. The `is_application` must be set to `true` to flag this JSON as a FINS Application.
 3. The `parameters` key contains constants that are propagated throughout the design with code generation, so set values that could potentially change as the design evolves or is adapted. The `parameters` schema is located [here](parameters.md).
-4. The `nodes` key lists the FINS Nodes which will make up the Application. To instantiate and connect nodes via JSON see the [Nodes JSON section](#Application-Json-Schema:-Nodes).
-5. The `connections` key defines port connections between Nodes in the Application. To instantiate and connect nodes via JSON see the [Connections JSON section](#Application-Json-Schema:-Connections).
-5. The `clocks` key defines the clock domains of the Application and which ports they are tied to (along with associated resets). A "properties" clock domain is always created by default for any Application with one or more properties interfaces. To create clock domains via JSON see the [Clocks JSON section](#Application-Json-Schema:-Clocks).
+4. The `nodes` key lists the FINS Nodes which will make up the Application. To instantiate and connect nodes via JSON see the [Nodes JSON section](#application-json-schema-nodes).
+5. The `connections` key defines port connections between Nodes in the Application. To instantiate and connect nodes via JSON see the [Connections JSON section](#application-json-schema-connections).
+5. The `clocks` key defines the clock domains of the Application and which ports they are tied to (along with associated resets). A "properties" clock domain is always created by default for any Application with one or more properties interfaces. To create clock domains via JSON see the [Clocks JSON section](#application-json-schema-clocks).
 6. The `[hdl_]port_exports` key defines which Node ports should be exported (become the external ports) from the Application. If unset, any unconnected ports are exported from a Application.
 
 The `fins` executable is used with the FINS Application to run code generation. The standard "core" backend location is **./gen/core/**. The `fins` executable automatically detects differences in FINS Application schemas. To generate the Application, execute the following commands:
@@ -72,7 +74,32 @@ $ fins -b quartus application.json
 $ make
 ```
 
-The code generation output will be located in the **./gen/** directory. Browse this directory to notice the files described in the [section above](#Applications:-Description).
+The code generation output will be located in the **./gen/** directory. Browse this directory to notice the files described in the [section above](#applications-description).
+
+## Application JSON Schema
+
+The JSON schema for a FINS Application is composed of the following top-level fields:
+
+| Key               | Type   | Required | Default Value  | Description |
+| ----------------- | ------ | -------- | -------------- | ----------- |
+| name              | string | YES      |                | The name of the System |
+| description       | string | NO       |                | The description of the System |
+| version           | string | NO       | 1.0            | The version of the System |
+| company_name      | string | NO       |                | The name of the company which created the System |
+| company_url       | string | NO       | user.org       | The base URL of the company which created the System. Quartus uses this field as the AUTHOR. |
+| company_logo      | string | NO       |                | The relative filepath of the logo image to use for display purposes. |
+| is_application    | bool   | YES      | false          | **MUST BE SET TO** `true`. This flags this JSON as a FINS Application JSON file. |
+| part              | string | NO       |                | The programmable logic part number. While a default is not selected for the JSON, the auto-generated vendor scripts use the following default parts: Vivado uses the Zynq weback part **xc7z020clg484-1** and Quartus uses the Cyclone V **10CX220YF780I5G**. |
+| params            | dict[] | NO       |                | An array of parameter definitions. See the parameters documentation [here](parameters.md). |
+| nodes             | dict[] | YES      |                | A dictionary array that contains a description of each node. See [Nodes JSON section](#system-json-schema-nodes). |
+| connections       | dict[] | NO       |                | An array of connections between to/from ports of Nodes in the Nodeset. See [Connections JSON section](#nodeset-json-schema-connections). |
+| clocks            | dict[] | YES      |                | Required for Application-level Nodesets. This field is an array of clock nets. Each entry connects a clock to a list of ports on Nodes in the Nodeset. See [Clocks JSON section](#nodeset-json-schema-clocks). |
+| port_exports      | dict[] | NO       | all open ports | An array of ports to export and become the external ports of this Nodeset. By default, unconnected ports are exported. Each dict element contains the "node_name" for the port and the "net" or actual port name. | |
+| hdl_port_exports  | dict[] | NO       | all open ports | An array of HDL ports (standard logic [vectors]) to export and become the external ports of this Nodeset. By default, unconnected ports are exported. Each dict element contains the "node_name" for the port and the "net" or actual port name. |
+| filesets          | dict   | NO       |                | A dictionary of fileset definitions. See the filesets documentation [here](filesets.md). |
+
+An example of a FINS Application JSON file can be found [here](../test/application/application_test.json). Another one is present in the [Power Converter Application Tutorial](tutorial2.md).
+
 
 ## Application JSON Schema: Nodes
 Each dictionary element of the `nodes` array has the following fields:

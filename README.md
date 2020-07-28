@@ -75,25 +75,13 @@ See the links below for detailed documentation on elements of a FINS Node.
 * [Node Filesets](./docs/filesets.md)
 * [Node Sub-IP](./docs/sub-ip.md)
 
-There are two important FINS constructs used for integration: Applications and Systems. These are elaborated on below, but the overall integration process is introduced here:
-
-* [FINS Integration](./docs/integration.md)
-
-A FINS "**Application**" is a collection of connected FINS Nodes assembled into a single firmware Intellectual Property (IP). See the link below for more information on development of an "Application".
-
-* [Application Development](./docs/applications.md)
-
-To follow a tutorial on how to create a simple FINS Application, see the link below.
+There are two important FINS constructs used for integration: Applications and Systems. These are elaborated on in [FINS Integration](./docs/integration.md), but to get started follow the tutorial on how to create a simple "power_application" FINS Application.
 
 * [Power Converter Application Tutorial](docs/tutorial2.md)
 
-A FINS "**System**" is the collection of FINS Nodes that exist within a programmable logic build. It describe the contents of an existing design to communicate such information to the FINS Software Package.  See the link below for more information on integrating a FINS "System".
-
-* [System Integration](./docs/systems.md)
-
 ## Notes
 
-Here are few things to keep in mind when developing FINS IP:
+Here are a few things to keep in mind when developing FINS IP:
 
 * Xilinx's AXI Interconnect only supports 32bit data widths for AXI4-Lite, but Intel's AXI Interconnect supports both 32bit and 64bit data widths of the AXI4-Lite standard.
 * Xilinx's AXI Interconnect creates slave AXI4-Lite byte-indexed buses, whereas Intel's AXI Interconnect creates slave AXI4-Lite word-indexed buses.

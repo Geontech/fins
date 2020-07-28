@@ -3,7 +3,7 @@
 ## Introduction
 The FINS System JSON is used to aggregate the Node information so that the FINS software package may control properties and communicate with ports in the programmable logic build.
 
-Illustrating the FINS System construct, the diagram below depicts a programmable logic block design that gets built into a bitstream. A System is used to describe the design in its entirety. The labeled information is required for software control and data communication with a processor, and this information is defined in the [FINS System JSON Schema](#System-Json-Schema).
+Illustrating the FINS System construct, the diagram below depicts a programmable logic block design that gets built into a bitstream. A System is used to describe the design in its entirety. The labeled information is required for software control and data communication with a processor, and this information is defined in the [FINS System JSON Schema](#system-json-schema).
 
 ![](system.png)
 
@@ -19,13 +19,13 @@ More explicitly, FINS Systems tell software what address offsets to use for each
 
 The first step in developing a FINS System is to integrate any Application code with a "Platform". A Platform is a set of HDL code or a block design that is responsible for interacting with the hardware interfaces on the target circuit board. Platforms are often provided by the vendors as reference designs or I/O wrappers. A robust Platform has standard interfaces to interact with Application modules.
 
-Once you have a bitstream that integrates Application content with a Platform, you are ready to develop a FINS System JSON file. The details of the FINS System JSON schema are in the [section below](#System-JSON-Schema).
+Once you have a bitstream that integrates Application content with a Platform, you are ready to develop a FINS System JSON file. The details of the FINS System JSON schema are in the [section below](#system-json-schema).
 
 To get started developing a FINS System, create a JSON file with the following:
 
 1. A unique and descriptive value for the `name` key.
 2. The `parameters` key contains constants that can be used elsewhere in the JSON file. The `parameters` schema is located [here](parameters.md).
-3. The `nodes` key lists the IPs and Nodes which are being described by this System. See the [Nodes JSON section](#System-Json-Schema:-Nodes) for more information.
+3. The `nodes` key lists the IPs and Nodes which are being described by this System. See the [Nodes JSON section](#system-json-schema-nodes) for more information.
 4. The `base_offset` key is the global offset for the bus that controls the AXI4-Lite Properties interface. For many architectures this is 0, but some specify this base address at the bus level.
 5. The `properties_offset` key is the offset for a particular node in the `nodes` array. It can be set manually or can be set to the filepath of the block design file to auto-infer the offset.
 6. The `ports_consumer_name` key is set for the element of the `nodes` array that consumes data from a processor through a DMA module. At most one element of the `nodes` array can have this key set.
@@ -54,7 +54,9 @@ The JSON schema for a FINS System is composed of the following top-level fields:
 | company_url       | string | NO       | user.org      | The base URL of the company which created the System. Quartus uses this field as the AUTHOR. |
 | base_offset       | uint   | YES      |             0 | The base address offset of the bus used to communicate with the FINS nodes. |
 | params            | dict[] | NO       |               | An array of parameter definitions. See the parameters documentation [here](parameters.md). |
-| nodes             | dict[] | YES      |               | A dictionary array that contains a description of each node. See [Nodes JSON section](#System-Json-Schema:-Nodes). |
+| nodes             | dict[] | YES      |               | A dictionary array that contains a description of each node. See [Nodes JSON section](#system-json-schema-nodes). |
+
+An example of a FINS System JSON file can be found [here](../test/system/quartus_system.json).
 
 
 ## System JSON Schema: Nodes
