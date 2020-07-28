@@ -92,11 +92,11 @@ The JSON schema for a FINS Application is composed of the following top-level fi
 | part              | string | NO       |                | The programmable logic part number. While a default is not selected for the JSON, the auto-generated vendor scripts use the following default parts: Vivado uses the Zynq weback part **xc7z020clg484-1** and Quartus uses the Cyclone V **10CX220YF780I5G**. |
 | params            | dict[] | NO       |                | An array of parameter definitions. See the parameters documentation [here](parameters.md). |
 | nodes             | dict[] | YES      |                | A dictionary array that contains a description of each node. See [Nodes JSON section](#system-json-schema-nodes). |
-| connections       | dict[] | NO       |                | An array of connections between to/from ports of Nodes in the Nodeset. See [Connections JSON section](#nodeset-json-schema-connections). |
-| clocks            | dict[] | YES      |                | Required for Application-level Nodesets. This field is an array of clock nets. Each entry connects a clock to a list of ports on Nodes in the Nodeset. See [Clocks JSON section](#nodeset-json-schema-clocks). |
-| port_exports      | dict[] | NO       | all open ports | An array of ports to export and become the external ports of this Nodeset. By default, unconnected ports are exported. Each dict element contains the "node_name" for the port and the "net" or actual port name. | |
-| hdl_port_exports  | dict[] | NO       | all open ports | An array of HDL ports (standard logic [vectors]) to export and become the external ports of this Nodeset. By default, unconnected ports are exported. Each dict element contains the "node_name" for the port and the "net" or actual port name. |
-| filesets          | dict   | NO       |                | A dictionary of fileset definitions. See the filesets documentation [here](filesets.md). |
+| connections       | dict[] | NO       |                | An array of connections between to/from ports of Nodes in the Application. See [Connections JSON section](#application-json-schema-connections). |
+| clocks            | dict[] | YES      |                | This field is an array of clock nets. Each entry connects a clock to a list of ports on Nodes in the Application. See [Clocks JSON section](#application-json-schema-clocks). |
+| port_exports      | dict[] | NO       | all open ports | An array of ports to export and become the external ports of this Application. By default, unconnected ports are exported. Each dict element contains the "node_name" for the port and the "net" or actual port name. | |
+| hdl_port_exports  | dict[] | NO       | all open ports | An array of HDL ports (standard logic [vectors]) to export and become the external ports of this Application. By default, unconnected ports are exported. Each dict element contains the "node_name" for the port and the "net" or actual port name. |
+| filesets          | dict   | NO       |                | A dictionary of fileset definitions. "source" files are not permitted for Applications. See the filesets documentation [here](filesets.md). |
 
 An example of a FINS Application JSON file can be found [here](../test/application/application_test.json). Another one is present in the [Power Converter Application Tutorial](tutorial2.md).
 
@@ -125,6 +125,7 @@ A clock domain named "properties" is always created for any Application that has
 | Key                 | Type              | Required | Default Value | Description |
 | ------------------- | ----------------- | -------- | ------------- | ----------- |
 | clock               | dict              | YES      |               | The clock domain to create. '_aclk' will be appended to this before being used in HDL. An '_aresetn' will be created and paired with this domain. |
+| period_ns           | float             | NO       | 10            | The **simulation-only clock period**. |
 | nets                | dict[]            | YES      |               | The list of nets on this clock domain. Each dict element contains the "node_name" for the port and the "net" or actual port name to place on this clock domain. |
 
 **[RETURN TO TOP LEVEL README](../README.md)**

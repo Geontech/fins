@@ -75,7 +75,7 @@ See the links below for detailed documentation on elements of a FINS Node.
 * [Node Filesets](./docs/filesets.md)
 * [Node Sub-IP](./docs/sub-ip.md)
 
-There are two important FINS constructs used for integration: Applications and Systems. These are elaborated on in [FINS Integration](./docs/integration.md), but to get started follow the tutorial on how to create a simple "power_application" FINS Application.
+There are two important FINS constructs used for integration: **Applications** and **Systems**. These are elaborated on in [FINS Integration](./docs/integration.md), but to get started follow the tutorial on how to create a simple "power_application" FINS Application.
 
 * [Power Converter Application Tutorial](docs/tutorial2.md)
 

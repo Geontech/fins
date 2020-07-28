@@ -84,9 +84,9 @@ Using your favorite text editor, create a file called **fins.json** in the **pow
 
 In the **fins.json** file we just created, we have defined:
 1. Two "params" which override params of the Nodes in this Application. See [here](parameters.md) for more information about parameters.
-2. A list of FINS "nodes" to be instantiated and connected in this Application. Each Node's property interface is assigned a meaningful name, and Node parameters are overwritten by parameters of the Application. FINS code-generation instantiates the nodes listed here in a backend/tool-specific block design (Vivado Block Design or Quartus Platform Designer System). For more information on the fields of each "nodes" entry see [here](applications.md).
-3. Connections between Node ports. For more information on "connections" see [here](applications.md).
-3. Clock domains and their assignments to ports. For more information on "clocks" see [here](applications.md).
+2. A list of FINS "nodes" to be instantiated and connected in this Application. Each Node's property interface is assigned a meaningful name, and Node parameters are overwritten by parameters of the Application. FINS code-generation instantiates the nodes listed here in a backend/tool-specific block design (Vivado Block Design or Quartus Platform Designer System). For more information on the fields of each "nodes" entry see [here](applications.md#application-json-schema-nodes).
+3. Connections between Node ports. For more information on "connections" see [here](applications.md#application-json-schema-connections).
+3. Clock domains and their assignments to ports. For more information on "clocks" see [here](applications.md#application-json-schema-clocks).
 
 ## Step 3: Auto-generating Block Designs and HDL
 
