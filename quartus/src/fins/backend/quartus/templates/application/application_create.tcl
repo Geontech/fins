@@ -116,7 +116,7 @@ save_instantiation
 
 add_connection {{ clock_bridge_name }}.out_clk/{{ reset_bridge_name }}.clk
 
-# add the exports
+# Export clocks
 set_interface_property {{ clock['clock'] }} EXPORT_OF {{ clock_bridge_name }}.in_clk
 set_interface_port_property {{ clock['clock'] }} {{ clock['clock'] }}_clk NAME {{ clock['clock'] }}
 set_interface_property {{ clock['resetn'] }} EXPORT_OF {{ reset_bridge_name }}.in_reset
@@ -140,7 +140,6 @@ set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }
 set_interface_property {{ port['name'] }} EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']['name'] }}
 {%-   endfor %}
 {%-  endif %}
-# The following ports were exported (made external) from the Application
 {%- endif %}
 
 {%- if 'prop_interfaces' in fins %}

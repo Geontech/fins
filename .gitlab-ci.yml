@@ -55,11 +55,13 @@ vivado-test:
         - 'cd test/node'
         - 'fins -b vivado fins.json && make sim && make clean-all'
         - 'cd ../application'
-        - 'fins -b vivado application_test.json'
+        - 'fins -b vivado application_test.json && make && make clean-all'
+        - 'cd ../system'
+        - 'make && fins vivado_system.json && make clean'
         - 'cd ../../tutorials/power_converter'
         - 'fins -b vivado fins.json && make sim && make clean-all'
         - 'cd ../power_application'
-        - 'fins -b vivado fins.json'
+        - 'fins -b vivado fins.json && make && make clean-all'
 
 quartus-test:
     extends: core-test
