@@ -28,12 +28,12 @@ image: centos:7
     yum install -y epel-release
     yum install -y python36 python36-pip python-jinja2 octave make gcc glibc.i686
     python3 -m pip install --upgrade pip setuptools
+    python3 -m pip install .
 
 test-core:
     stage: test-core
     before_script:
         - *install-prereqs
-        - 'python3 -m pip install .'
     script:
         - 'cd test/node'
         - 'fins fins.json'
