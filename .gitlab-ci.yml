@@ -32,7 +32,7 @@ image: centos:7
 test-core:
     stage: test-core
     before_script:
-        - '*install-prereqs'
+        - *install-prereqs
         - 'python3 -m pip install .'
     script:
         - 'cd test/node'
@@ -55,7 +55,7 @@ test-vivado:
         variables:
             [ $VIVADO_DISABLE == 'true' ]
     before_script:
-        - '*install-prereqs'
+        - *install-prereqs
         - 'python3 -m pip install ./vivado'
     script:
         - 'source $VIVADO_PATH/settings64.sh'
@@ -73,7 +73,7 @@ test-quartus:
         variables:
             [ $QUARTUS_DISABLE == 'true' ]
     before_script:
-        - '*install-prereqs'
+        - *install-prereqs
         - 'python3 -m pip install ./quartus'
     script:
         - 'export PATH=$PATH:$QUARTUS_PATH/quartus/bin:$QUARTUS_PATH/modelsim_ase/bin:$QUARTUS_PATH/qsys/bin'
