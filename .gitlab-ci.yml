@@ -43,6 +43,9 @@ test-core:
         - 'fins fins.json'
         - 'cd ../power_application'
         - 'fins fins.json'
+    artifacts:
+        - test/**/log/*
+        - tutorial/**/log/*
     tags:
         - fpga
 
@@ -51,9 +54,6 @@ test-vivado:
     variables:
         VIVADO_VERSION: '2019.1'
         VIVADO_PATH: '/opt/fpga/Xilinx/Vivado/$VIVADO_VERSION'
-    except:
-        variables:
-            [ $VIVADO_DISABLE == 'true' ]
     before_script:
         - *install-prereqs
         - 'python3 -m pip install ./vivado'
@@ -61,6 +61,12 @@ test-vivado:
         - 'source $VIVADO_PATH/settings64.sh'
         - 'cd test/'
         - './test_backend.sh vivado'
+    artifacts:
+        - test/**/log/*
+        - tutorial/**/log/*
+    except:
+        variables:
+            [ $VIVADO_DISABLE == 'true' ]
     tags:
         - fpga
 
@@ -69,9 +75,6 @@ test-quartus:
     variables:
         QUARTUS_VERSION: '19.4'
         QUARTUS_PATH: '/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION'
-    except:
-        variables:
-            [ $QUARTUS_DISABLE == 'true' ]
     before_script:
         - *install-prereqs
         - 'python3 -m pip install ./quartus'
@@ -79,5 +82,11 @@ test-quartus:
         - 'export PATH=$PATH:$QUARTUS_PATH/quartus/bin:$QUARTUS_PATH/modelsim_ase/bin:$QUARTUS_PATH/qsys/bin'
         - 'cd test/'
         - './test_backend.sh quartus'
+    artifacts:
+        - test/**/log/*
+        - tutorial/**/log/*
+    except:
+        variables:
+            [ $QUARTUS_DISABLE == 'true' ]
     tags:
         - fpga
