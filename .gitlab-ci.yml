@@ -85,8 +85,9 @@ test-quartus:
         - 'cd test/'
         - './test_backend.sh quartus'
     artifacts:
-        - test/**/log/*
-        - tutorial/**/log/*
+        paths:
+            - test/**/log/*
+            - tutorial/**/log/*
     except:
         variables:
             [ $QUARTUS_DISABLE == 'true' ]
