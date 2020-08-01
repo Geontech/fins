@@ -44,8 +44,9 @@ test-core:
         - 'cd ../power_application'
         - 'fins fins.json'
     artifacts:
-        - test/**/log/*
-        - tutorial/**/log/*
+        paths:
+            - test/**/log/*
+            - tutorial/**/log/*
     tags:
         - fpga
 
@@ -62,8 +63,9 @@ test-vivado:
         - 'cd test/'
         - './test_backend.sh vivado'
     artifacts:
-        - test/**/log/*
-        - tutorial/**/log/*
+        paths:
+            - test/**/log/*
+            - tutorial/**/log/*
     except:
         variables:
             [ $VIVADO_DISABLE == 'true' ]
