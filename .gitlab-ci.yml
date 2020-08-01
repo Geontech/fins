@@ -43,10 +43,6 @@ test-core:
         - 'fins fins.json'
         - 'cd ../power_application'
         - 'fins fins.json'
-    artifacts:
-        paths:
-            - test/**/log/*
-            - tutorial/**/log/*
     tags:
         - fpga
 
@@ -63,6 +59,7 @@ test-vivado:
         - 'cd test/'
         - './test_backend.sh vivado'
     artifacts:
+        when: on_failure
         paths:
             - test/**/log/*
             - tutorial/**/log/*
@@ -85,6 +82,7 @@ test-quartus:
         - 'cd test/'
         - './test_backend.sh quartus'
     artifacts:
+        when: on_failure
         paths:
             - test/**/log/*
             - tutorial/**/log/*
