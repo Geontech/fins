@@ -39,10 +39,13 @@ setup(
     package_data={
         'fins':[
             'loader/node.json',
-            'loader/nodeset.json',
+            'loader/application.json',
+            'loader/system.json',
             'backend/templates/node/*',
-            'backend/templates/nodeset/*',
-            'backend/templates/node/.gitignore'
+            'backend/templates/application/*',
+            'backend/templates/system/*',
+            'backend/templates/node/.gitignore',
+            'backend/templates/application/.gitignore'
         ]
     },
     entry_points={
