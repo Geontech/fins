@@ -22,6 +22,7 @@ variables:
     QUARTUS_VERSION: '19.4'
 stages:
     - test
+    - package
 image: centos:7
 
 core-test:
@@ -78,3 +79,55 @@ quartus-test:
         - 'fins -b quartus fins.json && make sim && make clean-all'
         - 'cd ../power_application'
         - 'fins -b quartus fins.json && make sim && make clean-all'
+
+.rpmbuild:
+    stage: package
+    image: centos:7
+    before_script:
+        - yum install -y epel-release rpm-build rpmdevtools
+        - yum install -y python3 python3-pip
+        - python3 -m pip install --user -U pip setuptools
+        # Create build tree; can't rely on bdist_rpm
+        - rpmdev-setuptree
+        # Neutralize brp-python-bytecompile
+        - sed -i '2iexit 0' /usr/lib/rpm/brp-python-bytecompile
+    script:
+        - python3 setup.py bdist_rpm --spec-only
+        - mv dist/*.spec ~/rpmbuild/SPECS/
+        - cd ~/rpmbuild/SPECS
+        # Patch spec file
+        - sed -i 's/-O1/--no-compile/g' *.spec && cd ~/rpmbuild
+        # tarball sources
+        - >-
+          export NAME=`grep "define name" ~/rpmbuild/SPECS/*.spec |
+          cut -d" " -f 3`
+        - >-
+          export VER=`grep "define version" ~/rpmbuild/SPECS/*.spec |
+          cut -d" " -f 3`
+        - cd $CI_PROJECT_DIR
+        - cp -R . "/tmp/$NAME-$VER"
+        - cd /tmp
+        - >-
+          tar -czvf
+          ~/rpmbuild/SOURCES/$NAME-$VER.tar.gz --exclude='.rrpucs-gitlab-ci.yml'
+          $NAME-$VER
+        # Build RPM old-fashioned way
+        - cd ~/rpmbuild
+        - rpmbuild -bb SPECS/*.spec
+        - mv RPMS/noarch/*.rpm $CI_PROJECT_DIR/dist/
+    after_script:
+        # Remove build tree
+        - rm -rf ~/rpmbuild
+        - rm -rf /tmp/$NAME-$VER
+        # Restore brp-python-bytecompile
+        - sed -i '2d' /usr/lib/rpm/brp-python-bytecompile
+    needs: []
+    artifacts:
+        paths:
+            - dist/*.rpm
+
+rpmbuild:
+    extends: .rpmbuild
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master"'
+
