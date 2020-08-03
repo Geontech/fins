@@ -1,6 +1,6 @@
 {#-
  #
- # Copyright (C) 2019 Geon Technologies, LLC
+ # Copyright (C) 2020 Geon Technologies, LLC
  #
  # This file is part of FINS.
  #
@@ -27,7 +27,7 @@
 # ---------------------------------------------------------
 # Description: Makefile to build and simulate the FINS "quartus" backend
 # Versions:    Tested with:
-#              * Intel Quartus Prime Pro 19.1
+#              * Intel Quartus Prime Pro 19.4
 #===============================================================================
 
 #-------------------------------------------------------------------------------
@@ -91,35 +91,36 @@ CONSTRAINTS_FILES+= {{ constraints_file['path'] }}
 #-------------------------------------------------------------------------------
 # Additional variables
 #-------------------------------------------------------------------------------
-# Search paths of this IP's _hw.tcl and sub-IP
+
+# Search paths of this Application's Nodes
 IP_SEARCH_PATHS:=$(QUARTUS_TO_ROOT)/$(FINS_OUTPUT_DIR),
-{%- if 'ip' in fins %}
-{%- for ip in fins['ip'] %}
-IP_SEARCH_PATHS:=$(IP_SEARCH_PATHS)$(QUARTUS_TO_ROOT)/{{ ip['fins_path']|dirname }}/**/*,
+{%- for node in fins['nodes'] %}
+IP_SEARCH_PATHS:=$(IP_SEARCH_PATHS)$(QUARTUS_TO_ROOT)/{{ node['fins_path']|dirname }}/**/*,
 {%- endfor %}
-{%- endif %}
-{%- if 'user_ip_catalog' in fins %}
-IP_SEARCH_PATHS:=$(IP_SEARCH_PATHS)$(QUARTUS_TO_ROOT)/{{ fins['user_ip_catalog'] }}/**/*,
-{%- endif %}
 
 # Filenames
 PROJECT_FILENAME:={{ fins['name'] }}.qpf
-QSYS_IP_FILENAME:={{ fins['name'] }}.ip
-IP_CREATE_SCRIPT_FILENAME:=ip_create.tcl
-IP_CREATE_LOG_FILENAME:=ip_create.log
-IP_SIMULATE_SCRIPT_FILENAME:=ip_simulate.tcl
-IP_SIMULATE_LOG_FILENAME:=ip_simulate.log
+QSYS_APPLICATION_FILENAME:={{ fins['name'] }}.qsys
+APPLICATION_PROJECT_SCRIPT_FILENAME:=application_project.tcl
+APPLICATION_PROJECT_LOG_FILENAME:=application_project.log
+APPLICATION_CREATE_SCRIPT_FILENAME:=application_create.tcl
+APPLICATION_CREATE_LOG_FILENAME:=application_create.log
+APPLICATION_SIMULATE_SCRIPT_FILENAME:=application_simulate.tcl
+APPLICATION_SIMULATE_LOG_FILENAME:=application_simulate.log
 
 # Paths relative to the IP root
-IP_CREATE_LOG_PATH:=$(LOGS_DIR)/$(IP_CREATE_LOG_FILENAME)
-IP_SIMULATE_LOG_PATH:=$(LOGS_DIR)/$(IP_SIMULATE_LOG_FILENAME)
+APPLICATION_PROJECT_LOG_PATH:=$(LOGS_DIR)/$(APPLICATION_PROJECT_LOG_FILENAME)
+APPLICATION_CREATE_LOG_PATH:=$(LOGS_DIR)/$(APPLICATION_CREATE_LOG_FILENAME)
+APPLICATION_SIMULATE_LOG_PATH:=$(LOGS_DIR)/$(APPLICATION_SIMULATE_LOG_FILENAME)
 
 # Paths relative to the other paths
-QUARTUS_TO_IP_CREATE_SCRIPT_PATH:=$(QUARTUS_TO_ROOT)/$(FINS_OUTPUT_DIR)/$(IP_CREATE_SCRIPT_FILENAME)
-QUARTUS_TO_IP_CREATE_LOG_PATH:=$(QUARTUS_TO_ROOT)/$(IP_CREATE_LOG_PATH)
-QUARTUS_TO_IP_SIMULATE_LOG_PATH:=$(QUARTUS_TO_ROOT)/$(IP_SIMULATE_LOG_PATH)
-MODELSIM_TO_IP_SIMULATE_SCRIPT_PATH:=$(MODELSIM_TO_ROOT)/$(FINS_OUTPUT_DIR)/$(IP_SIMULATE_SCRIPT_FILENAME)
-MODELSIM_TO_IP_SIMULATE_LOG_PATH:=$(MODELSIM_TO_ROOT)/$(IP_SIMULATE_LOG_PATH)
+QUARTUS_TO_APPLICATION_PROJECT_SCRIPT_PATH:=$(QUARTUS_TO_ROOT)/$(FINS_OUTPUT_DIR)/$(APPLICATION_PROJECT_SCRIPT_FILENAME)
+QUARTUS_TO_APPLICATION_PROJECT_LOG_PATH:=$(QUARTUS_TO_ROOT)/$(APPLICATION_PROJECT_LOG_PATH)
+QUARTUS_TO_APPLICATION_CREATE_SCRIPT_PATH:=$(QUARTUS_TO_ROOT)/$(FINS_OUTPUT_DIR)/$(APPLICATION_CREATE_SCRIPT_FILENAME)
+QUARTUS_TO_APPLICATION_CREATE_LOG_PATH:=$(QUARTUS_TO_ROOT)/$(APPLICATION_CREATE_LOG_PATH)
+QUARTUS_TO_APPLICATION_SIMULATE_LOG_PATH:=$(QUARTUS_TO_ROOT)/$(APPLICATION_SIMULATE_LOG_PATH)
+MODELSIM_TO_APPLICATION_SIMULATE_SCRIPT_PATH:=$(MODELSIM_TO_ROOT)/$(FINS_OUTPUT_DIR)/$(APPLICATION_SIMULATE_SCRIPT_FILENAME)
+MODELSIM_TO_APPLICATION_SIMULATE_LOG_PATH:=$(MODELSIM_TO_ROOT)/$(APPLICATION_SIMULATE_LOG_PATH)
 
 # Set the default synthesis language to use
 SYNTH_LANGUAGE:=VERILOG
@@ -151,37 +152,38 @@ SIM_LANGUAGE:=VHDL
 # Target specifications
 #-------------------------------------------------------------------------------
 # Top-level target
-IP_TARGET:=$(QUARTUS_DIR)/$(PROJECT_FILENAME)
+APPLICATION_TARGET:=$(QUARTUS_DIR)/$(PROJECT_FILENAME)
 
 #-------------------------------------------------------------------------------
 # Makefile targets
 #-------------------------------------------------------------------------------
-.PHONY: all clean clean-all {% if 'filesets' in fins %}{% if 'sim' in fins['filesets'] %}sim{% endif %}{% endif %}
+.PHONY: all clean clean-nodes clean-all {% if 'filesets' in fins %}{% if 'sim' in fins['filesets'] %}sim{% endif %}{% endif %}
 
-# All phony target to build the Vivado project
+# All phony target to build the {{ fins['backend'] }} project
 all:
-	{%- for ip in fins['ip'] %}
-	{%- if ip['library'] == "user" %}
-	make -C {{ ip['fins_path']|dirname }} all
-	{%- endif %}
+	{%- for node in fins['nodes'] %}
+	$(MAKE) -C {{ node['fins_dir'] }} all
 	{%- endfor %}
-	make -C . $(IP_TARGET)
+	make -C . $(APPLICATION_TARGET)
 
-# Clean target that cleans only this IP
+# Clean phony target that cleans only this Application
 clean:
 	rm -rf $(TEMP_FILES)
 
-# Clean-all phony target that cleans this IP and all sub-ip
-clean-all:
-{%- for ip in fins['ip'] %}
-{%- if ip['library'] == "user" %}
-	make -C {{ ip['fins_path']|dirname }} $@
-{%- endif %}
+# Clean-nodes phony target that cleans all nodes
+clean-nodes:
+{%- for node in fins['nodes'] %}
+	$(MAKE) -C {{ node['fins_dir'] }} clean-all
 {%- endfor %}
-	rm -rf $(TEMP_FILES)
 
-# Vivado project target
-$(IP_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES)
+# Clean-all phony target that cleans this Application and all nodes
+clean-all: clean-nodes clean
+
+{%- if 'filesets' in fins %}
+{%- if 'sim' in fins['filesets'] %}
+
+# {{ fins['backend'] }} project target
+$(APPLICATION_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES)
 	$(if $(UseBatch),mkdir -p $(LOGS_DIR))
 	rm -rf $(QUARTUS_DIR) && mkdir -p $(QUARTUS_DIR)
 	{%- if 'filesets' in fins %}
@@ -190,96 +192,96 @@ $(IP_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES)
 	{%- for script in fins['filesets']['scripts']['prebuild'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 else
-	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 endif
 	{%- elif script['type']|lower == 'octave' %}
-	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
-	python {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	python {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python3' %}
-	python3 {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'cmdline' %}
-	./{{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	./{{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
-	cd $(QUARTUS_DIR) && qsys-script --search-path=$(IP_SEARCH_PATHS)$$ --new-quartus-project=$(PROJECT_FILENAME) --script=$(QUARTUS_TO_IP_CREATE_SCRIPT_PATH) $(if $(UseBatch),>> $(QUARTUS_TO_IP_CREATE_LOG_PATH) 2>&1)
-	cd $(QUARTUS_DIR) && qsys-generate --search-path=$(IP_SEARCH_PATHS)$$ --quartus-project=$(PROJECT_FILENAME) --synthesis=$(SYNTH_LANGUAGE) {% if 'filesets' in fins %}{% if 'sim' in fins['filesets'] %}--simulation=$(SIM_LANGUAGE){% endif %}{% endif %} --ipxact $(QSYS_IP_FILENAME) $(if $(UseBatch),>> $(QUARTUS_TO_IP_CREATE_LOG_PATH) 2>&1)
+	cd $(QUARTUS_DIR) && quartus_sh -t $(QUARTUS_TO_APPLICATION_PROJECT_SCRIPT_PATH)$ $(if $(UseBatch),>> $(QUARTUS_TO_APPLICATION_PROJECT_LOG_PATH) 2>&1)
+	cd $(QUARTUS_DIR) && qsys-script --search-path=$(IP_SEARCH_PATHS)$$ --quartus-project=$(PROJECT_FILENAME) --script=$(QUARTUS_TO_APPLICATION_CREATE_SCRIPT_PATH) $(if $(UseBatch),>> $(QUARTUS_TO_APPLICATION_CREATE_LOG_PATH) 2>&1)
+	cd $(QUARTUS_DIR) && qsys-generate --search-path=$(IP_SEARCH_PATHS)$$ --quartus-project=$(PROJECT_FILENAME) --synthesis=$(SYNTH_LANGUAGE) {% if 'filesets' in fins %}{% if 'sim' in fins['filesets'] %}--simulation=$(SIM_LANGUAGE){% endif %}{% endif %} --ipxact $(QSYS_APPLICATION_FILENAME) $(if $(UseBatch),>> $(QUARTUS_TO_APPLICATION_CREATE_LOG_PATH) 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
 	{%- if 'postbuild' in fins['filesets']['scripts'] %}
 	{%- for script in fins['filesets']['scripts']['postbuild'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 else
-	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 endif
 	{%- elif script['type']|lower == 'octave' %}
-	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
-	python {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	python {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python3' %}
-	python3 {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'cmdline' %}
-	./{{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	./{{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
 
-{%- if 'filesets' in fins %}
-{%- if 'sim' in fins['filesets'] %}
 # Simulation phony target
-sim : all
+sim : all $(APPLICATION_TARGET)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
 	{%- if 'presim' in fins['filesets']['scripts'] %}
 	{%- for script in fins['filesets']['scripts']['presim'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 else
-	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 endif
 	{%- elif script['type']|lower == 'octave' %}
-	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
-	python {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	python {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python3' %}
-	python3 {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'cmdline' %}
-	./{{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	./{{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
-	cd $(QUARTUS_DIR) && ip-setup-simulation --quartus-project=$(PROJECT_FILENAME) --output-directory=./ --use-relative-paths $(if $(UseBatch),>> $(QUARTUS_TO_IP_SIMULATE_LOG_PATH) 2>&1)
-	cd $(MODELSIM_DIR) && vsim $(if $(UseBatch),-batch) -do $(MODELSIM_TO_IP_SIMULATE_SCRIPT_PATH) $(if $(UseBatch),>> $(MODELSIM_TO_IP_SIMULATE_LOG_PATH) 2>&1)
+	cd $(QUARTUS_DIR) && ip-setup-simulation --quartus-project=$(PROJECT_FILENAME) --output-directory=./ --use-relative-paths $(if $(UseBatch),>> $(QUARTUS_TO_APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	cd $(QUARTUS_DIR) && sim-script-gen --search-path=$(IP_SEARCH_PATHS)$$ --system-file=$(QSYS_APPLICATION_FILENAME) --output-directory=./ --use-relative-paths $(if $(UseBatch),>> $(QUARTUS_TO_APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	cd $(MODELSIM_DIR) && vsim $(if $(UseBatch),-batch) -do $(MODELSIM_TO_APPLICATION_SIMULATE_SCRIPT_PATH) $(if $(UseBatch),>> $(MODELSIM_TO_APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
 	{%- if 'postsim' in fins['filesets']['scripts'] %}
 	{%- for script in fins['filesets']['scripts']['postsim'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 else
-	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 endif
 	{%- elif script['type']|lower == 'octave' %}
-	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python' %}
-	python {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	python {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'python3' %}
-	python3 {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 	{%- elif script['type']|lower == 'cmdline' %}
-	./{{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	./{{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 	{%- endif %}
 	{%- endfor %}
 	{%- endif %}

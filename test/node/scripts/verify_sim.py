@@ -55,7 +55,7 @@ if sim_expected_data == sim_sink_data['data']:
 else:
     print('ERROR: myoutput simulation data is incorrect')
     print('    * Expected: {}'.format(sim_expected_data))
-    print('    * Received: {}'.format(sim_sink_data))
+    print('    * Received: {}'.format(sim_sink_data['data']))
     sys.exit(1)
 
 ###################################################################################################

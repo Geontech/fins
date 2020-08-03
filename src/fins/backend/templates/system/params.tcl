@@ -22,10 +22,10 @@
 # Firmware IP Node Specification (FINS) Auto-Generated File
 # ---------------------------------------------------------
 # Template:    params.tcl
-# Backend:     core (Nodeset)
+# Backend:     core (Application)
 # Generated:   {{ now }}
 # ---------------------------------------------------------
-# Description: TCL script for a Nodeset that defines parameters
+# Description: TCL script for a Application that defines parameters
 #===============================================================================
 
 {% if 'params' in fins %}
