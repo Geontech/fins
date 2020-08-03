@@ -1,47 +1,14 @@
-#
-# Copyright (C) 2019 Geon Technologies, LLC
-#
-# This file is part of FINS.
-#
-# FINS is free software: you can redistribute it and/or modify it under the
-# terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation, either version 3 of the License, or (at your option)
-# any later version.
-#
-# FINS is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for
-# more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program.  If not, see http://www.gnu.org/licenses/.
-#
+include:
+    - local: '.gitlab-ci.yml'
+    - project: common/common
+      file: 'common-ci.yml'
 
 variables:
-    VIVADO_VERSION: '2019.1'
-    QUARTUS_VERSION: '19.1'
-stages:
-    - test
-test:
-    stage: test
-    before_script:
-        - 'yum install -y epel-release'
-        - 'yum install -y python36 python36-pip python-jinja2 octave make gcc glibc.i686'
-        - 'python3 -m pip install --upgrade pip setuptools'
-        - 'python3 -m pip install .'
-        - 'python3 -m pip install ./vivado'
-        - 'python3 -m pip install ./quartus'
-    script:
-        #- 'source /opt/fpga/Xilinx/Vivado/$VIVADO_VERSION/settings64.sh'
-        - 'export PATH=$PATH:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/quartus/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/modelsim_ase/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/qsys/bin'
-        - 'cd test/node'
-        #- 'fins -b vivado fins.json && make sim && make clean-all'
-        - 'fins -b quartus fins.json && make sim && make clean-all'
-        - 'cd ../../test/nodeset'
-        - 'fins nodeset.json'
-        - 'cd ../../tutorials/power_converter'
-        #- 'fins -b vivado fins.json && make sim && make clean-all'
-        - 'fins -b quartus fins.json && make sim && make clean-all'
-    tags:
-        - QuartusPrimePro
+    VIVADO_DISABLE: "true"
 
+rpmbuild:rrpucs:
+    extends: .rpmbuild
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "rrpucs"'
+        - when: manual
+          allow_failure: true
