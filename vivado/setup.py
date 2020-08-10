@@ -27,7 +27,7 @@ setup(
     package_dir={'':'src'},
     python_requires='>= 3.6',
     install_requires=[
-        'fins == 0.14',
+        'fins == 0.15',
         'Jinja2 ~= 2.8',
     ],
     package_data={
