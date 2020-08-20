@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019 Geon Technologies, LLC
+# Copyright (C) 2020 Geon Technologies, LLC
 #
 # This file is part of FINS.
 #
@@ -19,11 +19,13 @@
 
 variables:
     VIVADO_VERSION: '2019.1'
-    QUARTUS_VERSION: '19.1'
+    QUARTUS_VERSION: '19.4'
 stages:
     - test
+    - package
 image: centos:7
-test:
+
+core-test:
     stage: test
     before_script:
         - 'yum install -y epel-release'
@@ -33,15 +35,99 @@ test:
         - 'python3 -m pip install ./vivado'
         - 'python3 -m pip install ./quartus'
     script:
-        - 'source /opt/fpga/Xilinx/Vivado/$VIVADO_VERSION/settings64.sh'
-        - 'export PATH=$PATH:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/quartus/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/modelsim_ase/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/qsys/bin'
         - 'cd test/node'
-        - 'fins -b vivado fins.json && make sim && make clean-all'
-        - 'fins -b quartus fins.json && make sim && make clean-all'
-        - 'cd ../../test/nodeset'
-        - 'fins nodeset.json'
+        - 'fins fins.json'
+        - 'cd ../application'
+        - 'fins application_test.json'
         - 'cd ../../tutorials/power_converter'
-        - 'fins -b vivado fins.json && make sim && make clean-all'
-        - 'fins -b quartus fins.json && make sim && make clean-all'
+        - 'fins fins.json'
+        - 'cd ../power_application'
+        - 'fins fins.json'
     tags:
         - fpga
+
+vivado-test:
+    extends: core-test
+    except:
+        variables:
+            [ $VIVADO_DISABLE == 'true' ]
+    script:
+        - 'source /opt/fpga/Xilinx/Vivado/$VIVADO_VERSION/settings64.sh'
+        - 'cd test/node'
+        - 'fins -b vivado fins.json && make sim && make clean-all'
+        - 'cd ../application'
+        - 'fins -b vivado application_test.json'
+        - 'cd ../../tutorials/power_converter'
+        - 'fins -b vivado fins.json && make sim && make clean-all'
+        - 'cd ../power_application'
+        - 'fins -b vivado fins.json'
+
+quartus-test:
+    extends: core-test
+    except:
+        variables:
+            [ $QUARTUS_DISABLE == 'true' ]
+    script:
+        - 'export PATH=$PATH:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/quartus/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/modelsim_ase/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/qsys/bin'
+        - 'cd test/node'
+        - 'fins -b quartus fins.json && make sim && make clean-all'
+        - 'cd ../application'
+        - 'fins -b quartus application_test.json && make sim && make clean-all'
+        - 'cd ../system'
+        - 'make && fins quartus_system.json && make clean'
+        - 'cd ../../tutorials/power_converter'
+        - 'fins -b quartus fins.json && make sim && make clean-all'
+        - 'cd ../power_application'
+        - 'fins -b quartus fins.json && make sim && make clean-all'
+
+.rpmbuild:
+    stage: package
+    image: centos:7
+    before_script:
+        - yum install -y epel-release rpm-build rpmdevtools
+        - yum install -y python3 python3-pip
+        - python3 -m pip install --user -U pip setuptools
+        # Create build tree; can't rely on bdist_rpm
+        - rpmdev-setuptree
+        # Neutralize brp-python-bytecompile
+        - sed -i '2iexit 0' /usr/lib/rpm/brp-python-bytecompile
+    script:
+        - python3 setup.py bdist_rpm --spec-only
+        - mv dist/*.spec ~/rpmbuild/SPECS/
+        - cd ~/rpmbuild/SPECS
+        # Patch spec file
+        - sed -i 's/-O1/--no-compile/g' *.spec && cd ~/rpmbuild
+        # tarball sources
+        - >-
+          export NAME=`grep "define name" ~/rpmbuild/SPECS/*.spec |
+          cut -d" " -f 3`
+        - >-
+          export VER=`grep "define version" ~/rpmbuild/SPECS/*.spec |
+          cut -d" " -f 3`
+        - cd $CI_PROJECT_DIR
+        - cp -R . "/tmp/$NAME-$VER"
+        - cd /tmp
+        - >-
+          tar -czvf
+          ~/rpmbuild/SOURCES/$NAME-$VER.tar.gz --exclude='.rrpucs-gitlab-ci.yml'
+          $NAME-$VER
+        # Build RPM old-fashioned way
+        - cd ~/rpmbuild
+        - rpmbuild -bb SPECS/*.spec
+        - mv RPMS/noarch/*.rpm $CI_PROJECT_DIR/dist/
+    after_script:
+        # Remove build tree
+        - rm -rf ~/rpmbuild
+        - rm -rf /tmp/$NAME-$VER
+        # Restore brp-python-bytecompile
+        - sed -i '2d' /usr/lib/rpm/brp-python-bytecompile
+    needs: []
+    artifacts:
+        paths:
+            - dist/*.rpm
+
+rpmbuild:
+    extends: .rpmbuild
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master"'
+

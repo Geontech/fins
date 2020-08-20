@@ -1,0 +1,123 @@
+{
+  "name":"application_test",
+  "is_application":true,
+  "description":"FINS Nodeset for testing",
+  "version":"0.0",
+  "company_name":"Geon Technologies",
+  "company_url":"geon.tech",
+  "company_logo":"docs/geontech_logo.png",
+  "params": [
+    { "name":"TEST_PARAM_BOOLEAN", "value":false,           "description":"This is a test parameter excercising a boolean type" },
+    { "name":"TEST_PARAM_INTEGER", "value":4,               "description":"This is a test parameter excercising an integer type" },
+    { "name":"TEST_PARAM_STRING",  "value":"my_app_string", "description":"This is a test parameter excercising a string type" },
+    { "name":"NODESET_TEST_PARAM", "value":true,            "description":"A parameter for testing FINS Application generated HDL/Tcl output" }
+  ],
+  "nodes":[
+    {
+      "fins_path":"../node/fins.json",
+      "module_name":"fins_test_ip_0",
+      "params": [
+        { "name":"TEST_PARAM_BOOLEAN",         "parent": "TEST_PARAM_BOOLEAN" },
+        { "name":"TEST_PARAM_INTEGER",         "parent": "TEST_PARAM_INTEGER" },
+        { "name":"TEST_PARAM_STRING",          "parent": "TEST_PARAM_STRING" }
+      ]
+    },
+    {
+      "fins_path":"../node/fins.json",
+      "module_name":"fins_test_ip_1",
+      "params": [
+        { "name":"TEST_PARAM_BOOLEAN",         "parent": "TEST_PARAM_BOOLEAN" },
+        { "name":"TEST_PARAM_INTEGER",         "parent": "TEST_PARAM_INTEGER" },
+        { "name":"TEST_PARAM_STRING",          "parent": "TEST_PARAM_STRING" }
+      ]
+    }
+  ],
+  "connections":[
+    {
+      "source":{"node_name":"fins_test_ip_0", "net":"myoutput"},
+      "destinations":[
+        {"node_name":"fins_test_ip_1", "net":"myinput"}
+      ]
+    },
+    {
+      "source":{"node_name":"fins_test_ip_0", "net":"test_out"},
+      "destinations":[
+        {"node_name":"fins_test_ip_1", "net":"test_in"}
+      ]
+    },
+    {
+      "source":{"node_name":"fins_test_ip_0", "net":"sfix_cpx_out"},
+      "destinations":[
+        {"node_name":"fins_test_ip_1", "net":"sfix_cpx_in"}
+      ]
+    },
+    {
+      "source":{"node_name":"fins_test_ip_0", "net":"test_hdl_std_logic_vector_out"},
+      "destinations":[
+        {"node_name":"fins_test_ip_1", "net":"test_hdl_std_logic_vector_in"}
+      ]
+    },
+    {
+      "source":{"node_name":"fins_test_ip_0", "net":"test_hdl_std_logic_out"},
+      "destinations":[
+        {"node_name":"fins_test_ip_1", "net":"test_hdl_std_logic_in"}
+      ]
+    }
+  ],
+  "clocks":[
+    {
+      "clock":"hdl",
+      "period_ns":2.5,
+      "nets":[
+        {"node_name":"fins_test_ip_0", "net":"test_hdl_clk"},
+        {"node_name":"fins_test_ip_1", "net":"test_hdl_clk"}
+      ]
+    },
+    {
+      "clock":"input",
+      "period_ns":2.5,
+      "nets":[
+        {"node_name":"fins_test_ip_0", "net":"myinput"},
+        {"node_name":"fins_test_ip_0", "net":"test_in"},
+        {"node_name":"fins_test_ip_0", "net":"sfix_cpx_in"}
+      ]
+    },
+    {
+      "clock":"processing",
+      "period_ns":2.5,
+      "nets":[
+        {"node_name":"fins_test_ip_0", "net":"myoutput"},
+        {"node_name":"fins_test_ip_0", "net":"test_out"},
+        {"node_name":"fins_test_ip_0", "net":"sfix_cpx_out"},
+        {"node_name":"fins_test_ip_1", "net":"myinput"},
+        {"node_name":"fins_test_ip_1", "net":"test_in"},
+        {"node_name":"fins_test_ip_1", "net":"sfix_cpx_in"}
+      ]
+    },
+    {
+      "clock":"output_aclk",
+      "period_ns":2.5,
+      "resetn":"output_aresetn",
+      "nets":[
+        {"node_name":"fins_test_ip_1", "net":"myoutput"},
+        {"node_name":"fins_test_ip_1", "net":"test_out"},
+        {"node_name":"fins_test_ip_1", "net":"sfix_cpx_out"}
+      ]
+    }
+  ],
+  "filesets":{
+    "sim":[
+      { "path":"../node/ip/test_middle/ip/test_bottom/gen/core/test_bottom_axilite_verify.vhd" },
+      { "path":"../node/ip/test_middle/gen/core/test_middle_axilite_verify.vhd" },
+      { "path":"../node/gen/core/test_top_axilite_verify.vhd", "type":"Vhdl" },
+      { "path":"./gen/core/application_test_pkg.vhd" },
+      { "path":"./gen/core/application_test_axis_verify.vhd" },
+      { "path":"./gen/core/application_test_tb.vhd" }
+    ],
+    "scripts":{
+      "postsim":[
+        { "path":"scripts/verify_sim.py" }
+      ]
+    }
+  }
+}
