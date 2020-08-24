@@ -55,7 +55,7 @@ def load_generator(name):
     raise KeyError(name)
 
 
-def run_generator(generator, filepath, backend, verbose, part):
+def run_generator(generator, filepath, backend, part, verbose):
 
     filename = os.path.basename(filepath)
 
@@ -87,7 +87,7 @@ def run_generator(generator, filepath, backend, verbose, part):
             if 'ip' in fins_data:
                 for ip in fins_data['ip']:
                     logging.info('Recursing into IP at', ip['fins_path'])
-                    ip['ip_details'] = run_generator(generator, ip['fins_path'], backend, verbose, part)
+                    ip['ip_details'] = run_generator(generator, ip['fins_path'], backend, part, verbose)
 
             loader.populate_fins_node(fins_data, verbose)
             loader.validate_node_fins_data_final(fins_data, verbose)
@@ -108,7 +108,7 @@ def run_generator(generator, filepath, backend, verbose, part):
             for node in fins_data['nodes']:
                 if not node['descriptive_node']:
                     logging.info('INFO: Recursing into node at "{}"'.format(node['fins_path']))
-                    node['node_details'] = run_generator(generator, node['fins_path'], backend, verbose, part)
+                    node['node_details'] = run_generator(generator, node['fins_path'], backend, part, verbose)
 
             loader.populate_fins_application(fins_data, verbose)
             loader.validate_application_fins_data_final(fins_data, verbose)
@@ -177,4 +177,4 @@ def main():
             raise SystemExit(str(exc))
 
     for filepath in args.filepath:
-        run_generator(generator, filepath, args.backend, args.verbose, args.part)
+        run_generator(generator, filepath, args.backend, args.part, args.verbose)
