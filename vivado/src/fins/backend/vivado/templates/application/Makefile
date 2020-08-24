@@ -187,53 +187,53 @@ endif
 {%- if 'sim' in fins['filesets'] %}
 
 # Simulation phony target
-#sim : all $(APPLICATION_TARGET)
-#	{%- if 'filesets' in fins %}
-#	{%- if 'scripts' in fins['filesets'] %}
-#	{%- if 'presim' in fins['filesets']['scripts'] %}
-#	{%- for script in fins['filesets']['scripts']['presim'] %}
-#	{%- if script['type']|lower == 'matlab' %}
-#ifdef MatlabExists
-#	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
-#else
-#	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
-#endif
-#	{%- elif script['type']|lower == 'octave' %}
-#	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
-#	{%- elif script['type']|lower == 'python' %}
-#	python {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
-#	{%- elif script['type']|lower == 'python3' %}
-#	python3 {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
-#	{%- elif script['type']|lower == 'cmdline' %}
-#	./{{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
-#	{%- endif %}
-#	{%- endfor %}
-#	{%- endif %}
-#	{%- endif %}
-#	{%- endif %}
-#	vivado $(if $(UseBatch),-mode batch) -source $(APPLICATION_SIMULATE_SCRIPT_FILENAME) $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_FILENAME) 2>&1)
-#	{%- if 'filesets' in fins %}
-#	{%- if 'scripts' in fins['filesets'] %}
-#	{%- if 'postsim' in fins['filesets']['scripts'] %}
-#	{%- for script in fins['filesets']['scripts']['postsim'] %}
-#	{%- if script['type']|lower == 'matlab' %}
-#ifdef MatlabExists
-#	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
-#else
-#	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
-#endif
-#	{%- elif script['type']|lower == 'octave' %}
-#	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
-#	{%- elif script['type']|lower == 'python' %}
-#	python {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
-#	{%- elif script['type']|lower == 'python3' %}
-#	python3 {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
-#	{%- elif script['type']|lower == 'cmdline' %}
-#	./{{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
-#	{%- endif %}
-#	{%- endfor %}
-#	{%- endif %}
-#	{%- endif %}
-#	{%- endif %}
+sim : all $(APPLICATION_TARGET)
+	{%- if 'filesets' in fins %}
+	{%- if 'scripts' in fins['filesets'] %}
+	{%- if 'presim' in fins['filesets']['scripts'] %}
+	{%- for script in fins['filesets']['scripts']['presim'] %}
+	{%- if script['type']|lower == 'matlab' %}
+ifdef MatlabExists
+	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+else
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+endif
+	{%- elif script['type']|lower == 'octave' %}
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'python' %}
+	python {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	{%- endif %}
+	{%- endfor %}
+	{%- endif %}
+	{%- endif %}
+	{%- endif %}
+	vivado $(if $(UseBatch),-mode batch) -source $(APPLICATION_SIMULATE_SCRIPT_PATH) $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	{%- if 'filesets' in fins %}
+	{%- if 'scripts' in fins['filesets'] %}
+	{%- if 'postsim' in fins['filesets']['scripts'] %}
+	{%- for script in fins['filesets']['scripts']['postsim'] %}
+	{%- if script['type']|lower == 'matlab' %}
+ifdef MatlabExists
+	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+else
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+endif
+	{%- elif script['type']|lower == 'octave' %}
+	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'python' %}
+	python {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'python3' %}
+	python3 {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	{%- elif script['type']|lower == 'cmdline' %}
+	./{{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	{%- endif %}
+	{%- endfor %}
+	{%- endif %}
+	{%- endif %}
+	{%- endif %}
 {%- endif %}
 {%- endif %}

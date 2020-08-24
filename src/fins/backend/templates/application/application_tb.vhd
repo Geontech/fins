@@ -64,7 +64,7 @@ entity {{ fins['name'] }}_tb is
     {%-    if fins['backend']|lower == 'quartus' %}
     G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      : string := "../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%-    else %}
-    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      : string := "../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      : string := "../../../../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%-    endif %}
     {%-   else %}
     G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_NUM_PACKETS_EXPECTED : natural := 1;
@@ -73,7 +73,7 @@ entity {{ fins['name'] }}_tb is
     {%-    if fins['backend']|lower == 'quartus' %}
     G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH        : string := "../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%-    else %}
-    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH        : string := "../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH        : string := "../../../../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%-    endif %}
     {%-   endif  %}{#### if port['direction'] == "in" ####}
     {%-  endfor %}{#### for i in range(port['num_instances']) ####}
@@ -270,7 +270,8 @@ begin
       {%- else %}
       G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_SAMPLE_PERIOD => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_SAMPLE_PERIOD,
       G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_RANDOMIZE_BUS => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_RANDOMIZE_BUS,
-      G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH      => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH{% if not (outer_loop.last and loop.last) %},{% endif %}
+      G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH      => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH
+      {% if not (outer_loop.last and loop.last) %},{% endif %}
     {%-   endif %}
     {%-  endfor %}
     {%- endfor %}

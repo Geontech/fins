@@ -71,6 +71,47 @@ set_property ip_repo_paths $IP_SEARCH_PATHS [current_project]
 
 update_ip_catalog
 
+{%- if 'filesets' in fins %}
+{%- if 'sim' in fins['filesets'] %}
+# Add Simulation Files
+# Note: Vivado doesn't care about VHDL vs. Verilog when adding files
+set SIM_FILES [list \
+{%- for sim_file in fins['filesets']['sim'] %}
+    {{ sim_file['path'] }} \
+{%- endfor %}
+]
+if {[llength $SIM_FILES] > 0} {
+    if { [info exists env(DELIVERY) ] } {
+        import_files -fileset sim_1 -norecurse $SIM_FILES
+    } else {
+        add_files -fileset sim_1 -norecurse $SIM_FILES
+    }
+}
+{%- endif %}
+
+{%- if 'constraints' in fins['filesets'] %}
+# Add XDC Constraints Files
+# Note: SDC constraints files will be ignored
+set CONSTRAINTS_FILES [list \
+{%- for constraint_file in fins['filesets']['constraints'] %}
+{%- if constraint_file['type']|lower == 'xdc' %}
+    {{ constraint_file['path'] }} \
+{%- endif %}
+{%- endfor %}
+]
+if {[llength $CONSTRAINTS_FILES] > 0} {
+    if { [info exists env(DELIVERY) ] } {
+        import_files -fileset constrs_1 -norecurse $CONSTRAINTS_FILES
+    } else {
+        add_files -fileset constrs_1 -norecurse $CONSTRAINTS_FILES
+    }
+}
+{%- endif %}
+{%- endif %}{#### if 'filesets' in fins ####}
+
+# Set the top module for the simulation
+set_property "top" {{ fins['top_sim'] }} [get_filesets "sim*"]
+
 {%  for node in fins['nodes'] %}
 {%- if not node['descriptive_node'] %}
 # set the "vlnv" = Vendor:Library:Name:Version
@@ -139,11 +180,11 @@ connect_bd_intf_net [get_bd_intf_pins {{ port['node_name'] }}/{{ port['node_port
 {%-   for port in fins['ports']['hdl'] %}
 {%-    set mode = 'I' if port['direction']|lower == 'in' else 'O' %}
 {%-    if port['bit_width'] > 1 %}
-create_bd_port -dir {{ mode }} -from {{ port['bit_width']-1 }} -to 0 {{ port['name'] }}
+create_bd_port -dir {{ mode }} -from {{ port['bit_width']-1 }} -to 0 {{ port['name'] }}_port
 {%-    else %}
-create_bd_port -dir {{ mode }} {{ port['name'] }}
+create_bd_port -dir {{ mode }} {{ port['name'] }}_port
 {%-    endif %}
-connect_bd_net [get_bd_pins {{ port['node_name'] }}/{{ port['node_port']['name'] }}] [get_bd_ports {{ port['name'] }}]
+connect_bd_net [get_bd_pins {{ port['node_name'] }}/{{ port['node_port']['name'] }}] [get_bd_ports {{ port['name'] }}_port]
 {%-   endfor %}
 {%-  endif %}
 {%- endif %}

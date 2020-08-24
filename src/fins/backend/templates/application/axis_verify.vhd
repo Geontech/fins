@@ -207,6 +207,9 @@ begin
               -- Open the file if it's not open already
               if (file_status /= OPEN_OK) then
                 file_open(file_status, read_file, G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH, READ_MODE);
+                assert (file_status = OPEN_OK)
+                  report "ERROR: Failed to open file G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH in mode 'READ_MODE'"
+                  severity failure;
               end if;
               -- Grab a valid value from the file if we haven't reached the EOF
               if (NOT endfile(read_file)) then
@@ -303,6 +306,9 @@ begin
         -- Open the file if it's not open already
         if (file_status /= OPEN_OK) then
           file_open(file_status, write_file, G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH, WRITE_MODE);
+          assert (file_status = OPEN_OK)
+            report "ERROR: Failed to open file G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH in mode 'WRITE_MODE'"
+            severity failure;
         end if;
         -- Write the value to the file in hexadecimal format
         current_tlast(0) := {{ port|axisprefix(i,True) }}_tlast;
