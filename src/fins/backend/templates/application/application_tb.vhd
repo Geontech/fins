@@ -383,9 +383,11 @@ begin
     {%- endfor %}
 
     {%- if 'prop_interfaces' in fins %}
-    -- deassert reset for properties interface after delay
+    -- deassert rall resets
     wait for PROPERTIES_CLOCK_PERIOD*10; -- Wait for an arbitrary 10 clocks
-    properties_aresetn <= '1';
+    {%- for clock in fins['clocks'] %}
+    {{ clock['resetn'] }} <= '1';
+    {%- endfor %}
     wait for PROPERTIES_CLOCK_PERIOD; -- Wait for an arbitrary 10 clocks
 
     ----------------------------------------------------
@@ -414,9 +416,6 @@ begin
     -- Verify Ports
     ----------------------------------------------------
     -- Enable the inputs
-    {%- for clock in fins['clocks'] %}
-    {{ clock['resetn'] }} <= '1';
-    {%- endfor %}
     {%-  for port in fins['ports']['ports'] %}
     {%-   if port['direction']|lower == 'in' %}
     {%-    for i in range(port['num_instances']) %}
