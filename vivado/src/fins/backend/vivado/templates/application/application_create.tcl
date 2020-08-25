@@ -124,7 +124,7 @@ create_bd_cell -type ip -vlnv $vlnv {{ node['module_name'] }}
 # Wiring clock domains
 {% for clock in fins['clocks'] %}
 # Add "{{ clock['basename'] }}" clock domain: ({{ clock['clock'] }} and {{ clock['resetn'] }})
-create_bd_port -dir I -type clk -freq_hz 100000000 {{ clock['clock'] }}
+create_bd_port -dir I -type clk {{ clock['clock'] }}
 create_bd_port -dir I -type rst {{ clock['resetn'] }}
 set_property -dict [list CONFIG.ASSOCIATED_ASYNC_RESET {{ clock['resetn'] }}] [get_bd_ports {{ clock['clock'] }}]
 
