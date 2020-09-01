@@ -108,6 +108,10 @@
             "net":{
               "is_required":false,
               "types":["str"]
+            },
+            "instance":{
+              "is_required":false,
+              "types":["int"]
             }
           }
         },
@@ -123,6 +127,10 @@
             "net":{
               "is_required":false,
               "types":["str"]
+            },
+            "instance":{
+              "is_required":false,
+              "types":["int"]
             }
           }
         }

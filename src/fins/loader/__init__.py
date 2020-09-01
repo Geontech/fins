@@ -1357,9 +1357,15 @@ def populate_application_connections(fins_data, verbose):
         for connection in fins_data['connections']:
             source = connection['source']
             source['type'], source['port'] = get_net_type(source, fins_data, verbose)
+            # Set default value for instance
+            if source['type'] == 'port' and not 'instance' in source:
+                source['instance'] = None
             # Each connection only has one source, but may have multiple destinations
             for destination in connection['destinations']:
                 destination['type'], destination['port'] = get_net_type(destination, fins_data, verbose)
+                # Set default value for instance
+                if destination['type'] == 'port' and not 'instance' in destination:
+                    destination['instance'] = None
                 # For port-to-port connections, perform error checks to ensure connection would be valid
                 if ((source['type'] == 'port' and destination['type'] == 'port') or
                     (source['type'] == 'hdl' and destination['type'] == 'hdl')):
@@ -2082,7 +2088,9 @@ def validate_application_connections(fins_data, verbose):
                 dst_name = destination['node_name'] + '.' + destination['net']
                 src_type = source['type']
                 dst_type = destination['type']
-
+                if (src_type == 'port' and dst_type == 'port'):
+                    src_inst = source['instance']
+                    dst_inst = destination['instance']
                 if ((src_type == 'hdl' and dst_type == 'port') or
                       (src_type == 'port' and dst_type == 'hdl')):
                     print('ERROR: One port is HDL and the other is AXIS in connection ({}->{})'.format(src_name, dst_name))
@@ -2094,8 +2102,17 @@ def validate_application_connections(fins_data, verbose):
                     if src_port['supports_backpressure'] != dst_port['supports_backpressure']:
                         print('ERROR: One port in connection ({}->{}) supports backpressure, but the other does not'.format(src_name, dst_name))
                         sys.exit(1)
-                    elif src_port['num_instances'] != dst_port['num_instances']:
+                    elif src_inst == None and dst_inst == None and src_port['num_instances'] != dst_port['num_instances']:
                         print('ERROR: Ports in connection ({}->{}) have different number of instances'.format(src_name, dst_name))
+                        sys.exit(1)
+                    elif src_inst == None and dst_inst != None and (src_port['num_instances'] != 1 or dst_inst >= dst_port['num_instances']):
+                        print('ERROR: Ports in connection ({}->{}) the source has too many instances or an invalid instance was chosen for the destination'.format(src_name, dst_name))
+                        sys.exit(1)
+                    elif src_inst != None and dst_inst == None and (dst_port['num_instances'] != 1 or src_inst >= src_port['num_instances']):
+                        print('ERROR: Ports in connection ({}->{}) the destination has too many instances or an invalid instance was chosen for the source'.format(src_name, dst_name))
+                        sys.exit(1)
+                    elif src_inst != None and dst_inst != None and (src_inst >= src_port['num_instances'] or dst_inst >= dst_port['num_instances']):
+                        print('ERROR: Ports in connection ({}->{}) do not have the proper amount of instances for the index chosen'.format(src_name, dst_name))
                         sys.exit(1)
                     elif (('metadata' in src_port and 'metadata' not in dst_port) or
                           ('metadata' not in src_port and 'metadata' in dst_port) or
