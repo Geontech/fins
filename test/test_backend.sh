@@ -59,7 +59,7 @@ echo "TESTING '$backend': Return status (should be 0): $?"
 echo "TESTING '$backend': Generating, building and simulating test Application..."
 cd ../application
 fins -b $backend application_test.json
-make # sim
+make sim
 echo "TESTING '$backend': Return status (should be 0): $?"
 
 echo "TESTING '$backend': Constructing a parent FPGA design for testing, and validating/generating a FINS System that uses it..."
@@ -78,6 +78,6 @@ echo "TESTING '$backend': Return status (should be 0): $?"
 
 cd ../power_application
 fins -b $backend fins.json
-make #sim
+make sim
 make clean-all
 echo "TESTING '$backend': Return status (should be 0): $?"
