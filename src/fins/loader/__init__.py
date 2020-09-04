@@ -1351,6 +1351,15 @@ def populate_application_connections(fins_data, verbose):
             connected = flagged as True for any ports that have one or more connections
     """
 
+    # Initialize the ports with 'connected' set to False
+    for node in fins_data['nodes']:
+        if 'ports' in node['node_details']['ports']:
+            for port in node['node_details']['ports']['ports']:
+                port['connected'] = [False]*port['num_instances']
+        if 'hdl' in node['node_details']['ports']:
+            for hdl_port in node['node_details']['ports']['hdl']:
+                hdl_port['connected'] = [False]
+
     # if this Application has connections, iterate over the connections,
     # get and set the type and port (if applicable) of each source and destination net
     if 'connections' in fins_data:
@@ -1370,9 +1379,15 @@ def populate_application_connections(fins_data, verbose):
                 if ((source['type'] == 'port' and destination['type'] == 'port') or
                     (source['type'] == 'hdl' and destination['type'] == 'hdl')):
                     # Flag port as 'connected'
-                    source['port']['connected'] = True
-                    destination['port']['connected'] = True
+                    if(source['type'] != 'port' or source['instance'] == None):
+                        source['port']['connected'][0] = True
+                    else:
+                        source['port']['connected'][source['instance']] = True
 
+                    if(source['type'] != 'port' or destination['instance'] == None):
+                        destination['port']['connected'][0] = True
+                    else:
+                        destination['port']['connected'][destination['instance']] = True
 
 def populate_application_clocks(fins_data, verbose):
     """
@@ -1470,15 +1485,19 @@ def populate_application_exports(fins_data, verbose):
         for node in fins_data['nodes']:
             # Only fully FINS-defined nodes are relevant here
             if not node['descriptive_node']:
-
                 if 'ports' in node['node_details']['ports']:
                     for port in node['node_details']['ports']['ports']:
                         # is this port part of a connection?
-                        port_unconnected = 'connected' not in port or not port['connected']
-
+                        port_unconnected = 'connected' not in port or False in port['connected'] 
                         # if port is unconnected, export it
                         if port_unconnected:
                             application_port = port.copy()
+                            application_port['node_instances'] = []
+                            for i in range(len(application_port['connected'])):
+                                if application_port['connected'][i]:
+                                    application_port['num_instances'] -= 1
+                                else:
+                                    application_port['node_instances'].append(i)
                             application_port['name'] = node['module_name'] + '_' + port['name']
                             application_port['node_name'] = node['module_name']
                             application_port['node_port'] = port
@@ -1515,7 +1534,7 @@ def populate_application_exports(fins_data, verbose):
                 if 'hdl' in node['node_details']['ports']:
                     for port in node['node_details']['ports']['hdl']:
                         # is this port part of a connection?
-                        port_unconnected = 'connected' not in port or not port['connected']
+                        port_unconnected = 'connected' not in port or not port['connected'][0]
 
                         # if port is unconnected and is not tied to a clock source, export it
                         if port_unconnected and 'clock' not in port:

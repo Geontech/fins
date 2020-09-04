@@ -178,7 +178,7 @@ add_connection {{ source['node_name'] }}.{{ source['net'] }}/{{ destination['nod
 # The following ports were exported (made external) from the Application
 {%-   for port in fins['ports']['ports'] %}
 {%-    for i in range(port['num_instances']) %}
-set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']|axisprefix(i) }}
+set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']|axisprefix(port['node_instances'][i]) }}
 {%-    endfor %}
 {%-   endfor %}
 {%-  endif %}

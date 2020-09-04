@@ -6,6 +6,7 @@
   "company_url":"geon.tech",
   "company_logo":"docs/geontech_logo.png",
   "library":"user",
+  "part":"10CX220YF780I5G",
   "top_source":"test_bottom",
   "top_sim":"test_bottom_tb",
   "params" : [
