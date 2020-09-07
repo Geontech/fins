@@ -2144,10 +2144,10 @@ def validate_application_connections(fins_data, verbose):
                         print('ERROR: Ports in connection ({}->{}) have different number of instances'.format(src_name, dst_name))
                         sys.exit(1)
                     elif src_inst == None and dst_inst != None and (src_port['num_instances'] != 1 or dst_inst >= dst_port['num_instances']):
-                        print('ERROR: Ports in connection ({}->{}) the source has too many instances or an invalid instance was chosen for the destination'.format(src_name, dst_name))
+                        print('ERROR: Ports in connection ({}->{}): the source has too many instances or an invalid instance was chosen for the destination'.format(src_name, dst_name))
                         sys.exit(1)
                     elif src_inst != None and dst_inst == None and (dst_port['num_instances'] != 1 or src_inst >= src_port['num_instances']):
-                        print('ERROR: Ports in connection ({}->{}) the destination has too many instances or an invalid instance was chosen for the source'.format(src_name, dst_name))
+                        print('ERROR: Ports in connection ({}->{}): the destination has too many instances or an invalid instance was chosen for the source'.format(src_name, dst_name))
                         sys.exit(1)
                     elif src_inst != None and dst_inst != None and (src_inst >= src_port['num_instances'] or dst_inst >= dst_port['num_instances']):
                         print('ERROR: Ports in connection ({}->{}) do not have the proper amount of instances for the index chosen'.format(src_name, dst_name))
