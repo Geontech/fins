@@ -1334,7 +1334,8 @@ def populate_application_connections(fins_data, verbose):
     Modifies the contents of fins_data for a FINS Application.
 
     Populate each connection in the Application so that each source and destination
-    is associated with a type and port (if applicable).
+    is associated with a type and port (if applicable). Port-Port connections can
+    be made based on a per-instance basis.
 
     The fins_data['connections'] list is populated as follows:
         [
@@ -1348,7 +1349,10 @@ def populate_application_connections(fins_data, verbose):
             net = which net on the node should be connected
             type = port or hdl
             port = if type is port or hdl, this is the actual port (dict) as found in the containing node
-            connected = flagged as True for any ports that have one or more connections
+            instance = number which correlates to the index of the instance of the port
+            connected = an array of booleans where the index correlates to the instance of a port
+                        Instances are flagged as True if the instance of the port has one or more 
+                        connections
     """
 
     # Initialize the ports with 'connected' set to False
@@ -1501,11 +1505,12 @@ def populate_application_exports(fins_data, verbose):
             if not node['descriptive_node']:
                 if 'ports' in node['node_details']['ports']:
                     for port in node['node_details']['ports']['ports']:
-                        # is this port part of a connection?
+                        # does this port or any of its instances not connected?
                         port_unconnected = 'connected' not in port or False in port['connected'] 
-                        # if port is unconnected, export it
+                        # if any instance of the port is not connected, export it
                         if port_unconnected:
                             application_port = port.copy()
+                            # Create a list of indexes of ports that need to be exported
                             application_port['node_instances'] = []
                             for i in range(len(application_port['connected'])):
                                 if application_port['connected'][i]:

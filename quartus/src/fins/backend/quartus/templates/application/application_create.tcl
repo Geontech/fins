@@ -146,24 +146,27 @@ save_instantiation
 {%-   set source = connection['source'] %}
 {%-   if source['type'] == 'port' and destination['type'] == 'port' %}
 # Connecting port "{{ source['node_name'] }}.{{ source['net'] }}" to port "{{ destination['node_name'] }}.{{ destination['net'] }}"
-{%-   if source['instance'] == None and destination['instance'] == None %}
-{%-    for i in range(source['port']['num_instances']) %}
+{%-    if source['instance'] == None and destination['instance'] == None %}
+{%-     for i in range(source['port']['num_instances']) %}
 add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(i) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(i) }}
 {%-    endfor %}
 {#-
-# Handles the case where the source is a specific instance but the destination is not
-{%-   elif source['instance'] != None and destination['instance'] == None %}
+# Handles the case where the source is a specific instance but the destination is not and num_instances==1 in the destination
+-#}
+{%-    elif source['instance'] != None and destination['instance'] == None %}
 add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(source['instance']) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(0) }}
 {#-
-# Handles the case where the destination is a specific instance but the source is not
-{%-   elif source['instance'] == None and destination['instance'] != None %}
+# Handles the case where the destination is a specific instance but the source is not and num_instances==1 in the source
+-#}
+{%-    elif source['instance'] == None and destination['instance'] != None %}
 add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(0) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(destination['instance']) }}
 {#-
 # Handles the case where the source and destination are a specific instance
-{%-   elif source['instance'] != None and destination['instance'] != None %}
+-#}
+{%-    elif source['instance'] != None and destination['instance'] != None %}
 add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(source['instance']) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(destination['instance']) }}
 
-{%-   endif %}
+{%-    endif %}
 {%-   else %}
 # Connecting signal "{{ source['node_name'] }}.{{ source['net'] }}" to signal "{{ destination['node_name'] }}.{{ destination['net'] }}"
 add_connection {{ source['node_name'] }}.{{ source['net'] }}/{{ destination['node_name'] }}.{{ destination['net'] }}
@@ -176,6 +179,7 @@ add_connection {{ source['node_name'] }}.{{ source['net'] }}/{{ destination['nod
 # The following ports were exported (made external) from the Application
 {%-   for port in fins['ports']['ports'] %}
 {%-    for i in range(port['num_instances']) %}
+# Creating application ports by exporting some, but not necessarily all, instances of the port on the nodes of the application
 set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']|axisprefix(port['node_instances'][i]) }}
 {%-    endfor %}
 {%-   endfor %}
