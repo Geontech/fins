@@ -1354,9 +1354,11 @@ def populate_application_connections(fins_data, verbose):
     # Initialize the ports with 'connected' set to False
     for node in fins_data['nodes']:
         if 'ports' in node['node_details']['ports']:
+            # For all ports, initialize all values in an array of size num_instances to False
             for port in node['node_details']['ports']['ports']:
                 port['connected'] = [False]*port['num_instances']
         if 'hdl' in node['node_details']['ports']:
+            # For all hdls, initialize an array of size 1 with the value False
             for hdl_port in node['node_details']['ports']['hdl']:
                 hdl_port['connected'] = [False]
 
@@ -1379,13 +1381,25 @@ def populate_application_connections(fins_data, verbose):
                 if ((source['type'] == 'port' and destination['type'] == 'port') or
                     (source['type'] == 'hdl' and destination['type'] == 'hdl')):
                     # Flag port as 'connected'
-                    if(source['type'] != 'port' or source['instance'] == None):
+                    # Handles case where the source type is not a port
+                    if (source['type'] != 'port'):
                         source['port']['connected'][0] = True
+                    # Handles case where the source type is a port but instance is not initialized in JSON
+                    elif (source['instance'] == None):
+                        for i in range(source['port']['num_instances']):
+                            source['port']['connected'][i] = True
+                    # Handles case where the source type is a port and instance is initialized in JSON
                     else:
                         source['port']['connected'][source['instance']] = True
 
-                    if(source['type'] != 'port' or destination['instance'] == None):
+                    # Handles case where the destination type is not a port
+                    if (destination['type'] != 'port'):
                         destination['port']['connected'][0] = True
+                    # Handles case where the destination type is a port but instance is not initialized in JSON
+                    elif (destination['instance'] == None):
+                        for i in range(destination['port']['num_instances']):
+                            destination['port']['connected'][i] = True
+                    # Handles case where the destination type is a port and instance is initialized in JSON
                     else:
                         destination['port']['connected'][destination['instance']] = True
 

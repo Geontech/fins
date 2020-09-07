@@ -123,10 +123,6 @@ set_interface_property {{ clock['resetn'] }} EXPORT_OF {{ reset_bridge_name }}.i
 set_interface_port_property {{ clock['resetn'] }} {{ clock['resetn'] }}_reset_n NAME {{ clock['resetn'] }}
 {%- endfor %}{#### for clock in fins['clocks'] ####}
 
-
-
-
-
 {#-
 # Instantiate all nodes in the Application
 -#}
@@ -154,10 +150,16 @@ save_instantiation
 {%-    for i in range(source['port']['num_instances']) %}
 add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(i) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(i) }}
 {%-    endfor %}
+{#-
+# Handles the case where the source is a specific instance but the destination is not
 {%-   elif source['instance'] != None and destination['instance'] == None %}
 add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(source['instance']) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(0) }}
+{#-
+# Handles the case where the destination is a specific instance but the source is not
 {%-   elif source['instance'] == None and destination['instance'] != None %}
 add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(0) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(destination['instance']) }}
+{#-
+# Handles the case where the source and destination are a specific instance
 {%-   elif source['instance'] != None and destination['instance'] != None %}
 add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(source['instance']) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(destination['instance']) }}
 
@@ -168,10 +170,6 @@ add_connection {{ source['node_name'] }}.{{ source['net'] }}/{{ destination['nod
 {%-   endif %}
 {%   endfor %}
 {%- endfor %}
-
-
-
-
 
 {%- if 'ports' in fins %}
 {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
