@@ -149,7 +149,7 @@ save_instantiation
 {%-    if source['instance'] == None and destination['instance'] == None %}
 {%-     for i in range(source['port']['num_instances']) %}
 add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(i) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(i) }}
-{%-    endfor %}
+{%-     endfor %}
 {#-
 # Handles the case where the source is a specific instance but the destination is not and num_instances==1 in the destination
 -#}
@@ -179,7 +179,7 @@ add_connection {{ source['node_name'] }}.{{ source['net'] }}/{{ destination['nod
 # The following ports were exported (made external) from the Application
 {%-   for port in fins['ports']['ports'] %}
 {%-    for i in range(port['num_instances']) %}
-# Creating application ports by exporting some, but not necessarily all, instances of the port on the nodes of the application
+# Creating application ports by exporting some (not necessarily all) instances of each port on each nodes in the application
 set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']|axisprefix(port['node_instances'][i]) }}
 {%-    endfor %}
 {%-   endfor %}

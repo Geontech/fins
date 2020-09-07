@@ -1334,8 +1334,9 @@ def populate_application_connections(fins_data, verbose):
     Modifies the contents of fins_data for a FINS Application.
 
     Populate each connection in the Application so that each source and destination
-    is associated with a type and port (if applicable). Port-Port connections can
-    be made based on a per-instance basis.
+    is associated with a type and port (if applicable). Port-port connections can 
+    either be made on a per-port or per-instance basis: Port A connects to Port B 
+    (all instances), or instance 0 of Port A connects to instance 1 of Port B.
 
     The fins_data['connections'] list is populated as follows:
         [
@@ -1510,7 +1511,7 @@ def populate_application_exports(fins_data, verbose):
                         # if any instance of the port is not connected, export it
                         if port_unconnected:
                             application_port = port.copy()
-                            # Create a list of indexes of ports that need to be exported
+                            # Create a list of instances for the node that need to be exported for this port. These are the port-instances that will be present on the port of the application.
                             application_port['node_instances'] = []
                             for i in range(len(application_port['connected'])):
                                 if application_port['connected'][i]:
@@ -2144,10 +2145,10 @@ def validate_application_connections(fins_data, verbose):
                         print('ERROR: Ports in connection ({}->{}) have different number of instances'.format(src_name, dst_name))
                         sys.exit(1)
                     elif src_inst == None and dst_inst != None and (src_port['num_instances'] != 1 or dst_inst >= dst_port['num_instances']):
-                        print('ERROR: Ports in connection ({}->{}): the source has too many instances or an invalid instance was chosen for the destination'.format(src_name, dst_name))
+                        print('ERROR: Ports in connection ({}->{}), the source has too many instances or an invalid instance was chosen for the destination'.format(src_name, dst_name))
                         sys.exit(1)
                     elif src_inst != None and dst_inst == None and (dst_port['num_instances'] != 1 or src_inst >= src_port['num_instances']):
-                        print('ERROR: Ports in connection ({}->{}): the destination has too many instances or an invalid instance was chosen for the source'.format(src_name, dst_name))
+                        print('ERROR: Ports in connection ({}->{}), the destination has too many instances or an invalid instance was chosen for the source'.format(src_name, dst_name))
                         sys.exit(1)
                     elif src_inst != None and dst_inst != None and (src_inst >= src_port['num_instances'] or dst_inst >= dst_port['num_instances']):
                         print('ERROR: Ports in connection ({}->{}) do not have the proper amount of instances for the index chosen'.format(src_name, dst_name))

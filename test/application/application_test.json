@@ -6,7 +6,6 @@
   "company_name":"Geon Technologies",
   "company_url":"geon.tech",
   "company_logo":"docs/geontech_logo.png",
-  "part":"10CX220YF780I5G",
   "params": [
     { "name":"TEST_PARAM_BOOLEAN", "value":false,           "description":"This is a test parameter excercising a boolean type" },
     { "name":"TEST_PARAM_INTEGER", "value":4,               "description":"This is a test parameter excercising an integer type" },
