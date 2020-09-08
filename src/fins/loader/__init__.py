@@ -1334,7 +1334,9 @@ def populate_application_connections(fins_data, verbose):
     Modifies the contents of fins_data for a FINS Application.
 
     Populate each connection in the Application so that each source and destination
-    is associated with a type and port (if applicable).
+    is associated with a type and port (if applicable). Port-port connections can 
+    either be made on a per-port or per-instance basis: Port A connects to Port B 
+    (all instances), or instance 0 of Port A connects to instance 1 of Port B.
 
     The fins_data['connections'] list is populated as follows:
         [
@@ -1348,8 +1350,22 @@ def populate_application_connections(fins_data, verbose):
             net = which net on the node should be connected
             type = port or hdl
             port = if type is port or hdl, this is the actual port (dict) as found in the containing node
-            connected = flagged as True for any ports that have one or more connections
+            instance = number which correlates to the index of the instance of the port
+            connected = an array of booleans where the index correlates to the instance of a port
+                        Instances are flagged as True if the instance of the port has one or more 
+                        connections
     """
+
+    # Initialize the ports with 'connected' set to False
+    for node in fins_data['nodes']:
+        if 'ports' in node['node_details']['ports']:
+            # For all ports, initialize all values in an array of size num_instances to False
+            for port in node['node_details']['ports']['ports']:
+                port['connected'] = [False]*port['num_instances']
+        if 'hdl' in node['node_details']['ports']:
+            # For all hdls, initialize an array of size 1 with the value False
+            for hdl_port in node['node_details']['ports']['hdl']:
+                hdl_port['connected'] = [False]
 
     # if this Application has connections, iterate over the connections,
     # get and set the type and port (if applicable) of each source and destination net
@@ -1357,16 +1373,40 @@ def populate_application_connections(fins_data, verbose):
         for connection in fins_data['connections']:
             source = connection['source']
             source['type'], source['port'] = get_net_type(source, fins_data, verbose)
+            # Set default value for instance
+            if source['type'] == 'port' and not 'instance' in source:
+                source['instance'] = None
             # Each connection only has one source, but may have multiple destinations
             for destination in connection['destinations']:
                 destination['type'], destination['port'] = get_net_type(destination, fins_data, verbose)
+                # Set default value for instance
+                if destination['type'] == 'port' and not 'instance' in destination:
+                    destination['instance'] = None
                 # For port-to-port connections, perform error checks to ensure connection would be valid
                 if ((source['type'] == 'port' and destination['type'] == 'port') or
                     (source['type'] == 'hdl' and destination['type'] == 'hdl')):
                     # Flag port as 'connected'
-                    source['port']['connected'] = True
-                    destination['port']['connected'] = True
+                    # Handles case where the source type is not a port
+                    if (source['type'] != 'port'):
+                        source['port']['connected'][0] = True
+                    # Handles case where the source type is a port but instance is not initialized in JSON
+                    elif (source['instance'] == None):
+                        for i in range(source['port']['num_instances']):
+                            source['port']['connected'][i] = True
+                    # Handles case where the source type is a port and instance is initialized in JSON
+                    else:
+                        source['port']['connected'][source['instance']] = True
 
+                    # Handles case where the destination type is not a port
+                    if (destination['type'] != 'port'):
+                        destination['port']['connected'][0] = True
+                    # Handles case where the destination type is a port but instance is not initialized in JSON
+                    elif (destination['instance'] == None):
+                        for i in range(destination['port']['num_instances']):
+                            destination['port']['connected'][i] = True
+                    # Handles case where the destination type is a port and instance is initialized in JSON
+                    else:
+                        destination['port']['connected'][destination['instance']] = True
 
 def populate_application_clocks(fins_data, verbose):
     """
@@ -1464,15 +1504,20 @@ def populate_application_exports(fins_data, verbose):
         for node in fins_data['nodes']:
             # Only fully FINS-defined nodes are relevant here
             if not node['descriptive_node']:
-
                 if 'ports' in node['node_details']['ports']:
                     for port in node['node_details']['ports']['ports']:
-                        # is this port part of a connection?
-                        port_unconnected = 'connected' not in port or not port['connected']
-
-                        # if port is unconnected, export it
+                        # does this port or any of its instances not connected?
+                        port_unconnected = 'connected' not in port or False in port['connected'] 
+                        # if any instance of the port is not connected, export it
                         if port_unconnected:
                             application_port = port.copy()
+                            # Create a list of instances for the node that need to be exported for this port. These are the port-instances that will be present on the port of the application.
+                            application_port['node_instances'] = []
+                            for i in range(len(application_port['connected'])):
+                                if application_port['connected'][i]:
+                                    application_port['num_instances'] -= 1
+                                else:
+                                    application_port['node_instances'].append(i)
                             application_port['name'] = node['module_name'] + '_' + port['name']
                             application_port['node_name'] = node['module_name']
                             application_port['node_port'] = port
@@ -1509,7 +1554,7 @@ def populate_application_exports(fins_data, verbose):
                 if 'hdl' in node['node_details']['ports']:
                     for port in node['node_details']['ports']['hdl']:
                         # is this port part of a connection?
-                        port_unconnected = 'connected' not in port or not port['connected']
+                        port_unconnected = 'connected' not in port or not port['connected'][0]
 
                         # if port is unconnected and is not tied to a clock source, export it
                         if port_unconnected and 'clock' not in port:
@@ -2082,7 +2127,9 @@ def validate_application_connections(fins_data, verbose):
                 dst_name = destination['node_name'] + '.' + destination['net']
                 src_type = source['type']
                 dst_type = destination['type']
-
+                if (src_type == 'port' and dst_type == 'port'):
+                    src_inst = source['instance']
+                    dst_inst = destination['instance']
                 if ((src_type == 'hdl' and dst_type == 'port') or
                       (src_type == 'port' and dst_type == 'hdl')):
                     print('ERROR: One port is HDL and the other is AXIS in connection ({}->{})'.format(src_name, dst_name))
@@ -2094,8 +2141,17 @@ def validate_application_connections(fins_data, verbose):
                     if src_port['supports_backpressure'] != dst_port['supports_backpressure']:
                         print('ERROR: One port in connection ({}->{}) supports backpressure, but the other does not'.format(src_name, dst_name))
                         sys.exit(1)
-                    elif src_port['num_instances'] != dst_port['num_instances']:
+                    elif src_inst == None and dst_inst == None and src_port['num_instances'] != dst_port['num_instances']:
                         print('ERROR: Ports in connection ({}->{}) have different number of instances'.format(src_name, dst_name))
+                        sys.exit(1)
+                    elif src_inst == None and dst_inst != None and (src_port['num_instances'] != 1 or dst_inst >= dst_port['num_instances']):
+                        print('ERROR: Ports in connection ({}->{}), the source has too many instances or an invalid instance was chosen for the destination'.format(src_name, dst_name))
+                        sys.exit(1)
+                    elif src_inst != None and dst_inst == None and (dst_port['num_instances'] != 1 or src_inst >= src_port['num_instances']):
+                        print('ERROR: Ports in connection ({}->{}), the destination has too many instances or an invalid instance was chosen for the source'.format(src_name, dst_name))
+                        sys.exit(1)
+                    elif src_inst != None and dst_inst != None and (src_inst >= src_port['num_instances'] or dst_inst >= dst_port['num_instances']):
+                        print('ERROR: Ports in connection ({}->{}) do not have the proper amount of instances for the index chosen'.format(src_name, dst_name))
                         sys.exit(1)
                     elif (('metadata' in src_port and 'metadata' not in dst_port) or
                           ('metadata' not in src_port and 'metadata' in dst_port) or
