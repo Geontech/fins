@@ -155,9 +155,26 @@ connect_bd_net [get_bd_ports {{ clock['resetn'] }}] [get_bd_pins {{ net['node_na
 {%-   set source = connection['source'] %}
 {%-   if source['type'] == 'port' and destination['type'] == 'port' %}
 # Connecting port "{{ source['node_name'] }}.{{ source['net'] }}" to port "{{ destination['node_name'] }}.{{ destination['net'] }}"
-{%-    for i in range(source['port']['num_instances']) %}
+{%-    if source['instance'] == None and destination['instance'] == None %}
+{%-     for i in range(source['port']['num_instances']) %}
 connect_bd_intf_net [get_bd_intf_pins {{ source['node_name'] }}/{{ source['port']|axisprefix(i) }}] [get_bd_intf_pins {{ destination['node_name'] }}/{{ destination['port']|axisprefix(i) }}]
-{%-    endfor %}
+{%-     endfor %}
+{#-
+# Handles the case where the source is a specific instance but the destination is not and num_instances==1 in the destination
+-#}
+{%-    elif source['instance'] != None and destination['instance'] == None %}
+connect_bd_intf_net [get_bd_intf_pins {{ source['node_name'] }}/{{ source['port']|axisprefix(source['instance']) }}] [get_bd_intf_pins {{ destination['node_name'] }}/{{ destination['port']|axisprefix }}]
+{#-
+# Handles the case where the destination is a specific instance but the source is not and num_instances==1 in the source
+-#}
+{%-    elif source['instance'] == None and destination['instance'] != None %}
+connect_bd_intf_net [get_bd_intf_pins {{ source['node_name'] }}/{{ source['port']|axisprefix }}] [get_bd_intf_pins {{ destination['node_name'] }}/{{ destination['port']|axisprefix(destination['instance']) }}]
+{#-
+# Handles the case where the source and destination are a specific instance
+-#}
+{%-    elif source['instance'] != None and destination['instance'] != None %}
+connect_bd_intf_net [get_bd_intf_pins {{ source['node_name'] }}/{{ source['port']|axisprefix(source['instance']) }}] [get_bd_intf_pins {{ destination['node_name'] }}/{{ destination['port']|axisprefix(destination['instance']) }}]
+{%-    endif %}
 {%-   else %}
 # Connecting signal "{{ source['node_name'] }}.{{ source['net'] }}" to signal "{{ destination['node_name'] }}.{{ destination['net'] }}"
 connect_bd_net [get_bd_pins {{ source['node_name'] }}/{{ source['net'] }}] [get_bd_pins {{ destination['node_name'] }}/{{ destination['net'] }}]
@@ -172,7 +189,7 @@ connect_bd_net [get_bd_pins {{ source['node_name'] }}/{{ source['net'] }}] [get_
 {%-    set mode = 'Slave' if port['direction']|lower == 'in' else 'Master' %}
 {%-    for i in range(port['num_instances']) %}
 create_bd_intf_port -mode {{ mode }} -vlnv xilinx.com:interface:axis_rtl:1.0 {{ port|axisprefix(i) }}
-connect_bd_intf_net [get_bd_intf_pins {{ port['node_name'] }}/{{ port['node_port']|axisprefix(i) }}] [get_bd_intf_ports {{ port|axisprefix(i) }}]
+connect_bd_intf_net [get_bd_intf_pins {{ port['node_name'] }}/{{ port['node_port']|axisprefix(port['node_instances'][i]) }}] [get_bd_intf_ports {{ port|axisprefix(i) }}]
 {%-    endfor %}
 {%-   endfor %}
 {%-  endif %}

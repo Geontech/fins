@@ -154,12 +154,12 @@ add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(i) }}/{{ d
 # Handles the case where the source is a specific instance but the destination is not and num_instances==1 in the destination
 -#}
 {%-    elif source['instance'] != None and destination['instance'] == None %}
-add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(source['instance']) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(0) }}
+add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(source['instance']) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix }}
 {#-
 # Handles the case where the destination is a specific instance but the source is not and num_instances==1 in the source
 -#}
 {%-    elif source['instance'] == None and destination['instance'] != None %}
-add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(0) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(destination['instance']) }}
+add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(destination['instance']) }}
 {#-
 # Handles the case where the source and destination are a specific instance
 -#}
