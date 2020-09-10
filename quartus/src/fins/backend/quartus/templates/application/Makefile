@@ -179,9 +179,6 @@ clean-nodes:
 # Clean-all phony target that cleans this Application and all nodes
 clean-all: clean-nodes clean
 
-{%- if 'filesets' in fins %}
-{%- if 'sim' in fins['filesets'] %}
-
 # {{ fins['backend'] }} project target
 $(APPLICATION_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES)
 	$(if $(UseBatch),mkdir -p $(LOGS_DIR))
@@ -235,6 +232,9 @@ endif
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
+
+{%- if 'filesets' in fins %}
+{%- if 'sim' in fins['filesets'] %}
 
 # Simulation phony target
 sim : all $(APPLICATION_TARGET)

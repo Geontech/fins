@@ -116,7 +116,7 @@ save_instantiation
 
 add_connection {{ clock_bridge_name }}.out_clk/{{ reset_bridge_name }}.clk
 
-# add the exports
+# Export clocks
 set_interface_property {{ clock['clock'] }} EXPORT_OF {{ clock_bridge_name }}.in_clk
 set_interface_port_property {{ clock['clock'] }} {{ clock['clock'] }}_clk NAME {{ clock['clock'] }}
 set_interface_property {{ clock['resetn'] }} EXPORT_OF {{ reset_bridge_name }}.in_reset
@@ -154,12 +154,12 @@ add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(i) }}/{{ d
 # Handles the case where the source is a specific instance but the destination is not and num_instances==1 in the destination
 -#}
 {%-    elif source['instance'] != None and destination['instance'] == None %}
-add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(source['instance']) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(0) }}
+add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(source['instance']) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix }}
 {#-
 # Handles the case where the destination is a specific instance but the source is not and num_instances==1 in the source
 -#}
 {%-    elif source['instance'] == None and destination['instance'] != None %}
-add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(0) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(destination['instance']) }}
+add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(destination['instance']) }}
 {#-
 # Handles the case where the source and destination are a specific instance
 -#}
@@ -189,7 +189,6 @@ set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }
 set_interface_property {{ port['name'] }} EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']['name'] }}
 {%-   endfor %}
 {%-  endif %}
-# The following ports were exported (made external) from the Application
 {%- endif %}
 
 {%- if 'prop_interfaces' in fins %}

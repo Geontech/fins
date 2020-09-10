@@ -18,21 +18,22 @@
 #
 
 variables:
-    VIVADO_VERSION: '2019.1'
-    QUARTUS_VERSION: '19.4'
 stages:
-    - test
+    - prereqs
+    - test-core
+    - test-backends
 image: centos:7
 
-core-test:
-    stage: test
+.install-prereqs: &install-prereqs |
+    yum install -y epel-release
+    yum install -y python36 python36-pip python-jinja2 octave make gcc glibc.i686
+    python3 -m pip install --upgrade pip setuptools
+    python3 -m pip install .
+
+test-core:
+    stage: test-core
     before_script:
-        - 'yum install -y epel-release'
-        - 'yum install -y python36 python36-pip python-jinja2 octave make gcc glibc.i686'
-        - 'python3 -m pip install --upgrade pip setuptools'
-        - 'python3 -m pip install .'
-        - 'python3 -m pip install ./vivado'
-        - 'python3 -m pip install ./quartus'
+        - *install-prereqs
     script:
         - 'cd test/node'
         - 'fins fins.json'
@@ -45,36 +46,48 @@ core-test:
     tags:
         - fpga
 
-vivado-test:
-    extends: core-test
+test-vivado:
+    stage: test-backends
+    variables:
+        VIVADO_VERSION: '2019.1'
+        VIVADO_PATH: '/opt/fpga/Xilinx/Vivado/$VIVADO_VERSION'
+    before_script:
+        - *install-prereqs
+        - 'python3 -m pip install ./vivado'
+    script:
+        - 'source $VIVADO_PATH/settings64.sh'
+        - 'cd test/'
+        - './test_backend.sh vivado'
+    artifacts:
+        when: on_failure
+        paths:
+            - test/**/log/*
+            - tutorial/**/log/*
     except:
         variables:
             [ $VIVADO_DISABLE == 'true' ]
-    script:
-        - 'source /opt/fpga/Xilinx/Vivado/$VIVADO_VERSION/settings64.sh'
-        - 'cd test/node'
-        - 'fins -b vivado fins.json && make sim && make clean-all'
-        - 'cd ../application'
-        - 'fins -b vivado application_test.json'
-        - 'cd ../../tutorials/power_converter'
-        - 'fins -b vivado fins.json && make sim && make clean-all'
-        - 'cd ../power_application'
-        - 'fins -b vivado fins.json'
+    tags:
+        - fpga
 
-quartus-test:
-    extends: core-test
+test-quartus:
+    stage: test-backends
+    variables:
+        QUARTUS_VERSION: '19.4'
+        QUARTUS_PATH: '/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION'
+    before_script:
+        - *install-prereqs
+        - 'python3 -m pip install ./quartus'
+    script:
+        - 'export PATH=$PATH:$QUARTUS_PATH/quartus/bin:$QUARTUS_PATH/modelsim_ase/bin:$QUARTUS_PATH/qsys/bin'
+        - 'cd test/'
+        - './test_backend.sh quartus'
+    artifacts:
+        when: on_failure
+        paths:
+            - test/**/log/*
+            - tutorial/**/log/*
     except:
         variables:
             [ $QUARTUS_DISABLE == 'true' ]
-    script:
-        - 'export PATH=$PATH:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/quartus/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/modelsim_ase/bin:/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION/qsys/bin'
-        - 'cd test/node'
-        - 'fins -b quartus fins.json && make sim && make clean-all'
-        - 'cd ../application'
-        - 'fins -b quartus application_test.json && make sim && make clean-all'
-        - 'cd ../system'
-        - 'make && fins quartus_system.json && make clean'
-        - 'cd ../../tutorials/power_converter'
-        - 'fins -b quartus fins.json && make sim && make clean-all'
-        - 'cd ../power_application'
-        - 'fins -b quartus fins.json && make sim && make clean-all'
+    tags:
+        - fpga
