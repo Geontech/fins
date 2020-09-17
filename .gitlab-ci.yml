@@ -109,7 +109,7 @@ quartus-test:
         - cd /tmp
         - >-
           tar -czvf
-          ~/rpmbuild/SOURCES/$NAME-$VER.tar.gz --exclude='.rrpucs-gitlab-ci.yml'
+          ~/rpmbuild/SOURCES/$NAME-$VER.tar.gz --exclude='.gitlab-ci.yml'
           $NAME-$VER
         # Build RPM old-fashioned way
         - cd ~/rpmbuild
