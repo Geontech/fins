@@ -141,5 +141,7 @@ test-quartus:
 
 rpmbuild:
     extends: .rpmbuild
+    variables:
+        RPM_BRANCH: 'master'
     rules:
-        - if: '$CI_COMMIT_BRANCH == "master"'
+        - if: '$CI_COMMIT_BRANCH == $RPM_BRANCH'
