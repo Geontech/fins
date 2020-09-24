@@ -55,7 +55,7 @@ def load_generator(name):
     raise KeyError(name)
 
 
-def run_generator(generator, filepath, backend, verbose):
+def run_generator(generator, filepath, backend, part, verbose):
 
     filename = os.path.basename(filepath)
 
@@ -75,6 +75,10 @@ def run_generator(generator, filepath, backend, verbose):
         # Determine the schema type (NODE, APPLICATION, SYSTEM)
         fins_data['schema_type'] = int(SchemaType.get(fins_data))
 
+        # Determine the part (if one was passed through the command line)
+        if(part != None):
+            fins_data['part'] = part
+
         if fins_data['schema_type'] == SchemaType.NODE:
             # This is a FINS IP/Node
             fins_data = loader.validate_and_convert_node_fins_data(fins_data, filename, backend, verbose)
@@ -83,7 +87,7 @@ def run_generator(generator, filepath, backend, verbose):
             if 'ip' in fins_data:
                 for ip in fins_data['ip']:
                     logging.info('Recursing into IP at', ip['fins_path'])
-                    ip['ip_details'] = run_generator(generator, ip['fins_path'], backend, verbose)
+                    ip['ip_details'] = run_generator(generator, ip['fins_path'], backend, part, verbose)
 
             loader.populate_fins_node(fins_data, verbose)
             loader.validate_node_fins_data_final(fins_data, verbose)
@@ -104,7 +108,7 @@ def run_generator(generator, filepath, backend, verbose):
             for node in fins_data['nodes']:
                 if not node['descriptive_node']:
                     logging.info('INFO: Recursing into node at "{}"'.format(node['fins_path']))
-                    node['node_details'] = run_generator(generator, node['fins_path'], backend, verbose)
+                    node['node_details'] = run_generator(generator, node['fins_path'], backend, part, verbose)
 
             loader.populate_fins_application(fins_data, verbose)
             loader.validate_application_fins_data_final(fins_data, verbose)
@@ -149,6 +153,7 @@ def main():
     arg_parser.add_argument('-b', '--backend', default='core', help='code generator backend to target')
     arg_parser.add_argument('-o', '--option', action='append', default=[],
                             help='options for code generator backend')
+    arg_parser.add_argument('--part', default=None, help='part number of the FPGA being built')
 
     args = arg_parser.parse_args()
 
@@ -172,4 +177,4 @@ def main():
             raise SystemExit(str(exc))
 
     for filepath in args.filepath:
-        run_generator(generator, filepath, args.backend, args.verbose)
+        run_generator(generator, filepath, args.backend, args.part, args.verbose)
