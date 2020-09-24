@@ -116,22 +116,71 @@ save_instantiation
 
 add_connection {{ clock_bridge_name }}.out_clk/{{ reset_bridge_name }}.clk
 
-# add the exports
+# Export clocks
 set_interface_property {{ clock['clock'] }} EXPORT_OF {{ clock_bridge_name }}.in_clk
 set_interface_port_property {{ clock['clock'] }} {{ clock['clock'] }}_clk NAME {{ clock['clock'] }}
 set_interface_property {{ clock['resetn'] }} EXPORT_OF {{ reset_bridge_name }}.in_reset
 set_interface_port_property {{ clock['resetn'] }} {{ clock['resetn'] }}_reset_n NAME {{ clock['resetn'] }}
 {%- endfor %}{#### for clock in fins['clocks'] ####}
 
-# Source FINS Application Tcl to instantiate FINS nodes and make connections to/between them
-source ../../gen/quartus/nodes_instantiate.tcl
+{#-
+# Instantiate all nodes in the Application
+-#}
+{%  for node in fins['nodes'] %}
+{%- if not node['descriptive_node'] %}
+# Instantiate node "{{ node['node_name'] }}" as module "{{ node['module_name'] }}"
+add_component {{ node['module_name'] }} {{ node['module_name'] }}.ip {{ node['node_name'] }}
+load_component {{ node['module_name'] }}
+save_component
+load_instantiation {{ node['module_name'] }}
+save_instantiation
+{%  endif %}
+{%- endfor %}
+
+{#-
+# For each connection, determine the 'type' of each source and destination (port, or other)
+# Make connections between ports or signals accordingly, and include '<node>.' as a signal prefix
+-#}
+{%- for connection in fins['connections'] %}
+{%-  for destination in connection['destinations'] %}
+{%-   set source = connection['source'] %}
+{%-   if source['type'] == 'port' and destination['type'] == 'port' %}
+# Connecting port "{{ source['node_name'] }}.{{ source['net'] }}" to port "{{ destination['node_name'] }}.{{ destination['net'] }}"
+{%-    if source['instance'] == None and destination['instance'] == None %}
+{%-     for i in range(source['port']['num_instances']) %}
+add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(i) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(i) }}
+{%-     endfor %}
+{#-
+# Handles the case where the source is a specific instance but the destination is not and num_instances==1 in the destination
+-#}
+{%-    elif source['instance'] != None and destination['instance'] == None %}
+add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(source['instance']) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix }}
+{#-
+# Handles the case where the destination is a specific instance but the source is not and num_instances==1 in the source
+-#}
+{%-    elif source['instance'] == None and destination['instance'] != None %}
+add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(destination['instance']) }}
+{#-
+# Handles the case where the source and destination are a specific instance
+-#}
+{%-    elif source['instance'] != None and destination['instance'] != None %}
+add_connection {{ source['node_name'] }}.{{ source['port']|axisprefix(source['instance']) }}/{{ destination['node_name'] }}.{{ destination['port']|axisprefix(destination['instance']) }}
+
+{%-    endif %}
+{%-   else %}
+# Connecting signal "{{ source['node_name'] }}.{{ source['net'] }}" to signal "{{ destination['node_name'] }}.{{ destination['net'] }}"
+add_connection {{ source['node_name'] }}.{{ source['net'] }}/{{ destination['node_name'] }}.{{ destination['net'] }}
+{%-   endif %}
+{%   endfor %}
+{%- endfor %}
 
 {%- if 'ports' in fins %}
 {%-  if 'ports' in fins['ports'] and fins['ports']['ports']|length > 0 %}
 # The following ports were exported (made external) from the Application
 {%-   for port in fins['ports']['ports'] %}
 {%-    for i in range(port['num_instances']) %}
-set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']|axisprefix(i) }}
+# Creating application ports by exporting some (not necessarily all) instances of each port on each nodes in the application
+set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']|axisprefix(port['node_instances'][i]) }}
 {%-    endfor %}
 {%-   endfor %}
 {%-  endif %}
@@ -140,7 +189,6 @@ set_interface_property {{ port|axisprefix(i) }} EXPORT_OF {{ port['node_name'] }
 set_interface_property {{ port['name'] }} EXPORT_OF {{ port['node_name'] }}.{{ port['node_port']['name'] }}
 {%-   endfor %}
 {%-  endif %}
-# The following ports were exported (made external) from the Application
 {%- endif %}
 
 {%- if 'prop_interfaces' in fins %}

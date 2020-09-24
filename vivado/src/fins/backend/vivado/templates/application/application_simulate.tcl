@@ -1,6 +1,6 @@
 {#-
  #
- # Copyright (C) 2020 Geon Technologies, LLC
+ # Copyright (C) 2019 Geon Technologies, LLC
  #
  # This file is part of FINS.
  #
@@ -25,19 +25,18 @@
 # Backend:     {{ fins['backend'] }}
 # Generated:   {{ now }}
 # ---------------------------------------------------------
-# Description: TCL script to generate a simulation with Intel Quartus
-#              and run it with Intel ModelSim
+# Description: TCL script for running an Application simulation with
+#              Xilinx Vivado Xsim
 # Versions:    Tested with:
-#              * Intel Quartus Prime Pro 19.4
+#              * Xilinx Vivado 2019.1
 #===============================================================================
 
-# Set the relative path back to the IP root directory
-set IP_ROOT_RELATIVE_TO_PROJ "../../.."
+# Setup paths
+set PROJECT_VIVADO_DIR "./project/vivado"
 
 # Parameters
-# TODO expose these params in top level TB template
 set FINS_BACKEND "{{ fins['backend'] }}"
-{% if 'params' in fins %}
+{%- if 'params' in fins %}
 {% for param in fins['params'] -%}
 set {{ param['name'] }}
 {%- if param['value'] is iterable and param['value'] is not string %} [list {{ param['value']|join(' ') }}]
@@ -54,33 +53,52 @@ set {{ param['name'] }}
 {%- if 'presim' in fins['filesets']['scripts'] %}
 {%- for presim_script in fins['filesets']['scripts']['presim'] %}
 {%- if presim_script['type']|lower == 'tcl' %}
-source ${IP_ROOT_RELATIVE_TO_PROJ}/{{ presim_script['path'] }}
+source {{ presim_script['path'] }}
 {%- endif %}
 {%- endfor %}
 {%- endif %}
 {%- endif %}
 {%- endif %}
 
-# Find the Quartus-generated library name
-set UNIT_SIM_LIBRARY {{ fins['name'] }}
-set QSYS_SIMDIR ../
+# Open project if not open
+if {[current_project -quiet] == ""} {
+    open_project $PROJECT_VIVADO_DIR/{{ fins['name'] }}.xpr
+}
 
-source msim_setup.tcl
+make_wrapper -files [get_files $PROJECT_VIVADO_DIR/{{ fins['name'] }}.srcs/sources_1/bd/{{ fins['name'] }}_bd/{{ fins['name'] }}_bd.bd] -top -fileset sim_1
 
-com
-{%- if 'filesets' in fins %}
-{%- if 'sim' in fins['filesets'] %}
-{%- for src_file in fins['filesets']['sim'] %}
-vcom -work {{ fins['name'] }} ${IP_ROOT_RELATIVE_TO_PROJ}/{{ src_file['path'] }}
-{%- endfor %}
-{%- endif %}
-{%- endif %}
+# Replace all instances of <name>_bd_wrapper with <name>
+set orig_filename $PROJECT_VIVADO_DIR/{{ fins['name'] }}.srcs/sources_1/bd/{{ fins['name'] }}_bd/hdl/{{ fins['name'] }}_bd_wrapper.vhd
+set orig_fp [open $orig_filename r+]
+set orig_string [read $orig_fp]
+close $orig_fp
+# replace string and place results in "new_string"
+regsub -all {{ fins['name'] }}_bd_wrapper $orig_string {{ fins['name'] }} new_string
+# split into an array with newline as the delimiter
+set new_lines [split $new_string "\n"]
 
-# Run the simulation
-set TOP_LEVEL_NAME "${UNIT_SIM_LIBRARY}.{{ fins['top_sim'] }}"
-source msim_setup.tcl
-elab
-run -all
+set new_filename $PROJECT_VIVADO_DIR/{{ fins['name'] }}.srcs/sources_1/bd/{{ fins['name'] }}_bd/hdl/{{ fins['name'] }}.vhd
+set new_fp [open $new_filename w]
+# Write the new_string to the file line-by-line because the string is too long for Tcl all at once
+foreach line $new_lines {
+  puts $new_fp $line
+}
+close $new_fp
+
+# Add the wrapper file to the simulation fileset
+add_files -fileset sim_1 -norecurse $new_filename
+
+# Launch Simulation
+launch_sim
+
+# Check that the simulation launched correctly
+# Note: By default, Vivado launches the simulation and runs for 1us
+if { [current_time] != "1 us" } {
+    error "***** SIMULATION FAILED (t<1us) *****"
+}
+
+# Run Simulation until there is no more stimulus
+run all
 
 # Run Post-Sim TCL Scripts
 # Note: These scripts can use parameters defined above since they are sourced by this script
@@ -89,11 +107,9 @@ run -all
 {%- if 'postsim' in fins['filesets']['scripts'] %}
 {%- for postsim_script in fins['filesets']['scripts']['postsim'] %}
 {%- if postsim_script['type']|lower == 'tcl' %}
-source ${IP_ROOT_RELATIVE_TO_PROJ}/{{ postsim_script['path'] }}
+source {{ postsim_script['path'] }}
 {%- endif %}
 {%- endfor %}
 {%- endif %}
 {%- endif %}
 {%- endif %}
-
-quit

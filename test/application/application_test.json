@@ -6,6 +6,7 @@
   "company_name":"Geon Technologies",
   "company_url":"geon.tech",
   "company_logo":"docs/geontech_logo.png",
+  "library":"user",
   "params": [
     { "name":"TEST_PARAM_BOOLEAN", "value":false,           "description":"This is a test parameter excercising a boolean type" },
     { "name":"TEST_PARAM_INTEGER", "value":4,               "description":"This is a test parameter excercising an integer type" },
@@ -40,9 +41,15 @@
       ]
     },
     {
-      "source":{"node_name":"fins_test_ip_0", "net":"test_out"},
+      "source":{"node_name":"fins_test_ip_0", "net":"test_out", "instance":0},
       "destinations":[
-        {"node_name":"fins_test_ip_1", "net":"test_in"}
+        {"node_name":"fins_test_ip_1", "net":"test_in", "instance":0}
+      ]
+    },
+    {
+      "source":{"node_name":"fins_test_ip_0", "net":"test_out", "instance":1},
+      "destinations":[
+        {"node_name":"fins_test_ip_1", "net":"test_in", "instance":1}
       ]
     },
     {

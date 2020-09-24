@@ -59,7 +59,7 @@ class Generator:
         def dirname(path):
             return os.path.dirname(path)
 
-        def axisprefix(port, instance_index, reverse=False):
+        def axisprefix(port, instance_index=0, reverse=False):
             """
             Given a port, construct its name with the AXI4-Lite prefix prepended.
             Arguments:

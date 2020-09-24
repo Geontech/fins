@@ -108,15 +108,15 @@ Each dictionary element of the `nodes` array has the following fields:
 | ------------------- | ----------------- | -------- | ------------- | ----------- |
 | fins_path           | string            | YES      |               | The path to the *generated* FINS Node JSON file of the IP node. |
 | module_name         | string            | YES      |               | The name of this module when instantiated in the Block Design. |
-| descriptive_node    | bool              | NO       | false         | This Node/IP is not a FINS Node and is present only to describe and expose its interfaces and ports to FINS Software. No code/JSON generation should be performed for this Node. |
+| descriptive_node    | bool              | NO       | false         | This Node/IP is a sub-IP or is not a FINS Node and is present only to describe and expose its interfaces and ports to FINS Software. No code/JSON generation should be performed for this Node. |
 
 ## Application JSON Schema: Connections
 In a FINS Application, a connection can be made from a source port to any number of destinations. Each dictionary element of the `connections` array has the following fields:
 
 | Key                 | Type              | Required | Default Value | Description |
 | ------------------- | ----------------- | -------- | ------------- | ----------- |
-| source              | dict              | YES      |               | The source port or signal for this connection. This dict contains the "node_name" for the port and the "net" or actual port name. |
-| destinations        | dict[]            | YES      |               | The destination ports or signals of this connection. Each dict element contains the "node_name" for the port and the "net" or actual port/signal name. |
+| source              | dict              | YES      |               | The source port or signal for this connection. This dict contains the "node_name" for the port, the "net" or actual port name, and the "instance" for the instance index if the port has multiple instances. |
+| destinations        | dict[]            | YES      |               | The destination ports or signals of this connection. Each dict element contains the "node_name" for the port, the "net" or actual port/signal name, and the "instance" for the instance index if the port has multiple instances. |
 
 ### Application JSON Schema: Clocks
 In a FINS Application, clock domains must be created and tied to each port in the Application. 

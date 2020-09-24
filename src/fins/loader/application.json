@@ -30,6 +30,10 @@
       "is_required":false,
       "types":["str"]
     },
+    "library":{
+      "is_required":false,
+      "types":["str"]
+    },
     "part":{
       "is_required":false,
       "types":["str"]
@@ -108,6 +112,10 @@
             "net":{
               "is_required":false,
               "types":["str"]
+            },
+            "instance":{
+              "is_required":false,
+              "types":["int"]
             }
           }
         },
@@ -123,6 +131,10 @@
             "net":{
               "is_required":false,
               "types":["str"]
+            },
+            "instance":{
+              "is_required":false,
+              "types":["int"]
             }
           }
         }
