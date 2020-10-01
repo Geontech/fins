@@ -1615,81 +1615,195 @@ def populate_fins_system_node(node, verbose):
     """
     # Load the generated FINS JSON for the Node
     # and get the node_name from it
-    node_fins_data = load_json_file(node['fins_path'], verbose)
-    node['node_name'] = node_fins_data['name']
+    # node_fins_data = load_json_file(node['fins_path'], verbose)
+    # node['node_name'] = node_fins_data['name']
 
-    ports_producer_name_defined = False
-    ports_consumer_name_defined = False
-
-    # Convert dictionary to uint
-    if 'properties_offset' in node and isinstance(node['properties_offset'], str):
-        if os.path.exists(node['properties_offset']):
-            _, bd_extension = os.path.splitext(node['properties_offset'])
-            if bd_extension.lower() == '.qsys':
-                base_address = find_base_address_from_qsys(node['properties_offset'],node['module_name'],node['interface_name'])
-            elif bd_extension.lower() == '.bd':
-                base_address = find_base_address_from_bd(node['properties_offset'],node['module_name'],node['interface_name'])
+    # ports_producer_name_defined = False
+    # ports_consumer_name_defined = False
+    
+    if 'properties_interfaces' not in node:
+        node_fins_data = load_json_file(node['fins_path'], verbose)
+        node['node_name'] = node_fins_data['name']
+        ports_producer_name_defined = False
+        ports_consumer_name_defined = False
+    
+        # Convert dictionary to uint
+        if 'properties_offset' in node and isinstance(node['properties_offset'], str):
+            if os.path.exists(node['properties_offset']):
+                _, bd_extension = os.path.splitext(node['properties_offset'])
+                if bd_extension.lower() == '.qsys':
+                    base_address = find_base_address_from_qsys(node['properties_offset'],node['module_name'],node['interface_name'])
+                elif bd_extension.lower() == '.bd':
+                    base_address = find_base_address_from_bd(node['properties_offset'],node['module_name'],node['interface_name'])
+                else:
+                    print('ERROR: Unknown block design extension in FINS System:',bd_extension)
+                    sys.exit(1)
+                node['properties_offset'] = base_address
             else:
-                print('ERROR: Unknown block design extension in FINS System:',bd_extension)
+                print('WARNING: Properties offset path',node['properties_offset'],'for',node['module_name'],'does not exist')
+
+        if 'properties' in node_fins_data and 'interface_name' not in node:
+            print('ERROR: a node with a properties interface must have an "interface_name" specified in the System')
+            sys.exit(1)
+
+        if 'properties' in node_fins_data:
+            node['properties'] = node_fins_data['properties']['properties']
+            node['node_id'] = node['node_name'] + '::' + node['module_name'] + '::' + node['interface_name']
+
+        # Find the port listed in ports_producer_name
+        if 'ports_producer_name' in node:
+            # Make sure ports_producer_name is in only one node
+            if ports_producer_name_defined:
+                print('ERROR: ports_producer_name can only be defined in one node')
                 sys.exit(1)
-            node['properties_offset'] = base_address
+            ports_producer_name_defined = True
+            # Find the port
+            ports_producer_found = False
+            for port in node_fins_data['ports']['ports']:
+                if node['ports_producer_name'].lower() == port['name'].lower():
+                    if port['direction'].lower() == 'in':
+                        print('ERROR: ports_producer was incorrectly assigned to an input port')
+                        sys.exit(1)
+                    node['ports_producer'] = port
+                    ports_producer_found = True
+            if not ports_producer_found:
+                print('ERROR: ports_producer_name',node['ports_producer_name'],'not found in node',node['node_name'])
+                sys.exit(1)
         else:
-            print('WARNING: Properties offset path',node['properties_offset'],'for',node['module_name'],'does not exist')
+            node['ports_producer_name'] = ''
+            node['ports_producer'] = {}
 
-    if 'properties' in node_fins_data and 'interface_name' not in node:
-        print('ERROR: a node with a properties interface must have an "interface_name" specified in the System')
-        sys.exit(1)
-
-    if 'properties' in node_fins_data:
-        node['properties'] = node_fins_data['properties']['properties']
-        node['node_id'] = node['node_name'] + '::' + node['module_name'] + '::' + node['interface_name']
-
-    # Find the port listed in ports_producer_name
-    if 'ports_producer_name' in node:
-        # Make sure ports_producer_name is in only one node
-        if ports_producer_name_defined:
-            print('ERROR: ports_producer_name can only be defined in one node')
-            sys.exit(1)
-        ports_producer_name_defined = True
-        # Find the port
-        ports_producer_found = False
-        for port in node_fins_data['ports']['ports']:
-            if node['ports_producer_name'].lower() == port['name'].lower():
-                if port['direction'].lower() == 'in':
-                    print('ERROR: ports_producer was incorrectly assigned to an input port')
-                    sys.exit(1)
-                node['ports_producer'] = port
-                ports_producer_found = True
-        if not ports_producer_found:
-            print('ERROR: ports_producer_name',node['ports_producer_name'],'not found in node',node['node_name'])
-            sys.exit(1)
+        # Find the port listed in ports_consumer_name
+        if 'ports_consumer_name' in node:
+            # Make sure ports_consumer_name is in only one node
+            if ports_consumer_name_defined:
+                print('ERROR: ports_consumer_name can only be defined in one node')
+                sys.exit(1)
+            ports_consumer_name_defined = True
+            # Find the port
+            ports_consumer_found = False
+            for port in node_fins_data['ports']['ports']:
+                if node['ports_consumer_name'].lower() == port['name'].lower():
+                    if port['direction'].lower() == 'out':
+                        print('ERROR: ports_consumer was incorrectly assigned to an output port')
+                        sys.exit(1)
+                    node['ports_consumer'] = port
+                    ports_consumer_found = True
+            if not ports_consumer_found:
+                print('ERROR: ports_consumer_name',node['ports_consumer_name'],'not found in node',node['node_name'])
+                sys.exit(1)
+        else:
+            node['ports_consumer_name'] = ''
+            node['ports_consumer'] = {}
     else:
-        node['ports_producer_name'] = ''
-        node['ports_producer'] = {}
+        if 'interface_properties' in node:
+            print("ERROR: interface_properties key is invalid when you have properties_interfaces")
+        
 
-    # Find the port listed in ports_consumer_name
-    if 'ports_consumer_name' in node:
-        # Make sure ports_consumer_name is in only one node
-        if ports_consumer_name_defined:
-            print('ERROR: ports_consumer_name can only be defined in one node')
-            sys.exit(1)
-        ports_consumer_name_defined = True
-        # Find the port
-        ports_consumer_found = False
-        for port in node_fins_data['ports']['ports']:
-            if node['ports_consumer_name'].lower() == port['name'].lower():
-                if port['direction'].lower() == 'out':
-                    print('ERROR: ports_consumer was incorrectly assigned to an output port')
-                    sys.exit(1)
-                node['ports_consumer'] = port
-                ports_consumer_found = True
-        if not ports_consumer_found:
-            print('ERROR: ports_consumer_name',node['ports_consumer_name'],'not found in node',node['node_name'])
-            sys.exit(1)
-    else:
-        node['ports_consumer_name'] = ''
-        node['ports_consumer'] = {}
+        app_fins_data = load_json_file(node['fins_path'], verbose)
+        for prop_interface in node['properties_interfaces']:
+            module_name = prop_interface['module_name']
+            if 'nodes' in app_fins_data:
+                for app_node in app_fins_data['nodes']:
+                    if (module_name == app_node['module_name']):
+                        node_fins_data = load_json_file(app_node['fins_path'], verbose)
+                        prop_interface['node_name'] = node_fins_data['name']
+                        ports_producer_name_defined = False
+                        ports_consumer_name_defined = False
+    
+                        # Convert dictionary to uint
+                        if 'properties_offset' in prop_interface:
+                            if isinstance(prop_interface['properties_offset'], str):
+                                if os.path.exists(prop_interface['properties_offset']):
+                                    _, bd_extension = os.path.splitext(prop_interface['properties_offset'])
+                                    if bd_extension.lower() == '.qsys':
+                                        base_address = find_base_address_from_qsys(prop_interface['properties_offset'],node['module_name'],prop_interface['interface_name'])
+                                    elif bd_extension.lower() == '.bd':
+                                        base_address = find_base_address_from_bd(prop_interface['properties_offset'],node['module_name'],prop_interface['interface_name'])
+                                    else:
+                                        print('ERROR: Unknown block design extension in FINS System:',bd_extension)
+                                        sys.exit(1)
+                                    prop_interface['properties_offset'] = base_address
+                                else:
+                                    print('WARNING: Properties offset path',prop_interface['properties_offset'],'for',node['module_name'],'does not exist')
+                        else:
+                            if 'properties_offset' in node:
+                                if isinstance(node['properties_offset'], str):
+                                    if os.path.exists(node['properties_offset']):
+                                        _, bd_extension = os.path.splitext(node['properties_offset'])
+                                        if bd_extension.lower() == '.qsys':
+                                            base_address = find_base_address_from_qsys(node['properties_offset'],node['module_name'],prop_interface['interface_name'])
+                                        elif bd_extension.lower() == '.bd':
+                                            base_address = find_base_address_from_bd(node['properties_offset'],node['module_name'],prop_interface['interface_name'])
+                                        else:
+                                            print('ERROR: Unknown block design extension in FINS System:',bd_extension)
+                                            sys.exit(1)
+                                        prop_interface['properties_offset'] = base_address
+                                    else:
+                                        print('WARNING: Properties offset path',node['properties_offset'],'for',node['module_name'],'does not exist')
+                                else:
+                                    prop_interface['properties_offset'] = node['properties_offset']
+                            else:
+                                print('WARNING: Properties_offset does not exist')
 
+                        if 'properties' in node_fins_data and 'interface_name' not in prop_interface:
+                            print('ERROR: a node with a properties interface must have an "interface_name" specified in the System')
+                            sys.exit(1)
+
+                        if 'properties' in node_fins_data:
+                            prop_interface['properties'] = node_fins_data['properties']['properties']
+                            prop_interface['node_id'] = prop_interface['node_name'] + '::' + node['module_name'] + '::' + prop_interface['interface_name']
+
+                        node['ports_producer_name'] = ''
+                        node['ports_producer'] = {}
+                        node['ports_consumer_name'] = ''
+                        node['ports_consumer'] = {}
+
+#                        # Find the port listed in ports_producer_name
+#                        if 'ports_producer_name' in node:
+#                            # Make sure ports_producer_name is in only one node
+#                            if ports_producer_name_defined:
+#                                print('ERROR: ports_producer_name can only be defined in one node')
+#                                sys.exit(1)
+#                            ports_producer_name_defined = True
+#                            # Find the port
+#                            ports_producer_found = False
+#                            for port in node_fins_data['ports']['ports']:
+#                                if node['ports_producer_name'].lower() == port['name'].lower():
+#                                    if port['direction'].lower() == 'in':
+#                                        print('ERROR: ports_producer was incorrectly assigned to an input port')
+#                                        sys.exit(1)
+#                                    node['ports_producer'] = port
+#                                    ports_producer_found = True
+#                            if not ports_producer_found:
+#                                print('ERROR: ports_producer_name',node['ports_producer_name'],'not found in node',node['node_name'])
+#                                sys.exit(1)
+#                        else:
+#                            node['ports_producer_name'] = ''
+#                            node['ports_producer'] = {}
+#
+#                        # Find the port listed in ports_consumer_name
+#                        if 'ports_consumer_name' in node:
+#                            # Make sure ports_consumer_name is in only one node
+#                            if ports_consumer_name_defined:
+#                                print('ERROR: ports_consumer_name can only be defined in one node')
+#                                sys.exit(1)
+#                            ports_consumer_name_defined = True
+#                            # Find the port
+#                            ports_consumer_found = False
+#                            for port in node_fins_data['ports']['ports']:
+#                                if node['ports_consumer_name'].lower() == port['name'].lower():
+#                                    if port['direction'].lower() == 'out':
+#                                        print('ERROR: ports_consumer was incorrectly assigned to an output port')
+#                                        sys.exit(1)
+#                                    node['ports_consumer'] = port
+#                                    ports_consumer_found = True
+#                            if not ports_consumer_found:
+#                                print('ERROR: ports_consumer_name',node['ports_consumer_name'],'not found in node',node['node_name'])
+#                                sys.exit(1)
+#                        else:
+#                            node['ports_consumer_name'] = ''
+#                            node['ports_consumer'] = {}
 
 def populate_fins_system(fins_data, verbose):
     """

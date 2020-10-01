@@ -75,6 +75,25 @@
           "is_required":false,
           "types":["str","int"]
         },
+        "properties_interfaces":{
+          "is_required":false,
+          "types":["list"],
+          "list_types":["dict"],
+          "fields":{
+             "module_name":{
+               "is_required":true,
+               "types":["str"]
+             },
+             "interface_name":{
+               "is_required":true,
+               "types":["str"]
+             },
+             "properties_offset":{
+               "is_required":false,
+               "types":["str", "int"]
+             }
+           }
+        },
         "ports_producer_name":{
           "is_required":false,
           "types":["str"]
