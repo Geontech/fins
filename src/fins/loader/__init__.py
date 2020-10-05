@@ -1263,7 +1263,7 @@ def populate_property_interfaces(fins_data, verbose):
 
         if 'ip' in fins_data:
             for ip in fins_data['ip']:
-                if 'prop_interfaces' in ip['ip_details']:
+                if len(ip['ip_details']['prop_interfaces']) > 0:
                     # Update the list of interfaces for this IP
                     # NOTE:
                     #     'ip_details' should have the interfaces of this IP's sub-IPs.
@@ -1272,6 +1272,16 @@ def populate_property_interfaces(fins_data, verbose):
                     # These are sub-IPs so set their 'top' attribute to False
                     for interface in ip_interfaces:
                         interface['top'] = False
+
+                    if len(fins_data['prop_interfaces']) == 0:
+                        properties = ip['ip_details']['properties']
+                        fins_data['prop_interfaces'] = \
+                            [{
+                              'node_name': fins_data['name'],
+                              'addr_width': properties['addr_width'],
+                              'data_width': properties['data_width'],
+                              'interfaces': []
+                            }]
 
                     fins_data['prop_interfaces'][0]['interfaces'] += ip_interfaces
 
