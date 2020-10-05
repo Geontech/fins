@@ -12,13 +12,13 @@ As the diagram above demonstrates, the "core" backend only generates source code
 
 ```bash
 # Generates the "core" backend by default
-$ fins zynq_no_matlab.json
+$ fins fins.json
 # Generates the "core" backend explicitly
-$ fins --backend core zynq_no_matlab.json
+$ fins --backend core fins.json
 # Generates the "core" and "vivado" backends
-$ fins -b vivado zynq_no_matlab.json
+$ fins -b vivado fins.json
 # Generates the "core" and "quartus" backends
-$ fins -b quartus cycloneV.json
+$ fins -b quartus fins.json
 ```
 
 Within the "core" backend, FINS generates the following:

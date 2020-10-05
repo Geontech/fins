@@ -47,7 +47,7 @@ To verify your installation and run an example of a FINS Node, execute the follo
 # Enter the test IP directory
 $ cd ./test/node/
 # Run the fins executable to generate the Vivado backend
-$ fins -b vivado fins.json
+$ fins -b quartus fins.json
 # Run the simulation in command line mode
 $ make sim
 ```
