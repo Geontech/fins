@@ -59,40 +59,38 @@
       "types":["list"],
       "list_types":["dict"],
       "fields":{
-        "fins_path":{
+        "path":{
           "is_required":true,
           "types":["str"]
         },
-        "module_name":{
+        "instance_name":{
           "is_required":true,
           "types":["str"]
         },
-        "interface_name":{
-          "is_required":false,
-          "types":["str"]
-        },
-        "properties_offset":{
-          "is_required":false,
-          "types":["str","int"]
-        },
-        "properties_interfaces":{
-          "is_required":false,
-          "types":["list"],
-          "list_types":["dict"],
+        "properties":{
+          "is_required":true,
+          "types":["dict"],
           "fields":{
-             "module_name":{
-               "is_required":true,
-               "types":["str"]
-             },
-             "interface_name":{
-               "is_required":true,
-               "types":["str"]
-             },
-             "properties_offset":{
-               "is_required":false,
-               "types":["str", "int"]
-             }
-           }
+            "interfaces":{
+              "is_required":false,
+              "types":["list"],
+              "list_types":["dict"],
+              "fields":{
+                "id":{
+                  "is_required":true,
+                  "types":["str"]
+                },
+                "offset":{
+                  "is_required":true,
+                  "types":["int"]
+                }
+              }
+            },
+            "design_file":{
+              "is_required":false,
+              "types":["str"]
+            }
+          }
         },
         "ports_producer_name":{
           "is_required":false,
