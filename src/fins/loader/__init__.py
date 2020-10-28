@@ -1615,38 +1615,58 @@ def populate_fins_system_node(node, verbose):
         node_id
         ports_producer/consumer
     """
+    # Load the node/application dictionary that the path points to
     node_fins_data = load_json_file(node['path'], verbose)
 
+    # If the schema_type is NOT an application or node, exit with and error
     if node_fins_data['schema_type'] != SchemaType.NODE and node_fins_data['schema_type'] != SchemaType.APPLICATION:
         print("ERROR: path pointed to a JSON type that is not supported")
         sys.exit(1)
 
     node['prop_interfaces'] = {}
 
+    # Make sure there is exclusively interfaces or design_file in properties of each node
     if ('interfaces' in node['properties']) ^ ('design_file' in node['properties']):
+        instance_name = node['instance_name']
+        node_name = None
+        module_name = None
+        interface_name = None
+        
+        # Will only determine node_id and offset for each entry inside interfaces
         if 'interfaces' in node['properties']:
+            # Loop through each interface entry
             for sys_interface in node['properties']['interfaces']:
-                sid = sys_interface['id']
-                split_id = sid.split("::")
-
+                # id will either be 'module_name' if its a node or 'node_name'::'module_name' if its an application
+                system_id = sys_interface['id']
+                split_id = system_id.split("::")
+                
+                # Loop through each prop_interface in the loaded dictionary
                 for node_prop_interface in node_fins_data['prop_interfaces']:
-                    if(node_prop_interface['node_name'] == split_id[0]):
-                        for node_interface in node_prop_interface['interfaces']:
-                            if((node_fins_data['schema_type'] == SchemaType.NODE and node_interface['name'] == split_id[0])
-                               or (node_fins_data['schema_type'] == SchemaType.APPLICATION and node_interface['name'] == split_id[1])):
+                    node_name = node_prop_interface['node_name']
 
+                    # Check 'node_name' matches the 'id'; if the schema_type is a node, ignore this check
+                    if(node_name == split_id[0] or (node_fins_data['schema_type'] == SchemaType.NODE)):
+                        for node_interface in node_prop_interface['interfaces']:
+                            module_name = node_interface['name']
+                            interface_name = node_interface['full_name']
+                            # 'key' will match assuming its an application; if it is a node, it should concatenate the module_name to the node_name
+                            key = node_name + '::' + module_name
+
+                            # Check the module name matches the 'id'
+                            if((node_fins_data['schema_type'] == SchemaType.NODE and module_name == split_id[0])
+                               or (node_fins_data['schema_type'] == SchemaType.APPLICATION and module_name == split_id[1])):
                                 node_interface['offset'] = sys_interface['offset']
-                                node_interface['node_id'] = node_prop_interface['node_name'] + '::' + node['instance_name'] + '::' + node_interface['full_name']
-                                node['prop_interfaces'][sid] = node_interface
+                                node_interface['node_id'] =  instance_name + '::' + node_name + '::' + interface_name
+                                node['prop_interfaces'][key] = node_interface
                                 break
                         break
 
+        # Will determine node_id and offset for all prop_interfaces entry that corresponds to the 'instance_name'
         elif 'design_file' in node['properties']:
+            # Loop through all prop_interfaces
             for node_prop_interface in node_fins_data['prop_interfaces']:
-                instance_name = node['instance_name']
                 node_name = node_prop_interface['node_name']
-                module_name = None
-                interface_name = None
+                # Loop through all interfaces
                 for interface in node_prop_interface['interfaces']:
                     module_name = interface['name']
                     interface_name = interface['full_name']
@@ -1663,7 +1683,7 @@ def populate_fins_system_node(node, verbose):
                     else:
                         print('WARNING: Properties offset path',node['properties']['design_file'],'for',node['module_name'],'does not exist')
                     sid = node_name + "::" + module_name
-                    interface['node_id'] = node_name + '::' + instance_name + '::' + interface_name
+                    interface['node_id'] = instance_name + '::' + node_name + '::' + interface_name
                     node['prop_interfaces'][sid] = interface
 
     else:
