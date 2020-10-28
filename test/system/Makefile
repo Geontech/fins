@@ -18,7 +18,7 @@
 quartus project/quartus/system.qsys: scripts/stratix10_system.tcl
 	rm -rf project/quartus/ log/ && mkdir -p project/quartus/ && mkdir -p log/
 	cd project/quartus && \
-	qsys-script --script=../../scripts/stratix10_system.tcl --new-quartus-project=stratix10_system.qpf --search-path=../../../application/project/quartus/**/*,../../../node/**/*,$$ > ../../log/quartus_system_create.log 2>&1
+	qsys-script --script=../../scripts/stratix10_system.tcl --new-quartus-project=stratix10_system.qpf --search-path=../../../application/**/*,../../../node/**/*,$$ > ../../log/quartus_system_create.log 2>&1
 
 vivado project/vivado/zedboard_system.srcs/sources_1/bd/system/system.bd: scripts/zedboard_system.tcl
 	rm -rf log/ && mkdir -p log/
