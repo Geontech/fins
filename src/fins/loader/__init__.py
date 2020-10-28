@@ -1300,7 +1300,7 @@ def populate_property_interfaces(fins_data, verbose):
 
                     else:
                         interface['extended_name'] = node['module_name']
-                        interface['full_name'] = "S_AXI_" + upper(node['module_name'])
+                        interface['full_name'] = "S_AXI_" + (node['module_name'].upper())
 
                 fins_data['prop_interfaces'].append(prop_interface)
 
