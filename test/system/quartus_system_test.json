@@ -3,42 +3,57 @@
   "base_offset":0,
   "nodes":[
     {
-      "fins_path":"../node/gen/core/test_top.json",
-      "module_name":"application_test_0",
-      "interface_name":"S_AXI_FINS_TEST_IP_0_TEST_TOP",
-      "properties_offset":"project/quartus/system.qsys",
-      "ports_consumer_name":"myinput"
+      "path":"../application/gen/core/application_test.json",
+      "instance_name":"application_test_0",
+      "properties":{
+        "interfaces":[
+          {
+            "id":"fins_test_ip_0::test_top",
+            "offset":12345
+          },
+          {
+            "id":"fins_test_ip_1::test_bottom",
+            "offset":67890
+          }
+        ]
+      }
     },
     {
-      "fins_path":"../node/ip/test_middle/gen/core/test_middle.json",
-      "module_name":"application_test_0",
-      "interface_name":"S_AXI_FINS_TEST_IP_0_TEST_MIDDLE",
-      "properties_offset":"project/quartus/system.qsys"
+      "path":"../application/gen/core/application_test.json",
+      "instance_name":"application_test_0",
+      "properties":{
+        "design_file":"project/quartus/system.qsys"
+      },
+      "ports_consumer_name":"fins_test_ip_0_myinput",
+      "ports_producer_name":"fins_test_ip_1_myoutput"
     },
     {
-      "fins_path":"../node/ip/test_middle/ip/test_bottom/gen/core/test_bottom.json",
-      "module_name":"application_test_0",
-      "interface_name":"S_AXI_FINS_TEST_IP_0_TEST_BOTTOM",
-      "properties_offset":"project/quartus/system.qsys"
+      "path":"../node/gen/core/test_top.json",
+      "instance_name":"test_top_0",
+      "properties":{
+        "design_file":"project/quartus/system.qsys"
+      }
     },
     {
-      "fins_path":"../node/gen/core/test_top.json",
-      "module_name":"application_test_0",
-      "interface_name":"S_AXI_FINS_TEST_IP_1_TEST_TOP",
-      "properties_offset":"project/quartus/system.qsys",
-      "ports_producer_name":"myoutput"
-    },
-    {
-      "fins_path":"../node/ip/test_middle/gen/core/test_middle.json",
-      "module_name":"application_test_0",
-      "interface_name":"S_AXI_FINS_TEST_IP_1_TEST_MIDDLE",
-      "properties_offset":"project/quartus/system.qsys"
-    },
-    {
-      "fins_path":"../node/ip/test_middle/ip/test_bottom/gen/core/test_bottom.json",
-      "module_name":"application_test_0",
-      "interface_name":"S_AXI_FINS_TEST_IP_1_TEST_BOTTOM",
-      "properties_offset":"project/quartus/system.qsys"
+      "path":"../node/gen/core/test_top.json",
+      "instance_name":"test_top_0",
+      "properties":{
+        "interfaces":[
+          {
+            "id":"test_top",
+            "offset":123
+          },
+          {
+            "id":"test_middle",
+            "offset":456
+          },
+          {
+            "id":"test_bottom",
+            "offset":789
+          }
+        ]
+      }
     }
   ]
 }
+
