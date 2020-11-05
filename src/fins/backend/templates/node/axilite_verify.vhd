@@ -495,7 +495,7 @@ package body {{ fins['name']|lower }}_axilite_verify is
     --*********************************************
     -- Property: {{ prop['name'] }}
     --*********************************************
-    {%- if prop['is_readable'] %}
+    {%- if prop['is_readable'] and not prop['disable_default_test'] %}
     -- Verify default values
     {%- for n in range(prop['length']) %}
     {{ fins['name']|lower }}_read_reg(
