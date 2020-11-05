@@ -612,6 +612,8 @@ def populate_properties(fins_data,base_offset,verbose):
             prop['length'] = 1
         if not 'default_values' in prop:
             prop['default_values'] = [0] * prop['length']
+        if not 'disable_default_test' in prop:
+            prop['disable_default_test'] = False
         if not 'is_signed' in prop:
             prop['is_signed'] = False
         if not 'range_min' in prop:
