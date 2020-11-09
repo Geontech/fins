@@ -91,6 +91,10 @@
               "is_required":false,
               "types":["bool","str"]
             },
+            "supports_byte_enable":{
+              "is_required":false,
+              "types":["bool","str"]
+            },
             "num_instances":{
               "is_required":false,
               "types":["int","str"]
