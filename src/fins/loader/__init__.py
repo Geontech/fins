@@ -742,7 +742,9 @@ def populate_ports(fins_data,verbose):
                 elif port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] > 4096:
                     print('ERROR: Port',port['name'],'total data width (bit_width*num_samples*num_channels) is larger than the maximum value of 4096')
                     sys.exit(1)
-
+                
+                if 'supports_byte_enable':
+                    port['data']['num_bytes'] =  math.ceil(port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] / 8)
     # Return the modified dictionary
     return fins_data
 
