@@ -1608,7 +1608,11 @@ def populate_fins_application(fins_data, verbose):
 
 def populate_fins_system_node(node, verbose):
     """
-    Modifies the contents of 'node' dictionary. Brings out the prop_interfaces from the node and stores the offset into that corresponding interface.
+    Modifies the contents of 'node' dictionary. 
+    Brings out the prop_interfaces from the node and
+    stores the prop_interfaces at the system level dictionary.
+    Then, stores the offset of each interface into the corresponding
+    entry in the System's prop_interfaces list
 
     Determines/sets various information relating to the node:
         node_name
@@ -1633,10 +1637,13 @@ def populate_fins_system_node(node, verbose):
         
         # Will only determine node_id and offset for each entry inside interfaces
         if 'interfaces' in node['properties']:
-            # Loop through each interface entry within the system where the offsets are explicitly stated by the user and store the offsets into prop_interfaces at the system level dictionary
+            # Loop through each interface entry within the system where the offsets 
+            # are explicitly stated by the user and store the offsets into prop_interfaces 
+            # at the system level dictionary
             for sys_interface in node['properties']['interfaces']:
                 # "system_id" will either be <module_name> or <node_name>::<module_name>
-                # This will based on whether this entry in the System's `nodes` list represents a Node or an Application respectively.
+                # This will based on whether this entry in the System's `nodes` 
+                # list represents a Node or an Application respectively.
 
                 system_id = sys_interface['id']
                 split_id = system_id.split("::")
@@ -1645,15 +1652,21 @@ def populate_fins_system_node(node, verbose):
                 for node_prop_interface in node_fins_data['prop_interfaces']:
                     node_name = node_prop_interface['node_name']
 
-                    # Check 'node_name' matches the the node_name in the 'system_id' that was splitted. If it matches, it is in the correct prop_interface; if the schema_type is a node, ignore this check
+                    # Check 'node_name' matches the the node_name in the 'system_id'
+                    # that was splitted. If it matches, it is in the correct
+                    # prop_interface; if the schema_type is a node, ignore this check
                     if node_name == split_id[0] or (node_fins_data['schema_type'] == SchemaType.NODE):
                         for node_interface in node_prop_interface['interfaces']:
                             module_name = node_interface['name']
                             interface_name = node_interface['full_name']
-                            # 'final_system_id' will match system_id assuming its an application; if it is a node, it should concatenate the module_name to the end of node_name
+                            # 'final_system_id' will match system_id assuming its an
+                            # application; if it is a node, it should concatenate the
+                            # module_name to the end of node_name
                             final_system_id = node_name + '::' + module_name
 
-                            # Check the module name matches the module name in 'system_id' that was splitted, if it does, store the offset into that node_interface
+                            # Check the module name matches the module name in
+                            # 'system_id' that was splitted, if it does, store
+                            # the offset into that node_interface
                             if ((node_fins_data['schema_type'] == SchemaType.NODE and module_name == split_id[0])
                                or (node_fins_data['schema_type'] == SchemaType.APPLICATION and module_name == split_id[1])):
                                 node_interface['offset'] = sys_interface['offset']
@@ -1662,16 +1675,21 @@ def populate_fins_system_node(node, verbose):
                                 break
                         break
 
-        # Will determine node_id and offset for all prop_interfaces entry that corresponds to the 'instance_name'
+        # Will determine node_id and offset for all prop_interfaces entry that
+        # corresponds to the 'instance_name'
         elif 'design_file' in node['properties']:
-            # Loop through all prop_interfaces within the node to find all properties offset in the qsys/bd file and store the offset at the prop_interfaces of the system level dictionary
+            # Loop through all prop_interfaces within the node to find all 
+            # properties offset in the qsys/bd file and store the offset 
+            # at the prop_interfaces of the system level dictionary
             for node_prop_interface in node_fins_data['prop_interfaces']:
                 node_name = node_prop_interface['node_name']
-                # Loop through all interfaces within the node to find all properties offset in the qsys/bd file
+                # Loop through all interfaces within the node to find all
+                # properties offset in the qsys/bd file
                 for node_interface in node_prop_interface['interfaces']:
                     module_name = node_interface['name']
                     interface_name = node_interface['full_name']
-                    # Using the instance_name and interface_name, find the offset in the design_fileqsys/bd file
+                    # Using the instance_name and interface_name, find the 
+                    # offset in the design_fileqsys/bd file
                     if os.path.exists(node['properties']['design_file']):
                         _, bd_extension = os.path.splitext(node['properties']['design_file'])
                         if bd_extension.lower() == '.qsys':
@@ -1685,7 +1703,8 @@ def populate_fins_system_node(node, verbose):
                     else:
                         print('WARNING: Properties offset path',node['properties']['design_file'],'for',node['module_name'],'does not exist')
                     
-                    # Determine the system_id and store the node_interface with the system_id as the key
+                    # Determine the system_id and store the node_interface
+                    # with the system_id as the key
                     system_id = node_name + "::" + module_name
                     node_interface['node_id'] = instance_name + '::' + node_name + '::' + interface_name
                     node['prop_interfaces'][system_id] = node_interface
