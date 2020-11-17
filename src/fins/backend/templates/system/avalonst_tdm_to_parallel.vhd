@@ -55,6 +55,9 @@ entity {{ fins['name']|lower }}_avalonst_tdm_to_parallel is
     {%- if fins['supports_backpressure'] %}
     m_axis_tready     : in  std_logic;
     {%- endif %}
+    {%- if fins['supports_byte_enable'] %}
+    m_axis_tkeep      : out std_logic_vector({{ fins['data']['num_bytes'] }}-1 downto 0);
+    {%- endif %}
     m_axis_tdata      : out std_logic_vector({{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in fins %}
     m_axis_tuser      : out std_logic_vector({{ fins['metadata']|sum(attribute='bit_width') }}-1 downto 0);
