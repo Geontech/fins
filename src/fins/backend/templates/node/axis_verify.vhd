@@ -143,7 +143,7 @@ begin
       wait until rising_edge({{ port|axisprefix(i,True) }}_aclk);
       if ({{ port|axisprefix(i,True) }}_enable = '0') then
         -- When disabled, set output signals low
-        {{ port|axisprefix(i,True) }}_tvalid <= 'in
+        {{ port|axisprefix(i,True) }}_tvalid <= '0'
         {{ port|axisprefix(i,True) }}_tlast  <= '0';
         {{ port|axisprefix(i,True) }}_tdata  <= (others => '0');
         {%- if 'metadata' in port %}
