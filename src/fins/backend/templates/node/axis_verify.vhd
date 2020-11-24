@@ -137,8 +137,8 @@ begin
     variable current_tuser         : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
     {%- if port['supports_byte_enable'] %}
-    variable axis_tkeep            : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0) := (others => '0');
-    variable current_tkeep         : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+    --variable axis_tkeep            : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0) := (others => '0');
+    --variable current_tkeep         : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
     {%- endif %}
   begin
     -- Use "simulation_done" to suspend operations
@@ -152,6 +152,9 @@ begin
         {{ port|axisprefix(i,True) }}_tdata  <= (others => '0');
         {%- if 'metadata' in port %}
         {{ port|axisprefix(i,True) }}_tuser  <= (others => '0');
+        {%- endif %}
+        {%- if port['supports_byte_enable'] %}
+        -- {{ port|axisprefix(i,True) }}_tkeep  <= (others => '0');
         {%- endif %}
       else
         --******************************************
@@ -173,7 +176,7 @@ begin
             axis_tuser  := (others => '0');
             {%- endif %}
             {%- if port['supports_byte_enable'] %}
-            axis_tkeep  := (others => '0');
+            --axis_tkeep  := (others => '0');
             {%- endif %}
           end if;
           -- Note: the file_done flag might NOT mean that the last AXIS transaction has occurred.
@@ -237,7 +240,7 @@ begin
                 hread(current_line, current_tuser);
                 {%- endif %}
                 {%- if port['supports_byte_enable'] %}
-                hread(current_line, current_tkeep);
+                --hread(current_line, current_tkeep);
                 {%- endif %}
                 -- Set the output values
                 if (unsigned(current_tlast) > 0) then
@@ -263,7 +266,7 @@ begin
                   axis_tuser  := (others => '0');
                   {%- endif %}
                   {%- if port['supports_byte_enable'] %}
-                  axis_tkeep  := (others => '0');
+                  --axis_tkeep  := (others => '0');
                   {%- endif %}
                 end if;
                 -- Set the file_done flag for reference during next cycle
@@ -285,7 +288,7 @@ begin
         {{ port|axisprefix(i,True) }}_tuser  <= axis_tuser;
         {%- endif %}
         {%- if port['supports_byte_enable'] %}
-        {{ port|axisprefix(i,True) }}_tkeep  <= axis_tkeep;
+        --{{ port|axisprefix(i,True) }}_tkeep  <= axis_tkeep;
         {%- endif %}
       end if;
     else
@@ -352,10 +355,10 @@ begin
         hwrite(current_line, current_tuser);
         {%- endif %}
         {%- if port['supports_byte_enable'] %}
-        write(current_line, string'(" "));
-        hwrite(current_line, current_tkeep);
-        writeline(write_file, current_line);
+        --write(current_line, string'(" "));
+        --hwrite(current_line, current_tkeep);
         {%- endif %}
+        writeline(write_file, current_line);
       end if;
 
       {%- if port['supports_backpressure'] %}
