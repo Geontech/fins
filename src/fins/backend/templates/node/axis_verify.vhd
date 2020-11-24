@@ -355,6 +355,7 @@ begin
         write(current_line, string'(" "));
         hwrite(current_line, current_tkeep);
         writeline(write_file, current_line);
+        {%- endif %}
       end if;
 
       {%- if port['supports_backpressure'] %}
