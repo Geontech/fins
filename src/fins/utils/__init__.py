@@ -22,10 +22,12 @@ Allow inclusion via 'import fins.utils' which will import contents of files in t
 
 __all__ = [
     "path",
+    "finstypes",
     "logger",
     ]
 
 
 # pylint:disable=wildcard-import
 from .path import *
+from .finstypes import *
 from .logger import *
