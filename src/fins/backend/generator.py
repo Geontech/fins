@@ -30,7 +30,7 @@ CORE_SYSTEM_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/system/'
 CORE_OUTPUT_DIR = 'gen/core/'
 
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 class Generator:
 

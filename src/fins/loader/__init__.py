@@ -33,7 +33,7 @@ __all__ = (
 
 from .loader import *
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 NODE_SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/node.json'
 APPLICATION_SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/application.json'

@@ -27,12 +27,13 @@ from fins.utils import SchemaType
 # FINS Loader and Generator
 from fins import loader
 from fins.backend.generator import Generator
-# FINS version and logger
+# FINS version and LOGGER
 from fins import version
 from fins.utils import ColoredLogger
 
 
 ENTRY_POINT_ID = 'fins.backend.generators'
+
 
 class NullGenerator(Generator):
     """
@@ -56,8 +57,8 @@ def load_generator(name):
 logging.setLoggerClass(ColoredLogger)
 logging.getLogger().setLevel(logging.INFO)
 
-# Top level logger
-logger = logging.getLogger('fins')
+# Top level LOGGER
+LOGGER = logging.getLogger('fins')
 
 
 def run_generator(generator, filepath, backend, part, verbose):
@@ -71,7 +72,7 @@ def run_generator(generator, filepath, backend, part, verbose):
         target_dir = os.path.dirname(filepath)
 
     if target_dir != '.':
-        logger.debug('Temporarily changing directories to %s' % os.path.dirname(filepath))
+        LOGGER.debug('fTemporarily changing directories to {os.path.dirname(filepath)')
 
     with cd(target_dir):
         # Load the fins_data and generate the backend
@@ -79,7 +80,7 @@ def run_generator(generator, filepath, backend, part, verbose):
         fins_data['schema_type'] = int(SchemaType.get(fins_data))
 
         # Determine the part (if one was passed through the command line)
-        if(part != None):
+        if part:
             fins_data['part'] = part
 
         if fins_data['schema_type'] == SchemaType.NODE:
@@ -89,7 +90,7 @@ def run_generator(generator, filepath, backend, part, verbose):
             # Recursively call function on all sub-ip
             if 'ip' in fins_data:
                 for ip in fins_data['ip']:
-                    logger.info('Recursing into IP at %s ...' % ip['fins_path'])
+                    LOGGER.info(f'Recursing into IP at {ip["fins_path"]} ...')
                     ip['ip_details'] = run_generator(generator, ip['fins_path'], backend, part, verbose)
 
             loader.populate_fins_node(fins_data, verbose)
@@ -97,12 +98,12 @@ def run_generator(generator, filepath, backend, part, verbose):
 
             try:
                 # Run core generation, post core generation ops, and finally backend generation
-                logger.info('Running generator for %s ...' % filepath)
+                LOGGER.info(f'Running generator for {filepath} ...')
                 generator.generate_node_core(fins_data, filename)
                 loader.post_generate_node_core(fins_data, verbose)
                 generator.generate_node_backend(fins_data, filename)
             except RuntimeError as exc:
-                logger.error('Generator error: %s' % exc)
+                LOGGER.error(f'Generator error: {exc}')
 
         elif fins_data['schema_type'] == SchemaType.APPLICATION:
             fins_data = loader.validate_and_convert_application_fins_data(fins_data, filename, backend, verbose)
@@ -111,7 +112,7 @@ def run_generator(generator, filepath, backend, part, verbose):
             # and then populate their contents in fins_data via loader.populate_fins_node
             for node in fins_data['nodes']:
                 if not node['descriptive_node']:
-                    logger.info('Recursing into node at "%s"' % node['fins_path'])
+                    LOGGER.info(f'Recursing into node at "{node["fins_path"]}"')
                     node['node_details'] = run_generator(generator, node['fins_path'], backend, part, verbose)
 
             loader.populate_fins_application(fins_data, verbose)
@@ -122,7 +123,7 @@ def run_generator(generator, filepath, backend, part, verbose):
                 generator.generate_application_core(fins_data, filename)
                 generator.generate_application_backend(fins_data, filename)
             except RuntimeError as exc:
-                logger.error('Generator error: %s' % exc)
+                LOGGER.error(f'Generator error: {exc}')
 
         else:  # schema_type == SchemaType.SYSTEM:
             fins_data = loader.validate_and_convert_system_fins_data(fins_data, filename, backend, verbose)
@@ -134,7 +135,7 @@ def run_generator(generator, filepath, backend, part, verbose):
                 # Run core generation, post core generation ops, and finally backend generation
                 generator.generate_system_core(fins_data, filename)
             except RuntimeError as exc:
-                logger.error('Generator error: %s' % exc)
+                LOGGER.error(f'Generator error: {exc}')
 
         generator.end_file()
 
@@ -146,6 +147,7 @@ def run_generator(generator, filepath, backend, part, verbose):
 
         return fins_data
 
+
 def main():
 
     arg_parser = argparse.ArgumentParser(description='Generate HDL and programmable logic projects.')
@@ -154,7 +156,7 @@ def main():
                             help='display debug messages')
     arg_parser.add_argument('-q', '--quiet', action='store_true', default=False,
                             help='only print warnings and errors')
-    arg_parser.add_argument('--version', action='version', version='%(prog)s '+version.__version__)
+    arg_parser.add_argument('--version', action='version', version='%(prog)s ' + version.__version__)
     arg_parser.add_argument('-b', '--backend', default='core', help='code generator backend to target')
     arg_parser.add_argument('-o', '--option', action='append', default=[],
                             help='options for code generator backend')
@@ -170,7 +172,7 @@ def main():
     try:
         generator = load_generator(args.backend)
     except KeyError:
-        raise SystemExit("invalid backend '"+args.backend+"'")
+        raise SystemExit(f'invalid backend "{args.backend}"')
 
     for option in args.option:
         if '=' in option:

@@ -24,7 +24,7 @@ import sys
 import json
 import logging
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class Loader:
@@ -44,7 +44,7 @@ class Loader:
         Returns:
             The validated FINS contents after applying any overrides present
         """
-        logger.debug('Validating %s...' % fins_input)
+        LOGGER.debug(f'Validating {fins_input}...')
 
         overrides_present = True
         if overrides_present:
@@ -107,22 +107,22 @@ class JsonLoader(Loader):
         if not cls.__schemas.values():
             cls.__load_schemas()
             for schema_type, schema in cls.__schemas.items():
-                logger.debug('Validating %s schema ...' % schema_type)
+                LOGGER.debug(f'Validating {schema_type} schema ...')
                 try:
                     cls.__validate_schema(schema_type, schema)
                 except (TypeError, KeyError) as err:
-                    logger.error(str(err))
+                    LOGGER.error(str(err))
                     sys.exit(1)
 
-        logger.debug('Loading JSON file @ %s' % fins_json)
+        LOGGER.debug(f'Loading JSON file @ {fins_json}')
         fins_dict = cls.__load_json(fins_json)
         schema_type = cls.get_json_type(fins_dict)
         schema = cls.__schemas[schema_type]
-        logger.debug('Validating %s JSON contents ...' % schema_type)
+        LOGGER.debug(f'Validating {schema_type} JSON contents ...')
         try:
             cls.__validate_fins('fins-top', fins_dict, schema)
         except (TypeError, KeyError) as err:
-            logger.error(str(err))
+            LOGGER.error(str(err))
             sys.exit(1)
 
         return fins_dict
@@ -137,14 +137,14 @@ class JsonLoader(Loader):
         Returns:
             fins_dict after override modifications
         """
-        logger.debug('Processing overrides...')
+        LOGGER.debug('Processing overrides...')
 
     @classmethod
     def __load_schemas(cls):
         """Load schemas from files into the cls.__schemas dict
         """
         for schema_type, schema_path in cls.__schema_paths.items():
-            logger.debug('Loading %s schema @ %s', schema_type, schema_path)
+            LOGGER.debug(f'Loading {schema_type} schema @ {schema_path}')
             cls.__schemas[schema_type] = cls.__load_json(schema_path)
 
     @classmethod
@@ -195,48 +195,48 @@ class JsonLoader(Loader):
 
         for key, value in schema_object.items():
             if key not in cls.__schema_keys:
-                raise KeyError('%s has an invalid key: %s' % (parent_key, key))
+                raise KeyError(f'{parent_key} has an invalid key: {key}')
             if key.lower() == 'is_required':
                 found_is_required = True
             if key.lower() == 'types':
                 found_types = True
 
         if not (found_is_required and found_types):
-            raise TypeError('%s is missing the is_required or types key' % parent_key)
+            raise TypeError(f'{parent_key} is missing the is_required or types key')
 
         # Check the types and the dependent keys
         for schema_object_type in schema_object['types']:
             if schema_object_type not in cls.__schema_types:
-                raise TypeError('%s has an invalid type: %s' % (parent_key, schema_object_type))
+                raise TypeError(f'{parent_key} has an invalid type: {schema_object_type}')
 
         if 'list' in schema_object['types']:
             if 'list_types' not in schema_object:
-                raise KeyError('%s has no definition for the list types' % (parent_key))
+                raise KeyError(f'{(parent_key)} has no definition for the list types')
 
             for schema_list_type in schema_object['list_types']:
                 if schema_list_type not in cls.__schema_list_types:
-                    raise TypeError('%s has an invalid list type: %s' % (parent_key, schema_list_type))
+                    raise TypeError(f'{parent_key} has an invalid list type: {schema_list_type}')
 
             if 'dict' in schema_object['list_types']:
                 if 'fields' not in schema_object:
-                    raise KeyError('%s has no definition for the fields in the dict list type' % parent_key)
+                    raise KeyError(f'{parent_key} has no definition for the fields in the dict list type')
 
         if 'dict' in schema_object['types']:
             if 'fields' not in schema_object:
-                raise KeyError('%s has no definition for the fields in the dict type' % parent_key)
+                raise KeyError(f'{parent_key} has no definition for the fields in the dict type')
 
         if 'list' in schema_object['types'] and 'dict' in schema_object['types']:
-            raise TypeError('%s cannot have both dict and list in the valid types' % parent_key)
+            raise TypeError(f'{parent_key} cannot have both dict and list in the valid types')
 
         # Recursively check the fields
         if 'fields' in schema_object:
             if 'list' not in schema_object['types'] and 'dict' not in schema_object['types']:
-                raise TypeError('%s has a fields key but no dict or list type' % parent_key)
+                raise TypeError(f'{parent_key} has a fields key but no dict or list type')
             for key, value in schema_object['fields'].items():
                 JsonLoader.__validate_schema(key, value)
 
         # Notify of success
-        logger.debug('PASS: %s' % parent_key)
+        LOGGER.debug(f'PASS: {parent_key}')
 
     @classmethod
     def __validate_fins(cls, parent_key, fins_object, schema_object):
@@ -255,56 +255,56 @@ class JsonLoader(Loader):
         # Check type
         if type(fins_object) is list:
             if 'list' not in schema_object['types']:
-                raise TypeError('%s incorrectly has a list type' % parent_key)
+                raise TypeError(f'{parent_key} incorrectly has a list type')
         elif type(fins_object) is dict:
             if 'dict' not in schema_object['types']:
-                raise TypeError('%s incorrectly has a dict type' % parent_key)
+                raise TypeError(f'{parent_key} incorrectly has a dict type')
         elif type(fins_object) is str:
             if 'str' not in schema_object['types']:
-                raise TypeError('%s incorrectly has a str type' % parent_key)
+                raise TypeError(f'{parent_key} incorrectly has a str type')
         elif type(fins_object) is int:
             if 'int' not in schema_object['types'] and 'float' not in schema_object['types']:
-                raise TypeError('%s incorrectly has a int type' % parent_key)
+                raise TypeError(f'{parent_key} incorrectly has a int type')
         elif type(fins_object) is float:
             if 'float' not in schema_object['types']:
-                raise TypeError('%s incorrectly has a float type' % parent_key)
+                raise TypeError(f'{parent_key} incorrectly has a float type')
         elif type(fins_object) is bool:
             if 'bool' not in schema_object['types']:
-                raise TypeError('%s incorrectly has a bool type' % parent_key)
+                raise TypeError(f'{parent_key} incorrectly has a bool type')
         else:
-            raise TypeError('%s has an unknown type' % parent_key)
+            raise TypeError(f'{parent_key} has an unknown type')
 
         # Check list types
         if type(fins_object) is list:
             for fins_object_element in fins_object:
                 if type(fins_object_element) is dict:
                     if 'dict' not in schema_object['list_types']:
-                        raise TypeError('%s incorrectly has a dict list type' % parent_key)
+                        raise TypeError(f'{parent_key} incorrectly has a dict list type')
                 elif type(fins_object_element) is str:
                     if 'str' not in schema_object['list_types']:
-                        raise TypeError('%s incorrectly has a str list type' % parent_key)
+                        raise TypeError(f'{parent_key} incorrectly has a str list type')
                 elif type(fins_object_element) is int:
                     if 'int' not in schema_object['list_types'] and 'float' not in schema_object['list_types']:
-                        raise TypeError('%s incorrectly has a int list type' % parent_key)
+                        raise TypeError(f'{parent_key} incorrectly has a int list type')
                 elif type(fins_object_element) is float:
                     if 'float' not in schema_object['list_types']:
-                        raise TypeError('%s incorrectly has a float list type' % parent_key)
+                        raise TypeError(f'{parent_key} incorrectly has a float list type')
                 elif type(fins_object_element) is bool:
                     if 'bool' not in schema_object['list_types']:
-                        raise TypeError('%s incorrectly has a bool list type' % parent_key)
+                        raise TypeError(f'{parent_key} incorrectly has a bool list type')
                 else:
-                    raise TypeError('%s has an unknown list type' % parent_key)
+                    raise TypeError(f'{parent_key} has an unknown list type')
 
         # Check the fields
         if 'dict' in schema_object['types']:
             # Check that the required schema keys are in the fins object
             for key, value in schema_object['fields'].items():
                 if value['is_required'] and (key not in fins_object):
-                    raise KeyError('Required key %s does not exist in %s' % (key,  parent_key))
+                    raise KeyError(f'Required key {key} does not exist in {parent_key}')
             # Check for fins object keys that are not in the schema object
             for key, value in fins_object.items():
                 if key not in schema_object['fields'].keys():
-                    logger.warning('Undefined key %s in %s' % (key, parent_key))
+                    LOGGER.warning(f'Undefined key {key} in {parent_key}')
                     continue
                 # Recursively call this function on the fields
                 cls.__validate_fins(key, value, schema_object['fields'][key])
@@ -314,14 +314,14 @@ class JsonLoader(Loader):
                 # Check that the required schema keys are in the fins object
                 for key, value in schema_object['fields'].items():
                     if value['is_required'] and key not in fins_object_element:
-                        raise KeyError('Required key %s does not exist in %s' % (key, parent_key))
+                        raise KeyError(f'Required key {key} does not exist in {parent_key}')
                 # Check for fins object keys that are not in the schema object
                 for key, value in fins_object_element.items():
                     if key not in schema_object['fields'].keys():
-                        logger.warning('Undefined key %s in %s' % (key, parent_key))
+                        LOGGER.warning(f'Undefined key {key} in {parent_key}')
                         continue
                     # Recursively call this function on the fields
                     cls.__validate_fins(key, value, schema_object['fields'][key])
 
         # Notify of success
-        logger.debug('PASS: %s' % parent_key)
+        LOGGER.debug(f'PASS: {parent_key}')
