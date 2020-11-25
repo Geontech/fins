@@ -17,7 +17,6 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 #
 
-variables:
 stages:
     - prereqs
     - test-core
@@ -36,14 +35,8 @@ test-core:
     before_script:
         - *install-prereqs
     script:
-        - 'cd test/node'
-        - 'fins fins.json'
-        - 'cd ../application'
-        - 'fins application_test.json'
-        - 'cd ../../tutorials/power_converter'
-        - 'fins fins.json'
-        - 'cd ../power_application'
-        - 'fins fins.json'
+        - 'cd test/'
+        - './test_core.sh'
     tags:
         - fpga
 
@@ -141,5 +134,8 @@ test-quartus:
 
 rpmbuild:
     extends: .rpmbuild
+    variables:
+        RPM_BRANCH: 'master'
     rules:
-        - if: '$CI_COMMIT_BRANCH == "master"'
+        - if: '$CI_COMMIT_BRANCH == $RPM_BRANCH'
+        - if: '$CI_COMMIT_TAG'

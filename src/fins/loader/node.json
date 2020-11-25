@@ -7,7 +7,7 @@
       "types":["str"]
     },
     "schema_type":{
-      "is_required":true,
+      "is_required":false,
       "types":["int"]
     },
     "description":{
@@ -268,6 +268,10 @@
               "is_required":false,
               "types":["int","str","list"],
               "list_types":["int"]
+            },
+            "disable_default_test":{
+              "is_required":false,
+              "types":["bool"]
             },
             "is_signed":{
               "is_required":false,

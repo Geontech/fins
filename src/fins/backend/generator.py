@@ -20,6 +20,7 @@
 import os
 import json
 import datetime
+import logging
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
 
@@ -28,6 +29,8 @@ CORE_APPLICATION_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/applicatio
 CORE_SYSTEM_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/system/'
 CORE_OUTPUT_DIR = 'gen/core/'
 
+
+LOGGER = logging.getLogger(__name__)
 
 class Generator:
 

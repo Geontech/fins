@@ -31,6 +31,9 @@
 #              * Intel Quartus Prime Pro 19.1
 #===============================================================================
 
+# Default the return code to 0=SUCCESS
+set return_code 0
+
 # Set the relative path back to the IP root directory
 set IP_ROOT_RELATIVE_TO_PROJ "../../.."
 
@@ -70,6 +73,13 @@ ld
 vsim ${UNIT_SIM_LIBRARY}.{{ fins['top_sim'] }}
 run -all
 
+# Check that the simulation_done signal is True
+if { [examine "simulation_done"] == "FALSE" } {
+    # Explicitly set the return code since ModelSim doesn't exit with an error return code from a TCL error
+    set return_code 1
+    error "***** SIMULATION FAILED *****"
+}
+
 # Run Post-Sim TCL Scripts
 # Note: These scripts can use parameters defined above since they are sourced by this script
 {%- if 'filesets' in fins %}
@@ -84,4 +94,4 @@ source ${IP_ROOT_RELATIVE_TO_PROJ}/{{ postsim_script['path'] }}
 {%- endif %}
 {%- endif %}
 
-quit
+exit -code $return_code

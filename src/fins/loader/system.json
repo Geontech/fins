@@ -7,7 +7,7 @@
       "types":["str"]
     },
     "schema_type":{
-      "is_required":true,
+      "is_required":false,
       "types":["int"]
     },
     "description":{

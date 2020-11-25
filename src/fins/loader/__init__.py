@@ -28,8 +28,12 @@ import xml.etree.ElementTree as ET
 from fins.utils import SchemaType
 
 __all__ = (
-    'load_fins_data'
+    'loader',
 )
+
+from .loader import *
+
+LOGGER = logging.getLogger(__name__)
 
 NODE_SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/node.json'
 APPLICATION_SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/application.json'
@@ -612,6 +616,8 @@ def populate_properties(fins_data,base_offset,verbose):
             prop['length'] = 1
         if not 'default_values' in prop:
             prop['default_values'] = [0] * prop['length']
+        if not 'disable_default_test' in prop:
+            prop['disable_default_test'] = False
         if not 'is_signed' in prop:
             prop['is_signed'] = False
         if not 'range_min' in prop:
@@ -1263,7 +1269,7 @@ def populate_property_interfaces(fins_data, verbose):
 
         if 'ip' in fins_data:
             for ip in fins_data['ip']:
-                if 'prop_interfaces' in ip['ip_details']:
+                if len(ip['ip_details']['prop_interfaces']) > 0:
                     # Update the list of interfaces for this IP
                     # NOTE:
                     #     'ip_details' should have the interfaces of this IP's sub-IPs.
@@ -1273,6 +1279,16 @@ def populate_property_interfaces(fins_data, verbose):
                     for interface in ip_interfaces:
                         interface['top'] = False
                         interface['full_name'] = "S_AXI_" + interface['name'].upper()
+
+                    if len(fins_data['prop_interfaces']) == 0:
+                        properties = ip['ip_details']['properties']
+                        fins_data['prop_interfaces'] = \
+                            [{
+                              'node_name': fins_data['name'],
+                              'addr_width': properties['addr_width'],
+                              'data_width': properties['data_width'],
+                              'interfaces': []
+                            }]
 
                     fins_data['prop_interfaces'][0]['interfaces'] += ip_interfaces
 
@@ -2063,26 +2079,6 @@ def validate_ports(fins_data,verbose):
 
 
 def validate_fins_data(fins_data, filename, verbose):
-    if verbose:
-        print('+++++ Loading JSON ...')
-    with open(SCHEMA_FILENAME[fins_data['schema_type']]) as schema_data:
-        fins_schema = json.load(schema_data)
-    if verbose:
-        print('+++++ Done.')
-
-    # Validate the schema itself
-    if verbose:
-        print('+++++ Validating node.json ...')
-    validate_schema('schema', fins_schema, verbose)
-    if verbose:
-        print('+++++ Done.')
-
-    # Validate the FINS Node JSON file with the schema
-    if verbose:
-        print('+++++ Validating {} ...'.format(filename))
-    validate_fins(SchemaType.get_str(fins_data), fins_data, fins_schema, verbose)
-    if verbose:
-        print('+++++ Done.')
 
     # Validate sub-IP
     if 'ip' in fins_data:
