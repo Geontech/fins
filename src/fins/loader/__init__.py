@@ -28,8 +28,12 @@ import xml.etree.ElementTree as ET
 from fins.utils import SchemaType
 
 __all__ = (
-    'load_fins_data'
+    'loader',
 )
+
+from .loader import *
+
+logger = logging.getLogger(__name__)
 
 NODE_SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/node.json'
 APPLICATION_SCHEMA_FILENAME = os.path.dirname(os.path.abspath(__file__)) + '/application.json'
@@ -2003,26 +2007,6 @@ def validate_ports(fins_data,verbose):
 
 
 def validate_fins_data(fins_data, filename, verbose):
-    if verbose:
-        print('+++++ Loading JSON ...')
-    with open(SCHEMA_FILENAME[fins_data['schema_type']]) as schema_data:
-        fins_schema = json.load(schema_data)
-    if verbose:
-        print('+++++ Done.')
-
-    # Validate the schema itself
-    if verbose:
-        print('+++++ Validating node.json ...')
-    validate_schema('schema', fins_schema, verbose)
-    if verbose:
-        print('+++++ Done.')
-
-    # Validate the FINS Node JSON file with the schema
-    if verbose:
-        print('+++++ Validating {} ...'.format(filename))
-    validate_fins(SchemaType.get_str(fins_data), fins_data, fins_schema, verbose)
-    if verbose:
-        print('+++++ Done.')
 
     # Validate sub-IP
     if 'ip' in fins_data:
