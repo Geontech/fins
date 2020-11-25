@@ -28,5 +28,4 @@ __all__ = [
 
 # pylint:disable=wildcard-import
 from .path import *
-from .finstypes import *
 from .logger import *
