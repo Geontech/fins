@@ -58,6 +58,9 @@ entity {{ fins['name']|lower }}_axis_parallel_to_tdm is
     {%- if fins['supports_backpressure'] %}
     s_axis_tready  : out std_logic;
     {%- endif %}
+    {%- if fins['supports_byte_enable'] %}
+    s_axis_tkeep   : in std_logic_vector({{ fins['data']['num_bytes'] }}-1 downto 0);
+    {%- endif %}
     s_axis_tdata   : in  std_logic_vector({{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in fins %}
     s_axis_tuser   : in  std_logic_vector({{ fins['metadata']|sum(attribute='bit_width') }}-1 downto 0);
@@ -148,11 +151,7 @@ begin
   -- Input Buffer
   -----------------------------------------------------------------------------
   -- Write the input directly into FIFO
-  {%- if 'metadata' in fins %}
-  fifo_din   <= s_axis_tlast & s_axis_tdata & s_axis_tuser;
-  {%- else %}
-  fifo_din   <= s_axis_tlast & s_axis_tdata;
-  {%- endif %}
+  fifo_din   <= s_axis_tlast & s_axis_tdata{%- if 'metadata' in fins %} & s_axis_tuser{%- endif %} {%- if fins['supports_byte_enable'] %} & s_axis_tkeep{%- endif %};
   fifo_wr_en <= s_axis_tvalid; -- Since tready is always high
   {%- if fins['supports_backpressure'] %}
   -- Only ready when the FIFO has space

@@ -155,11 +155,7 @@ begin
   -- Input Buffer
   -----------------------------------------------------------------------------
   -- Write the input directly into FIFO
-  {%- if 'metadata' in fins %}
-  fifo_din   <= s_axis_tlast & s_axis_tdata & s_axis_tuser;
-  {%- else %}
-  fifo_din   <= s_axis_tlast & s_axis_tdata;
-  {%- endif %}
+  fifo_din   <= s_axis_tlast & s_axis_tdata{%- if 'metadata' in fins %} & s_axis_tuser{%- endif %}{%- if fins['supports_byte_enable'] %} & s_axis_tkeep{%- endif %};
   fifo_wr_en <= s_axis_tvalid; -- Since tready is always high
   {%- if fins['supports_backpressure'] %}
   -- Only ready when the FIFO has space

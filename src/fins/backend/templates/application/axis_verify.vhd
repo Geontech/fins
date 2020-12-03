@@ -168,6 +168,9 @@ begin
             {%- if 'metadata' in port %}
             axis_tuser  := (others => '0');
             {%- endif %}
+            {%- if port['supports_byte_enable'] %}
+            axis_tkeep  := (others => '0');
+            {%- endif %}
           end if;
           -- Note: the file_done flag might NOT mean that the last AXIS transaction has occurred.
           -- This is the case if the file is done being read but the last chunk of data has not yet
@@ -229,6 +232,9 @@ begin
                 {%- if 'metadata' in port %}
                 hread(current_line, current_tuser);
                 {%- endif %}
+                {%- if port['supports_byte_enable'] %}
+                hread(current_line, current_tkeep);
+                {%- endif %}
                 -- Set the output values
                 if (unsigned(current_tlast) > 0) then
                   axis_tlast := '1';
@@ -239,6 +245,9 @@ begin
                 {%- if 'metadata' in port %}
                 axis_tuser  := current_tuser;
                 {%- endif %}
+                {%- if port['supports_byte_enable'] %}
+                axis_tkeep := current_tkeep;
+                {%- endif %}
               else
                 -- If the last AXIS transaction for the file occurs on this same cycle
                 -- (which happens to be when the file is done being read) reset signals to 0
@@ -248,6 +257,9 @@ begin
                   axis_tdata  := (others => '0');
                   {%- if 'metadata' in port %}
                   axis_tuser  := (others => '0');
+                  {%- endif %}
+                  {%- if port['supports_byte_enable'] %}
+                  axis_tkeep := (others => '0');
                   {%- endif %}
                 end if;
                 -- Set the file_done flag for reference during next cycle
@@ -267,6 +279,9 @@ begin
         {{ port|axisprefix(i,True) }}_tdata  <= axis_tdata;
         {%- if 'metadata' in port %}
         {{ port|axisprefix(i,True) }}_tuser  <= axis_tuser;
+        {%- endif %}
+        {%- if port['supports_byte_enable'] %}
+        {{ port|axisprefix(i,True) }}_tkeep  <= axis_tkeep;
         {%- endif %}
       end if;
     else
@@ -325,12 +340,19 @@ begin
         {%- if 'metadata' in port %}
         current_tuser    := {{ port|axisprefix(i,True) }}_tuser;
         {%- endif %}
+        {%- if port['supports_byte_enable'] %}
+        current_tkeep    := {{ port|axisprefix(i,True) }}_tkeep;
+        {%- endif %}
         hwrite(current_line, current_tlast);
         write(current_line, string'(" "));
         hwrite(current_line, current_tdata);
         {%- if 'metadata' in port %}
         write(current_line, string'(" "));
         hwrite(current_line, current_tuser);
+        {%- endif %}
+        {%- if port['supports_byte_enable'] %}
+        write(current_line, string'(" "));
+        hwrite(current_line, current_tkeep);
         {%- endif %}
         writeline(write_file, current_line);
       end if;

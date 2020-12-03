@@ -79,7 +79,7 @@ entity {{ fins['name'] }}_axis_verify is
     {{ port|axisprefix(i,True) }}_tready  : out std_logic;
     {%- endif %}
     {%- if port['supports_byte_enable'] %}
-    {{ port|axisprefix(i,True) }}_tkeep   : out std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+    {{ port|axisprefix(i,True) }}_tkeep   : in std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
     {%- endif %}
     {{ port|axisprefix(i,True) }}_tdata   : in  std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in port %}
@@ -94,7 +94,7 @@ entity {{ fins['name'] }}_axis_verify is
     {{ port|axisprefix(i,True) }}_tready  : in  std_logic;
     {%- endif %}
     {%- if port['supports_byte_enable'] %}
-    {{ port|axisprefix(i,True) }}_tkeep   : in std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+    {{ port|axisprefix(i,True) }}_tkeep   : out std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
     {%- endif %}
     {{ port|axisprefix(i,True) }}_tdata   : out std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in port %}
@@ -311,7 +311,7 @@ begin
     variable current_tready        : std_logic;
     {%- endif %}
     {%- if port['supports_byte_enable'] %}
-    variable current_tkeep        : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+    variable current_tkeep         : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
     {%- endif %}
     variable current_tdata         : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in port %}
@@ -346,6 +346,9 @@ begin
         current_tdata    := {{ port|axisprefix(i,True) }}_tdata;
         {%- if 'metadata' in port %}
         current_tuser    := {{ port|axisprefix(i,True) }}_tuser;
+        {%- endif %}
+        {%- if port['supports_byte_enable'] %}
+        current_tkeep    := {{ port|axisprefix(i,True) }}_tkeep;
         {%- endif %}
         hwrite(current_line, current_tlast);
         write(current_line, string'(" "));
