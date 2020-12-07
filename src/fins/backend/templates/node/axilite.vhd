@@ -714,7 +714,7 @@ begin
         {%- elif prop['type'] == 'read-write-external' %}
         -- Assign read valids by looping through the elements of sequence read-write-external property
         for ix in 0 to {{ prop['length'] }}-1 loop
-          reg_rd_valids_foreach_addr({{ prop['offset'] }}+ix) <= props_status.{{ prop['name'] }}(ix).rd_valid;;
+          reg_rd_valids_foreach_addr({{ prop['offset'] }}+ix) <= props_status.{{ prop['name'] }}(ix).rd_valid;
         end loop;
         {%- endif %}
         {%- endif %}
