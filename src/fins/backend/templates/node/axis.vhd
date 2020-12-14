@@ -317,9 +317,7 @@ begin
       {{ port|axisprefix(i) }}_tuser_q <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata(ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.metadata);
       {%- endif %}
       {%- if port['supports_byte_enable'] %}
-      {{ port|axisprefix(i) }}_keep_q <= 
-      
-      --f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata(ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.metadata);
+      {{ port|axisprefix(i) }}_tkeep_q <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.keep;
       {%- endif %}
       {%- endif %}
       ---------------------
