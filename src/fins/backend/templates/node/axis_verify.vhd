@@ -231,7 +231,9 @@ begin
               if (NOT endfile(read_file)) then
                 -- Read a space-separated string from a line of the file
                 -- NOTE: File format is one of the following
+                --       TLAST_HEX_STRING TDATA_HEX_STRING TUSER_HEX_STRING TKEEP_HEX_STRING
                 --       TLAST_HEX_STRING TDATA_HEX_STRING TUSER_HEX_STRING
+                --       TLAST_HEX_STRING TDATA_HEX_STRING TKEEP_HEX_STRING
                 --       TLAST_HEX_STRING TDATA_HEX_STRING
                 readline(read_file, current_line);
                 hread(current_line, current_tlast);

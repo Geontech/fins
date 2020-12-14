@@ -183,9 +183,6 @@ end record t_{{ fins['name']|lower }}_props_status;
 {%- if 'ports' in fins['ports'] %}
 {%- for port in fins['ports']['ports'] %}
 -- {{ port['name']|lower }} DATA Records/Functions
---type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_keep is record
---  keep : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
---end record t_{{ fins['name']|lower }}_{{ port['name']|lower }}_keep;
 {%- if port['data']['is_complex'] %}
 type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_data_interface is record
   i : {% if port['data']['is_signed'] %}signed{% else %}unsigned{% endif %}({{ port['data']['bit_width']//2 }}-1 downto 0);
@@ -231,9 +228,6 @@ type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward_unit is record
   {%- if port['direction']|lower == 'in' %}
   clk      : std_logic;
   resetn   : std_logic;
-  {%- if port['supports_byte_enable'] %}
-  keep  : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
-  {%- endif %}
   {%- endif %}
   data     : t_{{ fins['name']|lower }}_{{ port['name']|lower }}_data;
   {%- if 'metadata' in port %}
@@ -241,15 +235,15 @@ type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward_unit is record
   {%- endif %}
   valid    : std_logic;
   last     : std_logic;
+  {%- if port['supports_byte_enable'] %}
+  keep     : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+  {%- endif %}
 end record t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward_unit;
 {%- if port['supports_backpressure'] or (port['direction']|lower == 'out') %}
 type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_backward_unit is record
   {%- if port['direction']|lower == 'out' %}
   clk    : std_logic;
   resetn : std_logic;
-  {%- if port['supports_byte_enable'] %}
-  keep  : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
-  {%- endif %}
   {%- endif %}
   {%- if port['supports_backpressure'] %}
   ready  : std_logic;
