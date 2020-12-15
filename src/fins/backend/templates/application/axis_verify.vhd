@@ -136,6 +136,10 @@ begin
     variable axis_tuser            : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0) := (others => '0');
     variable current_tuser         : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
+    {%- if port['supports_byte_enable'] %}
+    variable axis_tkeep            : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0) := (others => '0');
+    variable current_tkeep         : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+    {%- endif %}
   begin
     -- Use "simulation_done" to suspend operations
     if (NOT simulation_done) then
