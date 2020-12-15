@@ -90,11 +90,10 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   constant NUM_METADATA_WORDS : natural := integer(ceil(real(G_METADATA_WIDTH) / real(G_TDM_WORD_WIDTH)));
   constant NUM_METADATA_WORDS_LOG2 : natural := integer(ceil(log2(real(NUM_METADATA_WORDS))));
   {%- endif %}
-  {%- if 'metadata' in fins %}
-  constant FIFO_WIDTH : natural := G_DATA_WIDTH + G_METADATA_WIDTH + 1; -- +1 for tlast
-  {%- else %}
-  constant FIFO_WIDTH : natural := G_DATA_WIDTH + 1; -- +1 for tlast
+  {%- if fins['supports_byte_enable'] %}
+  constant G_KEEP_WIDTH : natural := {{ fins['data']['num_bytes'] }};
   {%- endif %}
+  constant FIFO_WIDTH : natural := G_DATA_WIDTH {%- if 'metadata' in fins %}+ G_METADATA_WIDTH {%- endif %} {%- if fins['supports_byte_enable'] %} + G_KEEP_WIDTH {%- endif %}+ 1; -- +1 for tlast
 
   --------------------------------------------------------------------------------
   -- Components
