@@ -6,6 +6,8 @@ Firmware Intellectual Property (IP) Node Specification (FINS) is an innovative s
 2. **Rapid Reconfiguration.** FINS consolidates parameterization of IP into a single location and distributes these parameters across design tools with code generation of header-like package files.
 3. **Properties and Ports Interfaces.** FINS generates HDL source code for a properties interface that enables repeatable software control of firmware and for a ports interface that standardizes firmware to firmware movement of data.
 
+![FINS Diagram](./docs/fins-diagram.png "FINS Code Generator - Tools and Technologies")
+
 ## Prerequisites
 
 The software packages required to use FINS are:
