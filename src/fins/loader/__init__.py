@@ -744,7 +744,10 @@ def populate_ports(fins_data,verbose):
                     sys.exit(1)
                 
                 if 'supports_byte_enable':
-                    port['data']['num_bytes'] =  math.ceil(port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] / 8)
+                    bit_width = port['data']['bit_width']
+                    num_samples = port['data']['num_samples']
+                    num_channels = port['data']['num_channels']
+                    port['data']['num_bytes'] = math.ceil((bit_width * num_samples * num_channels) / 8)
     # Return the modified dictionary
     return fins_data
 
