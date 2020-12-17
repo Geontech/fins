@@ -4,8 +4,7 @@
 
 A FINS Application JSON is used to construct a programmable-logic design that instantiates and connects a collection of FINS Nodes. FINS automation creates a simulation testbench for an Application and provides other utilities for rapid Application development.
 
-The diagram below shows a basic FINS Application. There are inter-node connections, exported ports, and exported AXI interfaces. Not shown here are the generated clock domains as well as the modules that connect to the Application's external ports in the platform. The `nodes`, `connections`, `clocks` and `port_exports` fields are detailed in the [FINS Application JSON Schema](#application-json-schema).
-
+The diagram below shows a basic FINS Application which includes inter-node connections, exported ports and exported AXI interfaces.  Additionally clock domains and modules that connect to the Application's external ports are generated but not shown in the diagram. The details of these `nodes`, `connections`, `clocks` and `port_exports` are included in the [FINS Application JSON Schema](#application-json-schema).
 ![](application_architecture.png)
 
 For a simple introduction to FINS Applications, follow the [Power Converter Application Tutorial](tutorial2.md).
