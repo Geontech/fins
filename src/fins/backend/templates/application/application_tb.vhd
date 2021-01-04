@@ -287,34 +287,34 @@ begin
       {%-  set outer_loop = loop %}
       {%-  for i in range(port['num_instances']) %}
       {%-   if port['direction']|lower == 'out' %}
-      {{ port|axisprefix(i,True) }}_aclk    => {{ port['clock'] }},
+      {{ port|axisprefix(i,reverse=True) }}_aclk    => {{ port['clock'] }},
       {%-    if port['supports_backpressure'] %}
-      {{ port|axisprefix(i,True) }}_tready  => {{ port|axisprefix(i) }}_tready,
+      {{ port|axisprefix(i,reverse=True) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%-    endif %}
       {%-    if port['supports_byte_enable'] %}
-      {{ port|axisprefix(i,True) }}_tkeep   => {{ port|axisprefix(i) }}_tkeep,
+      {{ port|axisprefix(i,reverse=True) }}_tkeep   => {{ port|axisprefix(i) }}_tkeep,
       {%-    endif %}
-      {{ port|axisprefix(i,True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
+      {{ port|axisprefix(i,reverse=True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
       {%-    if 'metadata' in port %}
-      {{ port|axisprefix(i,True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
+      {{ port|axisprefix(i,reverse=True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
       {%-    endif %}
-      {{ port|axisprefix(i,True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
-      {{ port|axisprefix(i,True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
+      {{ port|axisprefix(i,reverse=True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
+      {{ port|axisprefix(i,reverse=True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%-   else %}
-      {{ port|axisprefix(i,True) }}_aclk    => {{ port['clock'] }},
-      {{ port|axisprefix(i,True) }}_enable  => {{ port|axisprefix(i) }}_enable,
+      {{ port|axisprefix(i,reverse=True) }}_aclk    => {{ port['clock'] }},
+      {{ port|axisprefix(i,reverse=True) }}_enable  => {{ port|axisprefix(i) }}_enable,
       {%-    if port['supports_backpressure'] %}
-      {{ port|axisprefix(i,True) }}_tready  => {{ port|axisprefix(i) }}_tready,
+      {{ port|axisprefix(i,reverse=True) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%-    endif %}
       {%-    if port['supports_byte_enable'] %}
-      {{ port|axisprefix(i,True) }}_tkeep   => {{ port|axisprefix(i) }}_tkeep,
+      {{ port|axisprefix(i,reverse=True) }}_tkeep   => {{ port|axisprefix(i) }}_tkeep,
       {%-    endif %}
-      {{ port|axisprefix(i,True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
+      {{ port|axisprefix(i,reverse=True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
       {%-    if 'metadata' in port %}
-      {{ port|axisprefix(i,True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
+      {{ port|axisprefix(i,reverse=True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
       {%-    endif %}
-      {{ port|axisprefix(i,True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
-      {{ port|axisprefix(i,True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
+      {{ port|axisprefix(i,reverse=True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
+      {{ port|axisprefix(i,reverse=True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%-   endif %}
       {%-  endfor %}
       {%- endfor %}
