@@ -79,7 +79,7 @@ entity {{ fins['name'] }}_axis_verify is
     {{ port|axisprefix(i,reverse=True) }}_tready  : out std_logic;
     {%- endif %}
     {%- if port['supports_byte_enable'] %}
-    {{ port|axisprefix(i,reverse=True) }}_tkeep   : in std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+    {{ port|axisprefix(i,reverse=True) }}_tkeep   : in std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
     {%- endif %}
     {{ port|axisprefix(i,reverse=True) }}_tdata   : in  std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in port %}
@@ -94,7 +94,7 @@ entity {{ fins['name'] }}_axis_verify is
     {{ port|axisprefix(i,reverse=True) }}_tready  : in  std_logic;
     {%- endif %}
     {%- if port['supports_byte_enable'] %}
-    {{ port|axisprefix(i,reverse=True) }}_tkeep   : out std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+    {{ port|axisprefix(i,reverse=True) }}_tkeep   : out std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
     {%- endif %}
     {{ port|axisprefix(i,reverse=True) }}_tdata   : out std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in port %}
@@ -137,8 +137,8 @@ begin
     variable current_tuser         : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
     {%- if port['supports_byte_enable'] %}
-    variable axis_tkeep            : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0) := (others => '0');
-    variable current_tkeep         : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+    variable axis_tkeep            : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0) := (others => '0');
+    variable current_tkeep         : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
     {%- endif %}
   begin
     -- Use "simulation_done" to suspend operations
@@ -313,7 +313,7 @@ begin
     variable current_tready        : std_logic;
     {%- endif %}
     {%- if port['supports_byte_enable'] %}
-    variable current_tkeep         : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+    variable current_tkeep         : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
     {%- endif %}
     variable current_tdata         : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in port %}

@@ -236,7 +236,7 @@ type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward_unit is record
   valid    : std_logic;
   last     : std_logic;
   {%- if port['supports_byte_enable'] %}
-  keep     : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+  keep     : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
   {%- endif %}
 end record t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward_unit;
 {%- if port['supports_backpressure'] or (port['direction']|lower == 'out') %}

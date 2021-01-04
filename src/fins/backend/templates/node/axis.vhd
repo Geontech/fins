@@ -51,7 +51,7 @@ entity {{ fins['name']|lower }}_axis is
     {{ port|axisprefix(i) }}_tready  : {% if port['direction']|lower == 'in' %}out{% else %}in {% endif %} std_logic;
     {%- endif %}
     {%- if port['supports_byte_enable'] %}
-    {{ port|axisprefix(i) }}_tkeep   : {% if port['direction']|lower == 'in' %}in{% else %}out {% endif %} std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+    {{ port|axisprefix(i) }}_tkeep   : {% if port['direction']|lower == 'in' %}in{% else %}out {% endif %} std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
     {%- endif %}
     {{ port|axisprefix(i) }}_tdata   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in port %}
@@ -82,13 +82,13 @@ architecture rtl of {{ fins['name']|lower }}_axis is
   signal {{ port|axisprefix(i) }}_tuser_q       : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
   {%- endif %}
   {%- if port['supports_byte_enable'] %}
-  signal {{ port|axisprefix(i) }}_tkeep_q       : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+  signal {{ port|axisprefix(i) }}_tkeep_q       : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
   {%- endif %}
   signal {{ port|axisprefix(i) }}_tvalid_q      : std_logic;
   {%- if port['supports_backpressure'] %}
   signal {{ port|axisprefix(i) }}_tready_q      : std_logic;
   {%- if port['supports_byte_enable'] %}
-  signal {{ port|axisprefix(i) }}_tkeep_stored  : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+  signal {{ port|axisprefix(i) }}_tkeep_stored  : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
   {%- endif %}
   signal {{ port|axisprefix(i) }}_tlast_stored  : std_logic;
   signal {{ port|axisprefix(i) }}_tdata_stored  : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);

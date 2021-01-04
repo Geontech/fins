@@ -127,7 +127,7 @@ architecture behav of {{ fins['name']|lower }}_tb is
   signal {{ port|axisprefix(i) }}_tready  : std_logic;
   {%- endif %}
   {%- if port['supports_byte_enable'] %}
-  signal {{ port|axisprefix(i) }}_tkeep   : std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+  signal {{ port|axisprefix(i) }}_tkeep   : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
   {%- endif %}
   signal {{ port|axisprefix(i) }}_tdata   : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
   {%- if 'metadata' in port %}

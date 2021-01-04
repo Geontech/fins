@@ -88,7 +88,7 @@ entity {{ fins['name']|lower }} is
     {{ port|axisprefix(i) }}_tready  : {% if port['direction']|lower == 'in' %}out{% else %}in {% endif %} std_logic;
     {%- endif %}
     {%- if port['supports_byte_enable'] %}
-    {{ port|axisprefix(i) }}_tkeep   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+    {{ port|axisprefix(i) }}_tkeep   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
     {%- endif %}
     {{ port|axisprefix(i) }}_tdata   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in port %}
@@ -159,7 +159,7 @@ architecture struct of {{ fins['name']|lower }} is
       {{ port|axisprefix(i) }}_tready  : {% if port['direction']|lower == 'in' %}out{% else %}in {% endif %} std_logic;
       {%- endif %}
       {%- if port['supports_byte_enable'] %}
-      {{ port|axisprefix(i) }}_tkeep   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['num_bytes'] }}-1 downto 0);
+      {{ port|axisprefix(i) }}_tkeep   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
       {%- endif %}
       {{ port|axisprefix(i) }}_tdata   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
       {%- if 'metadata' in port %}

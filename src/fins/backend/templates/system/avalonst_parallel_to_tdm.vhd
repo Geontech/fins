@@ -59,7 +59,7 @@ entity {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
     s_axis_tready     : out std_logic;
     {%- endif %}
     {%- if fins['supports_byte_enable'] %}
-    s_axis_tkeep      : in std_logic_vector({{ fins['data']['num_bytes'] }}-1 downto 0);
+    s_axis_tkeep      : in std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
     {%- endif %}
     s_axis_tdata      : in  std_logic_vector({{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in fins %}
@@ -91,7 +91,7 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   constant NUM_METADATA_WORDS_LOG2 : natural := integer(ceil(log2(real(NUM_METADATA_WORDS))));
   {%- endif %}
   {%- if fins['supports_byte_enable'] %}
-  constant G_KEEP_WIDTH : natural := {{ fins['data']['num_bytes'] }};
+  constant G_KEEP_WIDTH : natural := {{ fins['data']['byte_width'] }};
   {%- endif %}
   constant FIFO_WIDTH : natural := G_DATA_WIDTH {%- if 'metadata' in fins %}+ G_METADATA_WIDTH {%- endif %} {%- if fins['supports_byte_enable'] %} + G_KEEP_WIDTH {%- endif %}+ 1; -- +1 for tlast
 

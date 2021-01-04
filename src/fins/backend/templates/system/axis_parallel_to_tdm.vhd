@@ -59,7 +59,7 @@ entity {{ fins['name']|lower }}_axis_parallel_to_tdm is
     s_axis_tready  : out std_logic;
     {%- endif %}
     {%- if fins['supports_byte_enable'] %}
-    s_axis_tkeep   : in std_logic_vector({{ fins['data']['num_bytes'] }}-1 downto 0);
+    s_axis_tkeep   : in std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
     {%- endif %}
     s_axis_tdata   : in  std_logic_vector({{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in fins %}
