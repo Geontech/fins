@@ -743,6 +743,8 @@ def populate_ports(fins_data,verbose):
                     print('ERROR: Port',port['name'],'total data width (bit_width*num_samples*num_channels) is larger than the maximum value of 4096')
                     sys.exit(1)
                 
+		# If the port supports byte enable, determine the number of bytes (rounded up) the port's
+                # bit width is
                 if 'supports_byte_enable':
                     bit_width = port['data']['bit_width']
                     num_samples = port['data']['num_samples']
