@@ -152,6 +152,7 @@ entity test_top is
     s_axis_sfix_cpx_in_tready  : out std_logic;
     s_axis_sfix_cpx_in_tdata   : in  std_logic_vector(32-1 downto 0);
     s_axis_sfix_cpx_in_tuser   : in  std_logic_vector(121-1 downto 0);
+    s_axis_sfix_cpx_in_tkeep   : in  std_logic_vector(4-1 downto 0);
     s_axis_sfix_cpx_in_tvalid  : in  std_logic;
     s_axis_sfix_cpx_in_tlast   : in  std_logic;
     -- AXI4-Stream Port OUT: sfix_cpx_out
@@ -160,6 +161,7 @@ entity test_top is
     m_axis_sfix_cpx_out_tready  : in  std_logic;
     m_axis_sfix_cpx_out_tdata   : out std_logic_vector(32-1 downto 0);
     m_axis_sfix_cpx_out_tuser   : out std_logic_vector(121-1 downto 0);
+    m_axis_sfix_cpx_out_tkeep   : out std_logic_vector(4-1 downto 0);
     m_axis_sfix_cpx_out_tvalid  : out std_logic;
     m_axis_sfix_cpx_out_tlast   : out std_logic
   );
@@ -264,6 +266,7 @@ architecture mixed of test_top is
       s_axis_sfix_cpx_in_tready  : out std_logic;
       s_axis_sfix_cpx_in_tdata   : in  std_logic_vector(32-1 downto 0);
       s_axis_sfix_cpx_in_tuser   : in   std_logic_vector(121-1 downto 0);
+      s_axis_sfix_cpx_in_tkeep   : in  std_logic_vector(4-1 downto 0);
       s_axis_sfix_cpx_in_tvalid  : in   std_logic;
       s_axis_sfix_cpx_in_tlast   : in   std_logic;
       -- AXI4-Stream Port OUT: sfix_cpx_out
@@ -272,6 +275,7 @@ architecture mixed of test_top is
       m_axis_sfix_cpx_out_tready  : in  std_logic;
       m_axis_sfix_cpx_out_tdata   : out std_logic_vector(32-1 downto 0);
       m_axis_sfix_cpx_out_tuser   : out  std_logic_vector(121-1 downto 0);
+      m_axis_sfix_cpx_out_tkeep   : out std_logic_vector(4-1 downto 0);
       m_axis_sfix_cpx_out_tvalid  : out  std_logic;
       m_axis_sfix_cpx_out_tlast   : out  std_logic;
       ports_in  : out t_test_top_ports_in;
@@ -554,6 +558,7 @@ begin
       s_axis_sfix_cpx_in_tready   => s_axis_sfix_cpx_in_tready,
       s_axis_sfix_cpx_in_tdata    => s_axis_sfix_cpx_in_tdata,
       s_axis_sfix_cpx_in_tuser    => s_axis_sfix_cpx_in_tuser,
+      s_axis_sfix_cpx_in_tkeep    => s_axis_sfix_cpx_in_tkeep,
       s_axis_sfix_cpx_in_tvalid   => s_axis_sfix_cpx_in_tvalid,
       s_axis_sfix_cpx_in_tlast    => s_axis_sfix_cpx_in_tlast,
       m_axis_sfix_cpx_out_aclk    => m_axis_sfix_cpx_out_aclk,
@@ -561,6 +566,7 @@ begin
       m_axis_sfix_cpx_out_tready  => m_axis_sfix_cpx_out_tready,
       m_axis_sfix_cpx_out_tdata   => m_axis_sfix_cpx_out_tdata,
       m_axis_sfix_cpx_out_tuser   => m_axis_sfix_cpx_out_tuser,
+      m_axis_sfix_cpx_out_tkeep   => m_axis_sfix_cpx_out_tkeep,
       m_axis_sfix_cpx_out_tvalid  => m_axis_sfix_cpx_out_tvalid,
       m_axis_sfix_cpx_out_tlast   => m_axis_sfix_cpx_out_tlast,
       ports_in  => ports_in,
@@ -688,6 +694,7 @@ begin
   test_out01_tready               <= ports_in.test_out(1).ready;
   ports_out.sfix_cpx_out.data     <= f_unserialize_test_top_sfix_cpx_out_data(f_serialize_test_top_sfix_cpx_in_data(ports_in.sfix_cpx_in.data));
   ports_out.sfix_cpx_out.metadata <= f_unserialize_test_top_sfix_cpx_out_metadata(f_serialize_test_top_sfix_cpx_in_metadata(ports_in.sfix_cpx_in.metadata));
+  ports_out.sfix_cpx_out.keep     <= ports_in.sfix_cpx_in.keep;
   ports_out.sfix_cpx_out.valid    <= ports_in.sfix_cpx_in.valid;
   ports_out.sfix_cpx_out.last     <= ports_in.sfix_cpx_in.last;
   ports_out.sfix_cpx_in.ready     <= ports_in.sfix_cpx_out.ready;
@@ -720,7 +727,7 @@ begin
       S_AXI_RVALID  => S_AXI_RVALID  ,
       S_AXI_RREADY  => S_AXI_RREADY  ,
       props_control => props_control ,
-      props_status  => props_status  
+      props_status  => props_status
     );
 
   -- Convert from AXI4-Lite to Software Configuration for the test_bottom IP
@@ -758,7 +765,7 @@ begin
       m_swconfig_wr_data   => swconfig_wr_data     ,
       m_swconfig_rd_enable => swconfig_rd_enable   ,
       m_swconfig_rd_valid  => swconfig_rd_valid    ,
-      m_swconfig_rd_data   => swconfig_rd_data     
+      m_swconfig_rd_data   => swconfig_rd_data
     );
 
   --------------------------------------------------------------------------------

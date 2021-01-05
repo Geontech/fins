@@ -699,6 +699,8 @@ def populate_ports(fins_data,verbose):
                 # Set defaults for port
                 if not 'supports_backpressure' in port:
                     port['supports_backpressure'] = False
+                if not 'supports_byte_enable' in port:
+                    port['supports_byte_enable'] = False
                 if not 'use_pipeline' in port:
                     port['use_pipeline'] = True
                 if not 'num_instances' in port:
@@ -740,7 +742,14 @@ def populate_ports(fins_data,verbose):
                 elif port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] > 4096:
                     print('ERROR: Port',port['name'],'total data width (bit_width*num_samples*num_channels) is larger than the maximum value of 4096')
                     sys.exit(1)
-
+                
+		# If the port supports byte enable, determine the number of bytes (rounded up) the port's
+                # bit width is
+                if 'supports_byte_enable':
+                    bit_width = port['data']['bit_width']
+                    num_samples = port['data']['num_samples']
+                    num_channels = port['data']['num_channels']
+                    port['data']['byte_width'] = math.ceil((bit_width * num_samples * num_channels) / 8)
     # Return the modified dictionary
     return fins_data
 
@@ -2127,7 +2136,7 @@ def validate_application_connections(fins_data, verbose):
         supports_backpressure, num_instances, metadata, and data fields
     Confirm that the 'direction' field is opposite between the two connections.
 
-    If the source and destination ports are a mistmatch, print a helpful error message and exit.
+    If the source and destination ports are a mismatch, print a helpful error message and exit.
     """
     if 'connections' in fins_data:
         for connection in fins_data['connections']:
