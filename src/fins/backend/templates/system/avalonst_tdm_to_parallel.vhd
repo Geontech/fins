@@ -46,7 +46,8 @@ use ieee.math_real.all;
 entity {{ fins['name']|lower }}_avalonst_tdm_to_parallel is
   generic (
     G_SAMPLE_COUNTER_WIDTH : natural := 16; -- This value MUST be >= ceil(log2(MAX_SAMPLES_IN_PACKET))
-    G_TDM_WORD_WIDTH       : natural := 32  -- LIMITATION: This value MUST be >= fins['data']['bit_width']
+    G_TDM_WORD_WIDTH       : natural := 32; -- LIMITATION: This value MUST be >= fins['data']['bit_width']
+    G_BIG_ENDIAN           : std_logic := '1' 
   );
   port (
     -- AXI4-Stream Parallel Bus
@@ -72,6 +73,9 @@ entity {{ fins['name']|lower }}_avalonst_tdm_to_parallel is
     asi_valid         : in  std_logic;
     asi_startofpacket : in  std_logic;
     asi_endofpacket   : in  std_logic
+    {%- if fins['supports_byte_enable'] %}
+    asi_empty         : in std_logic_vector(integer(ceil(log2({{ fins['data']['byte_width'] }})))-1 downto 0);
+    {%- endif %}
   );
 end {{ fins['name']|lower }}_avalonst_tdm_to_parallel;
 
@@ -107,6 +111,25 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_tdm_to_parallel is
   signal tdm_word_counter       : unsigned(G_SAMPLE_COUNTER_WIDTH-1 downto 0);
   signal metadata_array         : t_metadata_array;
   {%- endif  %}
+  function f_empty_to_keep(empty : std_logic_vector(integer(ceil(log2({{ fins['data']['byte_width'] }})))-1 downto 0) := (others => '0');
+                           big_endian : std_logic := '1') return std_logic_vector is
+    -- endian_end determines what value should '1's stop if the data is little-endian
+    variable endian_end : integer := {{ fins['data']['byte_width'] }} - (integer(empty));
+    variable keep : std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0) := (others => '0')
+    begin
+        for i in 0 to {{ fins['data']['byte_width'] }}-1 loop
+          if(big_endian) then
+            if(i < integer(empty)) then
+              keep(i) := '1';
+            end if;
+          else
+            if(i >= endian_end) then
+              keep(i) := '1';
+            end if;
+          end if;
+        end loop;
+        return keep;
+    end function;
 
 begin
 
@@ -187,6 +210,9 @@ begin
   -- Concurrent signal assignments to set outputs and signals
   m_axis_tdata  <= internal_asi_data(TOTAL_DATA_WIDTH-1 downto 0);
   m_axis_tlast  <= asi_endofpacket;
+  {%- if fins['supports_byte_enable'] %}
+  m_axis_tkeep <= f_empty_to_keep(asi_empty, G_BIG_ENDIAN);
+  {%- endif %}
   {%- if fins['supports_backpressure'] %}
   internal_asi_ready <= m_axis_tready;
   {%- else %}
