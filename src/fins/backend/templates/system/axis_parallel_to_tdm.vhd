@@ -74,6 +74,9 @@ entity {{ fins['name']|lower }}_axis_parallel_to_tdm is
     m_axis_tdata   : out std_logic_vector(G_TDM_WORD_WIDTH-1 downto 0);
     m_axis_tvalid  : out std_logic;
     m_axis_tlast   : out std_logic
+    {%- if fins['supports_byte_enable'] %}
+    m_axis_tkeep   : in std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
   );
 end {{ fins['name']|lower }}_axis_parallel_to_tdm;
 
@@ -89,11 +92,10 @@ architecture rtl of {{ fins['name']|lower }}_axis_parallel_to_tdm is
   constant NUM_METADATA_WORDS : natural := integer(ceil(real(G_METADATA_WIDTH) / real(G_TDM_WORD_WIDTH)));
   constant NUM_METADATA_WORDS_LOG2 : natural := integer(ceil(log2(real(NUM_METADATA_WORDS))));
   {%- endif %}
-  {%- if 'metadata' in fins %}
-  constant FIFO_WIDTH : natural := G_DATA_WIDTH + G_METADATA_WIDTH + 1; -- +1 for tlast
-  {%- else %}
-  constant FIFO_WIDTH : natural := G_DATA_WIDTH + 1; -- +1 for tlast
+  {%- if fins['supports_byte_enable'] %}
+  constant G_BYTE_WIDTH : natural := {{ fins['data']['byte_width'] }};
   {%- endif %}
+  constant FIFO_WIDTH : natural := G_DATA_WIDTH {%- if 'metadata' in fins %}+ G_METADATA_WIDTH{%- endif %}{%- if fins['supports_byte_enable'] %}+ G_BYTE_WIDTH {%- endif %}+ 1; -- +1 for tlast
 
   --------------------------------------------------------------------------------
   -- Components
@@ -231,6 +233,9 @@ begin
     m_axis_tdata  <= (others => '0');
     m_axis_tvalid <= (NOT fifo_empty) OR send_metadata;
     m_axis_tlast  <= fifo_dout(FIFO_WIDTH-1) AND (NOT send_metadata);
+    {%- if fins['supports_byte_enable'] %}
+    m_axis_tkeep  <= fifo_dout({{ fins['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
 
     -- Zero pad the metadata
     metadata(G_METADATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH-1 downto 0);
@@ -258,6 +263,9 @@ begin
     fifo_rd_en    <= m_axis_tready;
     m_axis_tvalid <= NOT fifo_empty;
     m_axis_tlast  <= fifo_dout(FIFO_WIDTH-1);
+    {%- if fins['supports_byte_enable'] %}
+    m_axis_tkeep  <= fifo_dout({{ fins['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
     m_axis_tdata  <= (others => '0');
 
     -- Zero-pad tdata if applicable
