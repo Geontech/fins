@@ -158,7 +158,7 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
       variable empty : std_logic_vector(integer(ceil(log2({{ fins['data']['byte_width'] }})))-1 downto 0) := (others => '0')
     begin
       for i in 0 to {{ fins['data']['byte_width'] }}-1 loop
-        if(keep(i) = '1') then
+        if(keep(i) = '0') then
           count := count + 1;
         end if;
       end loop;
