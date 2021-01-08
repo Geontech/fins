@@ -49,7 +49,8 @@ use work.{{ fins['name']|lower }}_avalonst_parallel_to_tdm_pkg.all;
 -- Entity
 entity {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   generic (
-    G_TDM_WORD_WIDTH : natural := 32  -- LIMITATION: This value MUST be >= fins['data']['bit_width']
+    G_TDM_WORD_WIDTH : natural := 32;  -- LIMITATION: This value MUST be >= fins['data']['bit_width']
+    G_BIG_ENDIAN     : boolean := True  -- LIMITATION: This value MUST be >= fins['data']['bit_width']
   );
   port (
     -- AXI4-Stream Parallel Bus
@@ -75,6 +76,9 @@ entity {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
     aso_valid         : out std_logic;
     aso_startofpacket : out std_logic;
     aso_endofpacket   : out std_logic
+    {%- if fins['supports_byte_enable'] %}
+    aso_empty         : out std_logic_vector(integer(ceil(log2({{ fins['data']['byte_width'] }})))-1 downto 0);
+    {%- endif %}
   );
 end {{ fins['name']|lower }}_avalonst_parallel_to_tdm;
 
@@ -91,9 +95,9 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   constant NUM_METADATA_WORDS_LOG2 : natural := integer(ceil(log2(real(NUM_METADATA_WORDS))));
   {%- endif %}
   {%- if fins['supports_byte_enable'] %}
-  constant G_KEEP_WIDTH : natural := {{ fins['data']['byte_width'] }};
+  constant G_BYTE_WIDTH : natural := {{ fins['data']['byte_width'] }};
   {%- endif %}
-  constant FIFO_WIDTH : natural := G_DATA_WIDTH {%- if 'metadata' in fins %}+ G_METADATA_WIDTH {%- endif %} {%- if fins['supports_byte_enable'] %} + G_KEEP_WIDTH {%- endif %}+ 1; -- +1 for tlast
+  constant FIFO_WIDTH : natural := G_DATA_WIDTH {%- if 'metadata' in fins %}+ G_METADATA_WIDTH {%- endif %} {%- if fins['supports_byte_enable'] %} + G_BYTE_WIDTH {%- endif %}+ 1; -- +1 for tlast
 
   --------------------------------------------------------------------------------
   -- Components
@@ -147,6 +151,20 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   signal metadata_mux_counter : unsigned(NUM_METADATA_WORDS_LOG2-1 downto 0);
   signal metadata : std_logic_vector(NUM_METADATA_WORDS*G_TDM_WORD_WIDTH-1 downto 0);
   {%- endif %}
+  
+  function f_keep_to_empty(keep : std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0) := (others => '0');
+                           big_endian : boolean := G_BIG_ENDIAN) return std_logic_vector is
+      variable count : integer := 0;
+      variable empty : std_logic_vector(integer(ceil(log2({{ fins['data']['byte_width'] }})))-1 downto 0) := (others => '0')
+    begin
+      for i in 0 to {{ fins['data']['byte_width'] }}-1 loop
+        if(keep(i) = '1') then
+          count := count + 1;
+        end if;
+      end loop;
+      empty := std_logic_vector(count);
+      return empty;
+    end function;
 
 begin
 
@@ -236,6 +254,9 @@ begin
     aso_valid <= (NOT fifo_empty) OR send_metadata;
     aso_endofpacket <= fifo_dout(FIFO_WIDTH-1) AND (NOT send_metadata);
     aso_startofpacket <= '0';
+    {%- if fins['supports_byte_enable'] %}
+    aso_empty <= f_keep_to_empty(fifo_dout(G_BYTE_WIDTH-1 downto 0), G_BIG_ENDIAN);
+    {%- endif %}
 
     -- Create the start of packet
     if (send_metadata = '1') then
@@ -276,6 +297,9 @@ begin
     aso_valid <= NOT fifo_empty;
     aso_endofpacket <= fifo_dout(FIFO_WIDTH-1);
     aso_data <= (others => '0');
+    {%- if fins['supports_byte_enable'] %}
+    aso_empty <= f_keep_to_empty(fifo_dout(G_BYTE_WIDTH-1 downto 0), G_BIG_ENDIAN);
+    {%- endif %}
 
     -- Zero-pad tdata if applicable
     aso_data(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_DATA_WIDTH-1 downto 0);
