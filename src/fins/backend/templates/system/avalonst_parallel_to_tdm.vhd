@@ -50,7 +50,7 @@ use work.{{ fins['name']|lower }}_avalonst_parallel_to_tdm_pkg.all;
 entity {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   generic (
     G_TDM_WORD_WIDTH : natural := 32;  -- LIMITATION: This value MUST be >= fins['data']['bit_width']
-    G_BIG_ENDIAN     : boolean := True  -- LIMITATION: This value MUST be >= fins['data']['bit_width']
+    G_BIG_ENDIAN     : std_logic := '1'  -- LIMITATION: This value MUST be >= fins['data']['bit_width']
   );
   port (
     -- AXI4-Stream Parallel Bus
@@ -153,7 +153,7 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   {%- endif %}
   
   function f_keep_to_empty(keep : std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0) := (others => '0');
-                           big_endian : boolean := G_BIG_ENDIAN) return std_logic_vector is
+                           big_endian : std_logic := G_BIG_ENDIAN) return std_logic_vector is
       variable count : integer := 0;
       variable empty : std_logic_vector(integer(ceil(log2({{ fins['data']['byte_width'] }})))-1 downto 0) := (others => '0')
     begin
