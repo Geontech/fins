@@ -50,7 +50,7 @@ use work.{{ fins['name']|lower }}_avalonst_parallel_to_tdm_pkg.all;
 entity {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   generic (
     G_TDM_WORD_WIDTH : natural := 32;  -- LIMITATION: This value MUST be >= fins['data']['bit_width']
-    G_BIG_ENDIAN     : std_logic := '1'  -- LIMITATION: This value MUST be >= fins['data']['bit_width']
+    G_BIG_ENDIAN     : boolean := True
   );
   port (
     -- AXI4-Stream Parallel Bus

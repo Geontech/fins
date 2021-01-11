@@ -47,7 +47,7 @@ entity {{ fins['name']|lower }}_avalonst_tdm_to_parallel is
   generic (
     G_SAMPLE_COUNTER_WIDTH : natural := 16; -- This value MUST be >= ceil(log2(MAX_SAMPLES_IN_PACKET))
     G_TDM_WORD_WIDTH       : natural := 32; -- LIMITATION: This value MUST be >= fins['data']['bit_width']
-    G_BIG_ENDIAN           : std_logic := '1' 
+    G_BIG_ENDIAN           : boolean := True
   );
   port (
     -- AXI4-Stream Parallel Bus
@@ -112,14 +112,14 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_tdm_to_parallel is
   signal metadata_array         : t_metadata_array;
   {%- endif  %}
   function f_empty_to_keep(empty : std_logic_vector(integer(ceil(log2(real({{ fins['data']['byte_width'] }}))))-1 downto 0) := (others => '0');
-                           big_endian : std_logic := '1') return std_logic_vector is
+                           big_endian : boolean := G_BIG_ENDIAN) return std_logic_vector is
     -- endian_end determines what value should '1's stop if the data is little-endian
-    variable endian_end : integer := {{ fins['data']['byte_width'] }} - (integer(empty));
+    variable endian_end : integer := {{ fins['data']['byte_width'] }} - (to_integer(unsigned(empty)));
     variable keep : std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0) := (others => '0');
     begin
         for i in 0 to {{ fins['data']['byte_width'] }}-1 loop
           if(big_endian) then
-            if(i < integer(empty)) then
+            if(i < to_integer(unsigned(empty))) then
               keep(i) := '1';
             end if;
           else
