@@ -60,7 +60,7 @@ entity {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
     s_axis_tready     : out std_logic;
     {%- endif %}
     {%- if fins['supports_byte_enable'] %}
-    s_axis_tkeep      : in std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
+    s_axis_tkeep      : in  std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
     {%- endif %}
     s_axis_tdata      : in  std_logic_vector({{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in fins %}
@@ -155,14 +155,14 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   function f_keep_to_empty(keep : std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0) := (others => '0');
                            big_endian : std_logic := G_BIG_ENDIAN) return std_logic_vector is
       variable count : integer := 0;
-      variable empty : std_logic_vector(integer(ceil(log2(real({{ fins['data']['byte_width'] }}))))-1 downto 0) := (others => '0')
+      variable empty : std_logic_vector(integer(ceil(log2(real({{ fins['data']['byte_width'] }}))))-1 downto 0) := (others => '0');
     begin
       for i in 0 to {{ fins['data']['byte_width'] }}-1 loop
         if(keep(i) = '0') then
           count := count + 1;
         end if;
       end loop;
-      empty := std_logic_vector(count);
+      empty := std_logic_vector(to_unsigned(count,empty'length));
       return empty;
     end function;
 

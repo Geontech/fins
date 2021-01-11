@@ -73,7 +73,7 @@ entity {{ fins['name']|lower }}_avalonst_tdm_to_parallel is
     asi_valid         : in  std_logic;
     asi_startofpacket : in  std_logic;
     {%- if fins['supports_byte_enable'] %}
-    asi_empty         : in std_logic_vector(integer(ceil(log2(real({{ fins['data']['byte_width'] }}))))-1 downto 0);
+    asi_empty         : in  std_logic_vector(integer(ceil(log2(real({{ fins['data']['byte_width'] }}))))-1 downto 0);
     {%- endif %}
     asi_endofpacket   : in  std_logic
   );
@@ -115,7 +115,7 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_tdm_to_parallel is
                            big_endian : std_logic := '1') return std_logic_vector is
     -- endian_end determines what value should '1's stop if the data is little-endian
     variable endian_end : integer := {{ fins['data']['byte_width'] }} - (integer(empty));
-    variable keep : std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0) := (others => '0')
+    variable keep : std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0) := (others => '0');
     begin
         for i in 0 to {{ fins['data']['byte_width'] }}-1 loop
           if(big_endian) then

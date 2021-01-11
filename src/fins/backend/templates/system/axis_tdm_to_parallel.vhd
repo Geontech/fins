@@ -61,7 +61,7 @@ entity {{ fins['name']|lower }}_axis_tdm_to_parallel is
     {%- endif %}
     m_axis_tvalid  : out std_logic;
     {%- if fins['supports_byte_enable'] %}
-    m_axis_tkeep   : out  std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
+    m_axis_tkeep   : out std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
     {%- endif %}
     m_axis_tlast   : out std_logic;
     -- Time-Division Multiplexed Bus
