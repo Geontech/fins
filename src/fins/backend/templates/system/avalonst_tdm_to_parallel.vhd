@@ -72,10 +72,10 @@ entity {{ fins['name']|lower }}_avalonst_tdm_to_parallel is
     asi_data          : in  std_logic_vector(G_TDM_WORD_WIDTH-1 downto 0);
     asi_valid         : in  std_logic;
     asi_startofpacket : in  std_logic;
-    asi_endofpacket   : in  std_logic
     {%- if fins['supports_byte_enable'] %}
-    asi_empty         : in std_logic_vector(integer(ceil(log2({{ fins['data']['byte_width'] }})))-1 downto 0);
+    asi_empty         : in std_logic_vector(integer(ceil(log2(real({{ fins['data']['byte_width'] }}))))-1 downto 0);
     {%- endif %}
+    asi_endofpacket   : in  std_logic
   );
 end {{ fins['name']|lower }}_avalonst_tdm_to_parallel;
 
@@ -111,7 +111,7 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_tdm_to_parallel is
   signal tdm_word_counter       : unsigned(G_SAMPLE_COUNTER_WIDTH-1 downto 0);
   signal metadata_array         : t_metadata_array;
   {%- endif  %}
-  function f_empty_to_keep(empty : std_logic_vector(integer(ceil(log2({{ fins['data']['byte_width'] }})))-1 downto 0) := (others => '0');
+  function f_empty_to_keep(empty : std_logic_vector(integer(ceil(log2(real({{ fins['data']['byte_width'] }}))))-1 downto 0) := (others => '0');
                            big_endian : std_logic := '1') return std_logic_vector is
     -- endian_end determines what value should '1's stop if the data is little-endian
     variable endian_end : integer := {{ fins['data']['byte_width'] }} - (integer(empty));

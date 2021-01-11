@@ -73,10 +73,10 @@ entity {{ fins['name']|lower }}_axis_parallel_to_tdm is
     m_axis_tready  : in  std_logic;
     m_axis_tdata   : out std_logic_vector(G_TDM_WORD_WIDTH-1 downto 0);
     m_axis_tvalid  : out std_logic;
-    m_axis_tlast   : out std_logic
     {%- if fins['supports_byte_enable'] %}
-    m_axis_tkeep   : in std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
+    m_axis_tkeep   : out std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
     {%- endif %}
+    m_axis_tlast   : out std_logic
   );
 end {{ fins['name']|lower }}_axis_parallel_to_tdm;
 
