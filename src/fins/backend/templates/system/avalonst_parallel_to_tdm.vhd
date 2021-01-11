@@ -153,7 +153,7 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   {%- endif %}
   
   function f_keep_to_empty(keep : std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0) := (others => '0');
-                           big_endian : std_logic := G_BIG_ENDIAN) return std_logic_vector is
+                           big_endian : boolean := G_BIG_ENDIAN) return std_logic_vector is
       variable count : integer := 0;
       variable empty : std_logic_vector(integer(ceil(log2(real({{ fins['data']['byte_width'] }}))))-1 downto 0) := (others => '0');
     begin
