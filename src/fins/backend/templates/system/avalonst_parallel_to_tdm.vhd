@@ -76,7 +76,7 @@ entity {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
     aso_valid         : out std_logic;
     aso_startofpacket : out std_logic;
     {%- if fins['supports_byte_enable'] %}
-    aso_empty         : out std_logic_vector(integer(ceil(log2(real({{ fins['data']['byte_width'] }}))))-1 downto 0);
+    aso_empty         : out std_logic_vector({{ fins['data']['empty_width'] }}-1 downto 0);
     {%- endif %}
     aso_endofpacket   : out std_logic
   );
@@ -155,7 +155,7 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   function f_keep_to_empty(keep : std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0) := (others => '0');
                            big_endian : boolean := G_BIG_ENDIAN) return std_logic_vector is
       variable count : integer := 0;
-      variable empty : std_logic_vector(integer(ceil(log2(real({{ fins['data']['byte_width'] }}))))-1 downto 0) := (others => '0');
+      variable empty : std_logic_vector({{ fins['data']['empty_width'] }}-1 downto 0) := (others => '0');
     begin
       for i in 0 to {{ fins['data']['byte_width'] }}-1 loop
         if(keep(i) = '0') then

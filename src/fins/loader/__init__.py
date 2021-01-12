@@ -750,6 +750,7 @@ def populate_ports(fins_data,verbose):
                     num_samples = port['data']['num_samples']
                     num_channels = port['data']['num_channels']
                     port['data']['byte_width'] = math.ceil((bit_width * num_samples * num_channels) / 8)
+                    port['data']['empty_width'] = math.ceil(math.log2(port['data']['byte_width']))
     # Return the modified dictionary
     return fins_data
 
