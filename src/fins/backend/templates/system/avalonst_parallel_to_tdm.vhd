@@ -266,7 +266,7 @@ begin
     end if;
 
     -- Zero pad the metadata
-    metadata(G_METADATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH-1 downto 0);
+    metadata(G_METADATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %}-1 downto 0{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %});
 
     -- Mux the data output
     if (send_metadata = '1') then
@@ -278,7 +278,7 @@ begin
       end loop;
     else
       -- Set as data
-      internal_aso_data(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH+G_DATA_WIDTH-1 downto G_METADATA_WIDTH);
+      internal_aso_data(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH+G_DATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %}-1 downto G_METADATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %});
     end if;
 
     -- Convert the data output to Big Endian
@@ -302,7 +302,7 @@ begin
     {%- endif %}
 
     -- Zero-pad tdata if applicable
-    aso_data(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_DATA_WIDTH-1 downto 0);
+    aso_data(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_DATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %}-1 downto 0);
   end process c_output;
 
   -- Synchronous process to create the startofpacket

@@ -238,7 +238,7 @@ begin
     {%- endif %}
 
     -- Zero pad the metadata
-    metadata(G_METADATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH-1 downto 0);
+    metadata(G_METADATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %}-1 downto 0{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %});
 
     -- Determine the tdata output
     if (send_metadata = '1') then
@@ -250,7 +250,7 @@ begin
       end loop;
     else
       -- Assign the data
-      m_axis_tdata(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH+G_DATA_WIDTH-1 downto G_METADATA_WIDTH);
+      m_axis_tdata(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH+G_DATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %}-1 downto G_METADATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %});
     end if;
   end process c_output;
 
@@ -269,7 +269,7 @@ begin
     m_axis_tdata  <= (others => '0');
 
     -- Zero-pad tdata if applicable
-    m_axis_tdata(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_DATA_WIDTH-1 downto 0);
+    m_axis_tdata(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_DATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %}-1 downto 0{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %});
   end process c_output;
 
   {%- endif %}{# if 'metadata' in fins #######################################}
