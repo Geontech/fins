@@ -95,7 +95,7 @@ architecture rtl of {{ fins['name']|lower }}_axis_parallel_to_tdm is
   {%- if fins['supports_byte_enable'] %}
   constant G_BYTE_WIDTH : natural := {{ fins['data']['byte_width'] }};
   {%- endif %}
-  constant FIFO_WIDTH : natural := G_DATA_WIDTH {%- if 'metadata' in fins %}+ G_METADATA_WIDTH{%- endif %}{%- if fins['supports_byte_enable'] %}+ G_BYTE_WIDTH {%- endif %}+ 1; -- +1 for tlast
+  constant FIFO_WIDTH : natural := G_DATA_WIDTH {%- if 'metadata' in fins %}+ G_METADATA_WIDTH {%- endif %}{%- if fins['supports_byte_enable'] %}+ G_BYTE_WIDTH {%- endif %}+ 1; -- +1 for tlast
 
   --------------------------------------------------------------------------------
   -- Components
