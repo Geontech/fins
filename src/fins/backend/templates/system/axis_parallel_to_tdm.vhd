@@ -231,7 +231,7 @@ begin
     fifo_rd_en    <= m_axis_tready AND (NOT fifo_empty) AND (NOT send_metadata);
     metadata      <= (others => '0');
     m_axis_tdata  <= (others => '0');
-    m_axis_tvalid <= (NOT fifo_empty) OR send_metadata;
+    m_axis_tvalid <= (NOT fifo_empty);
     m_axis_tlast  <= fifo_dout(FIFO_WIDTH-1) AND (NOT send_metadata);
     {%- if fins['supports_byte_enable'] %}
     m_axis_tkeep  <= fifo_dout({{ fins['data']['byte_width'] }}-1 downto 0);

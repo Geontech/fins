@@ -251,7 +251,7 @@ begin
     metadata <= (others => '0');
     internal_aso_data <= (others => '0');
     aso_data <= (others => '0');
-    aso_valid <= (NOT fifo_empty) OR send_metadata;
+    aso_valid <= (NOT fifo_empty);
     aso_endofpacket <= fifo_dout(FIFO_WIDTH-1) AND (NOT send_metadata);
     aso_startofpacket <= '0';
     {%- if fins['supports_byte_enable'] %}
