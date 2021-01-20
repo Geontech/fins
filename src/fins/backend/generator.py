@@ -242,25 +242,25 @@ class Generator:
                 ports_producer_dir = output_dir + node['ports_producer']['name'] + '_axis_parallel_to_tdm/'
                 os.makedirs(ports_producer_dir, exist_ok=True)
                 self.render_jinja_template(jinja_env, 'axis_parallel_to_tdm.vhd', ports_producer_dir+node['ports_producer']['name']+'_axis_parallel_to_tdm.vhd', node['ports_producer'])
-                #self.render_jinja_template(jinja_env, 'axis_parallel_to_tdm_tb.vhd', ports_producer_dir+node['ports_producer']['name']+'_axis_parallel_to_tdm_tb.vhd', node['ports_producer'])
+                self.render_jinja_template(jinja_env, 'axis_parallel_to_tdm_tb.vhd', ports_producer_dir+node['ports_producer']['name']+'_axis_parallel_to_tdm_tb.vhd', node['ports_producer'])
                 self.render_jinja_template(jinja_env, 'axis_parallel_to_tdm.json', ports_producer_dir+node['ports_producer']['name']+'_axis_parallel_to_tdm.json', node['ports_producer'])
                 self.render_jinja_template(jinja_env, 'parallel_word_fifo.tcl', ports_producer_dir+node['ports_producer']['name']+'_parallel_word_fifo.tcl', node['ports_producer'])
                 ports_producer_dir = output_dir + node['ports_producer']['name'] + '_avalonst_parallel_to_tdm/'
                 os.makedirs(ports_producer_dir, exist_ok=True)
                 self.render_jinja_template(jinja_env, 'avalonst_parallel_to_tdm.vhd', ports_producer_dir+node['ports_producer']['name']+'_avalonst_parallel_to_tdm.vhd', node['ports_producer'])
-                #self.render_jinja_template(jinja_env, 'avalonst_parallel_to_tdm_tb.vhd', ports_producer_dir+node['ports_producer']['name']+'_avalonst_parallel_to_tdm_tb.vhd', node['ports_producer'])
+                self.render_jinja_template(jinja_env, 'avalonst_parallel_to_tdm_tb.vhd', ports_producer_dir+node['ports_producer']['name']+'_avalonst_parallel_to_tdm_tb.vhd', node['ports_producer'])
                 self.render_jinja_template(jinja_env, 'avalonst_parallel_to_tdm.json', ports_producer_dir+node['ports_producer']['name']+'_avalonst_parallel_to_tdm.json', node['ports_producer'])
                 self.render_jinja_template(jinja_env, 'parallel_word_fifo.tcl', ports_producer_dir+node['ports_producer']['name']+'_parallel_word_fifo.tcl', node['ports_producer'])
             if node['ports_consumer']:
                 ports_consumer_dir = output_dir + node['ports_consumer']['name'] + '_axis_tdm_to_parallel/'
                 os.makedirs(ports_consumer_dir, exist_ok=True)
                 self.render_jinja_template(jinja_env, 'axis_tdm_to_parallel.vhd', ports_consumer_dir+node['ports_consumer']['name']+'_axis_tdm_to_parallel.vhd', node['ports_consumer'])
-                #self.render_jinja_template(jinja_env, 'axis_tdm_to_parallel_tb.vhd', ports_consumer_dir+node['ports_consumer']['name']+'_axis_tdm_to_parallel_tb.vhd', node['ports_consumer'])
+                self.render_jinja_template(jinja_env, 'axis_tdm_to_parallel_tb.vhd', ports_consumer_dir+node['ports_consumer']['name']+'_axis_tdm_to_parallel_tb.vhd', node['ports_consumer'])
                 self.render_jinja_template(jinja_env, 'axis_tdm_to_parallel.json', ports_consumer_dir+node['ports_consumer']['name']+'_axis_tdm_to_parallel.json', node['ports_consumer'])
                 ports_consumer_dir = output_dir + node['ports_consumer']['name'] + '_avalonst_tdm_to_parallel/'
                 os.makedirs(ports_consumer_dir, exist_ok=True)
                 self.render_jinja_template(jinja_env, 'avalonst_tdm_to_parallel.vhd', ports_consumer_dir+node['ports_consumer']['name']+'_avalonst_tdm_to_parallel.vhd', node['ports_consumer'])
-                #self.render_jinja_template(jinja_env, 'avalonst_tdm_to_parallel_tb.vhd', ports_consumer_dir+node['ports_consumer']['name']+'_avalonst_tdm_to_parallel_tb.vhd', node['ports_consumer'])
+                self.render_jinja_template(jinja_env, 'avalonst_tdm_to_parallel_tb.vhd', ports_consumer_dir+node['ports_consumer']['name']+'_avalonst_tdm_to_parallel_tb.vhd', node['ports_consumer'])
                 self.render_jinja_template(jinja_env, 'avalonst_tdm_to_parallel.json', ports_consumer_dir+node['ports_consumer']['name']+'_avalonst_tdm_to_parallel.json', node['ports_consumer'])
 
     def generate_node_backend(self, fins_data, filename):
