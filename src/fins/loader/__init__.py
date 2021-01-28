@@ -1920,10 +1920,11 @@ def validate_ip(fins_data,verbose):
             print('ERROR: IP does not exist or path',ip['fins_path'],'is incorrect')
             sys.exit(1)
         # Make sure all parameters have a parent
-        for param in ip['params']:
-            if not param['parent'] in parent_names:
-                print('ERROR: The parent for parameter',param['name'],'in IP',ip['fins_path'],'does not exist')
-                sys.exit(1)
+        if 'params' in ip:
+            for param in ip['params']:
+                if not param['parent'] in parent_names:
+                    print('ERROR: The parent for parameter',param['name'],'in IP',ip['fins_path'],'does not exist')
+                    sys.exit(1)
         # Notify of success
         if verbose:
             print('PASS:',ip['fins_path'])
