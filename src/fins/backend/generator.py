@@ -180,6 +180,11 @@ class Generator:
             # Software Configuration bus code
             self.render_jinja_template(jinja_env, 'swconfig.vhd', output_dir+fins_data['name']+'_swconfig.vhd', fins_data)
             self.render_jinja_template(jinja_env, 'swconfig_verify.vhd', output_dir+fins_data['name']+'_swconfig_verify.vhd', fins_data)
+            # Clock Domain Crossings code and constraints
+            self.render_jinja_template(jinja_env, 'props_cdc.xdc', output_dir+fins_data['name']+'_props_cdc.xdc', fins_data)
+            self.render_jinja_template(jinja_env, 'props_cdc.sdc', output_dir+fins_data['name']+'_props_cdc.sdc', fins_data)
+            self.render_jinja_template(jinja_env, 'props_control_cdc.vhd', output_dir+fins_data['name']+'_props_control_cdc.vhd', fins_data)
+            self.render_jinja_template(jinja_env, 'props_status_cdc.vhd', output_dir+fins_data['name']+'_props_status_cdc.vhd', fins_data)
         if ('ports' in fins_data) or ('properties' in fins_data):
             # Top-level stubbed out code
             self.render_jinja_template(jinja_env, 'core.vhd', output_dir+fins_data['name']+'_core.vhd', fins_data)
