@@ -354,7 +354,7 @@ begin
     resetn <= '0';
     wait for CLOCK_PERIOD*10; -- Wait for an arbitrary 10 clocks
     resetn <= '1';
-    wait for CLOCK_PERIOD;
+    wait for CLOCK_PERIOD*10; -- Wait for an arbitrary 10 clocks
 
     {%- if 'properties' in fins %}
     --**************************************************
