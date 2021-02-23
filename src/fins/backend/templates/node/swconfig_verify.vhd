@@ -23,7 +23,6 @@
 -- ---------------------------------------------------------
 -- Template:    swconfig_verify.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: File I/O Software Configuration bus test component for FINS
 --              ports

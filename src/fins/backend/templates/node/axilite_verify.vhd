@@ -23,7 +23,6 @@
 -- ---------------------------------------------------------
 -- Template:    axilite_verify.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: AXI4-Lite bus verification procedure for FINS properties
 --==============================================================================

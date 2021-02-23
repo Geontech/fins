@@ -23,7 +23,6 @@
 % ---------------------------------------------------------
 % Template:    pkg.m
 % Backend:     {{ fins['backend'] }}
-% Generated:   {{ now }}
 % ---------------------------------------------------------
 % Description: MATLAB/Octave package script for definition of FINS parameters,
 %              ports, and properties

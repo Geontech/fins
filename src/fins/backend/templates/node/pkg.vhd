@@ -23,7 +23,6 @@
 -- ---------------------------------------------------------
 -- Template:    pkg.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: VHDL package file for definition of FINS parameters, ports,
 --              and properties

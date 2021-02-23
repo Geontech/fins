@@ -23,7 +23,6 @@
 -- ---------------------------------------------------------
 -- Template:    swconfig.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: Software Configuration bus register decode for FINS properties
 -- Reset Type:  Synchronous

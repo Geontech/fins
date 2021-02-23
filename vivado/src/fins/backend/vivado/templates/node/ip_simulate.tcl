@@ -23,7 +23,6 @@
 # ---------------------------------------------------------
 # Template:    ip_simulate.tcl
 # Backend:     {{ fins['backend'] }}
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: TCL script for running an IP simulation with
 #              Xilinx Vivado Xsim

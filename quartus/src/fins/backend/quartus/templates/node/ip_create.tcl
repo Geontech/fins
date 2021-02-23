@@ -23,7 +23,6 @@
 # ---------------------------------------------------------
 # Template:    ip_create.tcl
 # Backend:     {{ fins['backend'] }}
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: TCL script for creating an IP compatible with
 #              Intel Quartus Platform Designer

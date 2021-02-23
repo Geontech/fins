@@ -23,7 +23,6 @@
 # ---------------------------------------------------------
 # Template:    ip_project.tcl
 # Backend:     {{ fins['backend'] }}
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: TCL script for creating an IP project compatible with
 #              Intel Quartus Platform Designer

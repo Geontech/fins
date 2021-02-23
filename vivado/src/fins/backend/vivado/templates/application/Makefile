@@ -23,7 +23,6 @@
 # ---------------------------------------------------------
 # Template:    Makefile
 # Backend:     {{ fins['backend'] }}
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: Makefile to build and simulate the FINS "vivado" backend
 # Versions:    Tested with:

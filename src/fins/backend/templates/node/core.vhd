@@ -23,7 +23,6 @@
 -- ---------------------------------------------------------
 -- Template:    core.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: Core functionality code stub for a FINS IP
 -- Reset Type:  Synchronous

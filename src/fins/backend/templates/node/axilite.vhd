@@ -23,7 +23,6 @@
 -- ---------------------------------------------------------
 -- Template:    axilite.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: AXI4-Lite bus register decode for FINS properties
 -- Reset Type:  Synchronous

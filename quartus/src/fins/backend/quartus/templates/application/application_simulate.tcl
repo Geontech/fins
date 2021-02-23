@@ -23,7 +23,6 @@
 # ---------------------------------------------------------
 # Template:    application_simulate.tcl
 # Backend:     {{ fins['backend'] }}
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: TCL script to generate a simulation with Intel Quartus
 #              and run it with Intel ModelSim

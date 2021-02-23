@@ -23,7 +23,6 @@
 # ---------------------------------------------------------
 # Template:    application_create.tcl
 # Backend:     {{ fins['backend'] }}
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: TCL script for creating a Application compatible with
 #              Xilinx Vivado IP Integrator

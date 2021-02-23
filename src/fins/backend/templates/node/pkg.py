@@ -23,7 +23,6 @@
 # ---------------------------------------------------------
 # Template:    pkg.py
 # Backend:     {{ fins['backend'] }}
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: Python package script for definition of FINS parameters, ports,
 #              and properties

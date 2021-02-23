@@ -23,7 +23,6 @@
 -- ---------------------------------------------------------
 -- Template:    axis.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: AXI4-Stream bus interpreter for FINS ports
 -- Reset Type:  Synchronous
