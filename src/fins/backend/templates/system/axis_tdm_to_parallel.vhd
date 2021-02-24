@@ -60,6 +60,9 @@ entity {{ fins['name']|lower }}_axis_tdm_to_parallel is
     m_axis_tuser   : out std_logic_vector({{ fins['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
     m_axis_tvalid  : out std_logic;
+    {%- if fins['supports_byte_enable'] %}
+    m_axis_tkeep   : out std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
     m_axis_tlast   : out std_logic;
     -- Time-Division Multiplexed Bus
     s_axis_aclk    : in  std_logic;
@@ -67,6 +70,9 @@ entity {{ fins['name']|lower }}_axis_tdm_to_parallel is
     s_axis_tready  : out std_logic;
     s_axis_tdata   : in  std_logic_vector(G_TDM_WORD_WIDTH-1 downto 0);
     s_axis_tvalid  : in  std_logic;
+    {%- if fins['supports_byte_enable'] %}
+    s_axis_tkeep   : in  std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
     s_axis_tlast   : in  std_logic
   );
 end {{ fins['name']|lower }}_axis_tdm_to_parallel;
@@ -170,6 +176,9 @@ begin
   -- Concurrent signal assignments to set outputs and signals
   m_axis_tdata  <= s_axis_tdata(G_DATA_WIDTH-1 downto 0);
   m_axis_tlast  <= s_axis_tlast;
+  {%- if fins['supports_byte_enable'] %}
+  m_axis_tkeep  <= s_axis_tkeep;
+  {%- endif %}
   {%- if fins['supports_backpressure'] %}
   internal_s_axis_tready <= m_axis_tready;
   {%- else %}

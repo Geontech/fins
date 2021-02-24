@@ -58,6 +58,9 @@ entity {{ fins['name']|lower }}_axis_parallel_to_tdm is
     {%- if fins['supports_backpressure'] %}
     s_axis_tready  : out std_logic;
     {%- endif %}
+    {%- if fins['supports_byte_enable'] %}
+    s_axis_tkeep   : in  std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
     s_axis_tdata   : in  std_logic_vector({{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in fins %}
     s_axis_tuser   : in  std_logic_vector({{ fins['metadata']|sum(attribute='bit_width') }}-1 downto 0);
@@ -70,6 +73,9 @@ entity {{ fins['name']|lower }}_axis_parallel_to_tdm is
     m_axis_tready  : in  std_logic;
     m_axis_tdata   : out std_logic_vector(G_TDM_WORD_WIDTH-1 downto 0);
     m_axis_tvalid  : out std_logic;
+    {%- if fins['supports_byte_enable'] %}
+    m_axis_tkeep   : out std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
     m_axis_tlast   : out std_logic
   );
 end {{ fins['name']|lower }}_axis_parallel_to_tdm;
@@ -86,11 +92,10 @@ architecture rtl of {{ fins['name']|lower }}_axis_parallel_to_tdm is
   constant NUM_METADATA_WORDS : natural := integer(ceil(real(G_METADATA_WIDTH) / real(G_TDM_WORD_WIDTH)));
   constant NUM_METADATA_WORDS_LOG2 : natural := integer(ceil(log2(real(NUM_METADATA_WORDS))));
   {%- endif %}
-  {%- if 'metadata' in fins %}
-  constant FIFO_WIDTH : natural := G_DATA_WIDTH + G_METADATA_WIDTH + 1; -- +1 for tlast
-  {%- else %}
-  constant FIFO_WIDTH : natural := G_DATA_WIDTH + 1; -- +1 for tlast
+  {%- if fins['supports_byte_enable'] %}
+  constant G_BYTE_WIDTH : natural := {{ fins['data']['byte_width'] }};
   {%- endif %}
+  constant FIFO_WIDTH : natural := G_DATA_WIDTH {%- if 'metadata' in fins %}+ G_METADATA_WIDTH {%- endif %}{%- if fins['supports_byte_enable'] %}+ G_BYTE_WIDTH {%- endif %}+ 1; -- +1 for tlast
 
   --------------------------------------------------------------------------------
   -- Components
@@ -148,11 +153,7 @@ begin
   -- Input Buffer
   -----------------------------------------------------------------------------
   -- Write the input directly into FIFO
-  {%- if 'metadata' in fins %}
-  fifo_din   <= s_axis_tlast & s_axis_tdata & s_axis_tuser;
-  {%- else %}
-  fifo_din   <= s_axis_tlast & s_axis_tdata;
-  {%- endif %}
+  fifo_din   <= s_axis_tlast & s_axis_tdata{%- if 'metadata' in fins %} & s_axis_tuser{%- endif %} {%- if fins['supports_byte_enable'] %} & s_axis_tkeep{%- endif %};
   fifo_wr_en <= s_axis_tvalid; -- Since tready is always high
   {%- if fins['supports_backpressure'] %}
   -- Only ready when the FIFO has space
@@ -230,11 +231,14 @@ begin
     fifo_rd_en    <= m_axis_tready AND (NOT fifo_empty) AND (NOT send_metadata);
     metadata      <= (others => '0');
     m_axis_tdata  <= (others => '0');
-    m_axis_tvalid <= (NOT fifo_empty) OR send_metadata;
+    m_axis_tvalid <= (NOT fifo_empty);
     m_axis_tlast  <= fifo_dout(FIFO_WIDTH-1) AND (NOT send_metadata);
+    {%- if fins['supports_byte_enable'] %}
+    m_axis_tkeep  <= fifo_dout({{ fins['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
 
     -- Zero pad the metadata
-    metadata(G_METADATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH-1 downto 0);
+    metadata(G_METADATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %}-1 downto 0{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %});
 
     -- Determine the tdata output
     if (send_metadata = '1') then
@@ -246,7 +250,7 @@ begin
       end loop;
     else
       -- Assign the data
-      m_axis_tdata(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH+G_DATA_WIDTH-1 downto G_METADATA_WIDTH);
+      m_axis_tdata(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH+G_DATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %}-1 downto G_METADATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %});
     end if;
   end process c_output;
 
@@ -259,10 +263,13 @@ begin
     fifo_rd_en    <= m_axis_tready;
     m_axis_tvalid <= NOT fifo_empty;
     m_axis_tlast  <= fifo_dout(FIFO_WIDTH-1);
+    {%- if fins['supports_byte_enable'] %}
+    m_axis_tkeep  <= fifo_dout({{ fins['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
     m_axis_tdata  <= (others => '0');
 
     -- Zero-pad tdata if applicable
-    m_axis_tdata(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_DATA_WIDTH-1 downto 0);
+    m_axis_tdata(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_DATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %}-1 downto 0{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %});
   end process c_output;
 
   {%- endif %}{# if 'metadata' in fins #######################################}
