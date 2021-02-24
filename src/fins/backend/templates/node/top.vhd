@@ -87,6 +87,9 @@ entity {{ fins['name']|lower }} is
     {%- if port['supports_backpressure'] %}
     {{ port|axisprefix(i) }}_tready  : {% if port['direction']|lower == 'in' %}out{% else %}in {% endif %} std_logic;
     {%- endif %}
+    {%- if port['supports_byte_enable'] %}
+    {{ port|axisprefix(i) }}_tkeep   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
     {{ port|axisprefix(i) }}_tdata   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in port %}
     {{ port|axisprefix(i) }}_tuser   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
@@ -154,6 +157,9 @@ architecture struct of {{ fins['name']|lower }} is
       {{ port|axisprefix(i) }}_aresetn : in  std_logic;
       {%- if port['supports_backpressure'] %}
       {{ port|axisprefix(i) }}_tready  : {% if port['direction']|lower == 'in' %}out{% else %}in {% endif %} std_logic;
+      {%- endif %}
+      {%- if port['supports_byte_enable'] %}
+      {{ port|axisprefix(i) }}_tkeep   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
       {%- endif %}
       {{ port|axisprefix(i) }}_tdata   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
       {%- if 'metadata' in port %}
@@ -267,6 +273,9 @@ begin
       {{ port|axisprefix(i) }}_aresetn => {{ port|axisprefix(i) }}_aresetn,
       {%- if port['supports_backpressure'] %}
       {{ port|axisprefix(i) }}_tready  => {{ port|axisprefix(i) }}_tready,
+      {%- endif %}
+      {%- if port['supports_byte_enable'] %}
+      {{ port|axisprefix(i) }}_tkeep  => {{ port|axisprefix(i) }}_tkeep,
       {%- endif %}
       {{ port|axisprefix(i) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
       {%- if 'metadata' in port %}

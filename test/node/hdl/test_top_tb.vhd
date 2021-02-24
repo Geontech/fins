@@ -160,6 +160,7 @@ architecture behav of test_top_tb is
   signal s_axis_sfix_cpx_in_tready   : std_logic;
   signal s_axis_sfix_cpx_in_tdata    : std_logic_vector(32-1 downto 0);
   signal s_axis_sfix_cpx_in_tuser    : std_logic_vector(121-1 downto 0);
+  signal s_axis_sfix_cpx_in_tkeep    : std_logic_vector(4-1 downto 0);
   signal s_axis_sfix_cpx_in_tvalid   : std_logic;
   signal s_axis_sfix_cpx_in_tlast    : std_logic;
   signal m_axis_sfix_cpx_out_aclk    : std_logic;
@@ -167,6 +168,7 @@ architecture behav of test_top_tb is
   signal m_axis_sfix_cpx_out_tready  : std_logic;
   signal m_axis_sfix_cpx_out_tdata   : std_logic_vector(32-1 downto 0);
   signal m_axis_sfix_cpx_out_tuser   : std_logic_vector(121-1 downto 0);
+  signal m_axis_sfix_cpx_out_tkeep   : std_logic_vector(4-1 downto 0);
   signal m_axis_sfix_cpx_out_tvalid  : std_logic;
   signal m_axis_sfix_cpx_out_tlast   : std_logic;
 
@@ -310,6 +312,7 @@ begin
       s_axis_sfix_cpx_in_tready   => s_axis_sfix_cpx_in_tready,
       s_axis_sfix_cpx_in_tdata    => s_axis_sfix_cpx_in_tdata,
       s_axis_sfix_cpx_in_tuser    => s_axis_sfix_cpx_in_tuser,
+      s_axis_sfix_cpx_in_tkeep    => s_axis_sfix_cpx_in_tkeep,
       s_axis_sfix_cpx_in_tvalid   => s_axis_sfix_cpx_in_tvalid,
       s_axis_sfix_cpx_in_tlast    => s_axis_sfix_cpx_in_tlast,
       m_axis_sfix_cpx_out_aclk    => m_axis_sfix_cpx_out_aclk,
@@ -317,6 +320,7 @@ begin
       m_axis_sfix_cpx_out_tready  => m_axis_sfix_cpx_out_tready,
       m_axis_sfix_cpx_out_tdata   => m_axis_sfix_cpx_out_tdata,
       m_axis_sfix_cpx_out_tuser   => m_axis_sfix_cpx_out_tuser,
+      m_axis_sfix_cpx_out_tkeep   => m_axis_sfix_cpx_out_tkeep,
       m_axis_sfix_cpx_out_tvalid  => m_axis_sfix_cpx_out_tvalid,
       m_axis_sfix_cpx_out_tlast   => m_axis_sfix_cpx_out_tlast,
       test_hdl_clk                  => test_hdl_clk,
@@ -399,6 +403,7 @@ begin
       m_axis_sfix_cpx_in_enable  => s_axis_sfix_cpx_in_enable,
       m_axis_sfix_cpx_in_tready  => s_axis_sfix_cpx_in_tready,
       m_axis_sfix_cpx_in_tdata   => s_axis_sfix_cpx_in_tdata,
+      m_axis_sfix_cpx_in_tkeep   => s_axis_sfix_cpx_in_tkeep,
       m_axis_sfix_cpx_in_tuser   => s_axis_sfix_cpx_in_tuser,
       m_axis_sfix_cpx_in_tvalid  => s_axis_sfix_cpx_in_tvalid,
       m_axis_sfix_cpx_in_tlast   => s_axis_sfix_cpx_in_tlast,
@@ -406,6 +411,7 @@ begin
       s_axis_sfix_cpx_out_tready => m_axis_sfix_cpx_out_tready,
       s_axis_sfix_cpx_out_tdata  => m_axis_sfix_cpx_out_tdata,
       s_axis_sfix_cpx_out_tuser  => m_axis_sfix_cpx_out_tuser,
+      s_axis_sfix_cpx_out_tkeep  => m_axis_sfix_cpx_out_tkeep,
       s_axis_sfix_cpx_out_tvalid => m_axis_sfix_cpx_out_tvalid,
       s_axis_sfix_cpx_out_tlast  => m_axis_sfix_cpx_out_tlast
     );
