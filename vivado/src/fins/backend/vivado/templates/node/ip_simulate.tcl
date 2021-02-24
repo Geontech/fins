@@ -65,6 +65,11 @@ if {[current_project -quiet] == ""} {
     open_project $PROJECT_VIVADO_DIR/{{ fins['name'] }}.xpr
 }
 
+# Generate each vendor and sub-IP
+foreach ip [get_ips] {
+    generate_target simulation [get_files [get_property IP_FILE $ip ] ]
+}
+
 # Launch Simulation
 launch_sim
 
