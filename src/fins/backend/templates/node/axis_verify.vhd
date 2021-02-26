@@ -23,7 +23,6 @@
 -- ---------------------------------------------------------
 -- Template:    axis_verify.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: File I/O AXI4-Stream bus test component for FINS ports
 --==============================================================================

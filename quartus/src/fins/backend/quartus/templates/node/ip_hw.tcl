@@ -23,7 +23,6 @@
 # ---------------------------------------------------------
 # Template:    ip_hw.tcl
 # Backend:     {{ fins['backend'] }}
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: Intel Quartus Platform Designer Hardware Component
 #              Definition TCL Script

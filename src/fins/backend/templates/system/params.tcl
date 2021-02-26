@@ -23,7 +23,6 @@
 # ---------------------------------------------------------
 # Template:    params.tcl
 # Backend:     core (Application)
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: TCL script for a Application that defines parameters
 #===============================================================================

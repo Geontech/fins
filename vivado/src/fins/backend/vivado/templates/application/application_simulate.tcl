@@ -23,7 +23,6 @@
 # ---------------------------------------------------------
 # Template:    application_simulate.tcl
 # Backend:     {{ fins['backend'] }}
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: TCL script for running an Application simulation with
 #              Xilinx Vivado Xsim

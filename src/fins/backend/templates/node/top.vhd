@@ -23,7 +23,6 @@
 -- ---------------------------------------------------------
 -- Template:    top.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: Top-level interface wrapper for a FINS IP
 -- Reset Type:  Synchronous

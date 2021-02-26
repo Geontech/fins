@@ -23,7 +23,6 @@
 -- ---------------------------------------------------------
 -- Template:    avalonst_tdm_to_parallel.vhd
 -- Backend:     core (Application)
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: Converts FINS Port from Avalon-ST time-division multiplexed
 --              bus (Big Endian) to AXI4-Stream fully parallel bus

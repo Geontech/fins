@@ -23,7 +23,6 @@
 -- ---------------------------------------------------------
 -- Template:    axis_parallel_to_tdm.vhd
 -- Backend:     core (Application)
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: Converts FINS Port from AXI4-Stream fully parallel to
 --              AXI4-Stream time-division multiplexed
