@@ -398,7 +398,7 @@ begin
     {%- for clock in fins['clocks'] %}
     {{ clock['resetn'] }} <= '1';
     {%- endfor %}
-    wait for PROPERTIES_CLOCK_PERIOD; -- Wait for an arbitrary 10 clocks
+    wait for PROPERTIES_CLOCK_PERIOD*10; -- Wait for an arbitrary 10 clocks
 
     ----------------------------------------------------
     -- Verify Properties
