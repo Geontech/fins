@@ -1,5 +1,6 @@
 {
   "name":"test_system",
+  "license_file":"../../COPYRIGHT",
   "base_offset":0,
   "nodes":[
     {
