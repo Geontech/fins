@@ -111,10 +111,10 @@ IP_TARGET:=$(PROJECT_VIVADO_DIR)/{{ fins['name'] }}.xpr
 all:
 	{%- for ip in fins['ip'] %}
 	{%- if ip['library'] == "user" %}
-	make -C {{ ip['fins_path']|dirname }} all
+	$(MAKE) -C {{ ip['fins_path']|dirname }} all
 	{%- endif %}
 	{%- endfor %}
-	make -C . $(IP_TARGET)
+	$(MAKE) -C . $(IP_TARGET)
 
 # Clean target that cleans only this IP
 clean:
@@ -124,7 +124,7 @@ clean:
 clean-all:
 {%- for ip in fins['ip'] %}
 {%- if ip['library'] == "user" %}
-	make -C {{ ip['fins_path']|dirname }} $@
+	$(MAKE) -C {{ ip['fins_path']|dirname }} $@
 {%- endif %}
 {%- endfor %}
 	rm -rf $(TEMP_FILES)

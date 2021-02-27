@@ -169,7 +169,7 @@ all:
 	{%- for node in fins['nodes'] %}
 	$(MAKE) -C {{ node['fins_dir'] }} all
 	{%- endfor %}
-	make -C . $(APPLICATION_TARGET)
+	$(MAKE) -C . $(APPLICATION_TARGET)
 
 # Clean phony target that cleans only this Application
 clean:
