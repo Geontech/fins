@@ -249,8 +249,7 @@ INTERFACE_PORT_INFERENCE = {
 ################################################################################
 
 def load_json_file(filename,verbose):
-    """
-    Loads data from a JSON file
+    """Loads data from a JSON file
     """
     # Load JSON
     if os.path.exists(filename):
@@ -476,12 +475,20 @@ def find_base_address_from_bd(filename, module_name, interface_name):
 
 
 def get_elem_with_name(fins_list, name, name_key="name"):
-    """
-    For a given list of fins dicts, find the element with the specified name.
+    """For a given list of fins dicts, find the element with the specified name.
 
     For example, get_elem_with_name(fins_ports, "myinput") will return the port in 'fins_ports'
     that is named "myinput", where 'fins_ports' is a list of dicts where each dict represents a
     port and has a 'name' field.
+
+    Args:
+        fins_list (list): a list of fins sub-dictionaries
+        name (str): name of the element to retrieve
+        name_key (str): what is the dict-key to use when getting the element name
+
+    Returns:
+        dict: the element with the provided name in fins_list
+        None: if name isn't found
     """
     name_list = [n[name_key] for n in fins_list]
     if name not in name_list:
@@ -491,9 +498,14 @@ def get_elem_with_name(fins_list, name, name_key="name"):
 
 
 def get_signal_type(signal_name, verbose):
-    """
-    Given the name of a signal, determine whether it matches one of the type patterns (clock, reset...)
+    """Given the name of a signal, determine whether it matches one of the type patterns (clock, reset...)
     If so, return that type, else return None
+
+    Args:
+        signal_name (str): name of the signal whose type should be retrieved
+    
+    Returns:
+        str: the signal type string on success, None on failure
     """
     # Loop through the interface port inference dictionary
     for interface_type, signal_defs in INTERFACE_PORT_INFERENCE.items():
@@ -517,11 +529,15 @@ def get_signal_type(signal_name, verbose):
 
 
 def get_port(node_name, port_name, fins_data, port_type='ports'):
-    """
-    Get the port on the specified node in fins_data
-        node_name : node of interest in fins_data
-        port_name : port being searched for in the node specified by node_name
-        fins_data : fins_data which may contain the specified node and its port
+    """Get the port on the specified node in fins_data
+    
+    Args:
+        node_name (str): node of interest in fins_data
+        port_name (str): port being searched for in the node specified by node_name
+        fins_data (dict): fins_data which may contain the specified node and its port
+
+    Returns:
+        dict: the sub-dictionary containing information for the port
     """
     # If a node is associated with the net, get the corresponding node in fins_data
     node = get_elem_with_name(fins_data['nodes'], node_name, name_key='module_name')
@@ -534,21 +550,29 @@ def get_port(node_name, port_name, fins_data, port_type='ports'):
 
 
 def get_hdl_port(node_name, port_name, fins_data):
-    """
-    Get the HDL port on the specified node in fins_data
-        node_name : node of interest in fins_data
-        port_name : port being searched for in the node specified by node_name
-        fins_data : fins_data which may contain the specified node and its port
+    """Get the HDL port on the specified node in fins_data
+
+    Args:
+        node_name (str): node of interest in fins_data
+        port_name (str): port being searched for in the node specified by node_name
+        fins_data (dict): fins_data which may contain the specified node and its port
+
+    Returns:
+        dict: the sub-dictionary containing information for the port
     """
     return get_port(node_name, port_name, fins_data, port_type='hdl')
 
 
 def get_any_port(node_name, port_name, fins_data):
-    """
-    Get the any port on the specified node in fins_data (AXIS or HDL)
-        node_name : node of interest in fins_data
-        port_name : port being searched for in the node specified by node_name
-        fins_dataa: fins_data which may contain the specified node and its port
+    """Get the any port on the specified node in fins_data (AXIS or HDL)
+
+    Args:
+        node_name (str): node of interest in fins_data
+        port_name (str): port being searched for in the node specified by node_name
+        fins_data (dict): fins_data which may contain the specified node and its port
+
+    Returns:
+        dict: the sub-dictionary containing information for the port
     """
     hdl_port = get_port(node_name, port_name, fins_data, port_type='hdl')
     if hdl_port is not None:
@@ -557,13 +581,17 @@ def get_any_port(node_name, port_name, fins_data):
 
 
 def get_net_type(net, fins_data, verbose):
-    """
-    Given a net, return its type and its port (if the type is 'port' or 'hdl')
-        net_type : 'port' if the net is actually a node's port, 'hdl' if the net is an HDL port on a node,
-                     otherwise the signal-type of this net ('clock' or 'reset')
-                    None if the net is just a type-less signal
-        port     : the port that this net matches based on its node and name (None if this "net" is not a port in the Application)
+    """Given a net, return its type and its port (if the type is 'port' or 'hdl')
 
+    Args:
+        net_type (str): 'port' if the net is actually a node's port, 'hdl' if the net is an HDL port on a node,
+                         otherwise the signal-type of this net ('clock' or 'reset')
+                         None if the net is just a type-less signal
+        port (dict): the port that this net matches based on its node and name (None if this "net" is not a port in the Application)
+
+    Returns:
+        str: the net type string on success ('port', 'hdl', signal_type, None (on failure))
+        port: the port-subdictionary with information for this net, if this net is a port (type=port or hdl)
     """
     net_type = None
     port = None
@@ -1220,8 +1248,7 @@ def populate_hdl_inferences(fins_data,verbose):
 
 
 def populate_property_interfaces(fins_data, verbose):
-    """
-    Modifies the contents of fins_data. Must be run after generator has been run for all sub-IPs/Nodes.
+    """Modifies the contents of fins_data. Must be run after generator has been run for all sub-IPs/Nodes.
 
     Can only be called for Nodes and Applications (not Systems)
 
@@ -1343,8 +1370,7 @@ def populate_property_interfaces(fins_data, verbose):
 
 
 def populate_fins_node(fins_data, verbose):
-    """
-    Modifies the contents of fins_data for a FINS Node.
+    """Modifies the contents of fins_data for a FINS Node.
 
     Populate contents specific to a FINS Node.
     """
@@ -1352,8 +1378,7 @@ def populate_fins_node(fins_data, verbose):
 
 
 def populate_application_connections(fins_data, verbose):
-    """
-    Modifies the contents of fins_data for a FINS Application.
+    """Modifies the contents of fins_data for a FINS Application.
 
     Populate each connection in the Application so that each source and destination
     is associated with a type and port (if applicable). Port-port connections can 
@@ -1431,8 +1456,7 @@ def populate_application_connections(fins_data, verbose):
                         destination['port']['connected'][destination['instance']] = True
 
 def populate_application_clocks(fins_data, verbose):
-    """
-    Modifies the contents of fins_data for a FINS Application.
+    """Modifies the contents of fins_data for a FINS Application.
 
     Populate clock domains (fins_data['clocks']) and which nets they connect to:
         [
@@ -1480,8 +1504,7 @@ def populate_application_clocks(fins_data, verbose):
 
 
 def populate_application_exports(fins_data, verbose):
-    """
-    Modifies the contents of fins_data for a FINS Application.
+    """Modifies the contents of fins_data for a FINS Application.
 
     Export ports that should be exposed externally from the Application.
     "Exporting" is another way of saying "make this an external port/interface of this Application"
@@ -1594,8 +1617,7 @@ def populate_application_exports(fins_data, verbose):
 
 
 def populate_fins_application_node(node, verbose):
-    """
-    Modifies the contents of 'node' dictionary. Must be run after run_generator has been for this Node.
+    """Modifies the contents of 'node' dictionary. Must be run after run_generator has been for this Node.
 
     Determines/sets the following in the node dictionary:
         fins_dir:  is the source directory where this Node/IP originates
@@ -1610,8 +1632,7 @@ def populate_fins_application_node(node, verbose):
 
 
 def populate_fins_application(fins_data, verbose):
-    """
-    Modifies the contents of fins_data for a FINS Application.
+    """Modifies the contents of fins_data for a FINS Application.
 
     Populate contents specific to a FINS Application.
     """
@@ -1625,8 +1646,7 @@ def populate_fins_application(fins_data, verbose):
 
 
 def populate_fins_system_node(node, verbose):
-    """
-    Modifies the contents of 'node' dictionary.
+    """Modifies the contents of 'node' dictionary.
 
     Determines/sets various information relating to the node:
         node_name
@@ -1714,8 +1734,7 @@ def populate_fins_system_node(node, verbose):
 
 
 def populate_fins_system(fins_data, verbose):
-    """
-    Modifies the contents of fins_data for a FINS System.
+    """Modifies the contents of fins_data for a FINS System.
 
     Populate contents specific to a FINS System.
     """
@@ -2061,11 +2080,10 @@ def validate_fins_data(fins_data, filename, verbose):
 
 
 def _override_fins_data(fins_data,origfile,filename,verbose):
-    '''
-    Looks for a <filename>.json.override file in the same directory and overrides params/part of the fins data
+    """Looks for a <filename>.json.override file in the same directory and overrides params/part of the fins data
 
     Used to override the params/part of a Node in an Application or of a sub-IP of a Node
-    '''
+    """
     if (os.path.exists(filename)):
         # Open .override file
         with open(filename) as override_file:
@@ -2086,8 +2104,7 @@ def _override_fins_data(fins_data,origfile,filename,verbose):
 
 
 def validate_and_convert_node_fins_data(fins_data,filename,backend,verbose):
-    """
-    Validates and converts data from a FINS Node JSON file
+    """Validates and converts data from a FINS Node JSON file
     """
     # Validate the FINS Node JSON using the node.json file
     validate_fins_data(fins_data,filename,verbose)
@@ -2121,8 +2138,7 @@ def validate_and_convert_node_fins_data(fins_data,filename,backend,verbose):
 
 
 def validate_node_fins_data_final(fins_data, verbose):
-    """
-    Final validation of the Node fins_data dictionary before
+    """Final validation of the Node fins_data dictionary before
     generation is run for the Node
     """
     # Placeholder function
@@ -2130,8 +2146,7 @@ def validate_node_fins_data_final(fins_data, verbose):
 
 
 def validate_application_connections(fins_data, verbose):
-    """
-    For each pair of connection endpoints that are both ports,
+    """For each pair of connection endpoints that are both ports,
     confirm that a connection between these ports would be valid
 
     Check that the following fields match within each pair of ports:
@@ -2203,8 +2218,7 @@ def validate_application_connections(fins_data, verbose):
 
 
 def validate_application_ports(fins_data, verbose):
-    """
-    Run port verification for Application ports.
+    """Run port verification for Application ports.
     This function first calls the standard (Node) validate_ports()
     and then verifies that each port also has an associated Application clock
     """
@@ -2219,8 +2233,7 @@ def validate_application_ports(fins_data, verbose):
                 sys.exit(1)
 
 def validate_and_convert_application_fins_data(fins_data, filename, backend, verbose):
-    """
-    Validates and converts data from a FINS Application JSON file
+    """Validates and converts data from a FINS Application JSON file
     """
     validate_fins_data(fins_data, filename, verbose)
 
@@ -2250,8 +2263,7 @@ def validate_and_convert_application_fins_data(fins_data, filename, backend, ver
 
 
 def validate_application_fins_data_final(fins_data, verbose):
-    """
-    Final validation of the Application fins_data dictionary before
+    """Final validation of the Application fins_data dictionary before
     generation is run for the Application
     """
     validate_application_ports(fins_data, verbose)
@@ -2259,8 +2271,7 @@ def validate_application_fins_data_final(fins_data, verbose):
 
 
 def validate_and_convert_system_fins_data(fins_data, filename, backend, verbose):
-    """
-    Validates and converts data from a FINS System JSON file
+    """Validates and converts data from a FINS System JSON file
     """
     validate_fins_data(fins_data, filename, verbose)
 
@@ -2291,8 +2302,7 @@ def validate_and_convert_system_fins_data(fins_data, filename, backend, verbose)
     return fins_data
 
 def validate_system_fins_data_final(fins_data, verbose):
-    """
-    Final validation of the System fins_data dictionary before
+    """Final validation of the System fins_data dictionary before
     generation is run for the System
     """
     # Placeholder function
@@ -2300,8 +2310,7 @@ def validate_system_fins_data_final(fins_data, verbose):
 
 
 def post_generate_node_core(fins_data, verbose):
-    """
-    Operations that must occur after the 'core' generation is complete for a Node,
+    """Operations that must occur after the 'core' generation is complete for a Node,
     but before backend generation starts
     """
     # Read top-level HDL code and find the ports
