@@ -30,6 +30,10 @@
       "is_required":false,
       "types":["str"]
     },
+    "license_file":{
+      "is_required":false,
+      "types":["str"]
+    },
     "base_offset":{
       "is_required":false,
       "types":["int"]

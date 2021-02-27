@@ -876,6 +876,16 @@ def populate_fins_fields(fins_data,verbose):
         fins_data['top_sim'] = fins_data['name']+'_tb'
         if verbose:
             print('INFO: Setting default top_sim to',fins_data['top_sim'])
+    if 'license_file' in fins_data:
+        if not os.path.exists(fins_data['license_file']):
+            print(f'ERROR: provided license_file does not exist: {license_file}')
+            sys.exit(1)
+        else:
+            with open(fins_data['license_file'], 'r', errors='ignore') as license_file:
+                fins_data['license_lines'] = license_file.readlines()
+            if verbose:
+                print(f'INFO: reading license file "{fins_data["license_file"]}" to insert in generated files')
+
     return fins_data
 
 
