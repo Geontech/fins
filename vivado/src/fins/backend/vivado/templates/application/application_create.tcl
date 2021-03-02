@@ -126,31 +126,6 @@ create_bd_cell -type ip -vlnv $vlnv {{ node['module_name'] }}
 {%  endif %}
 {%- endfor %}
 
-# Wiring clock domains
-{% for clock in fins['clocks'] %}
-# Add "{{ clock['basename'] }}" clock domain: ({{ clock['clock'] }} and {{ clock['resetn'] }})
-create_bd_port -dir I -type clk {{ clock['clock'] }}
-create_bd_port -dir I -type rst {{ clock['resetn'] }}
-set_property -dict [list CONFIG.ASSOCIATED_ASYNC_RESET {{ clock['resetn'] }}] [get_bd_ports {{ clock['clock'] }}]
-
-# Connecting clocks and resets for "{{ clock['base_name'] }}" clock domain
-{%-  for net in clock['nets'] %}
-{%-   if net['type'] == 'port' %}
-{%-    set port = net['port'] %}
-{%-    for i in range(port['num_instances']) %}
-connect_bd_net [get_bd_ports {{ clock['clock'] }}] [get_bd_pins {{ net['node_name'] }}/{{ port|axisprefix(i) }}_aclk]
-connect_bd_net [get_bd_ports {{ clock['resetn'] }}] [get_bd_pins {{ net['node_name'] }}/{{ port|axisprefix(i) }}_aresetn]
-{%-    endfor %}
-{%-   elif net['type'] == 'hdl' %}
-{%-    set port = net['port'] %}
-connect_bd_net [get_bd_ports {{ clock['clock'] }}] [get_bd_pins {{ net['node_name'] }}/{{ port['name'] }}]
-{%-   elif net['type'] == 'prop_interface' %}
-connect_bd_net [get_bd_ports {{ clock['clock'] }}] [get_bd_pins {{ net['node_name'] }}/{{ net['interface']|axi4liteprefix() }}_ACLK]
-connect_bd_net [get_bd_ports {{ clock['resetn'] }}] [get_bd_pins {{ net['node_name'] }}/{{ net['interface']|axi4liteprefix() }}_ARESETN]
-{%-   endif %}
-{%-  endfor %}
-{%- endfor %}
-
 {#-
 # For each connection, determine the 'type' of each source and destination (port, or other)
 # Make connections between ports or signals accordingly, and include '<node>.' as a signal prefix
@@ -193,6 +168,7 @@ connect_bd_net [get_bd_pins {{ source['node_name'] }}/{{ source['net'] }}] [get_
 {%-   for port in fins['ports']['ports'] %}
 {%-    set mode = 'Slave' if port['direction']|lower == 'in' else 'Master' %}
 {%-    for i in range(port['num_instances']) %}
+# Creating application ports by exporting some (not necessarily all) instances of each port on each nodes in the application
 create_bd_intf_port -mode {{ mode }} -vlnv xilinx.com:interface:axis_rtl:1.0 {{ port|axisprefix(i) }}
 connect_bd_intf_net [get_bd_intf_pins {{ port['node_name'] }}/{{ port['node_port']|axisprefix(port['node_instances'][i]) }}] [get_bd_intf_ports {{ port|axisprefix(i) }}]
 {%-    endfor %}
@@ -236,6 +212,31 @@ connect_bd_intf_net [get_bd_intf_pins {{ internal_iface_name }}] [get_bd_intf_po
 {%-   endfor %}
 {%-  endfor %}
 {%- endif %}
+
+# Wiring clock domains
+{% for clock in fins['clocks'] %}
+# Add "{{ clock['basename'] }}" clock domain: ({{ clock['clock'] }} and {{ clock['resetn'] }})
+create_bd_port -dir I -type clk {{ clock['clock'] }}
+create_bd_port -dir I -type rst {{ clock['resetn'] }}
+set_property -dict [list CONFIG.ASSOCIATED_ASYNC_RESET {{ clock['resetn'] }}] [get_bd_ports {{ clock['clock'] }}]
+
+# Connecting clocks and resets for "{{ clock['base_name'] }}" clock domain
+{%-  for net in clock['nets'] %}
+{%-   if net['type'] == 'port' %}
+{%-    set port = net['port'] %}
+{%-    for i in range(port['num_instances']) %}
+connect_bd_net [get_bd_ports {{ clock['clock'] }}] [get_bd_pins {{ net['node_name'] }}/{{ port|axisprefix(i) }}_aclk]
+connect_bd_net [get_bd_ports {{ clock['resetn'] }}] [get_bd_pins {{ net['node_name'] }}/{{ port|axisprefix(i) }}_aresetn]
+{%-    endfor %}
+{%-   elif net['type'] == 'hdl' %}
+{%-    set port = net['port'] %}
+connect_bd_net [get_bd_ports {{ clock['clock'] }}] [get_bd_pins {{ net['node_name'] }}/{{ port['name'] }}]
+{%-   elif net['type'] == 'prop_interface' %}
+connect_bd_net [get_bd_ports {{ clock['clock'] }}] [get_bd_pins {{ net['node_name'] }}/{{ net['interface']|axi4liteprefix() }}_ACLK]
+connect_bd_net [get_bd_ports {{ clock['resetn'] }}] [get_bd_pins {{ net['node_name'] }}/{{ net['interface']|axi4liteprefix() }}_ARESETN]
+{%-   endif %}
+{%-  endfor %}
+{%- endfor %}
 
 validate_bd_design
 regenerate_bd_layout
