@@ -51,33 +51,33 @@ rm -rf system/log/ system/gen/ system/project
 echo "TESTING '$backend': Generating, building and simulating test Node..."
 cd node
 rm -rf Makefile gen/ project/ log/
-fins -b $backend fins.json
+fins -b $backend fins.json -v
 make sim
 make clean-all
 echo "TESTING '$backend': Return status (should be 0): $?"
 
 echo "TESTING '$backend': Generating, building and simulating test Application..."
 cd ../application
-fins -b $backend application_test.json
+fins -b $backend application_test.json -v
 make sim
 echo "TESTING '$backend': Return status (should be 0): $?"
 
 echo "TESTING '$backend': Constructing a parent FPGA design for testing, and validating/generating a FINS System that uses it..."
 cd ../system
 make $backend
-fins ${backend}_system_test.json
+fins ${backend}_system_test.json -v
 make clean
 make clean-all -C ../application
 echo "TESTING '$backend': Return status (should be 0): $?"
 
 cd ../../tutorials/power_converter
-fins -b $backend fins.json
+fins -b $backend fins.json -v
 make sim
 make clean-all
 echo "TESTING '$backend': Return status (should be 0): $?"
 
 cd ../power_application
-fins -b $backend fins.json
+fins -b $backend fins.json -v
 make sim
 make clean-all
 echo "TESTING '$backend': Return status (should be 0): $?"

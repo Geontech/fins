@@ -19,9 +19,14 @@
 
 import os
 import json
+import logging
 import datetime
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
+
+
+# This logger will inherit log-level and settings from main.py
+LOGGER = logging.getLogger(__name__)
 
 
 CORE_NODE_TEMPLATE_DIR = os.path.dirname(__file__) + '/templates/node/'

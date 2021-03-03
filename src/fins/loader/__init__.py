@@ -27,6 +27,11 @@ import xml.etree.ElementTree as ET
 
 from fins.utils import SchemaType
 
+
+# This logger will inherit log-level and settings from main.py
+LOGGER = logging.getLogger('fins.loader')
+
+
 __all__ = (
     'load_fins_data'
 )
@@ -248,7 +253,7 @@ INTERFACE_PORT_INFERENCE = {
 # Loader Utility Functions
 ################################################################################
 
-def load_json_file(filename,verbose):
+def load_json_file(filename):
     """Loads data from a JSON file
     """
     # Load JSON
@@ -256,7 +261,7 @@ def load_json_file(filename,verbose):
         with open(filename) as fins_file:
             json_data = json.load(fins_file)
     else:
-        print('ERROR: No file',filename,'exists')
+        LOGGER.error(f'No file {filename} exists')
         sys.exit(1)
 
     # Return
@@ -279,7 +284,7 @@ def get_str_interface_name(interface_type, name):
     elif interface_type == 'avalon_streaming':
         return name.rpartition('_')[0]
     else:
-        print('ERROR: Unsupported interface type', interface_type)
+        LOGGER.error(f'Unsupported interface type {interface_type}')
         sys.exit(1)
 
 
@@ -304,13 +309,13 @@ def get_param_value(params,key_or_value):
             if key_or_value.lower() == param['name'].lower():
                 return param['value']
         else:
-            print('ERROR: {} not found in params'.format(key_or_value))
+            LOGGER.error(f'{key_or_value} not found in params')
             sys.exit(1)
     else:
         return key_or_value
 
 
-def convert_parameters_to_literal(fins_data,verbose):
+def convert_parameters_to_literal(fins_data):
     # Get the parameters
     params = []
     if 'params' in fins_data:
@@ -384,7 +389,7 @@ def convert_parameters_to_literal(fins_data,verbose):
                     # Get the value of parent parameter
                     parent_value = get_param_value(params, param['parent'])
                     if parent_value is None:
-                        print('ERROR: {} of {} not found in parent IP'.format(param['parent'], node['fins_path']))
+                        LOGGER.error(f'{param["parent"]} of {node["fins_path"]} not found in parent IP')
                         sys.exit(1)
                     # Put the value into the node
                     node['params'][param_ix]['value'] = parent_value
@@ -400,7 +405,7 @@ def convert_parameters_to_literal(fins_data,verbose):
                     # Get the value of parent parameter
                     parent_value = get_param_value(params, param['parent'])
                     if parent_value is None:
-                        print('ERROR: {} of {} not found in parent IP'.format(param['parent'], ip['fins_path']))
+                        LOGGER.error(f'{param["parent"]} of {ip["fins_path"]} not found in parent IP')
                         sys.exit(1)
                     # Put the value into the IP
                     ip['params'][param_ix]['value'] = parent_value
@@ -415,7 +420,7 @@ def find_base_address_from_qsys(filename, module_name, interface_name):
 
     # Parse the Qsys XML file
     if not os.path.exists(filename):
-        print('ERROR: No file',filename,'exists')
+        LOGGER.error(f'No file {filename} exists')
         sys.exit(1)
     tree = ET.parse(filename)
     root = tree.getroot()
@@ -440,15 +445,15 @@ def find_base_address_from_qsys(filename, module_name, interface_name):
                     base_address = int(parameter.get('value'), 16)
                     return base_address
                 except ValueError:
-                    print('ERROR: Unable to convert the base address from hex to int. Problem string:',parameter.get('value'))
+                    LOGGER.error(f'Unable to convert the base address from hex to int. Problem string: {parameter.get("value")}')
                     sys.exit(1)
 
         # If we haven't returned, it is an error
-        print('ERROR: Unable to find baseAddress parameter in qsys file',filename)
+        LOGGER.error(f'Unable to find baseAddress parameter in qsys file {filename}')
         sys.exit(1)
 
     # If we haven't returned, it is an error
-    print('ERROR: Unable to find memory-mapped connection that matches',connection_end)
+    LOGGER.error(f'Unable to find memory-mapped connection that matches {connection_end}')
     sys.exit(1)
 
 
@@ -466,11 +471,11 @@ def find_base_address_from_bd(filename, module_name, interface_name):
                         base_address = int(segment['offset'], 16)
                         return base_address
                     except ValueError:
-                        print('ERROR: Unable to convert the base address from hex to int. Problem string:',segment['offset'])
+                        LOGGER.error(f'Unable to convert the base address from hex to int. Problem string: {segment["offset"]}')
                         sys.exit(1)
 
     # If we haven't returned, it is an error
-    print('ERROR: Unable to find address space for',interface_name,'of',module_name,'in',filename)
+    LOGGER.error(f'Unable to find address space for {interface_name} of {module_name} in {filename}')
     sys.exit(1)
 
 
@@ -497,7 +502,7 @@ def get_elem_with_name(fins_list, name, name_key="name"):
     return fins_list[elem_index]
 
 
-def get_signal_type(signal_name, verbose):
+def get_signal_type(signal_name):
     """Given the name of a signal, determine whether it matches one of the type patterns (clock, reset...)
     If so, return that type, else return None
 
@@ -522,8 +527,7 @@ def get_signal_type(signal_name, verbose):
                     match_found = True
             # Parse the interface
             if match_found:
-                if verbose:
-                    print('INFO: Signal', signal_name, 'was determined to have type', interface_type)
+                LOGGER.debug(f'Signal {signal_name} was determined to have type {interface_type}')
                 return interface_type
     return None
 
@@ -580,7 +584,7 @@ def get_any_port(node_name, port_name, fins_data):
     return get_port(node_name, port_name, fins_data, port_type='hdl')
 
 
-def get_net_type(net, fins_data, verbose):
+def get_net_type(net, fins_data):
     """Given a net, return its type and its port (if the type is 'port' or 'hdl')
 
     Args:
@@ -608,7 +612,7 @@ def get_net_type(net, fins_data, verbose):
 
     if net_type is None:
         # Determine if the source net has an associated type (clock/reset...) and if so, get it
-        net_type = get_signal_type(net['net'], verbose)
+        net_type = get_signal_type(net['net'])
 
     return net_type, port
 
@@ -617,7 +621,7 @@ def get_net_type(net, fins_data, verbose):
 # Populate Entries in the FINS Data Dictionary
 ################################################################################
 
-def populate_properties(fins_data,base_offset,verbose):
+def populate_properties(fins_data,base_offset):
     # Make sure there are properties first
     if not 'properties' in fins_data:
         return fins_data
@@ -628,7 +632,7 @@ def populate_properties(fins_data,base_offset,verbose):
         # TODO: Implement is_signed
         if 'is_signed' in prop:
             if prop['is_signed']:
-                print('ERROR: The is_signed field defined for property {} is not implemented yet'.format(prop['name']))
+                LOGGER.error(f'The is_signed field defined for property {prop["name"]} is not implemented yet')
                 sys.exit(1)
 
         # Set defaults
@@ -668,23 +672,23 @@ def populate_properties(fins_data,base_offset,verbose):
 
         # Validate that the length is >=1
         if prop['length'] < 1:
-            print('ERROR: The length of property {} is < 1'.format(prop['name']))
+            LOGGER.error(f'The length of property {prop["name"]} is < 1')
             sys.exit(1)
 
         # Validate that the ranges are within valid widths
         if prop['is_signed']:
             if prop['range_max'] > 2**(prop['width']-1)-1:
-                print('ERROR: The range_max of property {} is larger than is possible for the signed bit width'.format(prop['name']))
+                LOGGER.error(f'The range_max of property {prop["name"]} is larger than is possible for the signed bit width')
                 sys.exit(1)
             if prop['range_min'] < -(2**(prop['width']-1)):
-                print('ERROR: The range_min of property {} is smaller than is possible for the signed bit width'.format(prop['name']))
+                LOGGER.error(f'The range_min of property {prop["name"]} is smaller than is possible for the signed bit width')
                 sys.exit(1)
         else:
             if prop['range_max'] > 2**prop['width']-1:
-                print('ERROR: The range_max of property {} is larger than is possible for the unsigned bit width'.format(prop['name']))
+                LOGGER.error(f'The range_max of property {prop["name"]} is larger than is possible for the unsigned bit width')
                 sys.exit(1)
             if prop['range_min'] < 0:
-                print('ERROR: The range_min of property {} is smaller than is possible for the unsigned bit width'.format(prop['name']))
+                LOGGER.error(f'The range_min of property {prop["name"]} is smaller than is possible for the unsigned bit width')
                 sys.exit(1)
 
         # If default_values is not a list, make it one
@@ -694,7 +698,7 @@ def populate_properties(fins_data,base_offset,verbose):
             if len(prop['default_values']) == 1:
                 prop['default_values'] = prop['default_values'] * prop['length']
             else:
-                print('ERROR: The number of elements in default_values of property {} does not match the property length'.format(prop['name']))
+                LOGGER.error(f'The number of elements in default_values of property {prop["name"]} does not match the property length')
                 sys.exit(1)
 
     # Calculate offsets
@@ -712,14 +716,14 @@ def populate_properties(fins_data,base_offset,verbose):
     else:
         largest_possible_offset = 2**fins_data['properties']['addr_width']-1
     if current_offset > largest_possible_offset:
-        print('ERROR: The specified address width {} is not large enough to accomodate all the properties'.format(fins_data['properties']['addr_width']))
+        LOGGER.error(f'The specified address width {fins_data["properties"]["addr_width"]} is not large enough to accomodate all the properties')
         sys.exit(1)
 
     # Return the modified dictionary
     return fins_data
 
 
-def populate_ports(fins_data,verbose):
+def populate_ports(fins_data):
     # Loop through ports
     if 'ports' in fins_data:
         if 'ports' in fins_data['ports']:
@@ -760,15 +764,15 @@ def populate_ports(fins_data,verbose):
                         current_offset = metafield['offset'] + metafield['bit_width']
                 # Validate values
                 if port['num_instances'] < 1:
-                    print('ERROR: The num_instances of port {} is < 1'.format(port['name']))
+                    LOGGER.error(f'The num_instances of port {port["name"]} is < 1')
                     sys.exit(1)
 
                 # Check the data bit_width for limits
                 if port['data']['bit_width'] < 8:
-                    print('ERROR: Port',port['name'],'data bit_width is smaller than the minimum value of 8')
+                    LOGGER.error(f'Port {port["name"]} data bit_width is smaller than the minimum value of 8')
                     sys.exit(1)
                 elif port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] > 4096:
-                    print('ERROR: Port',port['name'],'total data width (bit_width*num_samples*num_channels) is larger than the maximum value of 4096')
+                    LOGGER.error(f'Port {port["name"]} total data width (bit_width*num_samples*num_channels) is larger than the maximum value of 4096')
                     sys.exit(1)
                 
 		# If the port supports byte enable, determine the number of bytes (rounded up) the port's
@@ -783,7 +787,7 @@ def populate_ports(fins_data,verbose):
     return fins_data
 
 
-def populate_filesets(fins_data,verbose):
+def populate_filesets(fins_data):
     if not 'filesets' in fins_data:
         return fins_data
 
@@ -808,7 +812,7 @@ def populate_filesets(fins_data,verbose):
                         design_file['type'] = 'system_verilog'
                     else:
                         design_file['type'] = 'other'
-                        print('WARNING: No type was provided or detected, so OTHER was assigned to',design_file['path'],'... ONLY a concern with Quartus')
+                        LOGGER.warning(f'No type was provided or detected, so OTHER was assigned to {design_file["path"]} ... ONLY a concern with Quartus')
 
     if 'constraints' in fins_data['filesets']:
         for constraints_file in fins_data['filesets']['constraints']:
@@ -818,7 +822,7 @@ def populate_filesets(fins_data,verbose):
                 elif '.xdc' in constraints_file['path']:
                     constraints_file['type'] = 'xdc'
                 else:
-                    print('ERROR: A type cannot be auto-detected from constraints file',constraints_file['path'])
+                    LOGGER.error(f'A type cannot be auto-detected from constraints file {constraints_file["path"]}')
                     sys.exit(1)
 
     if 'scripts' in fins_data['filesets']:
@@ -838,7 +842,7 @@ def populate_filesets(fins_data,verbose):
                             script_file['type'] = 'cmdline'
                         else:
                             script_file['type'] = 'cmdline'
-                            print('WARNING: No type provided or detected, so CMDLINE was assigned to',script_file['path'],'... ONLY a concern if command line execution not intended')
+                            LOGGER.warning(f'No type provided or detected, so CMDLINE was assigned to {script_file["path"]}... ONLY a concern if command line execution not intended')
                             sys.exit(1)
 
         if 'vendor_ip' in fins_data['filesets']['scripts']:
@@ -850,7 +854,7 @@ def populate_filesets(fins_data,verbose):
     return fins_data
 
 
-def populate_ip(fins_data,verbose):
+def populate_ip(fins_data):
     # Only continue if this is applicable
     if not 'ip' in fins_data:
         return fins_data
@@ -862,7 +866,7 @@ def populate_ip(fins_data,verbose):
             with open(ip['fins_path']) as sub_ip_fins_file:
                 sub_ip_fins_data = json.load(sub_ip_fins_file)
         else:
-            print('ERROR: No sub-ip file',ip['fins_path'],'exists')
+            LOGGER.error(f'No sub-ip file {ip["fins_path"]} exists')
             sys.exit(1)
 
         # Populate the sub-ip's properties
@@ -883,49 +887,41 @@ def populate_ip(fins_data,verbose):
     return fins_data
 
 
-def populate_fins_fields(fins_data,verbose):
+def populate_fins_fields(fins_data):
     if not 'version' in fins_data:
         fins_data['version'] = '1.0'
-        if verbose:
-            print('INFO: Setting default version to',fins_data['version'])
+        LOGGER.debug(f'Setting default version to {fins_data["version"]}')
     if not 'company_url' in fins_data:
         fins_data['company_url'] = 'user.org'
-        if verbose:
-            print('INFO: Setting default company_url to',fins_data['company_url'])
+        LOGGER.debug(f'Setting default company_url to {fins_data["company_url"]}')
     if not 'library' in fins_data:
         fins_data['library'] = 'user'
-        if verbose:
-            print('INFO: Setting default library to',fins_data['library'])
+        LOGGER.debug(f'Setting default library to {fins_data["library"]}')
     if not 'top_source' in fins_data:
         fins_data['top_source'] = fins_data['name']
-        if verbose:
-            print('INFO: Setting default top_source to',fins_data['top_source'])
+        LOGGER.debug(f'Setting default top_source to {fins_data["top_source"]}')
     if not 'top_sim' in fins_data:
         fins_data['top_sim'] = fins_data['name']+'_tb'
-        if verbose:
-            print('INFO: Setting default top_sim to',fins_data['top_sim'])
+        LOGGER.debug(f'Setting default top_sim to {fins_data["top_sim"]}')
     if 'license_file' in fins_data:
         if not os.path.exists(fins_data['license_file']):
-            print(f'ERROR: provided license_file does not exist: {license_file}')
+            LOGGER.error(f'provided license_file does not exist: {license_file}')
             sys.exit(1)
         else:
             with open(fins_data['license_file'], 'r', errors='ignore') as license_file:
                 fins_data['license_lines'] = license_file.readlines()
-            if verbose:
-                print(f'INFO: reading license file "{fins_data["license_file"]}" to insert in generated files')
+            LOGGER.debug(f'reading license file "{fins_data["license_file"]}" to insert in generated files')
 
     return fins_data
 
 
-def populate_hdl_inferences(fins_data,verbose):
+def populate_hdl_inferences(fins_data):
     # Make sure the fins_data has the correct keys
     if not 'filesets' in fins_data:
-        if verbose:
-            print('INFO: No filesets in fins_data')
+        LOGGER.debug('No filesets in fins_data')
         return fins_data
     if not 'source' in fins_data['filesets']:
-        if verbose:
-            print('INFO: No source in filesets of fins_data')
+        LOGGER.debug('No source in filesets of fins_data')
         return fins_data
 
     top_file_descriptor = {}
@@ -933,30 +929,28 @@ def populate_hdl_inferences(fins_data,verbose):
     for source_file in fins_data['filesets']['source']:
         if '/'+fins_data['top_source']+'.vhd' in source_file['path']:
             if top_file_descriptor:
-                print('ERROR: Multiple VHDL source files match the top_source key',fins_data['top_source'])
+                LOGGER.error(f'Multiple VHDL source files match the top_source key {fins_data["top_source"]}')
                 sys.exit(1)
             else:
                 top_file_descriptor = source_file
-                if verbose:
-                    print('INFO: Found the top-level',top_file_descriptor['type'],'file',top_file_descriptor['path'])
+                LOGGER.debug(f'Found the top-level {top_file_descriptor["type"]} file {top_file_descriptor["path"]}')
     # Look for verilog file in source filesets
     if not top_file_descriptor:
         for source_file in fins_data['filesets']['source']:
             if fins_data['top_source']+'.v' in source_file['path']:
                 if top_file_descriptor:
-                    print('ERROR: Multiple VERILOG source files match the top_source key',fins_data['top_source'])
+                    LOGGER.error(f'Multiple VERILOG source files match the top_source key {fins_data["top_source"]}')
                     sys.exit(1)
                 else:
                     top_file_descriptor = source_file
-                    if verbose:
-                        print('INFO: Found the top-level',top_file_descriptor['type'],'file',top_file_descriptor['path'])
+                    LOGGER.debug(f'Found the top-level {top_file_descriptor["type"]} file {top_file_descriptor["path"]}')
 
     # Make sure we found the top-level source file
     if not top_file_descriptor:
-        print('WARNING: HDL inference failed because no source file matches the top_source key',fins_data['top_source'])
+        LOGGER.warning(f'HDL inference failed because no source file matches the top_source key {fins_data["top_source"]}')
         return fins_data
     if not os.path.isfile(top_file_descriptor['path']):
-        print('WARNING: HDL inference failed because the top-level source file does not exist',top_file_descriptor['path'])
+        LOGGER.warning(f'HDL inference failed because the top-level source file does not exist {top_file_descriptor["path"]}')
         return fins_data
 
     # Initialize the fins_data dictionary
@@ -965,18 +959,17 @@ def populate_hdl_inferences(fins_data,verbose):
     # Read the file
     with open(top_file_descriptor['path'], 'r') as top_file:
         top_file_contents = top_file.read()
-        if verbose:
-            print('INFO: Reading ports from',top_file_descriptor['path'])
+        LOGGER.debug(f'Reading ports from {top_file_descriptor["path"]}')
 
     # Parse the ports and the generics
     if 'vhdl' in top_file_descriptor['type'].lower():
         # Find the entity
         vhdl_entity_find = re.findall(r'\s+entity\s+\w+\s+is.+?\s+end[\s;]',top_file_contents,flags=re.IGNORECASE|re.DOTALL)
         if not vhdl_entity_find:
-            print('WARNING: HDL inference failed because no entity found in VHDL file',top_file_descriptor['path'])
+            LOGGER.warning(f'HDL inference failed because no entity found in VHDL file {top_file_descriptor["path"]}')
             return fins_data
         if len(vhdl_entity_find) > 1:
-            print('WARNING: HDL inference failed because the top level source file',top_file_descriptor['path'],'has multiple entities')
+            LOGGER.warning(f'HDL inference failed because the top level source file {top_file_descriptor["path"]} has multiple entities')
             return fins_data
         vhdl_entity = vhdl_entity_find[0]
 
@@ -986,24 +979,23 @@ def populate_hdl_inferences(fins_data,verbose):
         vhdl_entity_comments = re.findall(r'--[ \t\S]*', vhdl_entity)
         for vhdl_entity_comment in vhdl_entity_comments:
             vhdl_entity = vhdl_entity.replace(vhdl_entity_comment,'')
-            if verbose:
-                print('INFO: Comment deleted',vhdl_entity_comment)
+            LOGGER.debug(f'Comment deleted {vhdl_entity_comment}')
 
         # Find the keywords to use for parsing
         vhdl_entity_generic_keyword = re.findall(r'\s+generic\s*\(',vhdl_entity,flags=re.IGNORECASE)
         if len(vhdl_entity_generic_keyword) > 1:
-            print('WARNING: HDL inference failed because the top level source file',top_file_descriptor['path'],'has multiple generics lists')
+            LOGGER.warning(f'HDL inference failed because the top level source file {top_file_descriptor["path"]} has multiple generics lists')
             return fins_data
         if vhdl_entity_generic_keyword:
             vhdl_entity_generic_keyword = vhdl_entity_generic_keyword[0]
         vhdl_entity_port_keyword = re.findall(r'\s+port\s*\(',vhdl_entity,flags=re.IGNORECASE)
         if len(vhdl_entity_port_keyword) > 1:
-            print('WARNING: HDL inference failed because the top level source file',top_file_descriptor['path'],'has multiple ports lists')
+            LOGGER.warning(f'HDL inference failed because the top level source file {top_file_descriptor["path"]} has multiple ports lists')
             return fins_data
         if vhdl_entity_port_keyword:
             vhdl_entity_port_keyword = vhdl_entity_port_keyword[0]
         else:
-            print('WARNING: HDL inference failed because a port list was not detected in the top level source file',top_file_descriptor['path'])
+            LOGGER.warning(f'HDL inference failed because a port list was not detected in the top level source file {top_file_descriptor["path"]}')
             return fins_data
 
         # Find the ports
@@ -1011,10 +1003,9 @@ def populate_hdl_inferences(fins_data,verbose):
         vhdl_ports = re.findall(r'\w+\s*:\s*in\s+\w+[ \w)(-/*+]*',vhdl_entity,flags=re.IGNORECASE)
         vhdl_ports = vhdl_ports + re.findall(r'\w+\s*:\s*out\s+\w+[ \w)(-/*+]*',vhdl_entity,flags=re.IGNORECASE)
         vhdl_ports = vhdl_ports + re.findall(r'\w+\s*:\s*inout\s+\w+[ \w)(-/*+]*',vhdl_entity,flags=re.IGNORECASE)
-        if verbose:
-            print('INFO: Inferred ports from',top_file_descriptor['path'])
-            for vhdl_port in vhdl_ports:
-                print(vhdl_port)
+        LOGGER.debug(f'Inferred ports from {top_file_descriptor["path"]}')
+        for vhdl_port in vhdl_ports:
+            LOGGER.debug(vhdl_port)
         for vhdl_port in vhdl_ports:
             # Parse the port into dictionary
             # NOTE: Only 'downto' syntax is supported for std_logic_vector
@@ -1076,23 +1067,23 @@ def populate_hdl_inferences(fins_data,verbose):
                     try:
                         new_generic_def['width'] = int(width_partition[0].strip())+1
                     except ValueError:
-                        print('WARNING: HDL inference failed because parsing the width specification of std_logic_vector generic encountered an error. Problem string:',width_partition[0].strip())
+                        LOGGER.warning(f'HDL inference failed because parsing the width specification of std_logic_vector generic encountered an error. Problem string: {width_partition[0].strip()}')
                         return fins_data
                 # Add the generics array
                 fins_data['hdl']['generics'].append(new_generic_def)
 
     else:
-        print('WARNING: HDL inference failed because verilog top-level file not yet supported.')
+        LOGGER.warning('HDL inference failed because verilog top-level file not yet supported.')
         return fins_data
 
         # Find the module
         # NOTE: Verilog 2001 ANSI-style is assumed, i.e. `module foo #(PARAMETERS)(PORTS);`
         verilog_module_find = re.findall(r'\s+module\s+.)\s*;',top_file_contents,flags=re.IGNORECASE|re.DOTALL)
         if not verilog_module_find:
-            print('ERROR: No module found in verilog file',top_file_descriptor['path'])
+            LOGGER.error(f'No module found in verilog file {top_file_descriptor["path"]}')
             sys.exit(1)
         if len(verilog_module_find) > 1:
-            print('ERROR: The top level source file',top_file_descriptor['path'],'can not be read because has multiple modules')
+            LOGGER.error(f'The top level source file {top_file_descriptor["path"]} can not be read because has multiple modules')
             sys.exit(1)
         verilog_module = verilog_module_find[0]
 
@@ -1102,13 +1093,13 @@ def populate_hdl_inferences(fins_data,verbose):
         verilog_module_comments = re.findall(r'//[ \t\S]*',verilog_module,flags=re.IGNORECASE)
         for verilog_module_comment in verilog_module_comments:
             verilog_module = verilog_module.replace(verilog_module_comment,'')
-            print('INFO: Comment deleted',verilog_module_comment)
+            LOGGER.debug('Comment deleted')
 
         # Figure out if the module has a parameter list (2001 ANSI-style)
         # NOTE: Parameters must have a default value
         verilog_module_parameters = re.findall(r'#\s*(.)',verilog_module,flags=re.IGNORECASE|re.DOTALL)
         if len(verilog_module_parameters) > 1:
-            print('ERROR: The top level source file',top_file_descriptor['path'],'can not be read because it has multiple parameter lists')
+            LOGGER.error(f'The top level source file {top_file_descriptor["path"]} can not be read because it has multiple parameter lists')
             sys.exit(1)
         if verilog_module_parameters:
             # Find the ports string
@@ -1248,16 +1239,14 @@ def populate_hdl_inferences(fins_data,verbose):
                         new_interface['hdl_ports'].append(hdl_port)
                         unique_interface_ids.append(interface_id)
                         fins_data['hdl']['interfaces'].append(new_interface)
-                    if verbose:
-                        print('INFO: Port',hdl_port['name'],'was associated to interface',interface_name,'with type',interface_type)
+                    LOGGER.debug(f'Port {hdl_port["name"]} was associated to interface {interface_name} with type {interface_type}')
 
-    if verbose:
-        print('INFO: Inferred interfaces',unique_interface_ids)
+    LOGGER.debug(f'Inferred interfaces {unique_interface_ids}')
 
     return fins_data
 
 
-def populate_property_interfaces(fins_data, verbose):
+def populate_property_interfaces(fins_data):
     """Modifies the contents of fins_data. Must be run after generator has been run for all sub-IPs/Nodes.
 
     Can only be called for Nodes and Applications (not Systems)
@@ -1375,19 +1364,18 @@ def populate_property_interfaces(fins_data, verbose):
 
             fins_data['clocks'].append(properties_clock)
 
-        if verbose:
-            print('Property interfaces for "{}": {}'.format(fins_data['name'], fins_data['prop_interfaces']))
+        LOGGER.debug(f'Property interfaces for "{fins_data["name"]}": {fins_data["prop_interfaces"]}')
 
 
-def populate_fins_node(fins_data, verbose):
+def populate_fins_node(fins_data):
     """Modifies the contents of fins_data for a FINS Node.
 
     Populate contents specific to a FINS Node.
     """
-    populate_property_interfaces(fins_data, verbose)
+    populate_property_interfaces(fins_data)
 
 
-def populate_application_connections(fins_data, verbose):
+def populate_application_connections(fins_data):
     """Modifies the contents of fins_data for a FINS Application.
 
     Populate each connection in the Application so that each source and destination
@@ -1429,13 +1417,13 @@ def populate_application_connections(fins_data, verbose):
     if 'connections' in fins_data:
         for connection in fins_data['connections']:
             source = connection['source']
-            source['type'], source['port'] = get_net_type(source, fins_data, verbose)
+            source['type'], source['port'] = get_net_type(source, fins_data)
             # Set default value for instance
             if source['type'] == 'port' and not 'instance' in source:
                 source['instance'] = None
             # Each connection only has one source, but may have multiple destinations
             for destination in connection['destinations']:
-                destination['type'], destination['port'] = get_net_type(destination, fins_data, verbose)
+                destination['type'], destination['port'] = get_net_type(destination, fins_data)
                 # Set default value for instance
                 if destination['type'] == 'port' and not 'instance' in destination:
                     destination['instance'] = None
@@ -1465,7 +1453,7 @@ def populate_application_connections(fins_data, verbose):
                     else:
                         destination['port']['connected'][destination['instance']] = True
 
-def populate_application_clocks(fins_data, verbose):
+def populate_application_clocks(fins_data):
     """Modifies the contents of fins_data for a FINS Application.
 
     Populate clock domains (fins_data['clocks']) and which nets they connect to:
@@ -1487,7 +1475,7 @@ def populate_application_clocks(fins_data, verbose):
     for clock in fins_data['clocks']:
         clock['base_name'] = clock['clock']
 
-        if get_signal_type(clock['base_name'], verbose) != 'clock':
+        if get_signal_type(clock['base_name']) != 'clock':
             clock['clock'] = clock['base_name'] + '_aclk'
             #reset_name = clock['base_name'] + '_aresetn'
 
@@ -1499,12 +1487,11 @@ def populate_application_clocks(fins_data, verbose):
 
         nets = clock['nets']
         for net in nets:
-            net['type'], net['port'] = get_net_type(net, fins_data, verbose)
-            if verbose:
-                print('Connecting clock "{}" to port "{}" of type "{}"'.format(clock['clock'], net['port']['name'], net['type']))
+            net['type'], net['port'] = get_net_type(net, fins_data)
+            LOGGER.debug(f'Connecting clock "{clock["clock"]}" to port "{net["port"]["name"]}" of type "{net["type"]}"')
             if (net['type'] == 'hdl' and
-                (get_signal_type(net['net'], verbose) != 'clock' or net['port']['bit_width'] != 1)):
-                print('ERROR: To connect "hdl" port "{}" to a clock it must be named as a clock and must have bit_width=1'.format(net['net']))
+                (get_signal_type(net['net']) != 'clock' or net['port']['bit_width'] != 1)):
+                LOGGER.error(f'To connect "hdl" port "{net["net"]}" to a clock it must be named as a clock and must have bit_width=1')
                 sys.exit(1)
             elif net['type'] == 'port':
                 net['port']['clock'] = clock['clock']
@@ -1513,7 +1500,7 @@ def populate_application_clocks(fins_data, verbose):
                 net['port']['clock'] = clock['clock']
 
 
-def populate_application_exports(fins_data, verbose):
+def populate_application_exports(fins_data):
     """Modifies the contents of fins_data for a FINS Application.
 
     Export ports that should be exposed externally from the Application.
@@ -1541,7 +1528,7 @@ def populate_application_exports(fins_data, verbose):
             # and add it to the Application's ports list
             port = get_port(net['node_name'], net['net'], fins_data)
             if port is None:
-                print('ERROR: Exported port not found {}'.format(net['net']))
+                LOGGER.error(f'Exported port not found {net["net"]}')
                 sys.exit(1)
 
             application_port = port.copy()
@@ -1589,7 +1576,7 @@ def populate_application_exports(fins_data, verbose):
             # and add it to the Application's hdl ports list
             port = get_port(net['node_name'], net['net'], fins_data, port_type='hdl')
             if port is None:
-                print('ERROR: Exported port not found {}'.format(net['net']))
+                LOGGER.error(f'Exported port not found {net["net"]}')
                 sys.exit(1)
 
             application_port = port.copy()
@@ -1626,7 +1613,7 @@ def populate_application_exports(fins_data, verbose):
         del fins_data['ports']['hdl']
 
 
-def populate_fins_application_node(node, verbose):
+def populate_fins_application_node(node):
     """Modifies the contents of 'node' dictionary. Must be run after run_generator has been for this Node.
 
     Determines/sets the following in the node dictionary:
@@ -1641,21 +1628,21 @@ def populate_fins_application_node(node, verbose):
     node['node_name'] = node['node_details']['name']
 
 
-def populate_fins_application(fins_data, verbose):
+def populate_fins_application(fins_data):
     """Modifies the contents of fins_data for a FINS Application.
 
     Populate contents specific to a FINS Application.
     """
     for node in fins_data['nodes']:
-        populate_fins_application_node(node, verbose)
+        populate_fins_application_node(node)
 
-    populate_application_connections(fins_data, verbose)
-    populate_application_clocks(fins_data, verbose)
-    populate_application_exports(fins_data, verbose)
-    populate_property_interfaces(fins_data, verbose)
+    populate_application_connections(fins_data)
+    populate_application_clocks(fins_data)
+    populate_application_exports(fins_data)
+    populate_property_interfaces(fins_data)
 
 
-def populate_fins_system_node(node, verbose):
+def populate_fins_system_node(node):
     """Modifies the contents of 'node' dictionary.
 
     Determines/sets various information relating to the node:
@@ -1667,7 +1654,7 @@ def populate_fins_system_node(node, verbose):
     """
     # Load the generated FINS JSON for the Node
     # and get the node_name from it
-    node_fins_data = load_json_file(node['fins_path'], verbose)
+    node_fins_data = load_json_file(node['fins_path'])
     node['node_name'] = node_fins_data['name']
 
     ports_producer_name_defined = False
@@ -1682,14 +1669,14 @@ def populate_fins_system_node(node, verbose):
             elif bd_extension.lower() == '.bd':
                 base_address = find_base_address_from_bd(node['properties_offset'],node['module_name'],node['interface_name'])
             else:
-                print('ERROR: Unknown block design extension in FINS System:',bd_extension)
+                LOGGER.error(f'Unknown block design extension in FINS System: {bd_extension}')
                 sys.exit(1)
             node['properties_offset'] = base_address
         else:
-            print('WARNING: Properties offset path',node['properties_offset'],'for',node['module_name'],'does not exist')
+            LOGGER.warning(f'Properties offset path {node["properties_offset"]} for {node["module_name"]} does not exist')
 
     if 'properties' in node_fins_data and 'interface_name' not in node:
-        print('ERROR: a node with a properties interface must have an "interface_name" specified in the System')
+        LOGGER.error('a node with a properties interface must have an "interface_name" specified in the System')
         sys.exit(1)
 
     if 'properties' in node_fins_data:
@@ -1700,7 +1687,7 @@ def populate_fins_system_node(node, verbose):
     if 'ports_producer_name' in node:
         # Make sure ports_producer_name is in only one node
         if ports_producer_name_defined:
-            print('ERROR: ports_producer_name can only be defined in one node')
+            LOGGER.error('ports_producer_name can only be defined in one node')
             sys.exit(1)
         ports_producer_name_defined = True
         # Find the port
@@ -1708,12 +1695,12 @@ def populate_fins_system_node(node, verbose):
         for port in node_fins_data['ports']['ports']:
             if node['ports_producer_name'].lower() == port['name'].lower():
                 if port['direction'].lower() == 'in':
-                    print('ERROR: ports_producer was incorrectly assigned to an input port')
+                    LOGGER.error('ports_producer was incorrectly assigned to an input port')
                     sys.exit(1)
                 node['ports_producer'] = port
                 ports_producer_found = True
         if not ports_producer_found:
-            print('ERROR: ports_producer_name',node['ports_producer_name'],'not found in node',node['node_name'])
+            LOGGER.error(f'ports_producer_name {node["ports_producer_name"]} not found in node {node["node_name"]}')
             sys.exit(1)
     else:
         node['ports_producer_name'] = ''
@@ -1723,7 +1710,7 @@ def populate_fins_system_node(node, verbose):
     if 'ports_consumer_name' in node:
         # Make sure ports_consumer_name is in only one node
         if ports_consumer_name_defined:
-            print('ERROR: ports_consumer_name can only be defined in one node')
+            LOGGER.error('ports_consumer_name can only be defined in one node')
             sys.exit(1)
         ports_consumer_name_defined = True
         # Find the port
@@ -1731,171 +1718,169 @@ def populate_fins_system_node(node, verbose):
         for port in node_fins_data['ports']['ports']:
             if node['ports_consumer_name'].lower() == port['name'].lower():
                 if port['direction'].lower() == 'out':
-                    print('ERROR: ports_consumer was incorrectly assigned to an output port')
+                    LOGGER.error('ports_consumer was incorrectly assigned to an output port')
                     sys.exit(1)
                 node['ports_consumer'] = port
                 ports_consumer_found = True
         if not ports_consumer_found:
-            print('ERROR: ports_consumer_name',node['ports_consumer_name'],'not found in node',node['node_name'])
+            LOGGER.error(f'ports_consumer_name {node["ports_consumer_name"]} not found in node {node["node_name"]}')
             sys.exit(1)
     else:
         node['ports_consumer_name'] = ''
         node['ports_consumer'] = {}
 
 
-def populate_fins_system(fins_data, verbose):
+def populate_fins_system(fins_data):
     """Modifies the contents of fins_data for a FINS System.
 
     Populate contents specific to a FINS System.
     """
     for node in fins_data['nodes']:
-        populate_fins_system_node(node, verbose)
+        populate_fins_system_node(node)
 
 
 ################################################################################
 # Validation of the FINS JSON Schema and the Populated FINS Data Dictionary
 ################################################################################
 
-def validate_schema(parent_key,schema_object,verbose):
+def validate_schema(parent_key, schema_object):
     # Check the keys
     found_is_required = False
     found_types = False
     for key, value in schema_object.items():
         if not key in SCHEMA_KEYS:
-            print('ERROR:',parent_key,'has an invalid key:', key)
+            LOGGER.error(f'{parent_key} has an invalid key: {key}')
             sys.exit(1)
         if key.lower() == 'is_required':
             found_is_required = True
         if key.lower() == 'types':
             found_types = True
     if not (found_is_required and found_types):
-        print('ERROR:',parent_key,'is missing the is_required or types key')
+        LOGGER.error(f'{parent_key} is missing the is_required or types key')
         sys.exit(1)
     # Check the types and the dependent keys
     for schema_object_type in schema_object['types']:
         if not schema_object_type in SCHEMA_TYPES:
-            print('ERROR:',parent_key,'has an invalid type:', schema_object_type)
+            LOGGER.error(f'{parent_key} has an invalid type: {schema_object_type}')
             sys.exit(1)
     if 'list' in schema_object['types']:
         if not 'list_types' in schema_object:
-            print('ERROR:',parent_key,'has no definition for the list types')
+            LOGGER.error(f'{parent_key} has no definition for the list types')
             sys.exit(1)
         for schema_list_type in schema_object['list_types']:
             if not schema_list_type in SCHEMA_LIST_TYPES:
-                print('ERROR:',parent_key,'has an invalid list type:', schema_list_type)
+                LOGGER.error(f'{parent_key} has an invalid list type: {schema_list_type}')
                 sys.exit(1)
         if 'dict' in schema_object['list_types']:
             if not 'fields' in schema_object:
-                print('ERROR:',parent_key,'has no definition for the fields in the dict list type')
+                LOGGER.error(f'{parent_key} has no definition for the fields in the dict list type')
                 sys.exit(1)
     if 'dict' in schema_object['types']:
         if not 'fields' in schema_object:
-            print('ERROR:',parent_key,'has no definition for the fields in the dict type')
+            LOGGER.error(f'{parent_key} has no definition for the fields in the dict type')
             sys.exit(1)
     if ('list' in schema_object['types']) and ('dict' in schema_object['types']):
-        print('ERROR:',parent_key,'cannot have both dict and list in the valid types')
+        LOGGER.error(f'{parent_key} cannot have both dict and list in the valid types')
         sys.exit(1)
     # Recursively check the fields
     if 'fields' in schema_object:
         if not (('list' in schema_object['types']) or ('dict' in schema_object['types'])):
-            print('ERROR:',parent_key,'has a fields key but no dict or list type')
+            LOGGER.error(f'{parent_key} has a fields key but no dict or list type')
             sys.exit(1)
         for key, value in schema_object['fields'].items():
-            validate_schema(key,value,verbose)
+            validate_schema(key,value)
     # Notify of success
-    if verbose:
-        print('PASS:',parent_key)
+    LOGGER.debug(f'PASS: {parent_key}')
 
 
-def validate_fins(parent_key,fins_object,schema_object,verbose):
+def validate_fins(parent_key,fins_object,schema_object):
     # Check type
     if type(fins_object) is list:
         if not 'list' in schema_object['types']:
-            print('ERROR:',parent_key,'incorrectly has a list type')
+            LOGGER.error(f'{parent_key} incorrectly has a list type')
             sys.exit(1)
     elif type(fins_object) is dict:
         if not 'dict' in schema_object['types']:
-            print('ERROR:',parent_key,'incorrectly has a dict type')
+            LOGGER.error(f'{parent_key} incorrectly has a dict type')
             sys.exit(1)
     elif type(fins_object) is str:
         if not 'str' in schema_object['types']:
-            print('ERROR:',parent_key,'incorrectly has a str type')
+            LOGGER.error(f'{parent_key} incorrectly has a str type')
             sys.exit(1)
     elif type(fins_object) is int:
         if not 'int' in schema_object['types'] and not 'float' in schema_object['types']:
-            print('ERROR:',parent_key,'incorrectly has a int type')
+            LOGGER.error(f'{parent_key} incorrectly has a int type')
             sys.exit(1)
     elif type(fins_object) is float:
         if not 'float' in schema_object['types']:
-            print('ERROR:',parent_key,'incorrectly has a float type')
+            LOGGER.error(f'{parent_key} incorrectly has a float type')
             sys.exit(1)
     elif type(fins_object) is bool:
         if not 'bool' in schema_object['types']:
-            print('ERROR:',parent_key,'incorrectly has a bool type')
+            LOGGER.error(f'{parent_key} incorrectly has a bool type')
             sys.exit(1)
     else:
-        print('ERROR:',parent_key,'has an unknown type')
+        LOGGER.error(f'{parent_key} has an unknown type')
         sys.exit(1)
     # Check list types
     if type(fins_object) is list:
         for fins_object_element in fins_object:
             if type(fins_object_element) is dict:
                 if not 'dict' in schema_object['list_types']:
-                    print('ERROR:',parent_key,'incorrectly has a dict list type')
+                    LOGGER.error(f'{parent_key} incorrectly has a dict list type')
                     sys.exit(1)
             elif type(fins_object_element) is str:
                 if not 'str' in schema_object['list_types']:
-                    print('ERROR:',parent_key,'incorrectly has a str list type')
+                    LOGGER.error(f'{parent_key} incorrectly has a str list type')
                     sys.exit(1)
             elif type(fins_object_element) is int:
                 if not 'int' in schema_object['list_types'] and not 'float' in schema_object['list_types']:
-                    print('ERROR:',parent_key,'incorrectly has a int list type')
+                    LOGGER.error(f'{parent_key} incorrectly has a int list type')
                     sys.exit(1)
             elif type(fins_object_element) is float:
                 if not 'float' in schema_object['list_types']:
-                    print('ERROR:',parent_key,'incorrectly has a float list type')
+                    LOGGER.error(f'{parent_key} incorrectly has a float list type')
                     sys.exit(1)
             elif type(fins_object_element) is bool:
                 if not 'bool' in schema_object['list_types']:
-                    print('ERROR:',parent_key,'incorrectly has a bool list type')
+                    LOGGER.error(f'{parent_key} incorrectly has a bool list type')
                     sys.exit(1)
             else:
-                print('ERROR:',parent_key,'has an unknown list type')
+                LOGGER.error(f'{parent_key} has an unknown list type')
                 sys.exit(1)
     # Check the fields
     if 'dict' in schema_object['types']:
         # Check that the required schema keys are in the fins object
         for key, value in schema_object['fields'].items():
             if value['is_required'] and not (key in fins_object):
-                print('ERROR: Required key',key,'does not exist in',parent_key)
+                LOGGER.error(f'Required key {key} does not exist in {parent_key}')
                 sys.exit(1)
         # Check for fins object keys that are not in the schema object
         for key, value in fins_object.items():
             if not key in schema_object['fields'].keys():
-                print('WARNING: Undefined key',key,'in',parent_key)
+                LOGGER.warning(f'Undefined key {key} in {parent_key}')
                 continue
             # Recursively call this function on the fields
-            validate_fins(key,value,schema_object['fields'][key],verbose)
+            validate_fins(key,value,schema_object['fields'][key])
     elif ('list' in schema_object['types']) and ('dict' in schema_object['list_types']):
         for fins_object_element in fins_object:
             # Check that the required schema keys are in the fins object
             for key, value in schema_object['fields'].items():
                 if value['is_required'] and not (key in fins_object_element):
-                    print('ERROR: Required key',key,'does not exist in',parent_key)
+                    LOGGER.error(f'Required key {key} does not exist in {parent_key}')
                     sys.exit(1)
             # Check for fins object keys that are not in the schema object
             for key, value in fins_object_element.items():
                 if not key in schema_object['fields'].keys():
-                    print('WARNING: Undefined key',key,'in',parent_key)
+                    LOGGER.warning(f'Undefined key {key} in {parent_key}')
                     continue
                 # Recursively call this function on the fields
-                validate_fins(key,value,schema_object['fields'][key],verbose)
+                validate_fins(key,value,schema_object['fields'][key])
     # Notify of success
-    if verbose:
-        print('PASS:',parent_key)
+    LOGGER.debug(f'PASS: {parent_key}')
 
 
-def validate_files(fins_name,filename,file_list,allowed_types,verbose):
+def validate_files(fins_name,filename,file_list,allowed_types):
     # Iterate through the files
     for fins_file in file_list:
         # Assemble the path name
@@ -1905,48 +1890,45 @@ def validate_files(fins_name,filename,file_list,allowed_types,verbose):
             filepath = fins_file['path']
         # Check that the file exists
         if not os.path.isfile(filepath):
-            print('ERROR: File does not exist or path is incorrect',filepath)
+            LOGGER.error(f'File does not exist or path is incorrect {filepath}')
             sys.exit(1)
         # Check the type
         if 'type' in fins_file:
             if not (fins_file['type'].lower() in [allowed_type.lower() for allowed_type in allowed_types]):
-                print('WARNING: Unknown type',fins_file['type'],'for file',filepath)
+                LOGGER.warning(f'Unknown type {fins_file["type"]} for file {filepath}')
         # Notify of success
-        if verbose:
-            print('PASS:',filepath)
+        LOGGER.debug(f'PASS: {filepath}')
 
 
-def validate_filesets(fins_data,filename,verbose):
+def validate_filesets(fins_data,filename):
     # Validate filesets
-    if verbose:
-        print('+++++ Validating filesets of {} ...'.format(filename))
+    LOGGER.debug(f'+++++ Validating filesets of {filename} ...')
 
     if 'source' in fins_data['filesets']:
-        validate_files(fins_data['name'],filename,fins_data['filesets']['source'],QUARTUS_DESIGN_FILE_TYPES,verbose)
+        validate_files(fins_data['name'],filename,fins_data['filesets']['source'],QUARTUS_DESIGN_FILE_TYPES)
     elif fins_data['schema_type'] == SchemaType.NODE:
-        print('ERROR: Nodes must include the "source" fileset')
+        LOGGER.error('Nodes must include the "source" fileset')
         sys.exit(1)
 
     if 'sim' in fins_data['filesets']:
-        validate_files(fins_data['name'],filename,fins_data['filesets']['sim'],QUARTUS_DESIGN_FILE_TYPES,verbose)
+        validate_files(fins_data['name'],filename,fins_data['filesets']['sim'],QUARTUS_DESIGN_FILE_TYPES)
     if 'constraints' in fins_data['filesets']:
-        validate_files(fins_data['name'],filename,fins_data['filesets']['constraints'],CONSTRAINT_FILE_TYPES,verbose)
+        validate_files(fins_data['name'],filename,fins_data['filesets']['constraints'],CONSTRAINT_FILE_TYPES)
     if 'scripts' in fins_data['filesets']:
         if 'vendor_ip' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['vendor_ip'],VENDOR_SCRIPT_FILE_TYPES,verbose)
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['vendor_ip'],VENDOR_SCRIPT_FILE_TYPES)
         if 'presim' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['presim'],SCRIPT_FILE_TYPES,verbose)
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['presim'],SCRIPT_FILE_TYPES)
         if 'postsim' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['postsim'],SCRIPT_FILE_TYPES,verbose)
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['postsim'],SCRIPT_FILE_TYPES)
         if 'prebuild' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['prebuild'],SCRIPT_FILE_TYPES,verbose)
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['prebuild'],SCRIPT_FILE_TYPES)
         if 'postbuild' in fins_data['filesets']['scripts']:
-            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['postbuild'],SCRIPT_FILE_TYPES,verbose)
-    if verbose:
-        print('+++++ Done.')
+            validate_files(fins_data['name'],filename,fins_data['filesets']['scripts']['postbuild'],SCRIPT_FILE_TYPES)
+    LOGGER.debug('+++++ Done.')
 
 
-def validate_ip(fins_data,verbose):
+def validate_ip(fins_data):
     # Collect parent parameter names
     parent_names = []
     if 'params' in fins_data:
@@ -1956,20 +1938,19 @@ def validate_ip(fins_data,verbose):
     for ip in fins_data['ip']:
         # Make sure the IP file exists
         if not os.path.isfile(ip['fins_path']):
-            print('ERROR: IP does not exist or path',ip['fins_path'],'is incorrect')
+            LOGGER.error(f'IP does not exist or path {ip["fins_path"]} is incorrect')
             sys.exit(1)
         # Make sure all parameters have a parent
         if 'params' in ip:
             for param in ip['params']:
                 if not param['parent'] in parent_names:
-                    print('ERROR: The parent for parameter',param['name'],'in IP',ip['fins_path'],'does not exist')
+                    LOGGER.error(f'The parent for parameter {param["name"]} in IP {ip["fins_path"]} does not exist')
                     sys.exit(1)
         # Notify of success
-        if verbose:
-            print('PASS:',ip['fins_path'])
+        LOGGER.debug(f'PASS: {ip["fins_path"]}')
 
 
-def validate_properties(fins_data,verbose):
+def validate_properties(fins_data):
     # Iterate through all properties
     prop_names = []
     for prop in fins_data['properties']['properties']:
@@ -1977,15 +1958,14 @@ def validate_properties(fins_data,verbose):
         prop_names.append(prop['name'])
         # Validate the property type
         if not prop['type'] in PROPERTY_TYPES:
-            print('ERROR: Property',prop['name'],'type',prop['type'],'is invalid')
+            LOGGER.error(f'Property {prop["name"]} type {prop["type"]} is invalid')
             sys.exit(1)
         # Notify of success
-        if verbose:
-            print('PASS: Property',prop['name'])
+        LOGGER.debug(f'PASS: Property {prop["name"]}')
 
     # Check for name duplicates
     if (len(prop_names) != len(set(prop_names))):
-        print('ERROR: Duplicate property names detected')
+        LOGGER.error('Duplicate property names detected')
         sys.exit(1)
 
     # Set top-level defaults for properties interface
@@ -1993,7 +1973,7 @@ def validate_properties(fins_data,verbose):
         fins_data['properties']['is_addr_byte_indexed'] = True
 
 
-def validate_ports(fins_data,verbose):
+def validate_ports(fins_data):
     # Iterate through all FINS ports
     if 'ports' in fins_data['ports']:
         port_names = []
@@ -2002,19 +1982,18 @@ def validate_ports(fins_data,verbose):
             port_names.append(port['name'])
             # Check the direction
             if not port['direction'] in PORT_DIRECTIONS:
-                print('ERROR: Port',port['name'],'direction',port['direction'],'is invalid')
+                LOGGER.error(f'Port {port["name"]} direction {port["direction"]} is invalid')
                 sys.exit(1)
             # Neither data nor metadata are required, but we must have at least one
             if not 'data' in port and not 'metadata' in port:
-                print('ERROR: Port',port['name'],'must have either metadata or data')
+                LOGGER.error(f'Port {port["name"]} must have either metadata or data')
                 sys.exit(1)
             # Notify of success
-            if verbose:
-                print('PASS: Port',port['name'],'with direction',port['direction'])
+            LOGGER.debug(f'PASS: Port {port["name"]} with direction {port["direction"]}')
 
         # Check for name duplicates
         if (len(port_names) != len(set(port_names))):
-            print('ERROR: Duplicate port names detected')
+            LOGGER.error('Duplicate port names detected')
             sys.exit(1)
 
     # Iterate through all FINS ports HDL
@@ -2025,71 +2004,58 @@ def validate_ports(fins_data,verbose):
             port_hdl_names.append(port_hdl['name'])
             # Check the direction
             if not port_hdl['direction'] in PORT_HDL_DIRECTIONS:
-                print('ERROR: Port HDL',port_hdl['name'],'direction',port_hdl['direction'],'is invalid')
+                LOGGER.error(f'Port HDL {port_hdl["name"]} direction {port_hdl["direction"]} is invalid')
                 sys.exit(1)
             # Check that bit width is > 0
             bit_width = get_param_value(fins_data['params'], port_hdl['bit_width'])
             if bit_width < 1:
-                print('ERROR: Port HDL',port_hdl['name'],'must have a bit_width > 0')
+                LOGGER.error(f'Port HDL {port_hdl["name"]} must have a bit_width > 0')
                 sys.exit(1)
             # Notify of success
-            if verbose:
-                print('PASS: Port HDL',port_hdl['name'],'with direction',port_hdl['direction'])
+            LOGGER.debug(f'PASS: Port HDL {port_hdl["name"]} with direction {port_hdl["direction"]}')
 
         # Check for name duplicates
         if (len(port_hdl_names) != len(set(port_hdl_names))):
-            print('ERROR: Duplicate port HDL names detected')
+            LOGGER.error('Duplicate port HDL names detected')
             sys.exit(1)
 
 
-def validate_fins_data(fins_data, filename, verbose):
-    if verbose:
-        print('+++++ Loading JSON ...')
+def validate_fins_data(fins_data, filename):
+    LOGGER.debug('+++++ Loading JSON ...')
     with open(SCHEMA_FILENAME[fins_data['schema_type']]) as schema_data:
         fins_schema = json.load(schema_data)
-    if verbose:
-        print('+++++ Done.')
+    LOGGER.debug('+++++ Done.')
 
     # Validate the schema itself
-    if verbose:
-        print('+++++ Validating node.json ...')
-    validate_schema('schema', fins_schema, verbose)
-    if verbose:
-        print('+++++ Done.')
+    LOGGER.debug('+++++ Validating node.json ...')
+    validate_schema('schema', fins_schema)
+    LOGGER.debug('+++++ Done.')
 
     # Validate the FINS Node JSON file with the schema
-    if verbose:
-        print('+++++ Validating {} ...'.format(filename))
-    validate_fins(SchemaType.get_str(fins_data), fins_data, fins_schema, verbose)
-    if verbose:
-        print('+++++ Done.')
+    LOGGER.debug(f'+++++ Validating {filename} ...')
+    validate_fins(SchemaType.get_str(fins_data), fins_data, fins_schema)
+    LOGGER.debug('+++++ Done.')
 
     # Validate sub-IP
     if 'ip' in fins_data:
-        if verbose:
-            print('+++++ Validating ip of {} ...'.format(filename))
-        validate_ip(fins_data, verbose)
-        if verbose:
-            print('+++++ Done.')
+        LOGGER.debug(f'+++++ Validating ip of {filename} ...')
+        validate_ip(fins_data)
+        LOGGER.debug('+++++ Done.')
 
     # Validate properties
     if 'properties' in fins_data:
-        if verbose:
-            print('+++++ Validating properties of {} ...'.format(filename))
-        validate_properties(fins_data, verbose)
-        if verbose:
-            print('+++++ Done.')
+        LOGGER.debug(f'+++++ Validating properties of {filename} ...')
+        validate_properties(fins_data)
+        LOGGER.debug('+++++ Done.')
 
     # Validate ports
     if 'ports' in fins_data:
-        if verbose:
-            print('+++++ Validating ports of {} ...'.format(filename))
-        validate_ports(fins_data, verbose)
-        if verbose:
-            print('+++++ Done.')
+        LOGGER.debug(f'+++++ Validating ports of {filename} ...')
+        validate_ports(fins_data)
+        LOGGER.debug('+++++ Done.')
 
 
-def _override_fins_data(fins_data,origfile,filename,verbose):
+def _override_fins_data(fins_data, origfile, filename):
     """Looks for a <filename>.json.override file in the same directory and overrides params/part of the fins data
 
     Used to override the params/part of a Node in an Application or of a sub-IP of a Node
@@ -2098,8 +2064,7 @@ def _override_fins_data(fins_data,origfile,filename,verbose):
         # Open .override file
         with open(filename) as override_file:
             origpath = os.path.join(os.path.abspath(origfile))
-            if verbose:
-                print('INFO: FINS JSON file "{}" is overridden by "{}"'.format(origpath, filename))
+            LOGGER.debug(f'FINS JSON file "{origpath}" is overridden by "{filename}"')
             override_data = json.load(override_file)
         # Override parameters
         if 'params' in override_data:
@@ -2113,41 +2078,41 @@ def _override_fins_data(fins_data,origfile,filename,verbose):
     return fins_data
 
 
-def validate_and_convert_node_fins_data(fins_data,filename,backend,verbose):
+def validate_and_convert_node_fins_data(fins_data, filename, backend):
     """Validates and converts data from a FINS Node JSON file
     """
     # Validate the FINS Node JSON using the node.json file
-    validate_fins_data(fins_data,filename,verbose)
+    validate_fins_data(fins_data,filename)
 
     # Set the backend used for generation
     fins_data['backend'] = backend
 
     # Override the FINS Node JSON data with a .override file if it exists
-    fins_data = _override_fins_data(fins_data,filename,os.path.basename(filename)+'.override',verbose)
+    fins_data = _override_fins_data(fins_data,filename,os.path.basename(filename)+'.override')
 
     # Replace any linked parameters with their literal values
-    fins_data = convert_parameters_to_literal(fins_data,verbose)
+    fins_data = convert_parameters_to_literal(fins_data)
 
     # Set defaults for top-level keys
-    fins_data = populate_fins_fields(fins_data,verbose)
+    fins_data = populate_fins_fields(fins_data)
 
     # Apply property defaults and calculate offsets
-    fins_data = populate_properties(fins_data,0,verbose)
+    fins_data = populate_properties(fins_data,0)
 
     # Apply port defaults
-    fins_data = populate_ports(fins_data,verbose)
+    fins_data = populate_ports(fins_data)
 
     # Auto-detect file types
-    fins_data = populate_filesets(fins_data,verbose)
+    fins_data = populate_filesets(fins_data)
 
     # Auto-detect sub-ip versions
-    fins_data = populate_ip(fins_data,verbose)
+    fins_data = populate_ip(fins_data)
 
     # Return
     return fins_data
 
 
-def validate_node_fins_data_final(fins_data, verbose):
+def validate_node_fins_data_final(fins_data):
     """Final validation of the Node fins_data dictionary before
     generation is run for the Node
     """
@@ -2155,7 +2120,7 @@ def validate_node_fins_data_final(fins_data, verbose):
     pass
 
 
-def validate_application_connections(fins_data, verbose):
+def validate_application_connections(fins_data):
     """For each pair of connection endpoints that are both ports,
     confirm that a connection between these ports would be valid
 
@@ -2180,31 +2145,31 @@ def validate_application_connections(fins_data, verbose):
                     dst_inst = destination['instance']
                 if ((src_type == 'hdl' and dst_type == 'port') or
                       (src_type == 'port' and dst_type == 'hdl')):
-                    print('ERROR: One port is HDL and the other is AXIS in connection ({}->{})'.format(src_name, dst_name))
+                    LOGGER.error(f'One port is HDL and the other is AXIS in connection ({src_name}->{dst_name})')
                     sys.exit(1)
                 elif src_port['direction'] == dst_port['direction']:
-                    print('ERROR: Ports of the same direction cannot be connected ({}->{})'.format(src_name, dst_name))
+                    LOGGER.error(f'Ports of the same direction cannot be connected ({src_name}->{dst_name})')
                     sys.exit(1)
                 elif src_type == 'port' and dst_type == 'port':
                     if src_port['supports_backpressure'] != dst_port['supports_backpressure']:
-                        print('ERROR: One port in connection ({}->{}) supports backpressure, but the other does not'.format(src_name, dst_name))
+                        LOGGER.error(f'One port in connection ({src_name}->{dst_name}) supports backpressure, but the other does not')
                         sys.exit(1)
                     elif src_inst == None and dst_inst == None and src_port['num_instances'] != dst_port['num_instances']:
-                        print('ERROR: Ports in connection ({}->{}) have different number of instances'.format(src_name, dst_name))
+                        LOGGER.error(f'Ports in connection ({src_name}->{dst_name}) have different number of instances')
                         sys.exit(1)
                     elif src_inst == None and dst_inst != None and (src_port['num_instances'] != 1 or dst_inst >= dst_port['num_instances']):
-                        print('ERROR: Ports in connection ({}->{}), the source has too many instances or an invalid instance was chosen for the destination'.format(src_name, dst_name))
+                        LOGGER.error(f'Ports in connection ({src_name}->{dst_name}), the source has too many instances or an invalid instance was chosen for the destination')
                         sys.exit(1)
                     elif src_inst != None and dst_inst == None and (dst_port['num_instances'] != 1 or src_inst >= src_port['num_instances']):
-                        print('ERROR: Ports in connection ({}->{}), the destination has too many instances or an invalid instance was chosen for the source'.format(src_name, dst_name))
+                        LOGGER.error(f'Ports in connection ({src_name}->{dst_name}), the destination has too many instances or an invalid instance was chosen for the source')
                         sys.exit(1)
                     elif src_inst != None and dst_inst != None and (src_inst >= src_port['num_instances'] or dst_inst >= dst_port['num_instances']):
-                        print('ERROR: Ports in connection ({}->{}) do not have the proper amount of instances for the index chosen'.format(src_name, dst_name))
+                        LOGGER.error(f'Ports in connection ({src_name}->{dst_name}) do not have the proper amount of instances for the index chosen')
                         sys.exit(1)
                     elif (('metadata' in src_port and 'metadata' not in dst_port) or
                           ('metadata' not in src_port and 'metadata' in dst_port) or
                           ('metadata' in src_port and 'metadata' in dst_port and src_port['metadata'] != dst_port['metadata'])):
-                        print('ERROR: Metadata does not match on ports in connection ({}->{})'.format(src_name, dst_name))
+                        LOGGER.error(f'Metadata does not match on ports in connection ({src_name}->{dst_name})')
                         sys.exit(1)
                     elif src_port['data'] != dst_port['data']:
                         if (src_port['data']['bit_width'] != dst_port['data']['bit_width'] or
@@ -2214,53 +2179,53 @@ def validate_application_connections(fins_data, verbose):
                             src_total_width = src_port['data']['bit_width']*src_port['data']['bit_width']*src_port['data']['bit_width']
                             dst_total_width = dst_port['data']['bit_width']*dst_port['data']['bit_width']*dst_port['data']['bit_width']
                             if src_total_width != dst_total_width:
-                                print('ERROR: bit_width*num_samples*num_channels does not match between ports in connection ({}->{})'.format(src_name, dst_name))
+                                LOGGER.error(f'bit_width*num_samples*num_channels does not match between ports in connection ({src_name}->{dst_name})')
                             else:
-                                print('WARNING: bit_width, num_samples or num_channels do not match ports in connection ({}->{}). bit_width*num_samples*num_channels matches... OK'.format(src_name, dst_name))
+                                LOGGER.warning(f'bit_width, num_samples or num_channels do not match ports in connection ({src_name}->{dst_name}). bit_width*num_samples*num_channels matches... OK')
                             sys.exit(1)
                         elif (src_port['data']['is_complex'] != dst_port['data']['is_complex'] or
                               src_port['data']['is_signed'] != dst_port['data']['is_signed']):
-                            print('WARNING: is_complex or is_signed does not match between ports in connection ({}->{}). bit_width*num_samples*num_channels matches... OK.'.format(src_name, dst_name))
+                            LOGGER.warning(f'is_complex or is_signed does not match between ports in connection ({src_name}->{dst_name}). bit_width*num_samples*num_channels matches... OK.')
                 elif ((src_type == 'hdl' and dst_type == 'hdl') and
                     src_port['bit_width'] != dst_port['bit_width']):
-                    print('ERROR: HDL Ports in connection ({}->{}) do not have the same width'.format(src_name, dst_name))
+                    LOGGER.error(f'HDL Ports in connection ({src_name}->{dst_name}) do not have the same width')
                     sys.exit(1)
 
 
-def validate_application_ports(fins_data, verbose):
+def validate_application_ports(fins_data):
     """Run port verification for Application ports.
     This function first calls the standard (Node) validate_ports()
     and then verifies that each port also has an associated Application clock
     """
 
-    validate_ports(fins_data, verbose)
+    validate_ports(fins_data)
 
     if 'ports' in fins_data['ports']:
         for port in fins_data['ports']['ports']:
             # if this port has no clock, or if the clock is not found in fins_data's clocks list, error
             if 'clock' not in port or get_elem_with_name(fins_data['clocks'], port['clock'], name_key='clock') is None:
-                print('ERROR: Port {} is not connected to a valid clock source'.format(port['name']))
+                LOGGER.error(f'Port {port["name"]} is not connected to a valid clock source')
                 sys.exit(1)
 
-def validate_and_convert_application_fins_data(fins_data, filename, backend, verbose):
+def validate_and_convert_application_fins_data(fins_data, filename, backend):
     """Validates and converts data from a FINS Application JSON file
     """
-    validate_fins_data(fins_data, filename, verbose)
+    validate_fins_data(fins_data, filename)
 
     # Set the backend used for generation
     fins_data['backend'] = backend
 
     # Override the FINS Node JSON data with a .override file if it exists
-    fins_data = _override_fins_data(fins_data, filename, os.path.basename(filename)+'.override', verbose)
+    fins_data = _override_fins_data(fins_data, filename, os.path.basename(filename)+'.override')
 
     # Replace any linked parameters with their literal values
-    fins_data = convert_parameters_to_literal(fins_data, verbose)
+    fins_data = convert_parameters_to_literal(fins_data)
 
     # Set defaults for top-level keys
-    fins_data = populate_fins_fields(fins_data, verbose)
+    fins_data = populate_fins_fields(fins_data)
 
     # Auto-detect file types
-    fins_data = populate_filesets(fins_data, verbose)
+    fins_data = populate_filesets(fins_data)
 
     for node in fins_data['nodes']:
         # Set per-node defaults
@@ -2272,27 +2237,27 @@ def validate_and_convert_application_fins_data(fins_data, filename, backend, ver
     return fins_data
 
 
-def validate_application_fins_data_final(fins_data, verbose):
+def validate_application_fins_data_final(fins_data):
     """Final validation of the Application fins_data dictionary before
     generation is run for the Application
     """
-    validate_application_ports(fins_data, verbose)
-    validate_application_connections(fins_data, verbose)
+    validate_application_ports(fins_data)
+    validate_application_connections(fins_data)
 
 
-def validate_and_convert_system_fins_data(fins_data, filename, backend, verbose):
+def validate_and_convert_system_fins_data(fins_data, filename, backend):
     """Validates and converts data from a FINS System JSON file
     """
-    validate_fins_data(fins_data, filename, verbose)
+    validate_fins_data(fins_data, filename)
 
     # Set the backend used for generation
     fins_data['backend'] = backend
 
     # Replace any linked parameters with their literal values
-    fins_data = convert_parameters_to_literal(fins_data, verbose)
+    fins_data = convert_parameters_to_literal(fins_data)
 
     # Set defaults for top-level keys
-    fins_data = populate_fins_fields(fins_data, verbose)
+    fins_data = populate_fins_fields(fins_data)
 
     # Set defaults for System-specific top-level keys
     if 'base_offset' not in fins_data:
@@ -2301,7 +2266,7 @@ def validate_and_convert_system_fins_data(fins_data, filename, backend, verbose)
     for node in fins_data['nodes']:
         # Ensure that mandatory per-node keys are present
         if 'properties_offset' not in node:
-            print('ERROR: Required key properties_offset does not exist for node', node['module_name'])
+            LOGGER.error(f'Required key properties_offset does not exist for node {node["module_name"]}')
 
         # Set per-node defaults
 
@@ -2311,7 +2276,7 @@ def validate_and_convert_system_fins_data(fins_data, filename, backend, verbose)
 
     return fins_data
 
-def validate_system_fins_data_final(fins_data, verbose):
+def validate_system_fins_data_final(fins_data):
     """Final validation of the System fins_data dictionary before
     generation is run for the System
     """
@@ -2319,11 +2284,11 @@ def validate_system_fins_data_final(fins_data, verbose):
     pass
 
 
-def post_generate_node_core(fins_data, verbose):
+def post_generate_node_core(fins_data):
     """Operations that must occur after the 'core' generation is complete for a Node,
     but before backend generation starts
     """
     # Read top-level HDL code and find the ports
     # NOTE: Must be executed after populate_fins_fields() and after populate_filesets()
-    fins_data = populate_hdl_inferences(fins_data,verbose)
+    fins_data = populate_hdl_inferences(fins_data)
     return fins_data

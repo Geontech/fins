@@ -18,7 +18,12 @@
 #
 
 import os
+import logging
 from fins.backend.generator import Generator
+
+
+# This logger will inherit log-level and settings from main.py
+LOGGER = logging.getLogger(__name__)
 
 
 QUARTUS_TEMPLATE_DIR = os.path.dirname(__file__) + '/templates/'

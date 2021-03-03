@@ -37,27 +37,27 @@ rm -rf application/Makefile application/log/ application/gen/ application/projec
 
 echo "TESTING 'core': Generating test Node..."
 cd node
-fins fins.json
+fins fins.json -v
 echo "Return status (should be 0): $?"
 
 echo "TESTING 'core': Generating test Application..."
 cd ../application
-fins application_test.json
+fins application_test.json -v
 echo "Return status (should be 0): $?"
 
 echo "TESTING 'core': Generating test Systems. Expect WARNINGs..."
 cd ../system
-fins quartus_system_test.json
+fins quartus_system_test.json -v
 echo "Return status (should be 0): $?"
-fins vivado_system_test.json
+fins vivado_system_test.json -v
 echo "Return status (should be 0): $?"
 
 echo "TESTING 'core': Generating tutorial Node..."
 cd ../../tutorials/power_converter
-fins fins.json
+fins fins.json -v
 echo "TESTING 'core': Return status (should be 0): $?"
 
-echo "================= Generating tutorial Application..."
+echo "TESTING 'core': Generating tutorial Application..."
 cd ../power_application
-fins fins.json
+fins fins.json -v
 echo "TESTING 'core': Return status (should be 0): $?"
