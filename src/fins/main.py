@@ -21,16 +21,16 @@ import os
 import logging
 import argparse
 import pkg_resources
-
-# FINS Utilities
+# FINS Utilities and Logger
 from fins.utils import cd
 from fins.utils import SchemaType
-
+from fins.utils import ColoredLogger
 # FINS Loader and Generator
 from fins import loader
 from fins.backend.generator import Generator
+# FINS version
+from fins import version
 
-from . import version
 
 ENTRY_POINT_ID = 'fins.backend.generators'
 
@@ -55,7 +55,14 @@ def load_generator(name):
     raise KeyError(name)
 
 
-def run_generator(generator, filepath, backend, part, verbose):
+logging.setLoggerClass(ColoredLogger)
+logging.getLogger().setLevel(logging.INFO)
+
+# Top level LOGGER
+LOGGER = logging.getLogger('fins')
+
+
+def run_generator(generator, filepath, backend, part):
 
     filename = os.path.basename(filepath)
 
@@ -65,72 +72,73 @@ def run_generator(generator, filepath, backend, part, verbose):
         target_dir = os.path.dirname(filepath)
 
     if target_dir != '.':
-        logging.info('-- Temporarily changing directories to', os.path.dirname(filepath))
+        LOGGER.debug('fTemporarily changing directories to {os.path.dirname(filepath)')
 
     with cd(target_dir):
         # Load the fins_data and generate the backend
         generator.start_file(filename)
-        fins_data = loader.load_json_file(filename, verbose)
+        fins_data = loader.load_json_file(filename)
 
         # Determine the schema type (NODE, APPLICATION, SYSTEM)
         fins_data['schema_type'] = int(SchemaType.get(fins_data))
 
         # Determine the part (if one was passed through the command line)
-        if(part != None):
+        if part:
             fins_data['part'] = part
 
         if fins_data['schema_type'] == SchemaType.NODE:
             # This is a FINS IP/Node
-            fins_data = loader.validate_and_convert_node_fins_data(fins_data, filename, backend, verbose)
+            fins_data = loader.validate_and_convert_node_fins_data(fins_data, filename, backend)
 
             # Recursively call function on all sub-ip
             if 'ip' in fins_data:
                 for ip in fins_data['ip']:
-                    logging.info('Recursing into IP at', ip['fins_path'])
-                    ip['ip_details'] = run_generator(generator, ip['fins_path'], backend, part, verbose)
+                    LOGGER.info(f'Recursing into sub-IP at {os.path.abspath(ip["fins_path"])}')
+                    ip['ip_details'] = run_generator(generator, ip['fins_path'], backend, part)
 
-            loader.populate_fins_node(fins_data, verbose)
-            loader.validate_node_fins_data_final(fins_data, verbose)
+            loader.populate_fins_node(fins_data)
+            loader.validate_node_fins_data_final(fins_data)
 
             try:
                 # Run core generation, post core generation ops, and finally backend generation
+                LOGGER.debug(f'Running generator for {os.path.abspath(filepath)}')
                 generator.generate_node_core(fins_data, filename)
-                loader.post_generate_node_core(fins_data, verbose)
+                loader.post_generate_node_core(fins_data)
                 generator.generate_node_backend(fins_data, filename)
             except RuntimeError as exc:
-                logging.error('Generator error: %s', exc)
+                LOGGER.error(f'Generator error: {exc}')
 
         elif fins_data['schema_type'] == SchemaType.APPLICATION:
-            fins_data = loader.validate_and_convert_application_fins_data(fins_data, filename, backend, verbose)
+            fins_data = loader.validate_and_convert_application_fins_data(fins_data, filename, backend)
 
             # Recursively call function on all nodes
             # and then populate their contents in fins_data via loader.populate_fins_node
             for node in fins_data['nodes']:
                 if not node['descriptive_node']:
-                    logging.info('INFO: Recursing into node at "{}"'.format(node['fins_path']))
-                    node['node_details'] = run_generator(generator, node['fins_path'], backend, part, verbose)
+                    LOGGER.info(f'Recursing into node at {os.path.abspath(node["fins_path"])}')
+                    node['node_details'] = run_generator(generator, node['fins_path'], backend, part)
 
-            loader.populate_fins_application(fins_data, verbose)
-            loader.validate_application_fins_data_final(fins_data, verbose)
+            loader.populate_fins_application(fins_data)
+            loader.validate_application_fins_data_final(fins_data)
 
             try:
                 # Run core generation, post core generation ops, and finally backend generation
                 generator.generate_application_core(fins_data, filename)
                 generator.generate_application_backend(fins_data, filename)
             except RuntimeError as exc:
-                logging.error('Generator error: %s', exc)
+                LOGGER.error(f'Generator error: {exc}')
 
         else:  # schema_type == SchemaType.SYSTEM:
-            fins_data = loader.validate_and_convert_system_fins_data(fins_data, filename, backend, verbose)
+            fins_data = loader.validate_and_convert_system_fins_data(fins_data, filename, backend)
 
-            loader.populate_fins_system(fins_data, verbose)
-            loader.validate_system_fins_data_final(fins_data, verbose)
+            loader.populate_fins_system(fins_data)
+            loader.validate_system_fins_data_final(fins_data)
 
             try:
                 # Run core generation, post core generation ops, and finally backend generation
                 generator.generate_system_core(fins_data, filename)
             except RuntimeError as exc:
-                logging.error('Generator error: %s', exc)
+                LOGGER.error(f'Generator error: {exc}')
 
         generator.end_file()
 
@@ -138,18 +146,21 @@ def run_generator(generator, filepath, backend, part, verbose):
         # NOTE: This validate happens after the generator since some of the files referenced
         #       may be generated files
         if 'filesets' in fins_data:
-            loader.validate_filesets(fins_data, filename, verbose)
+            loader.validate_filesets(fins_data, filename)
 
         return fins_data
 
+
 def main():
-    logging.basicConfig()
 
     arg_parser = argparse.ArgumentParser(description='Generate HDL and programmable logic projects.')
     arg_parser.add_argument('filepath', nargs='+', help='Firmware IP Node Specification (FINS) JSON file')
-    arg_parser.add_argument('-v', '--verbose', action='store_true', default=False,
-                            help='display debug messages')
-    arg_parser.add_argument('--version', action='version', version='%(prog)s '+version.__version__)
+    verbosity_group = arg_parser.add_mutually_exclusive_group()
+    verbosity_group.add_argument('-v', '--verbose', action='store_true', default=False,
+                                 help='display debug messages along with messages enabled by default (infos, warnings and errors)')
+    verbosity_group.add_argument('-q', '--quiet', action='store_true', default=False,
+                                 help='only print warnings and errors (supress infos)')
+    arg_parser.add_argument('--version', action='version', version='%(prog)s ' + version.__version__)
     arg_parser.add_argument('-b', '--backend', default='core', help='code generator backend to target')
     arg_parser.add_argument('-o', '--option', action='append', default=[],
                             help='options for code generator backend')
@@ -159,11 +170,13 @@ def main():
 
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
+    elif args.quiet:
+        logging.getLogger().setLevel(logging.WARNING)
 
     try:
         generator = load_generator(args.backend)
     except KeyError:
-        raise SystemExit("invalid backend '"+args.backend+"'")
+        raise SystemExit(f'invalid backend "{args.backend}"')
 
     for option in args.option:
         if '=' in option:
@@ -177,4 +190,4 @@ def main():
             raise SystemExit(str(exc))
 
     for filepath in args.filepath:
-        run_generator(generator, filepath, args.backend, args.part, args.verbose)
+        run_generator(generator, filepath, args.backend, args.part)
