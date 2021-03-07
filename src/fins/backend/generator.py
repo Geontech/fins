@@ -181,6 +181,8 @@ class Generator:
             if 'ports' in fins_data['ports']:
                 self.render_jinja_template(jinja_env, 'axis.vhd', output_dir + fins_data['name'] + '_axis.vhd', fins_data)
                 self.render_jinja_template(jinja_env, 'axis_verify.vhd', output_dir + fins_data['name'] + '_axis_verify.vhd', fins_data)
+                self.render_jinja_template(jinja_env, 'axis_file_write.m', output_dir + fins_data['name'] + '_axis_file_write.m', fins_data)
+                self.render_jinja_template(jinja_env, 'axis_file_read.m', output_dir + fins_data['name'] + '_axis_file_read.m', fins_data)
         if 'properties' in fins_data:
             # Documentation
             self.render_jinja_template(jinja_env, 'properties.md', output_dir + fins_data['name'] + '_properties.md', fins_data)
