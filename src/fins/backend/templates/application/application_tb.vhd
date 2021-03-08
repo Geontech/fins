@@ -18,12 +18,17 @@
 -- along with this program.  If not, see http://www.gnu.org/licenses/.
 --
 -#}
+{%- if 'license_lines' in fins %}
+{%-  for line in fins['license_lines'] -%}
+-- {{ line }}
+{%-  endfor %}
+{%- endif %}
+
 --==============================================================================
 -- Firmware IP Node Specification (FINS) Auto-Generated File
 -- -------------------------------------------------------------
 -- Template:    {{ fins['name'] }}_tb.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- -------------------------------------------------------------
 -- Description: Top-level testbench code stub for a FINS Application
 --==============================================================================
@@ -64,7 +69,7 @@ entity {{ fins['name'] }}_tb is
     {%-    if fins['backend']|lower == 'quartus' %}
     G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      : string := "../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%-    else %}
-    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      : string := "../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      : string := "../../../../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%-    endif %}
     {%-   else %}
     G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_NUM_PACKETS_EXPECTED : natural := 1;
@@ -73,7 +78,7 @@ entity {{ fins['name'] }}_tb is
     {%-    if fins['backend']|lower == 'quartus' %}
     G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH        : string := "../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%-    else %}
-    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH        : string := "../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH        : string := "../../../../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%-    endif %}
     {%-   endif  %}{#### if port['direction'] == "in" ####}
     {%-  endfor %}{#### for i in range(port['num_instances']) ####}
@@ -149,6 +154,9 @@ architecture behav of {{ fins['name'] }}_tb is
   {%-    for i in range(port['num_instances']) %}
   {%-     if port['supports_backpressure'] %}
   signal {{ port|axisprefix(i) }}_tready  : std_logic;
+  {%-     endif %}
+  {%-     if port['supports_byte_enable'] %}
+  signal {{ port|axisprefix(i) }}_tkeep   : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
   {%-     endif %}
   signal {{ port|axisprefix(i) }}_tdata   : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
   {%-     if 'metadata' in port %}
@@ -233,6 +241,9 @@ begin
       {%-     if port['supports_backpressure'] %}
       {{ port|axisprefix(i) }}_tready  => {{ port|axisprefix(i) }}_tready  ,
       {%-     endif %}
+      {%-     if port['supports_byte_enable'] %}
+      {{ port|axisprefix(i) }}_tkeep   => {{ port|axisprefix(i) }}_tkeep   ,
+      {%-     endif %}
       {{ port|axisprefix(i) }}_tdata   => {{ port|axisprefix(i) }}_tdata   ,
       {%-     if 'metadata' in port %}
       {{ port|axisprefix(i) }}_tuser   => {{ port|axisprefix(i) }}_tuser   ,
@@ -281,28 +292,34 @@ begin
       {%-  set outer_loop = loop %}
       {%-  for i in range(port['num_instances']) %}
       {%-   if port['direction']|lower == 'out' %}
-      {{ port|axisprefix(i,True) }}_aclk    => {{ port['clock'] }},
+      {{ port|axisprefix(i,reverse=True) }}_aclk    => {{ port['clock'] }},
       {%-    if port['supports_backpressure'] %}
-      {{ port|axisprefix(i,True) }}_tready  => {{ port|axisprefix(i) }}_tready,
+      {{ port|axisprefix(i,reverse=True) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%-    endif %}
-      {{ port|axisprefix(i,True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
+      {%-    if port['supports_byte_enable'] %}
+      {{ port|axisprefix(i,reverse=True) }}_tkeep   => {{ port|axisprefix(i) }}_tkeep,
+      {%-    endif %}
+      {{ port|axisprefix(i,reverse=True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
       {%-    if 'metadata' in port %}
-      {{ port|axisprefix(i,True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
+      {{ port|axisprefix(i,reverse=True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
       {%-    endif %}
-      {{ port|axisprefix(i,True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
-      {{ port|axisprefix(i,True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
+      {{ port|axisprefix(i,reverse=True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
+      {{ port|axisprefix(i,reverse=True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%-   else %}
-      {{ port|axisprefix(i,True) }}_aclk    => {{ port['clock'] }},
-      {{ port|axisprefix(i,True) }}_enable  => {{ port|axisprefix(i) }}_enable,
+      {{ port|axisprefix(i,reverse=True) }}_aclk    => {{ port['clock'] }},
+      {{ port|axisprefix(i,reverse=True) }}_enable  => {{ port|axisprefix(i) }}_enable,
       {%-    if port['supports_backpressure'] %}
-      {{ port|axisprefix(i,True) }}_tready  => {{ port|axisprefix(i) }}_tready,
+      {{ port|axisprefix(i,reverse=True) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%-    endif %}
-      {{ port|axisprefix(i,True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
+      {%-    if port['supports_byte_enable'] %}
+      {{ port|axisprefix(i,reverse=True) }}_tkeep   => {{ port|axisprefix(i) }}_tkeep,
+      {%-    endif %}
+      {{ port|axisprefix(i,reverse=True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
       {%-    if 'metadata' in port %}
-      {{ port|axisprefix(i,True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
+      {{ port|axisprefix(i,reverse=True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
       {%-    endif %}
-      {{ port|axisprefix(i,True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
-      {{ port|axisprefix(i,True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
+      {{ port|axisprefix(i,reverse=True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
+      {{ port|axisprefix(i,reverse=True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%-   endif %}
       {%-  endfor %}
       {%- endfor %}
@@ -382,10 +399,12 @@ begin
     {%- endfor %}
 
     {%- if 'prop_interfaces' in fins %}
-    -- deassert reset for properties interface after delay
+    -- deassert rall resets
     wait for PROPERTIES_CLOCK_PERIOD*10; -- Wait for an arbitrary 10 clocks
-    properties_aresetn <= '1';
-    wait for PROPERTIES_CLOCK_PERIOD; -- Wait for an arbitrary 10 clocks
+    {%- for clock in fins['clocks'] %}
+    {{ clock['resetn'] }} <= '1';
+    {%- endfor %}
+    wait for PROPERTIES_CLOCK_PERIOD*10; -- Wait for an arbitrary 10 clocks
 
     ----------------------------------------------------
     -- Verify Properties
@@ -413,9 +432,6 @@ begin
     -- Verify Ports
     ----------------------------------------------------
     -- Enable the inputs
-    {%- for clock in fins['clocks'] %}
-    {{ clock['resetn'] }} <= '1';
-    {%- endfor %}
     {%-  for port in fins['ports']['ports'] %}
     {%-   if port['direction']|lower == 'in' %}
     {%-    for i in range(port['num_instances']) %}

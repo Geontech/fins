@@ -18,12 +18,17 @@
 -- along with this program.  If not, see http://www.gnu.org/licenses/.
 --
 -#}
+{%- if 'license_lines' in fins %}
+{%-  for line in fins['license_lines'] -%}
+-- {{ line }}
+{%-  endfor %}
+{%- endif %}
+
 --==============================================================================
 -- Firmware IP Node Specification (FINS) Auto-Generated File
 -- ---------------------------------------------------------
 -- Template:    axis.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: AXI4-Stream bus interpreter for FINS ports
 -- Reset Type:  Synchronous
@@ -49,6 +54,9 @@ entity {{ fins['name']|lower }}_axis is
     {{ port|axisprefix(i) }}_aresetn : in  std_logic;
     {%- if port['supports_backpressure'] %}
     {{ port|axisprefix(i) }}_tready  : {% if port['direction']|lower == 'in' %}out{% else %}in {% endif %} std_logic;
+    {%- endif %}
+    {%- if port['supports_byte_enable'] %}
+    {{ port|axisprefix(i) }}_tkeep   : {% if port['direction']|lower == 'in' %}in{% else %}out {% endif %} std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
     {%- endif %}
     {{ port|axisprefix(i) }}_tdata   : {% if port['direction']|lower == 'in' %}in {% else %}out{% endif %} std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in port %}
@@ -78,9 +86,15 @@ architecture rtl of {{ fins['name']|lower }}_axis is
   {%- if 'metadata' in port %}
   signal {{ port|axisprefix(i) }}_tuser_q       : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
   {%- endif %}
+  {%- if port['supports_byte_enable'] %}
+  signal {{ port|axisprefix(i) }}_tkeep_q       : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
+  {%- endif %}
   signal {{ port|axisprefix(i) }}_tvalid_q      : std_logic;
   {%- if port['supports_backpressure'] %}
   signal {{ port|axisprefix(i) }}_tready_q      : std_logic;
+  {%- if port['supports_byte_enable'] %}
+  signal {{ port|axisprefix(i) }}_tkeep_stored  : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
+  {%- endif %}
   signal {{ port|axisprefix(i) }}_tlast_stored  : std_logic;
   signal {{ port|axisprefix(i) }}_tdata_stored  : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
   {%- if 'metadata' in port %}
@@ -130,12 +144,18 @@ begin
         {%- if 'metadata' in port %}
         {{ port|axisprefix(i) }}_tuser_q <= {{ port|axisprefix(i) }}_tuser;
         {%- endif %}
+        {%- if port['supports_byte_enable'] %}
+        {{ port|axisprefix(i) }}_tkeep_q <= {{ port|axisprefix(i) }}_tkeep;
+        {%- endif %}
       elsif ((ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready = '1') AND ({{ port|axisprefix(i) }}_tready_q = '0')) then
         -- Stored is sent to output
         {{ port|axisprefix(i) }}_tlast_q <= {{ port|axisprefix(i) }}_tlast_stored;
         {{ port|axisprefix(i) }}_tdata_q <= {{ port|axisprefix(i) }}_tdata_stored;
         {%- if 'metadata' in port %}
         {{ port|axisprefix(i) }}_tuser_q <= {{ port|axisprefix(i) }}_tuser_stored;
+        {%- endif %}
+        {%- if port['supports_byte_enable'] %}
+        {{ port|axisprefix(i) }}_tkeep_q <= {{ port|axisprefix(i) }}_tkeep_stored;
         {%- endif %}
       end if;
       if (((ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready = '0') AND ({{ port|axisprefix(i) }}_tvalid_q = '1')) AND ({{ port|axisprefix(i) }}_tready_q = '1')) then
@@ -145,6 +165,9 @@ begin
         {%- if 'metadata' in port %}
         {{ port|axisprefix(i) }}_tuser_stored <= {{ port|axisprefix(i) }}_tuser;
         {%- endif %}
+        {%- if port['supports_byte_enable'] %}
+        {{ port|axisprefix(i) }}_tkeep_stored <= {{ port|axisprefix(i) }}_tkeep;
+        {%- endif %}
       end if;
       {%- else %}
       -- Simple Pipeline
@@ -152,6 +175,9 @@ begin
       {{ port|axisprefix(i) }}_tdata_q <= {{ port|axisprefix(i) }}_tdata;
       {%- if 'metadata' in port %}
       {{ port|axisprefix(i) }}_tuser_q <= {{ port|axisprefix(i) }}_tuser;
+      {%- endif %}
+      {%- if port['supports_byte_enable'] %}
+      {{ port|axisprefix(i) }}_tkeep_q <= {{ port|axisprefix(i) }}_tkeep;
       {%- endif %}
       {%- endif %}
       ---------------------
@@ -213,6 +239,9 @@ begin
   {%- if port['supports_backpressure'] %}
   {{ port|axisprefix(i) }}_tready <= {{ port|axisprefix(i) }}_tready_q;
   {%- endif %}
+  {%- if port['supports_byte_enable'] %}
+  ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.keep <= {{ port|axisprefix(i) }}_tkeep_q;
+  {%- endif %}
   ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.valid <= {{ port|axisprefix(i) }}_tvalid_q;
 
   {%- else  %}{#### if port['use_pipeline'] ####}
@@ -224,6 +253,9 @@ begin
   {%- endif %}
   {%- if port['supports_backpressure'] %}
   {{ port|axisprefix(i) }}_tready <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready;
+  {%- endif %}
+  {%- if port['supports_byte_enable'] %}
+  ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.keep <= {{ port|axisprefix(i) }}_keep;
   {%- endif %}
   ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.valid <= {{ port|axisprefix(i) }}_tvalid;
 
@@ -257,12 +289,18 @@ begin
         {%- if 'metadata' in port %}
         {{ port|axisprefix(i) }}_tuser_q <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata(ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.metadata);
         {%- endif %}
+        {%- if port['supports_byte_enable'] %}
+        {{ port|axisprefix(i) }}_tkeep_q <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.keep;
+        {%- endif %}
       elsif (({{ port|axisprefix(i) }}_tready = '1') AND ({{ port|axisprefix(i) }}_tready_q = '0')) then
         -- Stored is sent to output
         {{ port|axisprefix(i) }}_tlast_q <= {{ port|axisprefix(i) }}_tlast_stored;
         {{ port|axisprefix(i) }}_tdata_q <= {{ port|axisprefix(i) }}_tdata_stored;
         {%- if 'metadata' in port %}
         {{ port|axisprefix(i) }}_tuser_q <= {{ port|axisprefix(i) }}_tuser_stored;
+        {%- endif %}
+        {%- if port['supports_byte_enable'] %}
+        {{ port|axisprefix(i) }}_tkeep_q <= {{ port|axisprefix(i) }}_tkeep_stored;
         {%- endif %}
       end if;
       if ((({{ port|axisprefix(i) }}_tready = '0') AND ({{ port|axisprefix(i) }}_tvalid_q = '1')) AND ({{ port|axisprefix(i) }}_tready_q = '1')) then
@@ -272,6 +310,9 @@ begin
         {%- if 'metadata' in port %}
         {{ port|axisprefix(i) }}_tuser_stored <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata(ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.metadata);
         {%- endif %}
+        {%- if port['supports_byte_enable'] %}
+        {{ port|axisprefix(i) }}_tkeep_stored <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.keep;
+        {%- endif %}
       end if;
       {%- else %}
       -- Simple Pipeline
@@ -279,6 +320,9 @@ begin
       {{ port|axisprefix(i) }}_tdata_q <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_data(ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.data);
       {%- if 'metadata' in port %}
       {{ port|axisprefix(i) }}_tuser_q <= f_serialize_{{ fins['name']|lower }}_{{ port['name']|lower }}_metadata(ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.metadata);
+      {%- endif %}
+      {%- if port['supports_byte_enable'] %}
+      {{ port|axisprefix(i) }}_tkeep_q <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.keep;
       {%- endif %}
       {%- endif %}
       ---------------------
@@ -341,6 +385,9 @@ begin
   {%- if port['supports_backpressure'] %}
   ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready <= {{ port|axisprefix(i) }}_tready_q;
   {%- endif %}
+  {%- if port['supports_byte_enable'] %}
+  {{ port|axisprefix(i) }}_tkeep  <= {{ port|axisprefix(i) }}_tkeep_q;
+  {%- endif %}
 
   {%- else  %}{#### if port['use_pipeline'] ####}
   -- Reinterpret AXI4-Stream port only
@@ -352,6 +399,9 @@ begin
   {{ port|axisprefix(i) }}_tvalid <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.valid;
   {%- if port['supports_backpressure'] %}
   ports_in.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.ready <= {{ port|axisprefix(i) }}_tready;
+  {%- endif %}
+  {%- if port['supports_byte_enable'] %}
+  {{ port|axisprefix(i) }}_tkeep  <= ports_out.{{ port['name']|lower }}{% if port['num_instances'] > 1 %}({{ i }}){% endif %}.keep;
   {%- endif %}
 
   {%- endif  %}{#### if port['use_pipeline'] ####}

@@ -18,9 +18,15 @@
 #
 
 import os
+import logging
 from fins.backend.generator import Generator
 
-VIVADO_TEMPLATE_DIR = os.path.dirname(__file__)+'/templates/'
+
+# This logger will inherit log-level and settings from main.py
+LOGGER = logging.getLogger(__name__)
+
+
+VIVADO_TEMPLATE_DIR = os.path.dirname(__file__) + '/templates/'
 VIVADO_OUTPUT_DIR = 'gen/vivado/'
 
 
@@ -29,8 +35,8 @@ class VivadoGenerator(Generator):
     def generate_node_backend(self, fins_data, filename):
         # Determine and create the root directory
         if os.path.dirname(filename):
-            root_dir = os.path.dirname(filename)+'/'
-            output_dir = root_dir+'/'+VIVADO_OUTPUT_DIR
+            root_dir = os.path.dirname(filename) + '/'
+            output_dir = root_dir + '/' + VIVADO_OUTPUT_DIR
         else:
             root_dir = ''
             output_dir = VIVADO_OUTPUT_DIR
@@ -40,15 +46,15 @@ class VivadoGenerator(Generator):
         jinja_env = self.create_jinja_env(os.path.join(VIVADO_TEMPLATE_DIR, 'node'))
 
         # Generate Vivado targets
-        self.render_jinja_template(jinja_env,'Makefile',root_dir+'Makefile',fins_data)
-        self.render_jinja_template(jinja_env,'ip_create.tcl',output_dir+'ip_create.tcl',fins_data)
-        self.render_jinja_template(jinja_env,'ip_simulate.tcl',output_dir+'ip_simulate.tcl',fins_data)
+        self.render_jinja_template(jinja_env, 'Makefile', root_dir + 'Makefile', fins_data)
+        self.render_jinja_template(jinja_env, 'ip_create.tcl', output_dir + 'ip_create.tcl', fins_data)
+        self.render_jinja_template(jinja_env, 'ip_simulate.tcl', output_dir + 'ip_simulate.tcl', fins_data)
 
     def generate_application_backend(self, fins_data, filename):
         # Determine and create the root directory
         if os.path.dirname(filename):
-            root_dir = os.path.dirname(filename)+'/'
-            output_dir = root_dir+'/'+VIVADO_OUTPUT_DIR
+            root_dir = os.path.dirname(filename) + '/'
+            output_dir = root_dir + '/' + VIVADO_OUTPUT_DIR
         else:
             root_dir = ''
             output_dir = VIVADO_OUTPUT_DIR
@@ -58,4 +64,6 @@ class VivadoGenerator(Generator):
         jinja_env = self.create_jinja_env(os.path.join(VIVADO_TEMPLATE_DIR, 'application'))
 
         # Generate Quartus targets
-        self.render_jinja_template(jinja_env,'Makefile',root_dir+'Makefile',fins_data)
+        self.render_jinja_template(jinja_env, 'Makefile', root_dir + 'Makefile', fins_data)
+        self.render_jinja_template(jinja_env, 'application_create.tcl', output_dir + 'application_create.tcl', fins_data)
+        self.render_jinja_template(jinja_env, 'application_simulate.tcl', output_dir + 'application_simulate.tcl', fins_data)

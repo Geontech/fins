@@ -18,12 +18,17 @@
  # along with this program.  If not, see http://www.gnu.org/licenses/.
  #
 -#}
+{%- if 'license_lines' in fins %}
+{%-  for line in fins['license_lines'] -%}
+# {{ line }}
+{%-  endfor %}
+{%  endif %}
+
 #===============================================================================
 # Firmware IP Node Specification (FINS) Auto-Generated File
 # ---------------------------------------------------------
 # Template:    Makefile
 # Backend:     {{ fins['backend'] }}
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: Makefile to build and simulate the FINS "quartus" backend
 # Versions:    Tested with:
@@ -164,7 +169,7 @@ all:
 	{%- for node in fins['nodes'] %}
 	$(MAKE) -C {{ node['fins_dir'] }} all
 	{%- endfor %}
-	make -C . $(APPLICATION_TARGET)
+	$(MAKE) -C . $(APPLICATION_TARGET)
 
 # Clean phony target that cleans only this Application
 clean:
@@ -178,9 +183,6 @@ clean-nodes:
 
 # Clean-all phony target that cleans this Application and all nodes
 clean-all: clean-nodes clean
-
-{%- if 'filesets' in fins %}
-{%- if 'sim' in fins['filesets'] %}
 
 # {{ fins['backend'] }} project target
 $(APPLICATION_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES)
@@ -235,6 +237,9 @@ endif
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
+
+{%- if 'filesets' in fins %}
+{%- if 'sim' in fins['filesets'] %}
 
 # Simulation phony target
 sim : all $(APPLICATION_TARGET)

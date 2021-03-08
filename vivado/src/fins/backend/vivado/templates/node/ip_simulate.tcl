@@ -18,12 +18,17 @@
  # along with this program.  If not, see http://www.gnu.org/licenses/.
  #
 -#}
+{%- if 'license_lines' in fins %}
+{%-  for line in fins['license_lines'] -%}
+# {{ line }}
+{%-  endfor %}
+{%- endif %}
+
 #===============================================================================
 # Firmware IP Node Specification (FINS) Auto-Generated File
 # ---------------------------------------------------------
 # Template:    ip_simulate.tcl
 # Backend:     {{ fins['backend'] }}
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: TCL script for running an IP simulation with
 #              Xilinx Vivado Xsim
@@ -63,6 +68,11 @@ source {{ presim_script['path'] }}
 # Open project if not open
 if {[current_project -quiet] == ""} {
     open_project $PROJECT_VIVADO_DIR/{{ fins['name'] }}.xpr
+}
+
+# Generate each vendor and sub-IP
+foreach ip [get_ips] {
+    generate_target simulation [get_files [get_property IP_FILE $ip ] ]
 }
 
 # Launch Simulation

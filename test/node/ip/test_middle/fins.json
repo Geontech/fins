@@ -5,6 +5,7 @@
   "company_name":"Geon Technologies",
   "company_url":"geon.tech",
   "company_logo":"docs/geontech_logo.png",
+  "license_file":"../../../../COPYRIGHT",
   "library":"user",
   "top_source":"test_middle",
   "top_sim":"test_middle_tb",

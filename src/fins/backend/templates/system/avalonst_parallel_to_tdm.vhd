@@ -18,12 +18,17 @@
 -- along with this program.  If not, see http://www.gnu.org/licenses/.
 --
 -#}
+{%- if 'license_lines' in fins %}
+{%-  for line in fins['license_lines'] -%}
+-- {{ line }}
+{%-  endfor %}
+{%- endif %}
+
 --==============================================================================
 -- Firmware IP Node Specification (FINS) Auto-Generated File
 -- ---------------------------------------------------------
 -- Template:    avalonst_parallel_to_tdm.vhd
 -- Backend:     core (Application)
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: Converts FINS Port from AXI4-Stream fully parallel bus to
 --              Avalon-ST time-division multiplexed bus (Big Endian)
@@ -49,7 +54,8 @@ use work.{{ fins['name']|lower }}_avalonst_parallel_to_tdm_pkg.all;
 -- Entity
 entity {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   generic (
-    G_TDM_WORD_WIDTH : natural := 32  -- LIMITATION: This value MUST be >= fins['data']['bit_width']
+    G_TDM_WORD_WIDTH : natural := 32;  -- LIMITATION: This value MUST be >= fins['data']['bit_width']
+    G_BIG_ENDIAN     : boolean := True
   );
   port (
     -- AXI4-Stream Parallel Bus
@@ -57,6 +63,9 @@ entity {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
     s_axis_aresetn    : in  std_logic;
     {%- if fins['supports_backpressure'] %}
     s_axis_tready     : out std_logic;
+    {%- endif %}
+    {%- if fins['supports_byte_enable'] %}
+    s_axis_tkeep      : in  std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
     {%- endif %}
     s_axis_tdata      : in  std_logic_vector({{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in fins %}
@@ -71,6 +80,9 @@ entity {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
     aso_data          : out std_logic_vector(G_TDM_WORD_WIDTH-1 downto 0);
     aso_valid         : out std_logic;
     aso_startofpacket : out std_logic;
+    {%- if fins['supports_byte_enable'] %}
+    aso_empty         : out std_logic_vector({{ fins['data']['empty_width'] }}-1 downto 0);
+    {%- endif %}
     aso_endofpacket   : out std_logic
   );
 end {{ fins['name']|lower }}_avalonst_parallel_to_tdm;
@@ -87,11 +99,10 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   constant NUM_METADATA_WORDS : natural := integer(ceil(real(G_METADATA_WIDTH) / real(G_TDM_WORD_WIDTH)));
   constant NUM_METADATA_WORDS_LOG2 : natural := integer(ceil(log2(real(NUM_METADATA_WORDS))));
   {%- endif %}
-  {%- if 'metadata' in fins %}
-  constant FIFO_WIDTH : natural := G_DATA_WIDTH + G_METADATA_WIDTH + 1; -- +1 for tlast
-  {%- else %}
-  constant FIFO_WIDTH : natural := G_DATA_WIDTH + 1; -- +1 for tlast
+  {%- if fins['supports_byte_enable'] %}
+  constant G_BYTE_WIDTH : natural := {{ fins['data']['byte_width'] }};
   {%- endif %}
+  constant FIFO_WIDTH : natural := G_DATA_WIDTH {%- if 'metadata' in fins %} + G_METADATA_WIDTH{%- endif %}{%- if fins['supports_byte_enable'] %} + G_BYTE_WIDTH{%- endif %}+ 1; -- +1 for tlast
 
   --------------------------------------------------------------------------------
   -- Components
@@ -145,6 +156,20 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   signal metadata_mux_counter : unsigned(NUM_METADATA_WORDS_LOG2-1 downto 0);
   signal metadata : std_logic_vector(NUM_METADATA_WORDS*G_TDM_WORD_WIDTH-1 downto 0);
   {%- endif %}
+  
+  function f_keep_to_empty(keep : std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0) := (others => '0');
+                           big_endian : boolean := G_BIG_ENDIAN) return std_logic_vector is
+      variable count : integer := 0;
+      variable empty : std_logic_vector({{ fins['data']['empty_width'] }}-1 downto 0) := (others => '0');
+    begin
+      for i in 0 to {{ fins['data']['byte_width'] }}-1 loop
+        if(keep(i) = '0') then
+          count := count + 1;
+        end if;
+      end loop;
+      empty := std_logic_vector(to_unsigned(count,empty'length));
+      return empty;
+    end function;
 
 begin
 
@@ -152,11 +177,7 @@ begin
   -- Input Buffer
   -----------------------------------------------------------------------------
   -- Write the input directly into FIFO
-  {%- if 'metadata' in fins %}
-  fifo_din   <= s_axis_tlast & s_axis_tdata & s_axis_tuser;
-  {%- else %}
-  fifo_din   <= s_axis_tlast & s_axis_tdata;
-  {%- endif %}
+  fifo_din   <= s_axis_tlast & s_axis_tdata{%- if 'metadata' in fins %} & s_axis_tuser{%- endif %}{%- if fins['supports_byte_enable'] %} & s_axis_tkeep{%- endif %};
   fifo_wr_en <= s_axis_tvalid; -- Since tready is always high
   {%- if fins['supports_backpressure'] %}
   -- Only ready when the FIFO has space
@@ -235,9 +256,12 @@ begin
     metadata <= (others => '0');
     internal_aso_data <= (others => '0');
     aso_data <= (others => '0');
-    aso_valid <= (NOT fifo_empty) OR send_metadata;
+    aso_valid <= (NOT fifo_empty);
     aso_endofpacket <= fifo_dout(FIFO_WIDTH-1) AND (NOT send_metadata);
     aso_startofpacket <= '0';
+    {%- if fins['supports_byte_enable'] %}
+    aso_empty <= f_keep_to_empty(fifo_dout(G_BYTE_WIDTH-1 downto 0), G_BIG_ENDIAN);
+    {%- endif %}
 
     -- Create the start of packet
     if (send_metadata = '1') then
@@ -247,7 +271,7 @@ begin
     end if;
 
     -- Zero pad the metadata
-    metadata(G_METADATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH-1 downto 0);
+    metadata(G_METADATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %}-1 downto 0{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %});
 
     -- Mux the data output
     if (send_metadata = '1') then
@@ -259,7 +283,7 @@ begin
       end loop;
     else
       -- Set as data
-      internal_aso_data(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH+G_DATA_WIDTH-1 downto G_METADATA_WIDTH);
+      internal_aso_data(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_METADATA_WIDTH+G_DATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %}-1 downto G_METADATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %});
     end if;
 
     -- Convert the data output to Big Endian
@@ -278,9 +302,12 @@ begin
     aso_valid <= NOT fifo_empty;
     aso_endofpacket <= fifo_dout(FIFO_WIDTH-1);
     aso_data <= (others => '0');
+    {%- if fins['supports_byte_enable'] %}
+    aso_empty <= f_keep_to_empty(fifo_dout(G_BYTE_WIDTH-1 downto 0), G_BIG_ENDIAN);
+    {%- endif %}
 
     -- Zero-pad tdata if applicable
-    aso_data(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_DATA_WIDTH-1 downto 0);
+    aso_data(G_DATA_WIDTH-1 downto 0) <= fifo_dout(G_DATA_WIDTH{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %}-1 downto 0{%- if fins['supports_byte_enable'] %}+G_BYTE_WIDTH{%- endif %});
   end process c_output;
 
   -- Synchronous process to create the startofpacket

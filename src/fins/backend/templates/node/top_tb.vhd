@@ -18,12 +18,17 @@
 -- along with this program.  If not, see http://www.gnu.org/licenses/.
 --
 -#}
+{%- if 'license_lines' in fins %}
+{%-  for line in fins['license_lines'] -%}
+-- {{ line }}
+{%-  endfor %}
+{%- endif %}
+
 --==============================================================================
 -- Firmware IP Node Specification (FINS) Auto-Generated File
 -- ---------------------------------------------------------
 -- Template:    top_tb.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: Top-level testbench code stub for a FINS IP
 --==============================================================================
@@ -54,21 +59,11 @@ entity {{ fins['name']|lower }}_tb is
     {%- for i in range(port['num_instances']) %}
     {%- if port['direction'] == "in" %}
     G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_SAMPLE_PERIOD : positive := 1;
-    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_RANDOMIZE_BUS : boolean := false;
-    {%- if fins['backend']|lower == 'quartus' %}
-    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      : string := "../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
-    {%- else %}
-    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      : string := "../../../../../../sim_data/sim_source_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
-    {%- endif %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_RANDOMIZE_BUS : boolean := false{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%- else %}
     G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_NUM_PACKETS_EXPECTED : natural := 1;
     G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_SAMPLE_PERIOD   : positive := 1;
-    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_RANDOMIZE_BUS   : boolean := false;
-    {%- if fins['backend']|lower == 'quartus' %}
-    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH        : string := "../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
-    {%- else %}
-    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH        : string := "../../../../../../sim_data/sim_sink_{{ port['name']|lower }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}.txt"{% if not (outer_loop.last and loop.last) %};{% endif %}
-    {%- endif %}
+    G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_RANDOMIZE_BUS   : boolean := false{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%- endif  %}{#### if port['direction'] == "in" ####}
     {%- endfor %}{#### for i in range(port['num_instances']) ####}
     {%- endfor %}{#### for port in fins['ports']['ports'] ####}
@@ -125,6 +120,9 @@ architecture behav of {{ fins['name']|lower }}_tb is
   signal {{ port|axisprefix(i) }}_aresetn : std_logic;
   {%- if port['supports_backpressure'] %}
   signal {{ port|axisprefix(i) }}_tready  : std_logic;
+  {%- endif %}
+  {%- if port['supports_byte_enable'] %}
+  signal {{ port|axisprefix(i) }}_tkeep   : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
   {%- endif %}
   signal {{ port|axisprefix(i) }}_tdata   : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
   {%- if 'metadata' in port %}
@@ -206,6 +204,9 @@ begin
       {%- if port['supports_backpressure'] %}
       {{ port|axisprefix(i) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%- endif %}
+      {%- if port['supports_byte_enable'] %}
+      {{ port|axisprefix(i) }}_tkeep   => {{ port|axisprefix(i) }}_tkeep,
+      {%- endif %}
       {{ port|axisprefix(i) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
       {%- if 'metadata' in port %}
       {{ port|axisprefix(i) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
@@ -223,7 +224,7 @@ begin
   --------------------------------------------------------------------------------
   -- File Input/Output AXI4-Stream Port Verification
   --------------------------------------------------------------------------------
-  -- NOTE: The source/sink filepaths are relative to where the simulation is executed
+  -- NOTE: The FILEPATH generics for each SOURCE/SINK are left at their defaults
   u_file_io : entity work.{{ fins['name']|lower }}_axis_verify
     generic map (
       {%- for port in fins['ports']['ports'] %}
@@ -231,12 +232,10 @@ begin
       {%- for i in range(port['num_instances']) %}
       {%- if port['direction'] == "in" %}
       G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_SAMPLE_PERIOD => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_SAMPLE_PERIOD,
-      G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_RANDOMIZE_BUS => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_RANDOMIZE_BUS,
-      G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH      => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH{% if not (outer_loop.last and loop.last) %},{% endif %}
+      G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_RANDOMIZE_BUS => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_RANDOMIZE_BUS{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%- else %}
       G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_SAMPLE_PERIOD => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_SAMPLE_PERIOD,
-      G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_RANDOMIZE_BUS => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_RANDOMIZE_BUS,
-      G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH      => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH{% if not (outer_loop.last and loop.last) %},{% endif %}
+      G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_RANDOMIZE_BUS => G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_RANDOMIZE_BUS{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%- endif %}
       {%- endfor %}
       {%- endfor %}
@@ -247,28 +246,34 @@ begin
       {%- set outer_loop = loop %}
       {%- for i in range(port['num_instances']) %}
       {%- if port['direction']|lower == 'out' %}
-      {{ port|axisprefix(i,True) }}_aclk    => {{ port|axisprefix(i) }}_aclk,
+      {{ port|axisprefix(i,reverse=True) }}_aclk    => {{ port|axisprefix(i) }}_aclk,
       {%- if port['supports_backpressure'] %}
-      {{ port|axisprefix(i,True) }}_tready  => {{ port|axisprefix(i) }}_tready,
+      {{ port|axisprefix(i,reverse=True) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%- endif %}
-      {{ port|axisprefix(i,True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
+      {%- if port['supports_byte_enable'] %}
+      {{ port|axisprefix(i,reverse=True) }}_tkeep   => {{ port|axisprefix(i) }}_tkeep,
+      {%- endif %}
+      {{ port|axisprefix(i,reverse=True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
       {%- if 'metadata' in port %}
-      {{ port|axisprefix(i,True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
+      {{ port|axisprefix(i,reverse=True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
       {%- endif %}
-      {{ port|axisprefix(i,True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
-      {{ port|axisprefix(i,True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
+      {{ port|axisprefix(i,reverse=True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
+      {{ port|axisprefix(i,reverse=True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%- else %}
-      {{ port|axisprefix(i,True) }}_aclk    => {{ port|axisprefix(i) }}_aclk,
-      {{ port|axisprefix(i,True) }}_enable  => {{ port|axisprefix(i) }}_enable,
+      {{ port|axisprefix(i,reverse=True) }}_aclk    => {{ port|axisprefix(i) }}_aclk,
+      {{ port|axisprefix(i,reverse=True) }}_enable  => {{ port|axisprefix(i) }}_enable,
       {%- if port['supports_backpressure'] %}
-      {{ port|axisprefix(i,True) }}_tready  => {{ port|axisprefix(i) }}_tready,
+      {{ port|axisprefix(i,reverse=True) }}_tready  => {{ port|axisprefix(i) }}_tready,
       {%- endif %}
-      {{ port|axisprefix(i,True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
+      {%- if port['supports_byte_enable'] %}
+      {{ port|axisprefix(i,reverse=True) }}_tkeep   => {{ port|axisprefix(i) }}_tkeep,
+      {%- endif %}
+      {{ port|axisprefix(i,reverse=True) }}_tdata   => {{ port|axisprefix(i) }}_tdata,
       {%- if 'metadata' in port %}
-      {{ port|axisprefix(i,True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
+      {{ port|axisprefix(i,reverse=True) }}_tuser   => {{ port|axisprefix(i) }}_tuser,
       {%- endif %}
-      {{ port|axisprefix(i,True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
-      {{ port|axisprefix(i,True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
+      {{ port|axisprefix(i,reverse=True) }}_tvalid  => {{ port|axisprefix(i) }}_tvalid,
+      {{ port|axisprefix(i,reverse=True) }}_tlast   => {{ port|axisprefix(i) }}_tlast{% if not (outer_loop.last and loop.last) %},{% endif %}
       {%- endif %}
       {%- endfor %}
       {%- endfor %}
@@ -333,6 +338,7 @@ begin
     -- Wait for all expected packets using the TLAST signal
     while (packets_received < G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_NUM_PACKETS_EXPECTED) loop
       wait until falling_edge({{ port|axisprefix(i) }}_aclk);
+      
       {%- if port['supports_backpressure'] %}
       if (({{ port|axisprefix(i) }}_tvalid = '1') AND ({{ port|axisprefix(i) }}_tlast = '1') AND ({{ port|axisprefix(i) }}_tready = '1')) then
       {%- else %}
@@ -366,7 +372,7 @@ begin
     resetn <= '0';
     wait for CLOCK_PERIOD*10; -- Wait for an arbitrary 10 clocks
     resetn <= '1';
-    wait for CLOCK_PERIOD;
+    wait for CLOCK_PERIOD*10; -- Wait for an arbitrary 10 clocks
 
     {%- if 'properties' in fins %}
     --**************************************************

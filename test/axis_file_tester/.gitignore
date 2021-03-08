@@ -1,0 +1,27 @@
+#===============================================================================
+# Firmware IP Node Specification (FINS) Auto-Generated File
+# ---------------------------------------------------------
+# Template:    .gitignore
+# Backend:     core
+# Generated:   2021-02-19 16:16:50.703853
+# ---------------------------------------------------------
+# Description: Default .gitignore file for FINS IP. Only auto-generated if
+#              file does not already exist.
+#===============================================================================
+
+# FINS Output Files
+/gen/*
+/project/*
+/log/*
+Makefile
+/*.override
+
+# Vivado Log Files
+vivado*.jou
+vivado*.log
+vivado*.str
+vivado*.zip
+/xgui/*
+
+# Test files
+*.txt

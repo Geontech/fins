@@ -160,6 +160,7 @@ architecture behav of test_top_tb is
   signal s_axis_sfix_cpx_in_tready   : std_logic;
   signal s_axis_sfix_cpx_in_tdata    : std_logic_vector(32-1 downto 0);
   signal s_axis_sfix_cpx_in_tuser    : std_logic_vector(121-1 downto 0);
+  signal s_axis_sfix_cpx_in_tkeep    : std_logic_vector(4-1 downto 0);
   signal s_axis_sfix_cpx_in_tvalid   : std_logic;
   signal s_axis_sfix_cpx_in_tlast    : std_logic;
   signal m_axis_sfix_cpx_out_aclk    : std_logic;
@@ -167,6 +168,7 @@ architecture behav of test_top_tb is
   signal m_axis_sfix_cpx_out_tready  : std_logic;
   signal m_axis_sfix_cpx_out_tdata   : std_logic_vector(32-1 downto 0);
   signal m_axis_sfix_cpx_out_tuser   : std_logic_vector(121-1 downto 0);
+  signal m_axis_sfix_cpx_out_tkeep   : std_logic_vector(4-1 downto 0);
   signal m_axis_sfix_cpx_out_tvalid  : std_logic;
   signal m_axis_sfix_cpx_out_tlast   : std_logic;
 
@@ -310,6 +312,7 @@ begin
       s_axis_sfix_cpx_in_tready   => s_axis_sfix_cpx_in_tready,
       s_axis_sfix_cpx_in_tdata    => s_axis_sfix_cpx_in_tdata,
       s_axis_sfix_cpx_in_tuser    => s_axis_sfix_cpx_in_tuser,
+      s_axis_sfix_cpx_in_tkeep    => s_axis_sfix_cpx_in_tkeep,
       s_axis_sfix_cpx_in_tvalid   => s_axis_sfix_cpx_in_tvalid,
       s_axis_sfix_cpx_in_tlast    => s_axis_sfix_cpx_in_tlast,
       m_axis_sfix_cpx_out_aclk    => m_axis_sfix_cpx_out_aclk,
@@ -317,6 +320,7 @@ begin
       m_axis_sfix_cpx_out_tready  => m_axis_sfix_cpx_out_tready,
       m_axis_sfix_cpx_out_tdata   => m_axis_sfix_cpx_out_tdata,
       m_axis_sfix_cpx_out_tuser   => m_axis_sfix_cpx_out_tuser,
+      m_axis_sfix_cpx_out_tkeep   => m_axis_sfix_cpx_out_tkeep,
       m_axis_sfix_cpx_out_tvalid  => m_axis_sfix_cpx_out_tvalid,
       m_axis_sfix_cpx_out_tlast   => m_axis_sfix_cpx_out_tlast,
       test_hdl_clk                  => test_hdl_clk,
@@ -399,6 +403,7 @@ begin
       m_axis_sfix_cpx_in_enable  => s_axis_sfix_cpx_in_enable,
       m_axis_sfix_cpx_in_tready  => s_axis_sfix_cpx_in_tready,
       m_axis_sfix_cpx_in_tdata   => s_axis_sfix_cpx_in_tdata,
+      m_axis_sfix_cpx_in_tkeep   => s_axis_sfix_cpx_in_tkeep,
       m_axis_sfix_cpx_in_tuser   => s_axis_sfix_cpx_in_tuser,
       m_axis_sfix_cpx_in_tvalid  => s_axis_sfix_cpx_in_tvalid,
       m_axis_sfix_cpx_in_tlast   => s_axis_sfix_cpx_in_tlast,
@@ -406,6 +411,7 @@ begin
       s_axis_sfix_cpx_out_tready => m_axis_sfix_cpx_out_tready,
       s_axis_sfix_cpx_out_tdata  => m_axis_sfix_cpx_out_tdata,
       s_axis_sfix_cpx_out_tuser  => m_axis_sfix_cpx_out_tuser,
+      s_axis_sfix_cpx_out_tkeep  => m_axis_sfix_cpx_out_tkeep,
       s_axis_sfix_cpx_out_tvalid => m_axis_sfix_cpx_out_tvalid,
       s_axis_sfix_cpx_out_tlast  => m_axis_sfix_cpx_out_tlast
     );
@@ -548,20 +554,20 @@ begin
       S_AXI_RDATA,  S_AXI_RRESP,  S_AXI_RVALID,  S_AXI_RREADY
     );
     test_middle_axilite_verify (
-      S_AXI_ACLK,   S_AXI_ARESETN,
-      S_AXI_AWADDR, S_AXI_AWPROT, S_AXI_AWVALID, S_AXI_AWREADY,
-      S_AXI_WDATA,  S_AXI_WSTRB,  S_AXI_WVALID,  S_AXI_WREADY,
-      S_AXI_BRESP,  S_AXI_BVALID, S_AXI_BREADY,
-      S_AXI_ARADDR, S_AXI_ARPROT, S_AXI_ARVALID, S_AXI_ARREADY,
-      S_AXI_RDATA,  S_AXI_RRESP,  S_AXI_RVALID,  S_AXI_RREADY
+      S_AXI_TEST_MIDDLE_ACLK,   S_AXI_TEST_MIDDLE_ARESETN,
+      S_AXI_TEST_MIDDLE_AWADDR, S_AXI_TEST_MIDDLE_AWPROT, S_AXI_TEST_MIDDLE_AWVALID, S_AXI_TEST_MIDDLE_AWREADY,
+      S_AXI_TEST_MIDDLE_WDATA,  S_AXI_TEST_MIDDLE_WSTRB,  S_AXI_TEST_MIDDLE_WVALID,  S_AXI_TEST_MIDDLE_WREADY,
+      S_AXI_TEST_MIDDLE_BRESP,  S_AXI_TEST_MIDDLE_BVALID, S_AXI_TEST_MIDDLE_BREADY,
+      S_AXI_TEST_MIDDLE_ARADDR, S_AXI_TEST_MIDDLE_ARPROT, S_AXI_TEST_MIDDLE_ARVALID, S_AXI_TEST_MIDDLE_ARREADY,
+      S_AXI_TEST_MIDDLE_RDATA,  S_AXI_TEST_MIDDLE_RRESP,  S_AXI_TEST_MIDDLE_RVALID,  S_AXI_TEST_MIDDLE_RREADY
     );
     test_bottom_axilite_verify (
-      S_AXI_ACLK,   S_AXI_ARESETN,
-      S_AXI_AWADDR, S_AXI_AWPROT, S_AXI_AWVALID, S_AXI_AWREADY,
-      S_AXI_WDATA,  S_AXI_WSTRB,  S_AXI_WVALID,  S_AXI_WREADY,
-      S_AXI_BRESP,  S_AXI_BVALID, S_AXI_BREADY,
-      S_AXI_ARADDR, S_AXI_ARPROT, S_AXI_ARVALID, S_AXI_ARREADY,
-      S_AXI_RDATA,  S_AXI_RRESP,  S_AXI_RVALID,  S_AXI_RREADY
+      S_AXI_TEST_BOTTOM_ACLK,   S_AXI_TEST_BOTTOM_ARESETN,
+      S_AXI_TEST_BOTTOM_AWADDR, S_AXI_TEST_BOTTOM_AWPROT, S_AXI_TEST_BOTTOM_AWVALID, S_AXI_TEST_BOTTOM_AWREADY,
+      S_AXI_TEST_BOTTOM_WDATA,  S_AXI_TEST_BOTTOM_WSTRB,  S_AXI_TEST_BOTTOM_WVALID,  S_AXI_TEST_BOTTOM_WREADY,
+      S_AXI_TEST_BOTTOM_BRESP,  S_AXI_TEST_BOTTOM_BVALID, S_AXI_TEST_BOTTOM_BREADY,
+      S_AXI_TEST_BOTTOM_ARADDR, S_AXI_TEST_BOTTOM_ARPROT, S_AXI_TEST_BOTTOM_ARVALID, S_AXI_TEST_BOTTOM_ARREADY,
+      S_AXI_TEST_BOTTOM_RDATA,  S_AXI_TEST_BOTTOM_RRESP,  S_AXI_TEST_BOTTOM_RVALID,  S_AXI_TEST_BOTTOM_RREADY
     );
     --**************************************************
     -- Verify Ports

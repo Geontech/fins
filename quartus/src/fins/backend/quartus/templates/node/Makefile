@@ -18,12 +18,17 @@
  # along with this program.  If not, see http://www.gnu.org/licenses/.
  #
 -#}
+{%- if 'license_lines' in fins %}
+{%-  for line in fins['license_lines'] -%}
+# {{ line }}
+{%-  endfor %}
+{%- endif %}
+
 #===============================================================================
 # Firmware IP Node Specification (FINS) Auto-Generated File
 # ---------------------------------------------------------
 # Template:    Makefile
 # Backend:     {{ fins['backend'] }}
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: Makefile to build and simulate the FINS "quartus" backend
 # Versions:    Tested with:
@@ -167,10 +172,10 @@ IP_TARGET:=$(QUARTUS_DIR)/$(PROJECT_FILENAME)
 all:
 	{%- for ip in fins['ip'] %}
 	{%- if ip['library'] == "user" %}
-	make -C {{ ip['fins_path']|dirname }} all
+	$(MAKE) -C {{ ip['fins_path']|dirname }} all
 	{%- endif %}
 	{%- endfor %}
-	make -C . $(IP_TARGET)
+	$(MAKE) -C . $(IP_TARGET)
 
 # Clean target that cleans only this IP
 clean:
@@ -180,7 +185,7 @@ clean:
 clean-all:
 {%- for ip in fins['ip'] %}
 {%- if ip['library'] == "user" %}
-	make -C {{ ip['fins_path']|dirname }} $@
+	$(MAKE) -C {{ ip['fins_path']|dirname }} $@
 {%- endif %}
 {%- endfor %}
 	rm -rf $(TEMP_FILES)
