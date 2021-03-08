@@ -22,12 +22,12 @@ from setuptools import setup, find_namespace_packages
 
 setup(
     name='fins-vivado',
-    version='0.15',
+    version='0.16',
     packages=find_namespace_packages(where='src'),
     package_dir={'': 'src'},
     python_requires='>= 3.6',
     install_requires=[
-        'fins == 0.15',
+        'fins == 0.16',
         'Jinja2 ~= 2.8',
     ],
     package_data={
