@@ -1,0 +1,266 @@
+{
+  "name":"axis_file_tester",
+  "description":"A FINS Node JSON used for testing of the MATLAB/Octave/Python Ports AXI-Stream file read/write functions",
+  "ports":{
+    "ports":[
+      {
+        "name":"data_unsigned_real_11bit_1ch_1samp", "direction":"in",
+        "data":{ "bit_width":11, "is_complex":false, "is_signed":false, "num_samples":1, "num_channels":1 }
+      },
+      {
+        "name":"data_unsigned_real_12bit_1ch_1samp", "direction":"in",
+        "data":{ "bit_width":12, "is_complex":false, "is_signed":false, "num_samples":1, "num_channels":1 }
+      },
+      {
+        "name":"data_signed_real_11bit_1ch_1samp", "direction":"in",
+        "data":{ "bit_width":11, "is_complex":false, "is_signed":true, "num_samples":1, "num_channels":1 }
+      },
+      {
+        "name":"data_signed_real_12bit_1ch_1samp", "direction":"in",
+        "data":{ "bit_width":12, "is_complex":false, "is_signed":true, "num_samples":1, "num_channels":1 }
+      },
+      {
+        "name":"data_unsigned_complex_22bit_1ch_1samp", "direction":"in",
+        "data":{ "bit_width":22, "is_complex":true, "is_signed":false, "num_samples":1, "num_channels":1 }
+      },
+      {
+        "name":"data_unsigned_complex_24bit_1ch_1samp", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":false, "num_samples":1, "num_channels":1 }
+      },
+      {
+        "name":"data_signed_complex_22bit_1ch_1samp", "direction":"in",
+        "data":{ "bit_width":22, "is_complex":true, "is_signed":true, "num_samples":1, "num_channels":1 }
+      },
+      {
+        "name":"data_signed_complex_24bit_1ch_1samp", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":1, "num_channels":1 }
+      },
+      {
+        "name":"data_unsigned_real_11bit_3ch_1samp", "direction":"in",
+        "data":{ "bit_width":11, "is_complex":false, "is_signed":false, "num_samples":1, "num_channels":3 }
+      },
+      {
+        "name":"data_unsigned_real_12bit_3ch_1samp", "direction":"in",
+        "data":{ "bit_width":12, "is_complex":false, "is_signed":false, "num_samples":1, "num_channels":3 }
+      },
+      {
+        "name":"data_signed_real_11bit_3ch_1samp", "direction":"in",
+        "data":{ "bit_width":11, "is_complex":false, "is_signed":true, "num_samples":1, "num_channels":3 }
+      },
+      {
+        "name":"data_signed_real_12bit_3ch_1samp", "direction":"in",
+        "data":{ "bit_width":12, "is_complex":false, "is_signed":true, "num_samples":1, "num_channels":3 }
+      },
+      {
+        "name":"data_unsigned_complex_22bit_3ch_1samp", "direction":"in",
+        "data":{ "bit_width":22, "is_complex":true, "is_signed":false, "num_samples":1, "num_channels":3 }
+      },
+      {
+        "name":"data_unsigned_complex_24bit_3ch_1samp", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":false, "num_samples":1, "num_channels":3 }
+      },
+      {
+        "name":"data_signed_complex_22bit_3ch_1samp", "direction":"in",
+        "data":{ "bit_width":22, "is_complex":true, "is_signed":true, "num_samples":1, "num_channels":3 }
+      },
+      {
+        "name":"data_signed_complex_24bit_3ch_1samp", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":1, "num_channels":3 }
+      },
+      {
+        "name":"data_unsigned_real_11bit_1ch_2samp", "direction":"in",
+        "data":{ "bit_width":11, "is_complex":false, "is_signed":false, "num_samples":2, "num_channels":1 }
+      },
+      {
+        "name":"data_unsigned_real_12bit_1ch_2samp", "direction":"in",
+        "data":{ "bit_width":12, "is_complex":false, "is_signed":false, "num_samples":2, "num_channels":1 }
+      },
+      {
+        "name":"data_signed_real_11bit_1ch_2samp", "direction":"in",
+        "data":{ "bit_width":11, "is_complex":false, "is_signed":true, "num_samples":2, "num_channels":1 }
+      },
+      {
+        "name":"data_signed_real_12bit_1ch_2samp", "direction":"in",
+        "data":{ "bit_width":12, "is_complex":false, "is_signed":true, "num_samples":2, "num_channels":1 }
+      },
+      {
+        "name":"data_unsigned_complex_22bit_1ch_2samp", "direction":"in",
+        "data":{ "bit_width":22, "is_complex":true, "is_signed":false, "num_samples":2, "num_channels":1 }
+      },
+      {
+        "name":"data_unsigned_complex_24bit_1ch_2samp", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":false, "num_samples":2, "num_channels":1 }
+      },
+      {
+        "name":"data_signed_complex_22bit_1ch_2samp", "direction":"in",
+        "data":{ "bit_width":22, "is_complex":true, "is_signed":true, "num_samples":2, "num_channels":1 }
+      },
+      {
+        "name":"data_signed_complex_24bit_1ch_2samp", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":2, "num_channels":1 }
+      },
+      {
+        "name":"data_unsigned_real_11bit_2ch_3samp", "direction":"in",
+        "data":{ "bit_width":11, "is_complex":false, "is_signed":false, "num_samples":3, "num_channels":2 }
+      },
+      {
+        "name":"data_unsigned_real_12bit_2ch_3samp", "direction":"in",
+        "data":{ "bit_width":12, "is_complex":false, "is_signed":false, "num_samples":3, "num_channels":2 }
+      },
+      {
+        "name":"data_signed_real_11bit_2ch_3samp", "direction":"in",
+        "data":{ "bit_width":11, "is_complex":false, "is_signed":true, "num_samples":3, "num_channels":2 }
+      },
+      {
+        "name":"data_signed_real_12bit_2ch_3samp", "direction":"in",
+        "data":{ "bit_width":12, "is_complex":false, "is_signed":true, "num_samples":3, "num_channels":2 }
+      },
+      {
+        "name":"data_unsigned_complex_22bit_2ch_3samp", "direction":"in",
+        "data":{ "bit_width":22, "is_complex":true, "is_signed":false, "num_samples":3, "num_channels":2 }
+      },
+      {
+        "name":"data_unsigned_complex_24bit_2ch_3samp", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":false, "num_samples":3, "num_channels":2 }
+      },
+      {
+        "name":"data_signed_complex_22bit_2ch_3samp", "direction":"in",
+        "data":{ "bit_width":22, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 }
+      },
+      {
+        "name":"data_signed_complex_24bit_2ch_3samp", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 }
+      },
+      {
+        "name":"metadata_1field_unsigned_real", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":11, "is_signed":false, "is_complex":false }
+        ]
+      },
+      {
+        "name":"metadata_2field_unsigned_real", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":11, "is_signed":false, "is_complex":false },
+          { "name":"field1", "bit_width":12, "is_signed":false, "is_complex":false }
+        ]
+      },
+      {
+        "name":"metadata_3field_unsigned_real", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":11, "is_signed":false, "is_complex":false },
+          { "name":"field1", "bit_width":12, "is_signed":false, "is_complex":false },
+          { "name":"field2", "bit_width":13, "is_signed":false, "is_complex":false }
+        ]
+      },
+      {
+        "name":"metadata_1field_signed_real", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":11, "is_signed":true, "is_complex":false }
+        ]
+      },
+      {
+        "name":"metadata_2field_signed_real", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":11, "is_signed":true, "is_complex":false },
+          { "name":"field1", "bit_width":12, "is_signed":true, "is_complex":false }
+        ]
+      },
+      {
+        "name":"metadata_3field_signed_real", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":11, "is_signed":true, "is_complex":false },
+          { "name":"field1", "bit_width":12, "is_signed":true, "is_complex":false },
+          { "name":"field2", "bit_width":13, "is_signed":true, "is_complex":false }
+        ]
+      },
+      {
+        "name":"metadata_1field_unsigned_complex", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":22, "is_signed":false, "is_complex":true }
+        ]
+      },
+      {
+        "name":"metadata_2field_unsigned_complex", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":22, "is_signed":false, "is_complex":true },
+          { "name":"field1", "bit_width":24, "is_signed":false, "is_complex":true }
+        ]
+      },
+      {
+        "name":"metadata_3field_unsigned_complex", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":22, "is_signed":false, "is_complex":true },
+          { "name":"field1", "bit_width":24, "is_signed":false, "is_complex":true },
+          { "name":"field2", "bit_width":26, "is_signed":false, "is_complex":true }
+        ]
+      },
+      {
+        "name":"metadata_1field_signed_complex", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":22, "is_signed":true, "is_complex":true }
+        ]
+      },
+      {
+        "name":"metadata_2field_signed_complex", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":22, "is_signed":true, "is_complex":true },
+          { "name":"field1", "bit_width":24, "is_signed":true, "is_complex":true }
+        ]
+      },
+      {
+        "name":"metadata_3field_signed_complex", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":22, "is_signed":true, "is_complex":true },
+          { "name":"field1", "bit_width":24, "is_signed":true, "is_complex":true },
+          { "name":"field2", "bit_width":26, "is_signed":true, "is_complex":true }
+        ]
+      },
+      {
+        "name":"metadata_2field_unsigned_mixed", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":22, "is_signed":false, "is_complex":true },
+          { "name":"field1", "bit_width":12, "is_signed":false, "is_complex":false }
+        ]
+      },
+      {
+        "name":"metadata_3field_unsigned_mixed", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":11, "is_signed":false, "is_complex":false },
+          { "name":"field1", "bit_width":24, "is_signed":false, "is_complex":true },
+          { "name":"field2", "bit_width":13, "is_signed":false, "is_complex":false }
+        ]
+      },
+      {
+        "name":"metadata_2field_signed_mixed", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":11, "is_signed":true, "is_complex":false },
+          { "name":"field1", "bit_width":24, "is_signed":true, "is_complex":true }
+        ]
+      },
+      {
+        "name":"metadata_3field_signed_mixed", "direction":"in",
+        "data":{ "bit_width":24, "is_complex":true, "is_signed":true, "num_samples":3, "num_channels":2 },
+        "metadata":[
+          { "name":"field0", "bit_width":22, "is_signed":true, "is_complex":true },
+          { "name":"field1", "bit_width":12, "is_signed":true, "is_complex":false },
+          { "name":"field2", "bit_width":26, "is_signed":true, "is_complex":true }
+        ]
+      }
+    ]
+  }
+}

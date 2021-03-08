@@ -16,6 +16,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 #
+{%- if 'license_lines' in fins %}
+{%-  for line in fins['license_lines'] -%}
+# {{ line }}
+{%-  endfor %}
+{%- endif %}
 
 #------------------------------------------------------------------------------
 # FWFT FIFO
@@ -23,9 +28,17 @@
 # Set the width to the fully-parallel data+metadata bit width of a single instance of the FINS port
 # NOTE: +1 is for TLAST
 {%- if 'metadata' in fins %}
+{%- if fins['supports_byte_enable'] %}
+set FIFO_WIDTH {{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] + fins['data']['byte_width'] + fins['metadata']|sum(attribute='bit_width') + 1 }}
+{%- else %}
 set FIFO_WIDTH {{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] + fins['metadata']|sum(attribute='bit_width') + 1 }}
+{%- endif %}
+{%- else %}
+{%- if fins['supports_byte_enable'] %}
+set FIFO_WIDTH {{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] + fins['data']['byte_width'] + 1 }}
 {%- else %}
 set FIFO_WIDTH {{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] + 1 }}
+{%- endif %}
 {%- endif %}
 
 {%- if fins['supports_backpressure'] %}

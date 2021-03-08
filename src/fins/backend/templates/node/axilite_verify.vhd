@@ -18,12 +18,17 @@
 -- along with this program.  If not, see http://www.gnu.org/licenses/.
 --
 -#}
+{%- if 'license_lines' in fins %}
+{%-  for line in fins['license_lines'] -%}
+-- {{ line }}
+{%-  endfor %}
+{%- endif %}
+
 --==============================================================================
 -- Firmware IP Node Specification (FINS) Auto-Generated File
 -- ---------------------------------------------------------
 -- Template:    axilite_verify.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: AXI4-Lite bus verification procedure for FINS properties
 --==============================================================================
@@ -495,7 +500,7 @@ package body {{ fins['name']|lower }}_axilite_verify is
     --*********************************************
     -- Property: {{ prop['name'] }}
     --*********************************************
-    {%- if prop['is_readable'] %}
+    {%- if prop['is_readable'] and not prop['disable_default_test'] %}
     -- Verify default values
     {%- for n in range(prop['length']) %}
     {{ fins['name']|lower }}_read_reg(

@@ -23,7 +23,6 @@
 # ---------------------------------------------------------
 # Template:    .gitignore
 # Backend:     {{ fins['backend'] }}
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: Default .gitignore file for FINS IP. Only auto-generated if
 #              file does not already exist.

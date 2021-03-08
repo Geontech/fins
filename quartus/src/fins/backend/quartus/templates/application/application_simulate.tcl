@@ -18,18 +18,26 @@
  # along with this program.  If not, see http://www.gnu.org/licenses/.
  #
 -#}
+{%- if 'license_lines' in fins %}
+{%-  for line in fins['license_lines'] -%}
+# {{ line }}
+{%-  endfor %}
+{%- endif %}
+
 #===============================================================================
 # Firmware IP Node Specification (FINS) Auto-Generated File
 # ---------------------------------------------------------
 # Template:    application_simulate.tcl
 # Backend:     {{ fins['backend'] }}
-# Generated:   {{ now }}
 # ---------------------------------------------------------
 # Description: TCL script to generate a simulation with Intel Quartus
 #              and run it with Intel ModelSim
 # Versions:    Tested with:
 #              * Intel Quartus Prime Pro 19.4
 #===============================================================================
+
+# Default the return code to 0=SUCCESS
+set return_code 0
 
 # Set the relative path back to the IP root directory
 set IP_ROOT_RELATIVE_TO_PROJ "../../.."
@@ -62,7 +70,6 @@ source ${IP_ROOT_RELATIVE_TO_PROJ}/{{ presim_script['path'] }}
 {%- endif %}
 
 # Find the Quartus-generated library name
-#set UNIT_SIM_LIBRARY [glob -tails -path ../{{ fins['name'] }}/ {{ fins['name'] }}_??]
 set UNIT_SIM_LIBRARY {{ fins['name'] }}
 set QSYS_SIMDIR ../
 
@@ -83,6 +90,13 @@ source msim_setup.tcl
 elab
 run -all
 
+# Check that the simulation_done signal is True
+if { [examine "simulation_done"] == "FALSE" } {
+    # Explicitly set the return code since ModelSim doesn't exit with an error return code from a TCL error
+    set return_code 1
+    error "***** SIMULATION FAILED *****"
+}
+
 # Run Post-Sim TCL Scripts
 # Note: These scripts can use parameters defined above since they are sourced by this script
 {%- if 'filesets' in fins %}
@@ -97,4 +111,4 @@ source ${IP_ROOT_RELATIVE_TO_PROJ}/{{ postsim_script['path'] }}
 {%- endif %}
 {%- endif %}
 
-quit
+exit -code $return_code

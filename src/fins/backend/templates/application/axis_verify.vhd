@@ -18,12 +18,17 @@
 -- along with this program.  If not, see http://www.gnu.org/licenses/.
 --
 -#}
+{%- if 'license_lines' in fins %}
+{%-  for line in fins['license_lines'] -%}
+-- {{ line }}
+{%-  endfor %}
+{%- endif %}
+
 --==============================================================================
 -- Firmware IP Node Specification (FINS) Auto-Generated File
 -- ---------------------------------------------------------
 -- Template:    axis_verify.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: File I/O AXI4-Stream bus test component for FINS ports
 --==============================================================================
@@ -74,28 +79,34 @@ entity {{ fins['name'] }}_axis_verify is
     {%- set outer_loop = loop %}
     {%- for i in range(port['num_instances']) %}
     {%- if port['direction']|lower == 'out' %}
-    {{ port|axisprefix(i,True) }}_aclk    : in  std_logic;
+    {{ port|axisprefix(i,reverse=True) }}_aclk    : in  std_logic;
     {%- if port['supports_backpressure'] %}
-    {{ port|axisprefix(i,True) }}_tready  : out std_logic;
+    {{ port|axisprefix(i,reverse=True) }}_tready  : out std_logic;
     {%- endif %}
-    {{ port|axisprefix(i,True) }}_tdata   : in  std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
+    {%- if port['supports_byte_enable'] %}
+    {{ port|axisprefix(i,reverse=True) }}_tkeep   : in std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
+    {{ port|axisprefix(i,reverse=True) }}_tdata   : in  std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in port %}
-    {{ port|axisprefix(i,True) }}_tuser   : in  std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
+    {{ port|axisprefix(i,reverse=True) }}_tuser   : in  std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
-    {{ port|axisprefix(i,True) }}_tvalid  : in  std_logic;
-    {{ port|axisprefix(i,True) }}_tlast   : in  std_logic{% if not (outer_loop.last and loop.last) %};{% endif %}
+    {{ port|axisprefix(i,reverse=True) }}_tvalid  : in  std_logic;
+    {{ port|axisprefix(i,reverse=True) }}_tlast   : in  std_logic{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%- else %}
-    {{ port|axisprefix(i,True) }}_aclk    : in  std_logic;
-    {{ port|axisprefix(i,True) }}_enable  : in  std_logic;
+    {{ port|axisprefix(i,reverse=True) }}_aclk    : in  std_logic;
+    {{ port|axisprefix(i,reverse=True) }}_enable  : in  std_logic;
     {%- if port['supports_backpressure'] %}
-    {{ port|axisprefix(i,True) }}_tready  : in  std_logic;
+    {{ port|axisprefix(i,reverse=True) }}_tready  : in  std_logic;
     {%- endif %}
-    {{ port|axisprefix(i,True) }}_tdata   : out std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
+    {%- if port['supports_byte_enable'] %}
+    {{ port|axisprefix(i,reverse=True) }}_tkeep   : out  std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
+    {{ port|axisprefix(i,reverse=True) }}_tdata   : out std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in port %}
-    {{ port|axisprefix(i,True) }}_tuser   : out std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
+    {{ port|axisprefix(i,reverse=True) }}_tuser   : out std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
-    {{ port|axisprefix(i,True) }}_tvalid  : out std_logic;
-    {{ port|axisprefix(i,True) }}_tlast   : out std_logic{% if not (outer_loop.last and loop.last) %};{% endif %}
+    {{ port|axisprefix(i,reverse=True) }}_tvalid  : out std_logic;
+    {{ port|axisprefix(i,reverse=True) }}_tlast   : out std_logic{% if not (outer_loop.last and loop.last) %};{% endif %}
     {%- endif %}
     {%- endfor %}
     {%- endfor %}
@@ -130,18 +141,22 @@ begin
     variable axis_tuser            : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0) := (others => '0');
     variable current_tuser         : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
     {%- endif %}
+    {%- if port['supports_byte_enable'] %}
+    variable axis_tkeep            : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0) := (others => '0');
+    variable current_tkeep         : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
   begin
     -- Use "simulation_done" to suspend operations
     if (NOT simulation_done) then
       -- Start to read at the rising edge of the clock
-      wait until rising_edge({{ port|axisprefix(i,True) }}_aclk);
-      if ({{ port|axisprefix(i,True) }}_enable = '0') then
+      wait until rising_edge({{ port|axisprefix(i,reverse=True) }}_aclk);
+      if ({{ port|axisprefix(i,reverse=True) }}_enable = '0') then
         -- When disabled, set output signals low
-        {{ port|axisprefix(i,True) }}_tvalid <= '0';
-        {{ port|axisprefix(i,True) }}_tlast  <= '0';
-        {{ port|axisprefix(i,True) }}_tdata  <= (others => '0');
+        {{ port|axisprefix(i,reverse=True) }}_tvalid <= '0';
+        {{ port|axisprefix(i,reverse=True) }}_tlast  <= '0';
+        {{ port|axisprefix(i,reverse=True) }}_tdata  <= (others => '0');
         {%- if 'metadata' in port %}
-        {{ port|axisprefix(i,True) }}_tuser  <= (others => '0');
+        {{ port|axisprefix(i,reverse=True) }}_tuser  <= (others => '0');
         {%- endif %}
       else
         --******************************************
@@ -152,7 +167,7 @@ begin
           -- When the file is done and a transaction occurs, reset signals to 0
           -- (This is the last AXIS transaction for the file)
           {%- if port['supports_backpressure'] %}
-          if (axis_tvalid = '1' AND {{ port|axisprefix(i,True) }}_tready = '1') then
+          if (axis_tvalid = '1' AND {{ port|axisprefix(i,reverse=True) }}_tready = '1') then
           {%- else %}
           if (axis_tvalid = '1') then
           {%- endif %}
@@ -161,6 +176,9 @@ begin
             axis_tdata  := (others => '0');
             {%- if 'metadata' in port %}
             axis_tuser  := (others => '0');
+            {%- endif %}
+            {%- if port['supports_byte_enable'] %}
+            axis_tkeep  := (others => '0');
             {%- endif %}
           end if;
           -- Note: the file_done flag might NOT mean that the last AXIS transaction has occurred.
@@ -202,11 +220,14 @@ begin
             axis_tvalid := '1';
             {%- if port['supports_backpressure'] %}
             -- When we get a TREADY, read the next value
-            if ({{ port|axisprefix(i,True) }}_tready = '1') then
+            if ({{ port|axisprefix(i,reverse=True) }}_tready = '1') then
             {%- endif %}
               -- Open the file if it's not open already
               if (file_status /= OPEN_OK) then
                 file_open(file_status, read_file, G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH, READ_MODE);
+                assert (file_status = OPEN_OK)
+                  report "ERROR: Failed to open file G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH in mode 'READ_MODE'"
+                  severity failure;
               end if;
               -- Grab a valid value from the file if we haven't reached the EOF
               if (NOT endfile(read_file)) then
@@ -220,6 +241,9 @@ begin
                 {%- if 'metadata' in port %}
                 hread(current_line, current_tuser);
                 {%- endif %}
+                {%- if port['supports_byte_enable'] %}
+                hread(current_line, current_tkeep);
+                {%- endif %}
                 -- Set the output values
                 if (unsigned(current_tlast) > 0) then
                   axis_tlast := '1';
@@ -230,6 +254,9 @@ begin
                 {%- if 'metadata' in port %}
                 axis_tuser  := current_tuser;
                 {%- endif %}
+                {%- if port['supports_byte_enable'] %}
+                axis_tkeep := current_tkeep;
+                {%- endif %}
               else
                 -- If the last AXIS transaction for the file occurs on this same cycle
                 -- (which happens to be when the file is done being read) reset signals to 0
@@ -239,6 +266,9 @@ begin
                   axis_tdata  := (others => '0');
                   {%- if 'metadata' in port %}
                   axis_tuser  := (others => '0');
+                  {%- endif %}
+                  {%- if port['supports_byte_enable'] %}
+                  axis_tkeep := (others => '0');
                   {%- endif %}
                 end if;
                 -- Set the file_done flag for reference during next cycle
@@ -253,11 +283,14 @@ begin
         --******************************************
         -- Set outputs to the variables
         --******************************************
-        {{ port|axisprefix(i,True) }}_tvalid <= axis_tvalid;
-        {{ port|axisprefix(i,True) }}_tlast  <= axis_tlast;
-        {{ port|axisprefix(i,True) }}_tdata  <= axis_tdata;
+        {{ port|axisprefix(i,reverse=True) }}_tvalid <= axis_tvalid;
+        {{ port|axisprefix(i,reverse=True) }}_tlast  <= axis_tlast;
+        {{ port|axisprefix(i,reverse=True) }}_tdata  <= axis_tdata;
         {%- if 'metadata' in port %}
-        {{ port|axisprefix(i,True) }}_tuser  <= axis_tuser;
+        {{ port|axisprefix(i,reverse=True) }}_tuser  <= axis_tuser;
+        {%- endif %}
+        {%- if port['supports_byte_enable'] %}
+        {{ port|axisprefix(i,reverse=True) }}_tkeep  <= axis_tkeep;
         {%- endif %}
       end if;
     else
@@ -279,6 +312,9 @@ begin
     {%- if port['supports_backpressure'] %}
     variable current_tready        : std_logic;
     {%- endif %}
+    {%- if port['supports_byte_enable'] %}
+    variable current_tkeep        : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
     variable current_tdata         : std_logic_vector({{ port['data']['bit_width']*port['data']['num_samples']*port['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in port %}
     variable current_tuser         : std_logic_vector({{ port['metadata']|sum(attribute='bit_width') }}-1 downto 0);
@@ -292,23 +328,29 @@ begin
     -- Use "simulation_done" to suspend operations
     if (simulation_done = false) then
       -- Perform operations at the rising edge of the clock
-      wait until rising_edge({{ port|axisprefix(i,True) }}_aclk);
+      wait until rising_edge({{ port|axisprefix(i,reverse=True) }}_aclk);
 
       -- Write valid transactions
       {%- if port['supports_backpressure'] %}
-      if (({{ port|axisprefix(i,True) }}_tvalid = '1') AND (current_tready = '1')) then
+      if (({{ port|axisprefix(i,reverse=True) }}_tvalid = '1') AND (current_tready = '1')) then
       {%- else %}
-      if ({{ port|axisprefix(i,True) }}_tvalid = '1') then
+      if ({{ port|axisprefix(i,reverse=True) }}_tvalid = '1') then
       {%- endif %}
         -- Open the file if it's not open already
         if (file_status /= OPEN_OK) then
           file_open(file_status, write_file, G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SINK_FILEPATH, WRITE_MODE);
+          assert (file_status = OPEN_OK)
+            report "ERROR: Failed to open file G_{{ port['name']|upper }}{% if port['num_instances'] > 1 %}{{ '%0#2d'|format(i) }}{% endif %}_SOURCE_FILEPATH in mode 'WRITE_MODE'"
+            severity failure;
         end if;
         -- Write the value to the file in hexadecimal format
-        current_tlast(0) := {{ port|axisprefix(i,True) }}_tlast;
-        current_tdata    := {{ port|axisprefix(i,True) }}_tdata;
+        current_tlast(0) := {{ port|axisprefix(i,reverse=True) }}_tlast;
+        current_tdata    := {{ port|axisprefix(i,reverse=True) }}_tdata;
         {%- if 'metadata' in port %}
-        current_tuser    := {{ port|axisprefix(i,True) }}_tuser;
+        current_tuser    := {{ port|axisprefix(i,reverse=True) }}_tuser;
+        {%- endif %}
+        {%- if port['supports_byte_enable'] %}
+        current_tkeep    := {{ port|axisprefix(i,reverse=True) }}_tkeep;
         {%- endif %}
         hwrite(current_line, current_tlast);
         write(current_line, string'(" "));
@@ -316,6 +358,10 @@ begin
         {%- if 'metadata' in port %}
         write(current_line, string'(" "));
         hwrite(current_line, current_tuser);
+        {%- endif %}
+        {%- if port['supports_byte_enable'] %}
+        write(current_line, string'(" "));
+        hwrite(current_line, current_tkeep);
         {%- endif %}
         writeline(write_file, current_line);
       end if;
@@ -338,7 +384,7 @@ begin
           current_tready := '0';
         end if;
       end if;
-      {{ port|axisprefix(i,True) }}_tready <= current_tready;
+      {{ port|axisprefix(i,reverse=True) }}_tready <= current_tready;
       
 
       -- Increment the sample period counter for the TREADY operation

@@ -18,12 +18,17 @@
 -- along with this program.  If not, see http://www.gnu.org/licenses/.
 --
 -#}
+{%- if 'license_lines' in fins %}
+{%-  for line in fins['license_lines'] -%}
+-- {{ line }}
+{%-  endfor %}
+{%- endif %}
+
 --==============================================================================
 -- Firmware IP Node Specification (FINS) Auto-Generated File
 -- ---------------------------------------------------------
 -- Template:    pkg.vhd
 -- Backend:     {{ fins['backend'] }}
--- Generated:   {{ now }}
 -- ---------------------------------------------------------
 -- Description: VHDL package file for definition of FINS parameters, ports,
 --              and properties
@@ -235,6 +240,9 @@ type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward_unit is record
   {%- endif %}
   valid    : std_logic;
   last     : std_logic;
+  {%- if port['supports_byte_enable'] %}
+  keep     : std_logic_vector({{ port['data']['byte_width'] }}-1 downto 0);
+  {%- endif %}
 end record t_{{ fins['name']|lower }}_{{ port['name']|lower }}_forward_unit;
 {%- if port['supports_backpressure'] or (port['direction']|lower == 'out') %}
 type t_{{ fins['name']|lower }}_{{ port['name']|lower }}_backward_unit is record
