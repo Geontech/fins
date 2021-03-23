@@ -58,6 +58,9 @@ entity {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
     {%- if fins['supports_backpressure'] %}
     s_axis_tready     : out std_logic;
     {%- endif %}
+    {%- if fins['supports_byte_enable'] %}
+    s_axis_tkeep      : in std_logic_vector({{ fins['data']['byte_width'] }}-1 downto 0);
+    {%- endif %}
     s_axis_tdata      : in  std_logic_vector({{ fins['data']['bit_width']*fins['data']['num_samples']*fins['data']['num_channels'] }}-1 downto 0);
     {%- if 'metadata' in fins %}
     s_axis_tuser      : in  std_logic_vector({{ fins['metadata']|sum(attribute='bit_width') }}-1 downto 0);
@@ -87,11 +90,10 @@ architecture rtl of {{ fins['name']|lower }}_avalonst_parallel_to_tdm is
   constant NUM_METADATA_WORDS : natural := integer(ceil(real(G_METADATA_WIDTH) / real(G_TDM_WORD_WIDTH)));
   constant NUM_METADATA_WORDS_LOG2 : natural := integer(ceil(log2(real(NUM_METADATA_WORDS))));
   {%- endif %}
-  {%- if 'metadata' in fins %}
-  constant FIFO_WIDTH : natural := G_DATA_WIDTH + G_METADATA_WIDTH + 1; -- +1 for tlast
-  {%- else %}
-  constant FIFO_WIDTH : natural := G_DATA_WIDTH + 1; -- +1 for tlast
+  {%- if fins['supports_byte_enable'] %}
+  constant G_KEEP_WIDTH : natural := {{ fins['data']['byte_width'] }};
   {%- endif %}
+  constant FIFO_WIDTH : natural := G_DATA_WIDTH {%- if 'metadata' in fins %}+ G_METADATA_WIDTH {%- endif %} {%- if fins['supports_byte_enable'] %} + G_KEEP_WIDTH {%- endif %}+ 1; -- +1 for tlast
 
   --------------------------------------------------------------------------------
   -- Components
@@ -152,11 +154,7 @@ begin
   -- Input Buffer
   -----------------------------------------------------------------------------
   -- Write the input directly into FIFO
-  {%- if 'metadata' in fins %}
-  fifo_din   <= s_axis_tlast & s_axis_tdata & s_axis_tuser;
-  {%- else %}
-  fifo_din   <= s_axis_tlast & s_axis_tdata;
-  {%- endif %}
+  fifo_din   <= s_axis_tlast & s_axis_tdata{%- if 'metadata' in fins %} & s_axis_tuser{%- endif %}{%- if fins['supports_byte_enable'] %} & s_axis_tkeep{%- endif %};
   fifo_wr_en <= s_axis_tvalid; -- Since tready is always high
   {%- if fins['supports_backpressure'] %}
   -- Only ready when the FIFO has space

@@ -67,8 +67,15 @@ if {[current_project -quiet] == ""} {
 
 make_wrapper -files [get_files $PROJECT_VIVADO_DIR/{{ fins['name'] }}.srcs/sources_1/bd/{{ fins['name'] }}_bd/{{ fins['name'] }}_bd.bd] -top -fileset sim_1
 
+set gendir $PROJECT_VIVADO_DIR/{{ fins['name'] }}.srcs/sources_1/bd/{{ fins['name'] }}_bd/hdl
+# Try the old (pre-2020) generated HDL path first (*.srcs/....../hdl/),
+# if that directory doesn't exist, use the new (post-2020) one (*.gen/......./hdl/)
+if { ![file exist $gendir] || ![file isdirectory $gendir] } {
+    set gendir $PROJECT_VIVADO_DIR/{{ fins['name'] }}.gen/sources_1/bd/{{ fins['name'] }}_bd/hdl
+}
+
 # Replace all instances of <name>_bd_wrapper with <name>
-set orig_filename $PROJECT_VIVADO_DIR/{{ fins['name'] }}.srcs/sources_1/bd/{{ fins['name'] }}_bd/hdl/{{ fins['name'] }}_bd_wrapper.vhd
+set orig_filename $gendir/{{ fins['name'] }}_bd_wrapper.vhd
 set orig_fp [open $orig_filename r+]
 set orig_string [read $orig_fp]
 close $orig_fp
@@ -77,7 +84,7 @@ regsub -all {{ fins['name'] }}_bd_wrapper $orig_string {{ fins['name'] }} new_st
 # split into an array with newline as the delimiter
 set new_lines [split $new_string "\n"]
 
-set new_filename $PROJECT_VIVADO_DIR/{{ fins['name'] }}.srcs/sources_1/bd/{{ fins['name'] }}_bd/hdl/{{ fins['name'] }}.vhd
+set new_filename $gendir/{{ fins['name'] }}.vhd
 set new_fp [open $new_filename w]
 # Write the new_string to the file line-by-line because the string is too long for Tcl all at once
 foreach line $new_lines {
