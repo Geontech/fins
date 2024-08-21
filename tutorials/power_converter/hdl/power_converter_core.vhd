@@ -82,8 +82,8 @@ begin
   end process s_user_code;
 
   -- Assign outputs
-  ports_out.power.data  <= power;
-  ports_out.power.valid <= valid_delay_chain(MODULE_LATENCY-1);
-  ports_out.power.last  <= last_delay_chain(MODULE_LATENCY-1);
+  ports_out.power.data(POWER_DATA_WIDTH-1 downto 0) <= power;
+  ports_out.power.valid                             <= valid_delay_chain(MODULE_LATENCY-1);
+  ports_out.power.last                              <= last_delay_chain(MODULE_LATENCY-1);
 
 end rtl;

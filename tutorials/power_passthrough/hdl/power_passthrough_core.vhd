@@ -171,11 +171,11 @@ begin
       -- Control pipelines
       if (ports_in.power_in.resetn = '0') then
         -- Data reset
-        ports_out.power_out.data  <= (others => '0');
+        ports_out.power_out.data(POWER_DATA_WIDTH-1 downto 0) <= (others => '0');
         ports_out.power_out.valid <= '0';
         ports_out.power_out.last  <= '0';
       else
-        ports_out.power_out.data  <= ports_in.power_in.data;
+        ports_out.power_out.data(POWER_DATA_WIDTH-1 downto 0) <= ports_in.power_in.data;
         ports_out.power_out.valid <= ports_in.power_in.valid;
         ports_out.power_out.last  <= ports_in.power_in.last;
       end if;
