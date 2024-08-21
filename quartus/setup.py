@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (C) 2019 Geon Technologies, LLC
+# Copyright (C) 2024 Geon Technologies, LLC
 #
 # This file is part of FINS.
 #
@@ -22,13 +22,13 @@ from setuptools import setup, find_namespace_packages
 
 setup(
     name='fins-quartus',
-    version='0.16',
+    version='0.16.1',
     packages=find_namespace_packages(where='src'),
     package_dir={'': 'src'},
     python_requires='>= 3.6',
     install_requires=[
-        'fins == 0.16',
-        'Jinja2 ~= 2.8',
+        'fins == 0.16.1',
+        'Jinja2 >= 2.8',
     ],
     package_data={
         'fins.backend.quartus': [

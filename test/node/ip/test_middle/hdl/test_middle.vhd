@@ -503,20 +503,20 @@ begin
     );
 
   -- Assign output ports
-  ports_out.myoutput.valid       <= myoutput_valid;
-  ports_out.myoutput.last        <= myoutput_last;
-  ports_out.myoutput.data        <= f_unserialize_test_middle_myoutput_data(myoutput_data);
-  ports_out.myoutput.metadata    <= f_unserialize_test_middle_myoutput_metadata(myoutput_metadata);
-  ports_out.test_out(0).data     <= f_unserialize_test_middle_test_out_data(test_out00_tdata);
-  ports_out.test_out(0).metadata <= f_unserialize_test_middle_test_out_metadata(test_out00_tuser);
-  ports_out.test_out(0).valid    <= test_out00_tvalid;
-  ports_out.test_out(0).last     <= test_out00_tlast;
-  test_out00_tready              <= ports_in.test_out(0).ready;
-  ports_out.test_out(1).data     <= f_unserialize_test_middle_test_out_data(test_out01_tdata);
-  ports_out.test_out(1).metadata <= f_unserialize_test_middle_test_out_metadata(test_out01_tuser);
-  ports_out.test_out(1).valid    <= test_out01_tvalid;
-  ports_out.test_out(1).last     <= test_out01_tlast;
-  test_out01_tready              <= ports_in.test_out(1).ready;
+  ports_out.myoutput.valid                        <= myoutput_valid;
+  ports_out.myoutput.last                         <= myoutput_last;
+  ports_out.myoutput.data(PORTS_WIDTH-1 downto 0) <= f_unserialize_test_middle_myoutput_data(myoutput_data);
+  ports_out.myoutput.metadata                     <= f_unserialize_test_middle_myoutput_metadata(myoutput_metadata);
+  ports_out.test_out(0).data                      <= f_unserialize_test_middle_test_out_data(test_out00_tdata);
+  ports_out.test_out(0).metadata                  <= f_unserialize_test_middle_test_out_metadata(test_out00_tuser);
+  ports_out.test_out(0).valid                     <= test_out00_tvalid;
+  ports_out.test_out(0).last                      <= test_out00_tlast;
+  test_out00_tready                               <= ports_in.test_out(0).ready;
+  ports_out.test_out(1).data                      <= f_unserialize_test_middle_test_out_data(test_out01_tdata);
+  ports_out.test_out(1).metadata                  <= f_unserialize_test_middle_test_out_metadata(test_out01_tuser);
+  ports_out.test_out(1).valid                     <= test_out01_tvalid;
+  ports_out.test_out(1).last                      <= test_out01_tlast;
+  test_out01_tready                               <= ports_in.test_out(1).ready;
 
   --------------------------------------------------------------------------------
   -- Properties
