@@ -126,16 +126,20 @@ begin
   -- Data Processing
   --------------------------------------------------------------------------------
   -- Combinatorial process to assign test_out to test_in
-  c_passthrough : process (ports_in)
-  begin
-    for ix in 0 to 2-1 loop
-      ports_out.test_out(ix).data     <= f_unserialize_test_bottom_test_out_data(f_serialize_test_bottom_test_in_data(ports_in.test_in(ix).data));
-      ports_out.test_out(ix).metadata <= f_unserialize_test_bottom_test_out_metadata(f_serialize_test_bottom_test_in_metadata(ports_in.test_in(ix).metadata));
-      ports_out.test_out(ix).valid    <= ports_in.test_in(ix).valid;
-      ports_out.test_out(ix).last     <= ports_in.test_in(ix).last;
-      ports_out.test_in(ix).ready     <= ports_in.test_out(ix).ready;
-    end loop;
-  end process c_passthrough;
+  -- Removed loop due to issue with XSIM Vivado 2021.2
+  -- Port 0
+  ports_out.test_out(0).data     <= f_unserialize_test_bottom_test_out_data(f_serialize_test_bottom_test_in_data(ports_in.test_in(0).data));  
+  ports_out.test_out(0).metadata <= f_unserialize_test_bottom_test_out_metadata(f_serialize_test_bottom_test_in_metadata(ports_in.test_in(0).metadata));
+  ports_out.test_out(0).valid    <= ports_in.test_in(0).valid;
+  ports_out.test_out(0).last     <= ports_in.test_in(0).last;
+  ports_out.test_in(0).ready     <= ports_in.test_out(0).ready;
+
+  -- Port 1
+  ports_out.test_out(1).data     <= f_unserialize_test_bottom_test_out_data(f_serialize_test_bottom_test_in_data(ports_in.test_in(1).data));  
+  ports_out.test_out(1).metadata <= f_unserialize_test_bottom_test_out_metadata(f_serialize_test_bottom_test_in_metadata(ports_in.test_in(1).metadata));
+  ports_out.test_out(1).valid    <= ports_in.test_in(1).valid;
+  ports_out.test_out(1).last     <= ports_in.test_in(1).last;
+  ports_out.test_in(1).ready     <= ports_in.test_out(1).ready;
 
   -- Synchronous process for data processsing
   s_data_processing : process (ports_in.myinput.clk)
@@ -165,10 +169,10 @@ begin
   end process s_data_processing;
 
   -- Assign output ports
-  ports_out.myoutput.valid    <= myinput_valid_q;
-  ports_out.myoutput.last     <= myinput_last_q;
-  ports_out.myoutput.data     <= myinput_data_q;
-  ports_out.myoutput.metadata <= f_unserialize_test_bottom_myoutput_metadata(myinput_metadata_q);
+  ports_out.myoutput.valid                        <= myinput_valid_q;
+  ports_out.myoutput.last                         <= myinput_last_q;
+  ports_out.myoutput.data(PORTS_WIDTH-1 downto 0) <= myinput_data_q;
+  ports_out.myoutput.metadata                     <= f_unserialize_test_bottom_myoutput_metadata(myinput_metadata_q);
 
   --------------------------------------------------------------------------------
   -- Testing elements for "read-write-external"

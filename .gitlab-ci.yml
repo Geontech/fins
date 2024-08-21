@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2021 Geon Technologies, LLC
+# Copyright (C) 2024 Geon Technologies, LLC
 #
 # This file is part of FINS.
 #
@@ -22,12 +22,15 @@ stages:
     - test-core
     - test-backends
     - package
-image: centos:7
+image: ubuntu:20.04
 
 .install-prereqs: &install-prereqs |
-    yum install -y epel-release
-    yum install -y python36 python36-pip python-jinja2 octave make gcc glibc.i686
+    echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+    apt-get update
+    apt-get install -y python3-pip octave python-is-python3 locales libtinfo5 libncurses5
     python3 -m pip install --upgrade pip setuptools
+    localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+    export LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
     python3 -m pip install .
 
 test-core:
@@ -40,16 +43,18 @@ test-core:
     tags:
         - fpga
 
-test-vivado:
+test-vivado 2021.2:
     stage: test-backends
     variables:
-        VIVADO_VERSION: '2019.1'
+        VIVADO_VERSION: '2021.2'
         VIVADO_PATH: '/opt/fpga/Xilinx/Vivado/$VIVADO_VERSION'
     before_script:
         - *install-prereqs
         - 'python3 -m pip install ./vivado'
     script:
         - 'source $VIVADO_PATH/settings64.sh'
+        # See https://support.xilinx.com/s/question/0D52E000079NURRSA4/synthesis-failed-abnormal-termination-tcmalloc-large-allocation?language=en_US
+        - export LD_PRELOAD=/lib/x86_64-linux-gnu/libudev.so.1
         - 'cd test/'
         - './test_backend.sh vivado'
     artifacts:
@@ -63,18 +68,20 @@ test-vivado:
     tags:
         - fpga
 
-test-quartus:
+test-vivado 2022.2:
     stage: test-backends
     variables:
-        QUARTUS_VERSION: '19.4'
-        QUARTUS_PATH: '/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION'
+        VIVADO_VERSION: '2022.2'
+        VIVADO_PATH: '/opt/fpga/Xilinx/Vivado/$VIVADO_VERSION'
     before_script:
         - *install-prereqs
-        - 'python3 -m pip install ./quartus'
+        - 'python3 -m pip install ./vivado'
     script:
-        - 'export PATH=$PATH:$QUARTUS_PATH/quartus/bin:$QUARTUS_PATH/modelsim_ase/bin:$QUARTUS_PATH/qsys/bin'
+        - 'source $VIVADO_PATH/settings64.sh'
+        # See https://support.xilinx.com/s/question/0D52E000079NURRSA4/synthesis-failed-abnormal-termination-tcmalloc-large-allocation?language=en_US
+        - export LD_PRELOAD=/lib/x86_64-linux-gnu/libudev.so.1
         - 'cd test/'
-        - './test_backend.sh quartus'
+        - './test_backend.sh vivado'
     artifacts:
         when: on_failure
         paths:
@@ -82,60 +89,29 @@ test-quartus:
             - tutorial/**/log/*
     except:
         variables:
-            [ $QUARTUS_DISABLE == 'true' ]
+            [ $VIVADO_DISABLE == 'true' ]
     tags:
         - fpga
 
-.rpmbuild:
-    stage: package
-    image: centos:7
-    before_script:
-        - yum install -y epel-release rpm-build rpmdevtools
-        - yum install -y python3 python3-pip
-        - python3 -m pip install --user -U pip setuptools
-        # Create build tree; can't rely on bdist_rpm
-        - rpmdev-setuptree
-        # Neutralize brp-python-bytecompile
-        - sed -i '2iexit 0' /usr/lib/rpm/brp-python-bytecompile
-    script:
-        - python3 setup.py bdist_rpm --spec-only
-        - mv dist/*.spec ~/rpmbuild/SPECS/
-        - cd ~/rpmbuild/SPECS
-        # Patch spec file
-        - sed -i 's/-O1/--no-compile/g' *.spec && cd ~/rpmbuild
-        # tarball sources
-        - >-
-          export NAME=`grep "define name" ~/rpmbuild/SPECS/*.spec |
-          cut -d" " -f 3`
-        - >-
-          export VER=`grep "define version" ~/rpmbuild/SPECS/*.spec |
-          cut -d" " -f 3`
-        - cd $CI_PROJECT_DIR
-        - cp -R . "/tmp/$NAME-$VER"
-        - cd /tmp
-        - >-
-          tar -czvf
-          ~/rpmbuild/SOURCES/$NAME-$VER.tar.gz --exclude='.gitlab-ci.yml'
-          $NAME-$VER
-        # Build RPM old-fashioned way
-        - cd ~/rpmbuild
-        - rpmbuild -bb SPECS/*.spec
-        - mv RPMS/noarch/*.rpm $CI_PROJECT_DIR/dist/
-    after_script:
-        # Remove build tree
-        - rm -rf ~/rpmbuild
-        - rm -rf /tmp/$NAME-$VER
-        # Restore brp-python-bytecompile
-        - sed -i '2d' /usr/lib/rpm/brp-python-bytecompile
-    needs: []
-    artifacts:
-        paths:
-            - dist/*.rpm
-
-rpmbuild:
-    extends: .rpmbuild
-    variables:
-        RPM_BRANCH: 'master'
-    rules:
-        - if: '$CI_COMMIT_BRANCH == $RPM_BRANCH'
-        - if: '$CI_COMMIT_TAG'
+# test-quartus:
+#     stage: test-backends
+#     variables:
+#         QUARTUS_VERSION: '19.4'
+#         QUARTUS_PATH: '/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION'
+#     before_script:
+#         - *install-prereqs
+#         - 'python3 -m pip install ./quartus'
+#     script:
+#         - 'export PATH=$PATH:$QUARTUS_PATH/quartus/bin:$QUARTUS_PATH/modelsim_ase/bin:$QUARTUS_PATH/qsys/bin'
+#         - 'cd test/'
+#         - './test_backend.sh quartus'
+#     artifacts:
+#         when: on_failure
+#         paths:
+#             - test/**/log/*
+#             - tutorial/**/log/*
+#     except:
+#         variables:
+#             [ $QUARTUS_DISABLE == 'true' ]
+#     tags:
+#         - fpga
