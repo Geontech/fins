@@ -69,7 +69,7 @@ source ${IP_ROOT_RELATIVE_TO_PROJ}/{{ presim_script['path'] }}
 {%- endif %}
 
 # Find the Quartus-generated library name
-set UNIT_SIM_LIBRARY [glob -tails -path ../{{ fins['name'] }}/ {{ fins['name'] }}_??]
+set UNIT_SIM_LIBRARY [glob -tails -path ../{{ fins['name'] }}/ {{ fins['name'] }}_???]
 
 # Run the simulation
 set TOP_LEVEL_NAME "${UNIT_SIM_LIBRARY}.{{ fins['top_sim'] }}"

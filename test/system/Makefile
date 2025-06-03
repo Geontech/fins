@@ -15,12 +15,27 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 
-quartus project/quartus/system.qsys: scripts/stratix10_system.tcl
+.PHONY: all quartus vivado clean
+
+all:
+ifeq ($(origin XILINX_VIVADO), environment)
+	$(MAKE) vivado
+else ifeq ($(origin QUARTUS_ROOTDIR), environment)
+	$(MAKE) quartus
+else
+	$(error Neither XILINX_VIVADO nor QUARTUS_ROOTDIR is set. Please source your FPGA tool environment first.)
+endif
+
+quartus: project/quartus/system.qsys
+
+project/quartus/system.qsys: scripts/stratix10_system.tcl
 	rm -rf project/quartus/ log/ && mkdir -p project/quartus/ && mkdir -p log/
 	cd project/quartus && \
 	qsys-script --script=../../scripts/stratix10_system.tcl --new-quartus-project=stratix10_system.qpf --search-path=../../../application/project/quartus/**/*,../../../node/**/*,$$ > ../../log/quartus_system_create.log 2>&1
 
-vivado project/vivado/zedboard_system.srcs/sources_1/bd/system/system.bd: scripts/zedboard_system.tcl
+vivado: project/vivado/zedboard_system.srcs/sources_1/bd/system/system.bd
+
+project/vivado/zedboard_system.srcs/sources_1/bd/system/system.bd: scripts/zedboard_system.tcl
 	rm -rf log/ && mkdir -p log/
 	mkdir -p project/vivado
 	vivado -mode batch -source $< > log/vivado_system_create.log 2>&1
