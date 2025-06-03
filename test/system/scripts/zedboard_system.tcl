@@ -24,7 +24,7 @@ set PROJECT_NAME "zedboard_system"
 set BD_NAME "system"
 
 create_project $PROJECT_NAME $PROJECT_VIVADO_DIR -part xc7z020clg484-1 -force
-set_property board_part avnet.com:zedboard:part0:1.4 [current_project]
+set_property board_part avnet-tria:zedboard:part0:1.5 [current_project]
 set_property target_language VHDL [current_project]
 create_bd_design $BD_NAME
 update_compile_order -fileset sources_1
