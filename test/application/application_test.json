@@ -2,7 +2,7 @@
   "name":"application_test",
   "is_application":true,
   "description":"FINS Nodeset for testing",
-  "version":"0.0",
+  "version":"0.0.0",
   "company_name":"Geon Technologies",
   "company_url":"geon.tech",
   "company_logo":"docs/geontech_logo.png",
