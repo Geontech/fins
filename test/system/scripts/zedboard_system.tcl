@@ -36,7 +36,7 @@ lappend IP_SEARCH_PATHS $TEST_DIR/node/ip/test_middle/ip/test_bottom/project/viv
 
 set_property  ip_repo_paths $IP_SEARCH_PATHS [current_project]
 update_ip_catalog
-create_bd_cell -type ip -vlnv geon.tech:user:application_test:0.0 application_test_0
+create_bd_cell -type ip -vlnv geon.tech:user:application_test:0.0.0 application_test_0
 create_bd_cell -type ip -vlnv xilinx.com:ip:processing_system7:5.5 processing_system7_0
 apply_bd_automation -rule xilinx.com:bd_rule:processing_system7 -config {make_external "FIXED_IO, DDR" apply_board_preset "1" Master "Disable" Slave "Disable" }  [get_bd_cells processing_system7_0]
 apply_bd_automation -rule xilinx.com:bd_rule:clkrst -config { Clk {/processing_system7_0/FCLK_CLK0 (100 MHz)} Freq {100} Ref_Clk0 {} Ref_Clk1 {} Ref_Clk2 {}}  [get_bd_pins application_test_0/hdl_aclk]
