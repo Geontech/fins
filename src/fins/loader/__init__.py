@@ -882,14 +882,14 @@ def populate_ip(fins_data):
         if 'version' in sub_ip_fins_data:
             ip['version'] = sub_ip_fins_data['version']
         else:
-            ip['version'] = '1.0'
+            ip['version'] = '1.0.0'
 
     return fins_data
 
 
 def populate_fins_fields(fins_data):
     if not 'version' in fins_data:
-        fins_data['version'] = '1.0'
+        fins_data['version'] = '1.0.0'
         LOGGER.debug(f'Setting default version to {fins_data["version"]}')
     if not 'company_url' in fins_data:
         fins_data['company_url'] = 'user.org'
