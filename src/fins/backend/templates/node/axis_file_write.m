@@ -73,7 +73,6 @@
 %              so there is validation in this function to require that the
 %              data field exists. However, if this validation is removed, the
 %              rest of the code permits metadata to exist without data.
-% TODO:        This function currently does not support metadata.
 %==============================================================================
 
 function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, packets, packet_size )
@@ -178,13 +177,6 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
     NUM_PACKETS = NUM_TOTAL_SAMPLES / packet_size;
     NUM_SAMPLES_PER_TRANSACTION = PORT_DEFINITION.data.num_channels * PORT_DEFINITION.data.num_samples;
     NUM_TRANSACTIONS = NUM_TOTAL_SAMPLES / NUM_SAMPLES_PER_TRANSACTION;
-  end
-
-  %----------------------------------------------------------------------------
-  % TODO: Remove this when Metadata is implemented
-  %----------------------------------------------------------------------------
-  if (PORT_HAS_METADATA)
-    error('This function currently does not support metadata');
   end
 
   %----------------------------------------------------------------------------
