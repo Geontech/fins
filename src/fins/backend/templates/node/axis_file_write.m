@@ -446,7 +446,7 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
     y = x(:);
 
     % Typecast to unsigned using 2's complement conversion
-    if (iscomplex(y))
+    if (~isreal(y))
       real_y = real(y);
       imag_y = imag(y);
       if (exist ('OCTAVE_VERSION', 'builtin') > 0)
@@ -535,7 +535,7 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
     % Convert to bit string
     x_twoscomp_bin = dec2bin(abs(x), N_BITS);
     % Flip bits
-    for n=1:num_rows
+    for n=1:length(x)
       for k=1:N_BITS
         if (x_twoscomp_bin(n, k) == '1')
           x_twoscomp_bin(n, k) = '0';
@@ -555,10 +555,10 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
   %----------------------------------------------------------------------------
   function [y] = validate_fixed_point_data(x, bit_width, is_complex, is_signed)
     % Validate that the data is complex if required
-    if (iscomplex(x) && ~is_complex)
+    if (~isreal(x) && ~is_complex)
       disp('WARNING: The data is complex when it should be real-only, dropping the imaginary component');
       x = real(x);
-    elseif (~iscomplex(x) && is_complex)
+    elseif (isreal(x) && is_complex)
       disp('WARNING: The data is real-only when it should be complex, adding a zero imaginary component');
       x = complex(x, 0);
     end
