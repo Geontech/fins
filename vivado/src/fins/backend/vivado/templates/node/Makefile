@@ -138,7 +138,7 @@ $(IP_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES)
 	{%- for script in fins['filesets']['scripts']['prebuild'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
+	matlab $(if $(UseBatch),-batch) "run('{{ script['path'] }}'); quit" $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
 endif
@@ -162,7 +162,7 @@ endif
 	{%- for script in fins['filesets']['scripts']['postbuild'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
+	matlab $(if $(UseBatch),-batch) "run('{{ script['path'] }}'); quit" $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_create.log 2>&1)
 endif
@@ -190,7 +190,7 @@ sim : all
 	{%- for script in fins['filesets']['scripts']['presim'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
+	matlab $(if $(UseBatch),-batch) "run('{{ script['path'] }}'); quit" $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
 endif
@@ -214,7 +214,7 @@ endif
 	{%- for script in fins['filesets']['scripts']['postsim'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
+	matlab $(if $(UseBatch),-batch) "run('{{ script['path'] }}'); quit" $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
 endif

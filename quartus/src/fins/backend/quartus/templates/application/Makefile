@@ -194,7 +194,7 @@ $(APPLICATION_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES)
 	{%- for script in fins['filesets']['scripts']['prebuild'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-batch) "run('{{ script['path'] }}'); quit" $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 endif
@@ -220,7 +220,7 @@ endif
 	{%- for script in fins['filesets']['scripts']['postbuild'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-batch) "run('{{ script['path'] }}'); quit" $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_CREATE_LOG_PATH) 2>&1)
 endif
@@ -249,7 +249,7 @@ sim : all $(APPLICATION_TARGET)
 	{%- for script in fins['filesets']['scripts']['presim'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-batch) "run('{{ script['path'] }}'); quit" $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 endif
@@ -275,7 +275,7 @@ endif
 	{%- for script in fins['filesets']['scripts']['postsim'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-nosplash -nodesktop -noFigureWindows) -r "try; run('{{ script['path'] }}'); catch; end; quit" $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-batch) "run('{{ script['path'] }}'); quit" $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 endif
