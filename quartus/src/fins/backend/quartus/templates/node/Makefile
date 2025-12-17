@@ -200,7 +200,7 @@ $(IP_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES)
 	{%- for script in fins['filesets']['scripts']['prebuild'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-batch) "run('{{ script['path'] }}'); quit" $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-batch,-r) "run('{{ script['path'] }}');" $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 endif
@@ -226,7 +226,7 @@ endif
 	{%- for script in fins['filesets']['scripts']['postbuild'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-batch) "run('{{ script['path'] }}'); quit" $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-batch,-r) "run('{{ script['path'] }}');" $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 endif
@@ -254,7 +254,7 @@ sim : all
 	{%- for script in fins['filesets']['scripts']['presim'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-batch) "run('{{ script['path'] }}'); quit" $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-batch,-r) "run('{{ script['path'] }}');" $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 endif
@@ -279,7 +279,7 @@ endif
 	{%- for script in fins['filesets']['scripts']['postsim'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-batch) "run('{{ script['path'] }}'); quit" $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-batch,-r) "run('{{ script['path'] }}');" $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 endif
