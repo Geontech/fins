@@ -435,7 +435,14 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
   %----------------------------------------------------------------------------
   function [ y ] = cast_to_unsigned( x, N_BITS )
     % Force column vector
-    y = x(:);
+    if isreal(x)
+      y = x(:);
+    else
+      % NOTE: If imaginary part is zero, the column conversion converts
+      % the vector to real, which can cause problems for bitwidths > 32.
+      % Casting to complex avoids this
+      y = complex(x(:));
+    end
 
     % Typecast to unsigned using 2's complement conversion
     if (~isreal(y))
