@@ -200,7 +200,7 @@ $(IP_TARGET) : $(SOURCE_FILES) $(SIM_FILES) $(CONSTRAINTS_FILES)
 	{%- for script in fins['filesets']['scripts']['prebuild'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-batch -nodisplay -nojvm,-r) "run('{{ script['path'] }}');" $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-nodisplay -nojvm -batch,-r) "run('{{ script['path'] }}');" $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 endif
@@ -226,7 +226,7 @@ endif
 	{%- for script in fins['filesets']['scripts']['postbuild'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-batch -nodisplay -nojvm,-r) "run('{{ script['path'] }}');" $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-nodisplay -nojvm -batch,-r) "run('{{ script['path'] }}');" $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_CREATE_LOG_PATH) 2>&1)
 endif
@@ -254,7 +254,7 @@ sim : all
 	{%- for script in fins['filesets']['scripts']['presim'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-batch -nodisplay -nojvm,-r) "run('{{ script['path'] }}');" $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-nodisplay -nojvm -batch,-r) "run('{{ script['path'] }}');" $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 endif
@@ -272,14 +272,14 @@ endif
 	{%- endif %}
 	{%- endif %}
 	cd $(QUARTUS_DIR) && ip-setup-simulation --quartus-project=$(PROJECT_FILENAME) --output-directory=./ --use-relative-paths $(if $(UseBatch),>> $(QUARTUS_TO_IP_SIMULATE_LOG_PATH) 2>&1)
-	cd $(MODELSIM_DIR) && vsim $(if $(UseBatch),-batch -nodisplay -nojvm) -do $(MODELSIM_TO_IP_SIMULATE_SCRIPT_PATH) $(if $(UseBatch),>> $(MODELSIM_TO_IP_SIMULATE_LOG_PATH) 2>&1)
+	cd $(MODELSIM_DIR) && vsim $(if $(UseBatch),-nodisplay -nojvm -batch) -do $(MODELSIM_TO_IP_SIMULATE_SCRIPT_PATH) $(if $(UseBatch),>> $(MODELSIM_TO_IP_SIMULATE_LOG_PATH) 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
 	{%- if 'postsim' in fins['filesets']['scripts'] %}
 	{%- for script in fins['filesets']['scripts']['postsim'] %}
 	{%- if script['type']|lower == 'matlab' %}
 ifdef MatlabExists
-	matlab $(if $(UseBatch),-batch -nodisplay -nojvm,-r) "run('{{ script['path'] }}');" $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
+	matlab $(if $(UseBatch),-nodisplay -nojvm -batch,-r) "run('{{ script['path'] }}');" $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 else
 	octave {{ script['path'] }} $(if $(UseBatch),>> $(IP_SIMULATE_LOG_PATH) 2>&1)
 endif
