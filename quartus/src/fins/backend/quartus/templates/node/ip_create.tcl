@@ -56,7 +56,7 @@ source ${IP_ROOT_RELATIVE_TO_PROJ}/{{ prebuild_script['path'] }}
 {%- endif %}
 
 # Create the IP and set the project properties
-create_ip {{ fins['name'] }} {{ fins['name'] }}
+create_ip {{ fins['name'] }} {{ fins['name'] }}_wrapper
 {%- if 'part' in fins %}
 set IP_DEVICE {{ fins['part'] }}
 {%- else %}
@@ -64,9 +64,9 @@ set IP_DEVICE 10CX220YF780I5G
 {%- endif %}
 set_project_property DEVICE $IP_DEVICE
 set_project_property HIDE_FROM_IP_CATALOG {false}
-set_module_property FILE {{ fins['name'] }}.ip
+set_module_property FILE {{ fins['name'] }}_wrapper.ip
 set_module_property GENERATION_ID {0x00000000}
-set_module_property NAME {{ fins['name'] }}
+set_module_property NAME {{ fins['name'] }}_wrapper
 
 # Run Post-Build TCL Scripts
 # Note: These scripts can use parameters defined above since they are sourced by this script
@@ -84,4 +84,4 @@ source ${IP_ROOT_RELATIVE_TO_PROJ}/{{ postbuild_script['path'] }}
 
 # Save the system
 sync_sysinfo_parameters
-save_system {{ fins['name'] }}
+save_system {{ fins['name'] }}_wrapper
