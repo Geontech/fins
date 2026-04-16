@@ -108,8 +108,8 @@ IP_SEARCH_PATHS:=$(IP_SEARCH_PATHS)$(QUARTUS_TO_ROOT)/{{ fins['user_ip_catalog']
 {%- endif %}
 
 # Filenames
-PROJECT_FILENAME:={{ fins['name'] }}.qpf
-QSYS_IP_FILENAME:={{ fins['name'] }}.ip
+PROJECT_FILENAME:={{ fins['name'] }}_wrapper.qpf
+QSYS_IP_FILENAME:={{ fins['name'] }}_wrapper.ip
 IP_PROJECT_SCRIPT_FILENAME:=ip_project.tcl
 IP_PROJECT_LOG_FILENAME:=ip_project.log
 IP_CREATE_SCRIPT_FILENAME:=ip_create.tcl
