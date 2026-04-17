@@ -20,7 +20,7 @@
 import os
 import logging
 import argparse
-import pkg_resources
+from importlib.metadata import entry_points
 # FINS Utilities and Logger
 from fins.utils import cd
 from fins.utils import SchemaType
@@ -47,7 +47,7 @@ def load_generator(name):
     if name is None:
         return NullGenerator()
 
-    for entry_point in pkg_resources.iter_entry_points(ENTRY_POINT_ID):
+    for entry_point in entry_points().get(ENTRY_POINT_ID, []):
         if entry_point.name == name:
             generator = entry_point.load()
             return generator()

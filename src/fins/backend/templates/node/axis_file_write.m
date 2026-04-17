@@ -73,7 +73,6 @@
 %              so there is validation in this function to require that the
 %              data field exists. However, if this validation is removed, the
 %              rest of the code permits metadata to exist without data.
-% TODO:        This function currently does not support metadata.
 %==============================================================================
 
 function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, packets, packet_size )
@@ -178,13 +177,6 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
     NUM_PACKETS = NUM_TOTAL_SAMPLES / packet_size;
     NUM_SAMPLES_PER_TRANSACTION = PORT_DEFINITION.data.num_channels * PORT_DEFINITION.data.num_samples;
     NUM_TRANSACTIONS = NUM_TOTAL_SAMPLES / NUM_SAMPLES_PER_TRANSACTION;
-  end
-
-  %----------------------------------------------------------------------------
-  % TODO: Remove this when Metadata is implemented
-  %----------------------------------------------------------------------------
-  if (PORT_HAS_METADATA)
-    error('This function currently does not support metadata');
   end
 
   %----------------------------------------------------------------------------
@@ -443,10 +435,17 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
   %----------------------------------------------------------------------------
   function [ y ] = cast_to_unsigned( x, N_BITS )
     % Force column vector
-    y = x(:);
+    if isreal(x)
+      y = x(:);
+    else
+      % NOTE: If imaginary part is zero, the column conversion converts
+      % the vector to real, which can cause problems for bitwidths > 32.
+      % Casting to complex avoids this
+      y = complex(x(:));
+    end
 
     % Typecast to unsigned using 2's complement conversion
-    if (iscomplex(y))
+    if (~isreal(y))
       real_y = real(y);
       imag_y = imag(y);
       if (exist ('OCTAVE_VERSION', 'builtin') > 0)
@@ -535,7 +534,7 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
     % Convert to bit string
     x_twoscomp_bin = dec2bin(abs(x), N_BITS);
     % Flip bits
-    for n=1:num_rows
+    for n=1:length(x)
       for k=1:N_BITS
         if (x_twoscomp_bin(n, k) == '1')
           x_twoscomp_bin(n, k) = '0';
@@ -555,10 +554,10 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
   %----------------------------------------------------------------------------
   function [y] = validate_fixed_point_data(x, bit_width, is_complex, is_signed)
     % Validate that the data is complex if required
-    if (iscomplex(x) && ~is_complex)
+    if (~isreal(x) && ~is_complex)
       disp('WARNING: The data is complex when it should be real-only, dropping the imaginary component');
       x = real(x);
-    elseif (~iscomplex(x) && is_complex)
+    elseif (isreal(x) && is_complex)
       disp('WARNING: The data is real-only when it should be complex, adding a zero imaginary component');
       x = complex(x, 0);
     end

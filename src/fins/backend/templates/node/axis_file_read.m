@@ -165,9 +165,9 @@ function [ packets, lasts ] = {{ fins['name']|lower }}_axis_file_read( port_name
   %----------------------------------------------------------------------------
   % TODO: Remove this when Metadata is implemented
   %----------------------------------------------------------------------------
-  if (PORT_HAS_METADATA)
-    error('This function currently does not support metadata');
-  end
+  %if (PORT_HAS_METADATA)
+  %  error('This function currently does not support metadata');
+  %end
 
   %----------------------------------------------------------------------------
   % Read File and Convert to Unsigned
