@@ -40,7 +40,7 @@
 package require ::quartus::project
 
 # Create project
-project_new -revision {{ fins['name'] }} {{ fins['name'] }}
+project_new -revision {{ fins['name'] }}_wrapper {{ fins['name'] }}_wrapper
 
 # Path variables
 set QUARTUS_TO_ROOT "../../"
