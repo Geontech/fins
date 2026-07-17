@@ -26,11 +26,28 @@ image: ubuntu:20.04
 
 .install-prereqs: &install-prereqs |
     echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+    dpkg --add-architecture i386
     apt-get update
-    apt-get install -y python3-pip octave python-is-python3 locales libtinfo5 libncurses5
+    apt-get install -y \
+        python3-pip \
+        octave \
+        python-is-python3 \
+        locales \
+        libtinfo5 \
+        libncurses5 \
+        libc6:i386 \
+        libncurses5:i386 \
+        libstdc++6:i386 \
+        libxft2:i386 \
+        libxext6:i386 \
+        libx11-6:i386 \
+        libxcb1:i386
     python3 -m pip install --upgrade pip setuptools
-    localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
-    export LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
+    localedef -i en_US -c -f UTF-8 \
+        -A /usr/share/locale/locale.alias en_US.UTF-8
+    export LANG=en_US.UTF-8
+    export LANGUAGE=en_US:en
+    export LC_ALL=en_US.UTF-8
     python3 -m pip install .
 
 test-core:
@@ -40,31 +57,6 @@ test-core:
     script:
         - 'cd test/'
         - './test_core.sh'
-    tags:
-        - fpga
-
-test-vivado 2021.2:
-    stage: test-backends
-    variables:
-        VIVADO_VERSION: '2021.2'
-        VIVADO_PATH: '/opt/fpga/Xilinx/Vivado/$VIVADO_VERSION'
-    before_script:
-        - *install-prereqs
-        - 'python3 -m pip install ./vivado'
-    script:
-        - 'source $VIVADO_PATH/settings64.sh'
-        # See https://support.xilinx.com/s/question/0D52E000079NURRSA4/synthesis-failed-abnormal-termination-tcmalloc-large-allocation?language=en_US
-        - export LD_PRELOAD=/lib/x86_64-linux-gnu/libudev.so.1
-        - 'cd test/'
-        - './test_backend.sh vivado'
-    artifacts:
-        when: on_failure
-        paths:
-            - test/**/log/*
-            - tutorial/**/log/*
-    except:
-        variables:
-            [ $VIVADO_DISABLE == 'true' ]
     tags:
         - fpga
 
@@ -93,25 +85,50 @@ test-vivado 2022.2:
     tags:
         - fpga
 
-# test-quartus:
-#     stage: test-backends
-#     variables:
-#         QUARTUS_VERSION: '19.4'
-#         QUARTUS_PATH: '/opt/fpga/Intel/intelFPGA_pro/$QUARTUS_VERSION'
-#     before_script:
-#         - *install-prereqs
-#         - 'python3 -m pip install ./quartus'
-#     script:
-#         - 'export PATH=$PATH:$QUARTUS_PATH/quartus/bin:$QUARTUS_PATH/modelsim_ase/bin:$QUARTUS_PATH/qsys/bin'
-#         - 'cd test/'
-#         - './test_backend.sh quartus'
-#     artifacts:
-#         when: on_failure
-#         paths:
-#             - test/**/log/*
-#             - tutorial/**/log/*
-#     except:
-#         variables:
-#             [ $QUARTUS_DISABLE == 'true' ]
-#     tags:
-#         - fpga
+test-vivado 2025.1.1:
+    stage: test-backends
+    variables:
+        VIVADO_VERSION: '2025.1.1'
+        VIVADO_PATH: '/opt/fpga/Xilinx/$VIVADO_VERSION'
+    before_script:
+        - *install-prereqs
+        - 'python3 -m pip install ./vivado'
+    script:
+        - 'source $VIVADO_PATH/Vivado/settings64.sh'
+        # See https://support.xilinx.com/s/question/0D52E000079NURRSA4/synthesis-failed-abnormal-termination-tcmalloc-large-allocation?language=en_US
+        - export LD_PRELOAD=/lib/x86_64-linux-gnu/libudev.so.1
+        - 'cd test/'
+        - './test_backend.sh vivado'
+    artifacts:
+        when: on_failure
+        paths:
+            - test/**/log/*
+            - tutorial/**/log/*
+    except:
+        variables:
+            [ $VIVADO_DISABLE == 'true' ]
+    tags:
+        - fpga
+
+test-quartus 19.4:
+    stage: test-backends
+    variables:
+        QUARTUS_VERSION: '19.4'
+        QUARTUS_PATH: '/opt/fpga/intelFPGA_pro/$QUARTUS_VERSION'
+    before_script:
+        - *install-prereqs
+        - 'python3 -m pip install ./quartus'
+    script:
+        - 'export PATH=$PATH:$QUARTUS_PATH/quartus/bin:$QUARTUS_PATH/quartus/sopc_builder/bin:$QUARTUS_PATH/quartus/../modelsim_ase/bin'
+        - 'cd test/'
+        - './test_backend.sh quartus'
+    artifacts:
+        when: on_failure
+        paths:
+            - test/**/log/*
+            - tutorial/**/log/*
+    except:
+        variables:
+            [ $QUARTUS_DISABLE == 'true' ]
+    tags:
+        - fpga
