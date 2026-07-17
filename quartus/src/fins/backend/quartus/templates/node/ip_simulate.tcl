@@ -69,7 +69,19 @@ source ${IP_ROOT_RELATIVE_TO_PROJ}/{{ presim_script['path'] }}
 {%- endif %}
 
 # Find the Quartus-generated library name
-set UNIT_SIM_LIBRARY [glob -tails -path ../{{ fins['name'] }}_wrapper/ {{ fins['name'] }}_???]
+set wrapper_dir [file normalize ../{{ fins['name'] }}_wrapper]
+set unit_sim_libraries [glob \
+    -nocomplain \
+    -types d \
+    -tails \
+    -directory $wrapper_dir \
+    {{ fins['name'] }}_*]
+
+if {[llength $unit_sim_libraries] != 1} {
+    error "Expected exactly one generated simulation library in $wrapper_dir, found: $unit_sim_libraries"
+}
+set UNIT_SIM_LIBRARY [lindex $unit_sim_libraries 0]
+
 
 # Run the simulation
 set TOP_LEVEL_NAME "${UNIT_SIM_LIBRARY}.{{ fins['top_sim'] }}"
