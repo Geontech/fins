@@ -1,6 +1,6 @@
 {#-
 --
--- Copyright (C) 2019 Geon Technologies, LLC
+-- Copyright (C) 2019, 2026 Geon Technologies, LLC
 --
 -- This file is part of FINS.
 --
@@ -54,7 +54,7 @@ type t_{{ param['name'] }} is array (0 to {{ param['value']|length-1 }}) of inte
 {% endif -%}
 constant {{ param['name'] }} :
 {%- if param['value'] is iterable and param['value'] is not string %} t_{{ param['name'] }} := ({{ param['value']|join(', ') }});
-{% elif 'hdl_type' in param %} {{ param['hdl_type'] }} := {{ param['value'] }};
+{% elif 'hdl_type' in param %} {{ param['hdl_type'] }} := {% if param['value'] is string %}"{{ param['value'] }}"{% else %}{{ param['value'] }}{% endif %};
 {% elif param['value'] is string %} string := "{{ param['value'] }}";
 {% elif param['value'] is sameas true or param['value'] is sameas false %} boolean := {{ param['value']|lower }};
 {% else %} integer := {{ param['value'] }};

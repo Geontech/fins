@@ -12,7 +12,7 @@ The top-level `ports` field of the FINS Node JSON Schema in turn has two fields.
 
 | Key   | Type   | Required | Default Value | Description |
 | ----- | ------ | -------- | ------------- | ----------- |
-| ports | dict[] | YES      |               | An array of FINS Port definitions which are ultimately generated as AXI4-Stream buses. See below for more information on the schema for each element of the array. |
+| ports | dict[] | NO       |               | An array of FINS Port definitions which are ultimately generated as AXI4-Stream buses. A `ports` object may instead contain only raw `hdl` ports. |
 | hdl   | dict[] | NO       |               | An array of HDL port definitions which are ultimately generated as raw VHDL ports. See below for more information on the schema for each element of the array. |
 
 ## HDL Ports
@@ -31,7 +31,7 @@ Each dictionary element of the `hdl` dictionary array field has the following fi
 
 ### Records
 
-FINS Ports in a FINS Node JSON file autogenerate into an intepreter module that uses records defined in the VHDL package file. This module interacts with user HDL through the `ports_hdl_in` and `ports_hdl_out` record interfaces which are defined in the auto-generated VHDL package file. All HDL ports that have a `direction` of "in" are transported to the HDL user core on the `ports_hdl_in` record, and all HDL ports that have a `direction` of "out" are transported to the HDL user core on the `ports_hdl_out` record.
+FINS Ports in a FINS Node JSON file autogenerate into an interpreter module that uses records defined in the VHDL package file. This module interacts with user HDL through the `ports_hdl_in` and `ports_hdl_out` record interfaces which are defined in the auto-generated VHDL package file. All HDL ports that have a `direction` of "in" are transported to the HDL user core on the `ports_hdl_in` record, and all HDL ports that have a `direction` of "out" are transported to the HDL user core on the `ports_hdl_out` record.
 
 ## FINS Ports
 
@@ -39,17 +39,34 @@ FINS Ports in a FINS Node JSON file autogenerate into an intepreter module that 
 
 Each dictionary element of the FINS `ports` dictionary array field has the following fields:
 
-> NOTES: Each element within the FINS `ports` dictionary array must have a unique `name` field. While neither `data` nor `metadata` are required in the table below, at least one must be used.
+> NOTE: Each element within the FINS `ports` dictionary array must have a unique `name` field. `data` is required. Optional `metadata` is transported alongside that data in AXI4-Stream `TUSER`.
 
 | Key                  | Type                    | Required | Default Value | Value Restrictions | Description |
 | -------------------- | ----------------------- | -------- | ------------- | ------------------ | ----------- |
 | name                 | string                  | YES      |               |                    | The name of the port. This must be unique within a FINS IP. |
 | direction            | string                  | YES      |               | in<br />out        | The bus direction of the port. This generally corresponds to the HDL port direction - except for the "tready" signal. |
-| supports_backpressue | bool or `param['name']` | NO       | false         |                    | A flag indicating if the port supports backpressure. Backpressure manifests as the "tready" signal of the AXI4-Stream bus. |
+| supports_backpressure | bool or `param['name']` | NO       | false         |                    | A flag indicating if the port supports backpressure. Backpressure manifests as the "tready" signal of the AXI4-Stream bus. |
+| supports_byte_enable | bool or `param['name']` | NO       | false         |                    | A flag indicating whether the port carries per-byte validity information. When true, the generated AXI4-Stream interface includes `TKEEP`, and the corresponding FINS port record includes a `keep` field. |
 | num_instances        | uint or `param['name']` | NO       | 1             | >=1                | The number of instances of this port. Each instance is independent and has unique control signals. |
 | use_pipeline         | bool or `param['name']` | NO       | true          |                    | A flag indicating if a pipeline should be inserted in the port. If true, input and output ports will have a 1 clock latency. |
-| data                 | dict or `param['name']` | YES      |               |                    | A dictionary the describes the data characteristics. This dictionary determines how the bus interpreter module decodes the "tdata" signal of the AXI4-Stream bus. |
-| metadata             | dict[]                  | NO       |               |                    | An array of dictionaries that define metadata. This array of dictionaries determines how the bus interpreter module decodes the "tuser" signal of the AXI4-Stream bus. |
+| data                 | dict                    | YES      |               |                    | A dictionary that describes the data characteristics. Its individual fields may reference parameters. This dictionary determines how the bus interpreter module decodes the `TDATA` signal. |
+| metadata             | dict[]                  | NO       |               |                    | Optional sideband fields packed into the AXI4-Stream `TUSER` signal in declaration order. |
+
+### Byte Enables and `TKEEP`
+
+When `supports_byte_enable` is `true`, FINS adds a `TKEEP` signal to the
+generated AXI4-Stream interface. Each bit of `TKEEP` identifies whether the
+corresponding byte lane of `TDATA` contains valid data for that transaction.
+
+The generated `TKEEP` width is:
+
+```
+ceil((data.bit_width * data.num_samples * data.num_channels) / 8)
+```
+
+The same value is exposed to user HDL as the `keep` field of the FINS port
+record. When `supports_byte_enable` is omitted or `false`, neither the
+`TKEEP` signal nor the record's `keep` field is generated.
 
 The `data` dictionary field has the following fields:
 
@@ -76,24 +93,23 @@ Each dictionary element of the `metadata` dictionary array field has the followi
 
 > **\*** The `bit_width` for all metadata fields must sum to <= 4096.
 
-### Records
+### FINS Port Records
 
-FINS Ports in a FINS Node JSON file autogenerate into an intepreter module that uses records defined in the VHDL package file. This module interacts with user HDL through the `ports_in` and `ports_out` record interfaces which are defined in the auto-generated VHDL package file. `ports_in` contains the signals that go from the bus interpreter decode module to user HDL, and `ports_out` contains the signals that go from user HDL to the bus interpreter decode module. These top-level records are an array if `num_instances > 1`, and they have a field for each property that can interact with other HDL. Each port in turn has fields that specify the interface with the user HDL. The fields of each port record depend on the direction and if backpressure is supported. The table below shows all available combinations:
+FINS Ports in a FINS Node JSON file autogenerate into an interpreter module that uses records defined in the VHDL package file. This module interacts with user HDL through the `ports_in` and `ports_out` record interfaces which are defined in the auto-generated VHDL package file. `ports_in` contains the signals that go from the bus interpreter decode module to user HDL, and `ports_out` contains the signals that go from user HDL to the bus interpreter decode module. These top-level records are an array if `num_instances > 1`, and they have a field for each port that can interact with other HDL. Each port in turn has fields that specify the interface with the user HDL. The fields of each port record depend on the direction and if backpressure is supported. The table below shows all available combinations:
 
-| `direction` | `supports_backpressure` | `data` exists | `metadata` exists | ports_in Record Fields                                       | ports_out Record Fields                 |
-| ----------- | ----------------------- | ------------- | ----------------- | ------------------------------------------------------------ | --------------------------------------- |
-| in          | true                    | true          | false             | clk<br />resetn<br />valid<br />last<br />data               | ready                                   |
-| in          | true                    | false         | true              | clk<br />resetn<br />valid<br />last<br />metadata           | ready                                   |
-| in          | true                    | true          | true              | clk<br />resetn<br />valid<br />last<br />data<br />metadata | ready                                   |
-| in          | false                   | true          | false             | clk<br />resetn<br />valid<br />last<br />data               |                                         |
-| in          | false                   | false         | true              | clk<br />resetn<br />valid<br />last<br />metadata           |                                         |
-| in          | false                   | true          | true              | clk<br />resetn<br />valid<br />last<br />data<br />metadata |                                         |
-| out         | true                    | true          | false             | clk<br />resetn<br />ready                                   | valid<br />last<br />data               |
-| out         | true                    | false         | true              | clk<br />resetn<br />ready                                   | valid<br />last<br />metadata           |
-| out         | true                    | true          | true              | clk<br />resetn<br />ready                                   | valid<br />last<br />data<br />metadata |
-| out         | false                   | true          | false             | clk<br />resetn                                              | valid<br />last<br />data               |
-| out         | false                   | false         | true              | clk<br />resetn                                              | valid<br />last<br />metadata           |
-| out         | false                   | true          | true              | clk<br />resetn                                              | valid<br />last<br />data<br />metadata |
+| `direction` | `supports_backpressure` | `metadata` exists | ports_in Record Fields                                       | ports_out Record Fields                 |
+| ----------- | ----------------------- | ----------------- | ------------------------------------------------------------ | --------------------------------------- |
+| in          | true                    | false             | clk<br />resetn<br />valid<br />last<br />data               | ready                                   |
+| in          | true                    | true              | clk<br />resetn<br />valid<br />last<br />data<br />metadata | ready                                   |
+| in          | false                   | false             | clk<br />resetn<br />valid<br />last<br />data               |                                         |
+| in          | false                   | true              | clk<br />resetn<br />valid<br />last<br />data<br />metadata |                                         |
+| out         | true                    | false             | clk<br />resetn<br />ready                                   | valid<br />last<br />data               |
+| out         | true                    | true              | clk<br />resetn<br />ready                                   | valid<br />last<br />data<br />metadata |
+| out         | false                   | false             | clk<br />resetn                                              | valid<br />last<br />data               |
+| out         | false                   | true              | clk<br />resetn                                              | valid<br />last<br />data<br />metadata |
+
+When `supports_byte_enable` is `true`, a `keep` field accompanies `data` in
+the same record.
 
 The diagram below has a visual representation of how example ports are converted to Port records from AXI4-Stream buses:
 
@@ -154,17 +170,18 @@ This VHDL module defines file IO processes for sourcing and sinking data/metadat
 
 | Vendor Tool    | Version | Execution Directory                        | Relative Path      |
 | -------------- | ------- | ------------------------------------------ | ------------------ |
-| Xilinx Vivado  | 2019.1  | project/vivado/`name`.sim/sim_1/behav/xsim | ../../../../../../ |
-| Intel ModelSim | 19.1    | project/quartus/mentor                     | ../../../          |
+| Xilinx Vivado  | 2022.2, 2025.1.1 | project/vivado/`name`.sim/sim_1/behav/xsim | ../../../../../../ |
+| Intel ModelSim | 19.4    | project/quartus/mentor                     | ../../../          |
 
 The source and sink text files require a specific format for file IO processes to be able to read the information properly. The following rules apply to these simulation sink/source files.
 
 1. All information in the text file is represented in ASCII hex characters.
 2. Each AXI4-Stream transaction is a row within the text file.
-3. Each transaction (row) is space-separated to differentiate between TLAST, TUSER, and TDATA fields.
+3. Each transaction is space-separated into `TLAST`, `TDATA`, optional `TUSER`, and optional `TKEEP` fields.
 4. Each transaction is required to start with a single hex character that represents the TLAST field of the AXI4-Stream bus protocol.
 5. After the TLAST field, the transaction row contains the TDATA field.
 6. If there is metadata communicated through the port, the TUSER field is present after the TDATA field in the transaction row.
+7. If `supports_byte_enable` is true, the TKEEP field is present last, after TDATA and any TUSER field.
 
 An example of a simulation source file for a port that has both data (TDATA) and metadata (TUSER) is below. This example contains two AXI4-Stream packets, each with 4 transactions.
 
@@ -178,5 +195,15 @@ An example of a simulation source file for a port that has both data (TDATA) and
 0 0606 00010001
 1 0707 00010001
 ```
+
+The generated MATLAB/Octave `name_axis_file_write.m` and
+`name_axis_file_read.m` helpers use this same layout. Metadata fields are
+packed in JSON declaration order, with the first field occupying the
+least-significant TUSER bits. Complex fields place the real component below
+the imaginary component. The helpers represent metadata once per packet: the
+writer repeats it for every transaction in that packet, and the reader uses
+the first transaction's metadata. Full TDATA and TUSER words may be wider than
+52 bits, but each real or imaginary component supplied as a MATLAB/Octave
+numeric value must be at most 52 bits to remain exactly representable.
 
 **[RETURN TO TOP LEVEL README](../README.md)**

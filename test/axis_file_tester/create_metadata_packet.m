@@ -1,5 +1,5 @@
 %
-% Copyright (C) 2021 Geon Technologies, LLC
+% Copyright (C) 2021, 2026 Geon Technologies, LLC
 %
 % This file is part of FINS.
 %
@@ -20,6 +20,10 @@
 %
 
 function [ packets ] = create_metadata_packet( packet_size, num_packets, metadata_fields )
+
+  % Metadata fields represent fixed-point integers. Round linspace-generated
+  % values before both writing and comparison, just as the data tests do.
+  metadata_fields = round(metadata_fields);
 
   % All metadata cases use port "data_signed_complex_24bit_2ch_3samp" data
   % NOTE: 1. Create linearly spaced data points from -2^11, 2^11-1 with the packet size * num_channels * num_samples

@@ -10,9 +10,9 @@
   "top_source":"test_top",
   "top_sim":"test_top_tb",
   "params" : [
-    { "name":"TEST_PARAM_BOOLEAN",         "value":true,        "description":"This is a test parameter excercising a boolean type" },
-    { "name":"TEST_PARAM_INTEGER",         "value":4,           "description":"This is a test parameter excercising an integer type" },
-    { "name":"TEST_PARAM_STRING",          "value":"my_string", "description":"This is a test parameter excercising a string type" },
+    { "name":"TEST_PARAM_BOOLEAN",         "value":true,        "description":"This is a test parameter excercising a boolean type", "promote_to_generic":true, "hdl_type":"boolean" },
+    { "name":"TEST_PARAM_INTEGER",         "value":4,           "description":"This is a test parameter excercising an integer type", "promote_to_generic":true, "hdl_type":"integer" },
+    { "name":"TEST_PARAM_STRING",          "value":"my_string", "description":"This is a test parameter excercising a string type", "promote_to_generic":true, "hdl_type":"string" },
     { "name":"TEST_PARAM_INTEGER_LIST",    "value":[0,1,2,3],   "description":"This is a test parameter excercising an integer list type" },
     { "name":"TEST_FIFO_DEPTH",            "value":16,          "description":"This is a parameter to set the depth of the test FIFO" },
     { "name":"TEST_RAM_DEPTH",             "value":16,          "description":"This is a parameter to set the depth of the test RAM" },

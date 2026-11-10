@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019 Geon Technologies, LLC
+# Copyright (C) 2019, 2026 Geon Technologies, LLC
 #
 # This file is part of FINS.
 #
@@ -23,6 +23,7 @@ import logging
 import datetime
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
+from fins.utils import SchemaType
 
 
 # This logger will inherit log-level and settings from main.py
@@ -146,6 +147,35 @@ class Generator:
         template_file.write(template_render)
         template_file.close()
 
+    def generate_node_file_dependencies(self, fins_data, filename, output_dir):
+        """Write the input-file dependencies for a backend-specific node."""
+        dependencies = [filename]
+
+        for key in ('company_logo', 'license_file'):
+            if key in fins_data:
+                dependencies.append(fins_data[key])
+
+        for ip in fins_data.get('ip', []):
+            dependencies.append(ip['fins_path'])
+
+        filesets = fins_data.get('filesets', {})
+        for key in ('source', 'sim', 'constraints'):
+            dependencies.extend(
+                entry['path'] for entry in filesets.get(key, []))
+        for entries in filesets.get('scripts', {}).values():
+            dependencies.extend(entry['path'] for entry in entries)
+
+        normalized_dependencies = []
+        for dependency in dependencies:
+            dependency = os.path.normpath(dependency).replace(os.sep, '/')
+            if dependency not in normalized_dependencies:
+                normalized_dependencies.append(dependency)
+
+        dependency_filename = os.path.join(
+            output_dir, fins_data['name'] + '_file_dependencies.txt')
+        with open(dependency_filename, 'w') as dependency_file:
+            dependency_file.write('\n'.join(normalized_dependencies) + '\n')
+
     def generate_node_core(self, fins_data, filename):
         """Generate the core backend files for a FINS Application
         """
@@ -186,6 +216,7 @@ class Generator:
         if 'properties' in fins_data:
             # Documentation
             self.render_jinja_template(jinja_env, 'properties.md', output_dir + fins_data['name'] + '_properties.md', fins_data)
+            self.render_jinja_template(jinja_env, 'register_memory_map.md', output_dir + fins_data['name'] + '_mem_map.md', fins_data)
             # AXI4-Lite bus code
             self.render_jinja_template(jinja_env, 'axilite.vhd', output_dir + fins_data['name'] + '_axilite.vhd', fins_data)
             self.render_jinja_template(jinja_env, 'axilite_verify.vhd', output_dir + fins_data['name'] + '_axilite_verify.vhd', fins_data)
@@ -197,7 +228,8 @@ class Generator:
             self.render_jinja_template(jinja_env, 'props_cdc.sdc', output_dir + fins_data['name'] + '_props_cdc.sdc', fins_data)
             self.render_jinja_template(jinja_env, 'props_control_cdc.vhd', output_dir + fins_data['name'] + '_props_control_cdc.vhd', fins_data)
             self.render_jinja_template(jinja_env, 'props_status_cdc.vhd', output_dir + fins_data['name'] + '_props_status_cdc.vhd', fins_data)
-        if ('ports' in fins_data) or ('properties' in fins_data):
+        if ((('ports' in fins_data) or ('properties' in fins_data)) and
+                fins_data.get('node_type', 'ip') != 'primitive'):
             # Top-level stubbed out code
             self.render_jinja_template(jinja_env, 'core.vhd', output_dir + fins_data['name'] + '_core.vhd', fins_data)
             self.render_jinja_template(jinja_env, 'top.vhd', output_dir + fins_data['name'] + '.vhd', fins_data)
@@ -273,6 +305,55 @@ class Generator:
                 os.makedirs(ports_consumer_dir, exist_ok=True)
                 self.render_jinja_template(jinja_env, 'avalonst_tdm_to_parallel.vhd', ports_consumer_dir + node['ports_consumer']['name'] + '_avalonst_tdm_to_parallel.vhd', node['ports_consumer'])
                 self.render_jinja_template(jinja_env, 'avalonst_tdm_to_parallel.json', ports_consumer_dir + node['ports_consumer']['name'] + '_avalonst_tdm_to_parallel.json', node['ports_consumer'])
+
+    def generate_node_backend_core(self, fins_data, output_dir):
+        """Generate the backend-specific subset of core node files."""
+        output_dir = os.path.join(output_dir, 'core') + '/'
+        os.makedirs(output_dir, exist_ok=True)
+        jinja_env = self.create_jinja_env(CORE_NODE_TEMPLATE_DIR)
+
+        self.render_jinja_template(
+            jinja_env, 'pkg.vhd',
+            output_dir + fins_data['name'] + '_pkg.vhd', fins_data)
+        if ('ports' in fins_data and
+                'ports' in fins_data['ports'] and
+                fins_data['ports']['ports']):
+            self.render_jinja_template(
+                jinja_env, 'axis_verify.vhd',
+                output_dir + fins_data['name'] + '_axis_verify.vhd', fins_data)
+
+    def generate_application_backend_core(self, fins_data, output_dir):
+        """Generate the backend-specific subset of core application files."""
+        output_dir = os.path.join(output_dir, 'core') + '/'
+        os.makedirs(output_dir, exist_ok=True)
+        jinja_env = self.create_jinja_env(CORE_APPLICATION_TEMPLATE_DIR)
+
+        self.render_jinja_template(
+            jinja_env, 'pkg.vhd',
+            output_dir + fins_data['name'] + '_pkg.vhd', fins_data)
+        self.render_jinja_template(
+            jinja_env, 'axis_verify.vhd',
+            output_dir + fins_data['name'] + '_axis_verify.vhd', fins_data)
+        self.render_jinja_template(
+            jinja_env, 'application_tb.vhd',
+            output_dir + fins_data['name'] + '_tb.vhd', fins_data)
+
+    def generate_backend_dispatcher(self, fins_data, filename):
+        """Generate the stable top-level Makefile for vendor backends."""
+        root_dir = os.path.dirname(filename)
+        if root_dir:
+            root_dir += '/'
+
+        if fins_data['schema_type'] == SchemaType.NODE:
+            template_dir = CORE_NODE_TEMPLATE_DIR
+        elif fins_data['schema_type'] == SchemaType.APPLICATION:
+            template_dir = CORE_APPLICATION_TEMPLATE_DIR
+        else:
+            return
+
+        jinja_env = self.create_jinja_env(template_dir)
+        self.render_jinja_template(
+            jinja_env, 'dispatcher.mk', root_dir + 'Makefile', fins_data)
 
     def generate_node_backend(self, fins_data, filename):
         """Only implemented by Generator subclasses

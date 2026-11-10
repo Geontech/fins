@@ -1,6 +1,6 @@
 {#-
  #
- # Copyright (C) 2019 Geon Technologies, LLC
+ # Copyright (C) 2019, 2026 Geon Technologies, LLC
  #
  # This file is part of FINS.
  #
@@ -54,6 +54,31 @@ set {{ param['name'] }}
 {% endfor %}
 {% endif %}
 
+# Try to read a simulation object without exposing simulator-specific commands.
+proc fins_try_get_value {object_name result_var} {
+    upvar 1 $result_var result
+    if {[catch {
+        set result [examine $object_name]
+    }]} {
+        return 0
+    }
+    return 1
+}
+
+# Check the standard FINS testbench completion signal.
+proc fins_check_simulation_done {signal_path} {
+    if {![fins_try_get_value $signal_path value]} {
+        puts "ERROR: simulation_done signal not found at '$signal_path'"
+        return 0
+    }
+    set value [string toupper [string trim $value]]
+    switch -- $value {
+        "TRUE"  { puts "***** SIMULATION PASSED *****"; return 1 }
+        "FALSE" { puts "***** SIMULATION FAILED *****"; return 0 }
+        default { puts "ERROR: simulation_done has unexpected value '$value'"; return 0 }
+    }
+}
+
 # Run Pre-Sim TCL Scripts
 # Note: These scripts can use parameters defined above since they are sourced by this script
 {%- if 'filesets' in fins %}
@@ -85,17 +110,18 @@ set UNIT_SIM_LIBRARY [lindex $unit_sim_libraries 0]
 
 # Run the simulation
 set TOP_LEVEL_NAME "${UNIT_SIM_LIBRARY}.{{ fins['top_sim'] }}"
+set USER_DEFINED_ELAB_OPTIONS "-t 1ps"
 source msim_setup.tcl
-ld
-vsim ${UNIT_SIM_LIBRARY}.{{ fins['top_sim'] }}
-run -all
 
-# Check that the simulation_done signal is True
-if { [examine "simulation_done"] == "FALSE" } {
-    # Explicitly set the return code since ModelSim doesn't exit with an error return code from a TCL error
-    set return_code 1
-    error "***** SIMULATION FAILED *****"
+if {[llength [info commands ld]] == 0} {
+    puts stderr "ERROR: msim_setup.tcl does not define the required ld command"
+    exit -code 1
 }
+if {[catch {ld} message]} {
+    puts stderr "ERROR: Quartus simulation compilation/elaboration failed: $message"
+    exit -code 1
+}
+run -all
 
 # Run Post-Sim TCL Scripts
 # Note: These scripts can use parameters defined above since they are sourced by this script
@@ -110,5 +136,9 @@ source ${IP_ROOT_RELATIVE_TO_PROJ}/{{ postsim_script['path'] }}
 {%- endif %}
 {%- endif %}
 {%- endif %}
+
+if {![fins_check_simulation_done "/{{ fins['top_sim'] }}/simulation_done"]} {
+    set return_code 1
+}
 
 exit -code $return_code

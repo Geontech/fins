@@ -1,5 +1,5 @@
 %
-% Copyright (C) 2021 Geon Technologies, LLC
+% Copyright (C) 2021, 2026 Geon Technologies, LLC
 %
 % This file is part of FINS.
 %
@@ -236,11 +236,7 @@ for packet_size_index=1:length(TEST_PACKET_SIZES)
     %   5. Run test case
     %
 
-    % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    % TODO: Implement Metadata
-    % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    if false
-      %**********************************
+    %**********************************
       % Unsigned Real
       %**********************************
       metadata_matrix = linspace(0, 2^11-1, num_packets).';
@@ -350,7 +346,34 @@ for packet_size_index=1:length(TEST_PACKET_SIZES)
       packets = create_metadata_packet(packet_size, num_packets, metadata_matrix);
       single_test_case('metadata_3field_signed_mixed', packets, packet_size*2*3, num_packets);
 
-    end
-
   end
 end
+
+% Metadata declaration order defines the TUSER bit layout, independently of
+% the alphabetical order returned by fieldnames(). The first field is in the
+% least-significant bits, so z_first=1 and a_second=2 must produce 0x21.
+packets = cell(1, 1);
+packets{1}.data = 165;
+packets{1}.metadata.z_first = 1;
+packets{1}.metadata.a_second = 2;
+single_test_case('metadata_declaration_order', packets, 1, 1);
+actual_transaction = strtrim(fileread('test.txt'));
+if (~strcmp(actual_transaction, '1 A5 21'))
+  error(['FAIL: Metadata declaration order produced transaction: ',actual_transaction]);
+end
+disp('PASS: Metadata declaration order determines TUSER layout');
+
+% Verify that a TUSER word wider than MATLAB/Octave's exact scalar range is
+% emitted in the same bit order expected by the generated VHDL serializer.
+metadata_matrix = [complex(1, 2), complex(3, 4), complex(5, 6)];
+packets = create_metadata_packet(1, 1, metadata_matrix);
+single_test_case('metadata_3field_unsigned_complex', packets, 6, 1);
+fid = fopen('test.txt');
+transaction_fields = textscan(fid, '%s %s %s');
+fclose(fid);
+actual_metadata = transaction_fields{3}{1};
+expected_metadata = '003001401000C01001';
+if (~strcmp(actual_metadata, expected_metadata))
+  error(['FAIL: Wide metadata produced ',actual_metadata,' instead of ',expected_metadata]);
+end
+disp('PASS: 72-bit metadata matches the VHDL TUSER layout');

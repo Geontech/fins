@@ -1,0 +1,48 @@
+{# Generated direct-simulation flow for primitive HDL nodes. #}
+FINS_QUARTUS_DIR:=gen/quartus
+MODELSIM_DIR:=project/quartus/mentor
+LOGS_DIR:=log/quartus
+COMPILE_STAMP:=$(MODELSIM_DIR)/.primitive_compiled
+QUARTUS_VERSION:=$(shell quartus_sh --version 2> /dev/null | sed -n 's/.*Version \([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p' | head -n 1)
+QUARTUS_LEGACY_19_4:=$(filter 19.4,$(QUARTUS_VERSION))
+MODELSIM_INI_OPTION:=$(if $(QUARTUS_LEGACY_19_4),,$(if $(MODELSIM),-modelsimini "$(MODELSIM)"))
+MODELSIM_TIME_OPTION:=$(if $(QUARTUS_LEGACY_19_4),,-t 1ps)
+
+# Define UseGui to launch the simulator GUI.
+#   * To set this variable on the command line, use: make UseGui=1
+#UseGui = 1
+
+# Inverse of UseGui
+UseBatch:=$(if $(UseGui),,1)
+
+.PHONY: all sim clean clean-all
+
+all: $(COMPILE_STAMP)
+
+$(COMPILE_STAMP):{% if 'filesets' in fins %}{% for group in ('source', 'sim') %}{% for file in fins['filesets'].get(group, []) %} {{ file['path'] }}{% endfor %}{% endfor %}{% endif %}
+	mkdir -p $(MODELSIM_DIR) $(LOGS_DIR)
+	rm -f $(LOGS_DIR)/primitive_compile.log
+	cd $(MODELSIM_DIR) && vlib work >> ../../../$(LOGS_DIR)/primitive_compile.log 2>&1
+	cd $(MODELSIM_DIR) && vmap work work >> ../../../$(LOGS_DIR)/primitive_compile.log 2>&1
+{%- if 'filesets' in fins %}
+{%- for group in ('source', 'sim') %}
+{%- for file in fins['filesets'].get(group, []) %}
+{%- if file['type']|lower == 'vhdl' %}
+	cd $(MODELSIM_DIR) && vcom -2008 ../../../{{ file['path'] }} >> ../../../$(LOGS_DIR)/primitive_compile.log 2>&1
+{%- elif file['type']|lower in ('system_verilog', 'systemverilog', 'sv') %}
+	cd $(MODELSIM_DIR) && vlog -sv ../../../{{ file['path'] }} >> ../../../$(LOGS_DIR)/primitive_compile.log 2>&1
+{%- elif file['type']|lower == 'verilog' %}
+	cd $(MODELSIM_DIR) && vlog ../../../{{ file['path'] }} >> ../../../$(LOGS_DIR)/primitive_compile.log 2>&1
+{%- endif %}
+{%- endfor %}
+{%- endfor %}
+{%- endif %}
+	touch $@
+
+sim: all
+	cd $(MODELSIM_DIR) && vsim $(MODELSIM_INI_OPTION) $(MODELSIM_TIME_OPTION) $(if $(UseBatch),-c) work.{{ fins['top_sim'] }} -do ../../../$(FINS_QUARTUS_DIR)/primitive_simulate.tcl $(if $(UseBatch),> ../../../$(LOGS_DIR)/primitive_simulate.log 2>&1)
+
+clean:
+	rm -rf project/quartus $(LOGS_DIR)
+
+clean-all: clean

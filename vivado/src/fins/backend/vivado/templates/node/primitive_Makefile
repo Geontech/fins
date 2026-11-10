@@ -1,0 +1,45 @@
+{# Generated direct-simulation flow for primitive HDL nodes. #}
+FINS_VIVADO_DIR:=gen/vivado
+PROJECT_VIVADO_DIR:=project/vivado
+LOGS_DIR:=log/vivado
+SNAPSHOT:={{ fins['name'] }}_snapshot
+COMPILE_STAMP:=$(PROJECT_VIVADO_DIR)/.primitive_compiled
+
+# Define UseGui to launch the simulator GUI.
+#   * To set this variable on the command line, use: make UseGui=1
+#UseGui = 1
+
+# Inverse of UseGui
+UseBatch:=$(if $(UseGui),,1)
+
+.PHONY: all sim clean clean-all
+
+all: $(COMPILE_STAMP)
+
+$(COMPILE_STAMP):{% if 'filesets' in fins %}{% for group in ('source', 'sim') %}{% for file in fins['filesets'].get(group, []) %} {{ file['path'] }}{% endfor %}{% endfor %}{% endif %}
+	mkdir -p $(PROJECT_VIVADO_DIR) $(LOGS_DIR)
+	rm -f $(LOGS_DIR)/primitive_compile.log
+{%- if 'filesets' in fins %}
+{%- for group in ('source', 'sim') %}
+{%- for file in fins['filesets'].get(group, []) %}
+{%- if file['type']|lower == 'vhdl' %}
+	cd $(PROJECT_VIVADO_DIR) && xvhdl --2008 ../../{{ file['path'] }} >> ../../$(LOGS_DIR)/primitive_compile.log 2>&1
+{%- elif file['type']|lower in ('system_verilog', 'systemverilog', 'sv') %}
+	cd $(PROJECT_VIVADO_DIR) && xvlog --sv ../../{{ file['path'] }} >> ../../$(LOGS_DIR)/primitive_compile.log 2>&1
+{%- elif file['type']|lower == 'verilog' %}
+	cd $(PROJECT_VIVADO_DIR) && xvlog ../../{{ file['path'] }} >> ../../$(LOGS_DIR)/primitive_compile.log 2>&1
+{%- endif %}
+{%- endfor %}
+{%- endfor %}
+{%- endif %}
+	cd $(PROJECT_VIVADO_DIR) && xelab {{ fins['top_sim'] }} -s $(SNAPSHOT) >> ../../$(LOGS_DIR)/primitive_compile.log 2>&1
+	touch $@
+
+# XSim's -tclbatch option is batch-only; GUI simulation is interactive.
+sim: all
+	cd $(PROJECT_VIVADO_DIR) && xsim $(SNAPSHOT) $(if $(UseBatch),-tclbatch ../../$(FINS_VIVADO_DIR)/primitive_simulate.tcl > ../../$(LOGS_DIR)/primitive_simulate.log 2>&1,-gui)
+
+clean:
+	rm -rf vivado*.log vivado*.jou vivado*.str vivado*.zip xgui .Xil $(PROJECT_VIVADO_DIR) $(LOGS_DIR)
+
+clean-all: clean

@@ -1,6 +1,6 @@
 {#-
  #
- # Copyright (C) 2020 Geon Technologies, LLC
+ # Copyright (C) 2020, 2026 Geon Technologies, LLC
  #
  # This file is part of FINS.
  #
@@ -49,6 +49,16 @@ UseBatch:=$(if $(UseGui),,1)
 # Check if matlab exists
 MatlabExists:=$(shell command -v matlab 2> /dev/null)
 
+# Quartus 24.2 and 25.1 generate Xcelium simulation metadata instead of the
+# legacy ncsim metadata expected by sim-script-gen.  ip-setup-simulation
+# already creates the ModelSim/Questa scripts on these releases.  Keep the
+# legacy command for Quartus 19.4 and unknown versions for compatibility.
+QUARTUS_VERSION:=$(shell quartus_sh --version 2> /dev/null | sed -n 's/.*Version \([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p' | head -n 1)
+QUARTUS_IP_SETUP_ONLY_VERSIONS:=24.2 25.1
+QUARTUS_LEGACY_19_4:=$(filter 19.4,$(QUARTUS_VERSION))
+MODELSIM_LEGACY_SETUP:=$(if $(and $(QUARTUS_LEGACY_19_4),$(FINS_MODELSIM_INI)),cp "$(FINS_MODELSIM_INI)" modelsim.ini &&)
+MODELSIM_INI_OPTION:=$(if $(QUARTUS_LEGACY_19_4),$(if $(FINS_MODELSIM_INI),-modelsimini modelsim.ini),$(if $(MODELSIM),-modelsimini "$(MODELSIM)"))
+
 #-------------------------------------------------------------------------------
 # File paths
 #-------------------------------------------------------------------------------
@@ -65,13 +75,13 @@ MODELSIM_DIR:=$(QUARTUS_DIR)/mentor
 MODELSIM_TO_ROOT:=../../..
 
 # Logging directory
-LOGS_DIR:=log
+LOGS_DIR:=log/quartus
 
 #-------------------------------------------------------------------------------
 # File lists
 #-------------------------------------------------------------------------------
 # Temporary build products and files
-TEMP_FILES:=$(PROJECT_DIR) $(LOGS_DIR)
+TEMP_FILES:=$(QUARTUS_DIR) $(LOGS_DIR)
 {% if 'filesets' in fins %}
 {%- if 'source' in fins['filesets'] %}
 # Source files
@@ -167,9 +177,9 @@ APPLICATION_TARGET:=$(QUARTUS_DIR)/$(PROJECT_FILENAME)
 # All phony target to build the {{ fins['backend'] }} project
 all:
 	{%- for node in fins['nodes'] %}
-	$(MAKE) -C {{ node['fins_dir'] }} all
+	$(MAKE) -C {{ node['fins_dir'] }} BACKEND=quartus all
 	{%- endfor %}
-	$(MAKE) -C . $(APPLICATION_TARGET)
+	$(MAKE) -f $(FINS_OUTPUT_DIR)/Makefile $(APPLICATION_TARGET)
 
 # Clean phony target that cleans only this Application
 clean:
@@ -213,6 +223,9 @@ endif
 	{%- endif %}
 	cd $(QUARTUS_DIR) && quartus_sh -t $(QUARTUS_TO_APPLICATION_PROJECT_SCRIPT_PATH)$ $(if $(UseBatch),>> $(QUARTUS_TO_APPLICATION_PROJECT_LOG_PATH) 2>&1)
 	cd $(QUARTUS_DIR) && qsys-script --search-path=$(IP_SEARCH_PATHS)$$ --quartus-project=$(PROJECT_FILENAME) --script=$(QUARTUS_TO_APPLICATION_CREATE_SCRIPT_PATH) $(if $(UseBatch),>> $(QUARTUS_TO_APPLICATION_CREATE_LOG_PATH) 2>&1)
+ifdef UseBatch
+	! grep -q ' Error:' $(APPLICATION_CREATE_LOG_PATH)
+endif
 	cd $(QUARTUS_DIR) && qsys-generate --search-path=$(IP_SEARCH_PATHS)$$ --quartus-project=$(PROJECT_FILENAME) --synthesis=$(SYNTH_LANGUAGE) {% if 'filesets' in fins %}{% if 'sim' in fins['filesets'] %}--simulation=$(SIM_LANGUAGE){% endif %}{% endif %} --ipxact $(QSYS_APPLICATION_FILENAME) $(if $(UseBatch),>> $(QUARTUS_TO_APPLICATION_CREATE_LOG_PATH) 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
@@ -267,8 +280,10 @@ endif
 	{%- endif %}
 	{%- endif %}
 	cd $(QUARTUS_DIR) && ip-setup-simulation --quartus-project=$(PROJECT_FILENAME) --output-directory=./ --use-relative-paths $(if $(UseBatch),>> $(QUARTUS_TO_APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+ifeq ($(filter $(QUARTUS_VERSION),$(QUARTUS_IP_SETUP_ONLY_VERSIONS)),)
 	cd $(QUARTUS_DIR) && sim-script-gen --search-path=$(IP_SEARCH_PATHS)$$ --system-file=$(QSYS_APPLICATION_FILENAME) --output-directory=./ --use-relative-paths $(if $(UseBatch),>> $(QUARTUS_TO_APPLICATION_SIMULATE_LOG_PATH) 2>&1)
-	cd $(MODELSIM_DIR) && vsim $(if $(UseBatch),-batch) -do $(MODELSIM_TO_APPLICATION_SIMULATE_SCRIPT_PATH) $(if $(UseBatch),>> $(MODELSIM_TO_APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+endif
+	cd $(MODELSIM_DIR) && $(MODELSIM_LEGACY_SETUP) vsim $(MODELSIM_INI_OPTION) $(if $(UseBatch),-batch) -do $(MODELSIM_TO_APPLICATION_SIMULATE_SCRIPT_PATH) $(if $(UseBatch),>> $(MODELSIM_TO_APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
 	{%- if 'postsim' in fins['filesets']['scripts'] %}

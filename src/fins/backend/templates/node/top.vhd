@@ -1,6 +1,6 @@
 {#-
 --
--- Copyright (C) 2019 Geon Technologies, LLC
+-- Copyright (C) 2019, 2026 Geon Technologies, LLC
 --
 -- This file is part of FINS.
 --
@@ -46,6 +46,13 @@ use work.{{ fins['name']|lower }}_pkg.all;
 
 -- Entity
 entity {{ fins['name']|lower }} is
+  {%- if 'params' in fins and fins['params']|selectattr('promote_to_generic', 'defined')|selectattr('promote_to_generic')|list|length > 0 %}
+  generic (
+    {%- for param in fins['params'] if param.get('promote_to_generic', false) %}
+    {{ param['name'] }} : {{ param['hdl_type'] }} := {% if param['value'] is sameas true %}true{% elif param['value'] is sameas false %}false{% elif param['value'] is string %}"{{ param['value'] }}"{% else %}{{ param['value'] }}{% endif %}{% if not loop.last %};{% endif %}
+    {%- endfor %}
+  );
+  {%- endif %}
   port (
     {%- if 'properties' in fins %}
     -- AXI4-Lite Properties Bus
@@ -183,6 +190,13 @@ architecture struct of {{ fins['name']|lower }} is
 
   -- Auto-generated User Core Code
   component {{ fins['name']|lower }}_core is
+    {%- if 'params' in fins and fins['params']|selectattr('promote_to_generic', 'defined')|selectattr('promote_to_generic')|list|length > 0 %}
+    generic (
+      {%- for param in fins['params'] if param.get('promote_to_generic', false) %}
+      {{ param['name'] }} : {{ param['hdl_type'] }} := {% if param['value'] is sameas true %}true{% elif param['value'] is sameas false %}false{% elif param['value'] is string %}"{{ param['value'] }}"{% else %}{{ param['value'] }}{% endif %}{% if not loop.last %};{% endif %}
+      {%- endfor %}
+    );
+    {%- endif %}
     port (
       {%- if 'properties' in fins %}
       props_control : in  t_{{ fins['name']|lower }}_props_control;
@@ -300,6 +314,13 @@ begin
   -- User Core
   --------------------------------------------------------------------------------
   u_core : {{ fins['name']|lower }}_core
+    {%- if 'params' in fins and fins['params']|selectattr('promote_to_generic', 'defined')|selectattr('promote_to_generic')|list|length > 0 %}
+    generic map (
+      {%- for param in fins['params'] if param.get('promote_to_generic', false) %}
+      {{ param['name'] }} => {{ param['name'] }}{% if not loop.last %},{% endif %}
+      {%- endfor %}
+    )
+    {%- endif %}
     port map (
       {%- if 'properties' in fins %}
       props_control => props_control,

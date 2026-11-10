@@ -1,6 +1,6 @@
 {#-
  #
- # Copyright (C) 2019 Geon Technologies, LLC
+ # Copyright (C) 2019, 2026 Geon Technologies, LLC
  #
  # This file is part of FINS.
  #
@@ -36,6 +36,9 @@
 #              * Xilinx Vivado 2019.1
 #===============================================================================
 
+# Default the return code to 0=SUCCESS
+set return_code 0
+
 # Setup paths
 set PROJECT_VIVADO_DIR "./project/vivado"
 
@@ -50,6 +53,31 @@ set {{ param['name'] }}
 {% endif -%}
 {% endfor %}
 {% endif %}
+
+# Try to read a simulation object without exposing simulator-specific commands.
+proc fins_try_get_value {object_name result_var} {
+    upvar 1 $result_var result
+    if {[catch {
+        set result [get_value [get_objects $object_name]]
+    }]} {
+        return 0
+    }
+    return 1
+}
+
+# Check the standard FINS testbench completion signal.
+proc fins_check_simulation_done {signal_path} {
+    if {![fins_try_get_value $signal_path value]} {
+        puts "ERROR: simulation_done signal not found at '$signal_path'"
+        return 0
+    }
+    set value [string toupper [string trim $value]]
+    switch -- $value {
+        "TRUE"  { puts "***** SIMULATION PASSED *****"; return 1 }
+        "FALSE" { puts "***** SIMULATION FAILED *****"; return 0 }
+        default { puts "ERROR: simulation_done has unexpected value '$value'"; return 0 }
+    }
+}
 
 # Run Pre-Sim TCL Scripts
 # Note: These scripts can use parameters defined above since they are sourced by this script
@@ -125,3 +153,8 @@ source {{ postsim_script['path'] }}
 {%- endif %}
 {%- endif %}
 {%- endif %}
+
+if {![fins_check_simulation_done "/{{ fins['top_sim'] }}/simulation_done"]} {
+    set return_code 1
+}
+exit $return_code
