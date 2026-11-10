@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019 Geon Technologies, LLC
+# Copyright (C) 2019, 2026 Geon Technologies, LLC
 #
 # This file is part of FINS.
 #
@@ -425,27 +425,47 @@ def find_base_address_from_qsys(filename, module_name, interface_name):
     tree = ET.parse(filename)
     root = tree.getroot()
 
+    # Quartus 24.2 and newer serialize Qsys connections as nested,
+    # namespace-qualified IP-XACT elements.  Quartus 19.4 uses direct,
+    # unqualified elements.  Compare local names so both formats work.
+    def local_name(name):
+        return name.rsplit('}', 1)[-1]
+
+    def attribute(element, *names):
+        for key, value in element.attrib.items():
+            if local_name(key) in names:
+                return value
+        return None
+
     # Loop through all connections in the design
-    for connection in root.findall('connection'):
-        # Initialize to the attributes
-        connection_def = connection.attrib
+    for connection in root.iter():
+        if local_name(connection.tag) != 'connection':
+            continue
 
         # Only collect avalon memory-mapped connections
-        if connection_def['kind'].lower() != 'avalon':
+        connection_kind = attribute(connection, 'kind')
+        if connection_kind is None or connection_kind.lower() != 'avalon':
             continue
 
         # Check for connection match against connection end module_name.interface syntax
-        if connection_def['end'].lower() != connection_end.lower():
+        connection_target = attribute(connection, 'end')
+        if connection_target is None or connection_target.lower() != connection_end.lower():
             continue
 
         # Find the base_address
-        for parameter in connection.findall('parameter'):
-            if parameter.get('name') == 'baseAddress':
+        for parameter in connection:
+            if local_name(parameter.tag) not in ('parameter', 'connection_parameter'):
+                continue
+            if attribute(parameter, 'name', 'parameter_name') == 'baseAddress':
+                base_address_value = attribute(
+                    parameter, 'value', 'parameter_value')
                 try:
-                    base_address = int(parameter.get('value'), 16)
+                    base_address = int(base_address_value, 16)
                     return base_address
                 except ValueError:
-                    LOGGER.error(f'Unable to convert the base address from hex to int. Problem string: {parameter.get("value")}')
+                    LOGGER.error(
+                        'Unable to convert the base address from hex to int. '
+                        f'Problem string: {base_address_value}')
                     sys.exit(1)
 
         # If we haven't returned, it is an error
@@ -626,6 +646,13 @@ def populate_properties(fins_data,base_offset):
     if not 'properties' in fins_data:
         return fins_data
 
+    data_width = fins_data['properties']['data_width']
+    if data_width > 128:
+        LOGGER.error(
+            f'Properties data_width {data_width} is larger than the maximum '
+            'value of 128')
+        sys.exit(1)
+
     # Loop through the properties to set defaults and validate values
     for prop in fins_data['properties']['properties']:
         # Make sure is_signed is not present and set to True
@@ -642,6 +669,11 @@ def populate_properties(fins_data,base_offset):
             prop['width'] = fins_data['properties']['data_width']
         if not 'length' in prop:
             prop['length'] = 1
+        if prop['width'] < 1 or prop['width'] > data_width:
+            LOGGER.error(
+                f'Property {prop["name"]} width must be between 1 and '
+                f'the properties data_width ({data_width})')
+            sys.exit(1)
         if not 'default_values' in prop:
             prop['default_values'] = [0] * prop['length']
         if not 'disable_default_test' in prop:
@@ -759,13 +791,30 @@ def populate_ports(fins_data):
                             metafield['is_complex'] = False
                         if not 'is_signed' in metafield:
                             metafield['is_signed'] = False
+                        if metafield['bit_width'] < 1:
+                            LOGGER.error(
+                                f'Metadata field {metafield["name"]} of port '
+                                f'{port["name"]} must have a bit_width >= 1')
+                            sys.exit(1)
                         # Set and update the bit offset
                         metafield['offset'] = current_offset
                         current_offset = metafield['offset'] + metafield['bit_width']
+                    if current_offset > 4096:
+                        LOGGER.error(
+                            f'Port {port["name"]} total metadata width is '
+                            'larger than the maximum value of 4096')
+                        sys.exit(1)
                 # Validate values
                 if port['num_instances'] < 1:
                     LOGGER.error(f'The num_instances of port {port["name"]} is < 1')
                     sys.exit(1)
+
+                for dimension in ('num_samples', 'num_channels'):
+                    if port['data'][dimension] < 1:
+                        LOGGER.error(
+                            f'Port {port["name"]} data {dimension} must be '
+                            '>= 1')
+                        sys.exit(1)
 
                 # Check the data bit_width for limits
                 if port['data']['bit_width'] < 8:
@@ -775,14 +824,15 @@ def populate_ports(fins_data):
                     LOGGER.error(f'Port {port["name"]} total data width (bit_width*num_samples*num_channels) is larger than the maximum value of 4096')
                     sys.exit(1)
                 
-		# If the port supports byte enable, determine the number of bytes (rounded up) the port's
+                # If the port supports byte enable, determine the number of bytes (rounded up) the port's
                 # bit width is
-                if 'supports_byte_enable':
+                if port['supports_byte_enable']:
                     bit_width = port['data']['bit_width']
                     num_samples = port['data']['num_samples']
                     num_channels = port['data']['num_channels']
                     port['data']['byte_width'] = math.ceil((bit_width * num_samples * num_channels) / 8)
-                    port['data']['empty_width'] = math.ceil(math.log2(port['data']['byte_width']))
+                    port['data']['empty_width'] = max(
+                        1, math.ceil(math.log2(port['data']['byte_width'])))
     # Return the modified dictionary
     return fins_data
 
@@ -843,13 +893,62 @@ def populate_filesets(fins_data):
                         else:
                             script_file['type'] = 'cmdline'
                             LOGGER.warning(f'No type provided or detected, so CMDLINE was assigned to {script_file["path"]}... ONLY a concern if command line execution not intended')
-                            sys.exit(1)
 
         if 'vendor_ip' in fins_data['filesets']['scripts']:
             for script_file in fins_data['filesets']['scripts']['vendor_ip']:
                 if not 'type' in script_file:
                     # There is only one option for this script type
                     script_file['type'] = 'tcl'
+
+    return fins_data
+
+
+def apply_backend_config(fins_data, backend):
+    """Resolve vendor-specific settings without changing legacy specifications.
+
+    A file entry with no ``backend`` selector is shared. Selectors may be a
+    backend name or a list of backend names. The core pass intentionally keeps
+    every entry so the generated JSON remains a complete delivery manifest.
+    """
+    if backend != 'core':
+        if 'part' not in fins_data and backend in fins_data.get('parts', {}):
+            fins_data['part'] = fins_data['parts'][backend]
+
+        filesets = fins_data.get('filesets', {})
+
+        def enabled(entry):
+            selectors = entry.get('backend')
+            if selectors is None:
+                return True
+            if isinstance(selectors, str):
+                selectors = [selectors]
+            return backend in [selector.lower() for selector in selectors]
+
+        for key in ('source', 'sim', 'constraints'):
+            if key in filesets:
+                filesets[key] = [entry for entry in filesets[key] if enabled(entry)]
+        for key, entries in filesets.get('scripts', {}).items():
+            filesets['scripts'][key] = [entry for entry in entries if enabled(entry)]
+
+        # A few generated files embed FINS_BACKEND or vendor-specific testbench
+        # behavior. Keep the bulk of gen/core common, but redirect references to
+        # the small per-vendor overlay generated by each backend plugin.
+        variant_files = {f'{fins_data["name"]}_pkg.vhd'}
+        if fins_data['schema_type'] == SchemaType.NODE:
+            variant_files.add(f'{fins_data["name"]}_axis_verify.vhd')
+        elif fins_data['schema_type'] == SchemaType.APPLICATION:
+            variant_files.update({
+                f'{fins_data["name"]}_axis_verify.vhd',
+                f'{fins_data["name"]}_tb.vhd',
+            })
+        for key in ('source', 'sim'):
+            for entry in filesets.get(key, []):
+                normalized_path = entry['path'].replace('\\', '/')
+                if normalized_path.startswith('./'):
+                    normalized_path = normalized_path[2:]
+                if (normalized_path.startswith('gen/core/') and
+                        os.path.basename(normalized_path) in variant_files):
+                    entry['path'] = f'gen/{backend}/core/{os.path.basename(normalized_path)}'
 
     return fins_data
 
@@ -1243,6 +1342,22 @@ def populate_hdl_inferences(fins_data):
 
     LOGGER.debug(f'Inferred interfaces {unique_interface_ids}')
 
+    # Promote explicitly selected FINS parameters even when the authored
+    # source does not declare the generic.  The generated top/core templates
+    # declare these generics, while authored generics remain authoritative when
+    # they are already present in the inferred HDL.
+    inferred_generic_names = {
+        generic['name'] for generic in fins_data['hdl']['generics']
+    }
+    for param in fins_data.get('params', []):
+        if param.get('promote_to_generic', False) and param['name'] not in inferred_generic_names:
+            fins_data['hdl']['generics'].append({
+                'name': param['name'],
+                'type': param['hdl_type'],
+                'value': param['value']
+            })
+            inferred_generic_names.add(param['name'])
+
     return fins_data
 
 
@@ -1500,6 +1615,25 @@ def populate_application_clocks(fins_data):
                 net['port']['clock'] = clock['clock']
 
 
+def normalize_application_export_keys(fins_data):
+    """Normalize legacy Application export keys to their canonical names."""
+    aliases = {
+        'port-exports': 'port_exports',
+        'hdl-port-exports': 'hdl_port_exports',
+        'hdl_exports': 'hdl_port_exports',
+    }
+    for alias, canonical in aliases.items():
+        if alias not in fins_data:
+            continue
+        if canonical in fins_data:
+            LOGGER.error(
+                f'Application contains both {canonical} and legacy alias '
+                f'{alias}')
+            sys.exit(1)
+        fins_data[canonical] = fins_data.pop(alias)
+    return fins_data
+
+
 def populate_application_exports(fins_data):
     """Modifies the contents of fins_data for a FINS Application.
 
@@ -1507,9 +1641,9 @@ def populate_application_exports(fins_data):
     "Exporting" is another way of saying "make this an external port/interface of this Application"
     Exported ports are added to the fins_data['ports']['ports'] or fins_data['ports']['hdl'] lists
 
-    By default, export all unconnected ports (ports and 'hdl' ports). If port_exports
-    or hdl_exports is specified in the Application JSON, only export the ports listed
-    in those fields.
+    By default, export all unconnected ports (ports and 'hdl' ports). If
+    port_exports or hdl_port_exports is specified in the Application JSON,
+    only export the ports listed in those fields.
 
     An exported port is a copied version of the original Node port with a few modified/extra fields:
         name: original port name prepended with the Node's module name
@@ -1520,8 +1654,8 @@ def populate_application_exports(fins_data):
     # Export ports as ports of the Application itself
     if 'port_exports' in fins_data:
         if 'ports' not in fins_data:
-            fins['ports'] = {}
-        fins['ports']['ports'] = []
+            fins_data['ports'] = {}
+        fins_data['ports']['ports'] = []
 
         for net in fins_data['port_exports']:
             # Get the port to export, copy it, change/add some information,
@@ -1566,12 +1700,12 @@ def populate_application_exports(fins_data):
                             fins_data['ports']['ports'].append(application_port)
 
     # Export hdl ports as hdl ports of the Application itself
-    if 'hdl_exports' in fins_data:
+    if 'hdl_port_exports' in fins_data:
         if 'ports' not in fins_data:
             fins_data['ports'] = {}
         fins_data['ports']['hdl'] = []
 
-        for net in fins_data['hdl_exports']:
+        for net in fins_data['hdl_port_exports']:
             # Get the hdl port to export, copy it, change/add some information,
             # and add it to the Application's hdl ports list
             port = get_port(net['node_name'], net['net'], fins_data, port_type='hdl')
@@ -1585,7 +1719,7 @@ def populate_application_exports(fins_data):
             application_port['node_port'] = port
             fins_data['ports']['hdl'].append(application_port)
     else:
-        # If hdl_exports isn't present in the JSON, export all unconnected ports
+        # If hdl_port_exports isn't present, export all unconnected HDL ports
         if 'ports' not in fins_data:
             fins_data['ports'] = {}
         fins_data['ports']['hdl'] = []
@@ -1614,7 +1748,10 @@ def populate_application_exports(fins_data):
 
 
 def populate_fins_application_node(node):
-    """Modifies the contents of 'node' dictionary. Must be run after run_generator has been for this Node.
+    """Populate an Application node after recursive generation.
+
+    Descriptive nodes skip recursive generation, so their already-generated
+    JSON is loaded directly from ``fins_path`` here.
 
     Determines/sets the following in the node dictionary:
         fins_dir:  is the source directory where this Node/IP originates
@@ -1623,6 +1760,9 @@ def populate_fins_application_node(node):
     # In order to construct the path to the generated JSON for this node,
     # the user-authored JSON must first be loaded to determine its name
     # which is part of the file-path to the generated file
+
+    if node['descriptive_node']:
+        node['node_details'] = load_json_file(node['fins_path'])
 
     node['fins_dir'] = os.path.dirname(node['fins_path']) #node_dir
     node['node_name'] = node['node_details']['name']
@@ -1657,8 +1797,14 @@ def populate_fins_system_node(node):
     node_fins_data = load_json_file(node['fins_path'])
     node['node_name'] = node_fins_data['name']
 
-    ports_producer_name_defined = False
-    ports_consumer_name_defined = False
+    has_properties = 'properties' in node_fins_data
+    if has_properties:
+        for required_key in ('properties_offset', 'interface_name'):
+            if required_key not in node:
+                LOGGER.error(
+                    f'Node {node["module_name"]} has a properties interface '
+                    f'and must specify "{required_key}" in the System')
+                sys.exit(1)
 
     # Convert dictionary to uint
     if 'properties_offset' in node and isinstance(node['properties_offset'], str):
@@ -1675,21 +1821,12 @@ def populate_fins_system_node(node):
         else:
             LOGGER.warning(f'Properties offset path {node["properties_offset"]} for {node["module_name"]} does not exist')
 
-    if 'properties' in node_fins_data and 'interface_name' not in node:
-        LOGGER.error('a node with a properties interface must have an "interface_name" specified in the System')
-        sys.exit(1)
-
-    if 'properties' in node_fins_data:
+    if has_properties:
         node['properties'] = node_fins_data['properties']['properties']
         node['node_id'] = node['node_name'] + '::' + node['module_name'] + '::' + node['interface_name']
 
     # Find the port listed in ports_producer_name
     if 'ports_producer_name' in node:
-        # Make sure ports_producer_name is in only one node
-        if ports_producer_name_defined:
-            LOGGER.error('ports_producer_name can only be defined in one node')
-            sys.exit(1)
-        ports_producer_name_defined = True
         # Find the port
         ports_producer_found = False
         for port in node_fins_data['ports']['ports']:
@@ -1708,11 +1845,6 @@ def populate_fins_system_node(node):
 
     # Find the port listed in ports_consumer_name
     if 'ports_consumer_name' in node:
-        # Make sure ports_consumer_name is in only one node
-        if ports_consumer_name_defined:
-            LOGGER.error('ports_consumer_name can only be defined in one node')
-            sys.exit(1)
-        ports_consumer_name_defined = True
         # Find the port
         ports_consumer_found = False
         for port in node_fins_data['ports']['ports']:
@@ -1735,6 +1867,17 @@ def populate_fins_system(fins_data):
 
     Populate contents specific to a FINS System.
     """
+    for field in ('ports_producer_name', 'ports_consumer_name'):
+        selected_nodes = [
+            node['module_name'] for node in fins_data['nodes']
+            if node.get(field)
+        ]
+        if len(selected_nodes) > 1:
+            LOGGER.error(
+                f'{field} can only be defined in one System node; found in '
+                f'{", ".join(selected_nodes)}')
+            sys.exit(1)
+
     for node in fins_data['nodes']:
         populate_fins_system_node(node)
 
@@ -1928,6 +2071,21 @@ def validate_filesets(fins_data,filename):
     LOGGER.debug('+++++ Done.')
 
 
+def validate_promoted_params(fins_data):
+    """Validate parameters promoted to top-level HDL generics."""
+    for param in fins_data.get('params', []):
+        if not param.get('promote_to_generic', False):
+            continue
+        hdl_type = param.get('hdl_type')
+        if not isinstance(hdl_type, str) or not hdl_type.strip():
+            LOGGER.error(f'Promoted parameter {param["name"]} must define a non-empty hdl_type')
+            sys.exit(1)
+        if not re.match(r'^[A-Za-z][A-Za-z0-9_ ]*$', hdl_type):
+            LOGGER.error(f'Promoted parameter {param["name"]} has invalid hdl_type {hdl_type}')
+            sys.exit(1)
+    LOGGER.debug('+++++ Promoted parameters validated.')
+
+
 def validate_ip(fins_data):
     # Collect parent parameter names
     parent_names = []
@@ -1984,10 +2142,6 @@ def validate_ports(fins_data):
             if not port['direction'] in PORT_DIRECTIONS:
                 LOGGER.error(f'Port {port["name"]} direction {port["direction"]} is invalid')
                 sys.exit(1)
-            # Neither data nor metadata are required, but we must have at least one
-            if not 'data' in port and not 'metadata' in port:
-                LOGGER.error(f'Port {port["name"]} must have either metadata or data')
-                sys.exit(1)
             # Notify of success
             LOGGER.debug(f'PASS: Port {port["name"]} with direction {port["direction"]}')
 
@@ -2007,7 +2161,8 @@ def validate_ports(fins_data):
                 LOGGER.error(f'Port HDL {port_hdl["name"]} direction {port_hdl["direction"]} is invalid')
                 sys.exit(1)
             # Check that bit width is > 0
-            bit_width = get_param_value(fins_data['params'], port_hdl['bit_width'])
+            bit_width = get_param_value(
+                fins_data.get('params', []), port_hdl['bit_width'])
             if bit_width < 1:
                 LOGGER.error(f'Port HDL {port_hdl["name"]} must have a bit_width > 0')
                 sys.exit(1)
@@ -2035,6 +2190,8 @@ def validate_fins_data(fins_data, filename):
     LOGGER.debug(f'+++++ Validating {filename} ...')
     validate_fins(SchemaType.get_str(fins_data), fins_data, fins_schema)
     LOGGER.debug('+++++ Done.')
+
+    validate_promoted_params(fins_data)
 
     # Validate sub-IP
     if 'ip' in fins_data:
@@ -2084,6 +2241,19 @@ def validate_and_convert_node_fins_data(fins_data, filename, backend):
     # Validate the FINS Node JSON using the node.json file
     validate_fins_data(fins_data,filename)
 
+    # Existing node descriptions are packaged IP unless explicitly marked as
+    # primitive HDL for direct compilation and simulation.
+    fins_data['node_type'] = fins_data.get('node_type', 'ip').lower()
+    if fins_data['node_type'] not in ('ip', 'primitive'):
+        LOGGER.error(
+            f'Node {fins_data["name"]} has invalid node_type '
+            f'{fins_data["node_type"]}; expected "ip" or "primitive"')
+        sys.exit(1)
+    if fins_data['node_type'] == 'primitive' and 'ip' in fins_data:
+        LOGGER.error(
+            f'Primitive node {fins_data["name"]} cannot contain packaged sub-IP')
+        sys.exit(1)
+
     # Set the backend used for generation
     fins_data['backend'] = backend
 
@@ -2104,6 +2274,9 @@ def validate_and_convert_node_fins_data(fins_data, filename, backend):
 
     # Auto-detect file types
     fins_data = populate_filesets(fins_data)
+
+    # Select vendor-specific part and fileset entries.
+    fins_data = apply_backend_config(fins_data, backend)
 
     # Auto-detect sub-ip versions
     fins_data = populate_ip(fins_data)
@@ -2176,13 +2349,17 @@ def validate_application_connections(fins_data):
                             src_port['data']['num_samples'] != dst_port['data']['num_samples'] or
                             src_port['data']['num_channels'] != dst_port['data']['num_channels']):
 
-                            src_total_width = src_port['data']['bit_width']*src_port['data']['bit_width']*src_port['data']['bit_width']
-                            dst_total_width = dst_port['data']['bit_width']*dst_port['data']['bit_width']*dst_port['data']['bit_width']
+                            src_total_width = (src_port['data']['bit_width'] *
+                                               src_port['data']['num_samples'] *
+                                               src_port['data']['num_channels'])
+                            dst_total_width = (dst_port['data']['bit_width'] *
+                                               dst_port['data']['num_samples'] *
+                                               dst_port['data']['num_channels'])
                             if src_total_width != dst_total_width:
                                 LOGGER.error(f'bit_width*num_samples*num_channels does not match between ports in connection ({src_name}->{dst_name})')
+                                sys.exit(1)
                             else:
                                 LOGGER.warning(f'bit_width, num_samples or num_channels do not match ports in connection ({src_name}->{dst_name}). bit_width*num_samples*num_channels matches... OK')
-                            sys.exit(1)
                         elif (src_port['data']['is_complex'] != dst_port['data']['is_complex'] or
                               src_port['data']['is_signed'] != dst_port['data']['is_signed']):
                             LOGGER.warning(f'is_complex or is_signed does not match between ports in connection ({src_name}->{dst_name}). bit_width*num_samples*num_channels matches... OK.')
@@ -2210,6 +2387,7 @@ def validate_application_ports(fins_data):
 def validate_and_convert_application_fins_data(fins_data, filename, backend):
     """Validates and converts data from a FINS Application JSON file
     """
+    fins_data = normalize_application_export_keys(fins_data)
     validate_fins_data(fins_data, filename)
 
     # Set the backend used for generation
@@ -2226,6 +2404,9 @@ def validate_and_convert_application_fins_data(fins_data, filename, backend):
 
     # Auto-detect file types
     fins_data = populate_filesets(fins_data)
+
+    # Select vendor-specific part and fileset entries.
+    fins_data = apply_backend_config(fins_data, backend)
 
     for node in fins_data['nodes']:
         # Set per-node defaults
@@ -2264,10 +2445,6 @@ def validate_and_convert_system_fins_data(fins_data, filename, backend):
         fins_data['base_offset'] = 0
 
     for node in fins_data['nodes']:
-        # Ensure that mandatory per-node keys are present
-        if 'properties_offset' not in node:
-            LOGGER.error(f'Required key properties_offset does not exist for node {node["module_name"]}')
-
         # Set per-node defaults
 
         # By default, a node is descriptive for Systems,

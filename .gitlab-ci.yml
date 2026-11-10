@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2024 Geon Technologies, LLC
+# Copyright (C) 2024, 2026 Geon Technologies, LLC
 #
 # This file is part of FINS.
 #
@@ -30,6 +30,7 @@ image: ubuntu:20.04
     apt-get update
     apt-get install -y \
         python3-pip \
+        tcl \
         octave \
         python-is-python3 \
         locales \
@@ -42,7 +43,7 @@ image: ubuntu:20.04
         libxext6:i386 \
         libx11-6:i386 \
         libxcb1:i386
-    python3 -m pip install --upgrade pip setuptools
+    python3 -m pip install --upgrade pip setuptools coverage==7.6.1
     localedef -i en_US -c -f UTF-8 \
         -A /usr/share/locale/locale.alias en_US.UTF-8
     export LANG=en_US.UTF-8
@@ -50,18 +51,162 @@ image: ubuntu:20.04
     export LC_ALL=en_US.UTF-8
     python3 -m pip install .
 
-test-core:
+.setup-quartus-19-4: &setup-quartus-19-4 |
+    export QUARTUS_ROOTDIR="$QUARTUS_PATH/quartus"
+    export PATH="$PATH:$QUARTUS_ROOTDIR/bin:$QUARTUS_ROOTDIR/sopc_builder/bin:$QUARTUS_PATH/modelsim_ase/bin"
+    MODELSIM_INSTALL_INI="$QUARTUS_PATH/modelsim_ase/modelsim.ini"
+    ALTERA_MF_LIBRARY="$QUARTUS_PATH/modelsim_ase/altera/vhdl/altera_mf"
+    test -r "$MODELSIM_INSTALL_INI" || { echo "ERROR: ModelSim configuration is not readable: $MODELSIM_INSTALL_INI" >&2; exit 1; }
+    test -r "$ALTERA_MF_LIBRARY/_info" || { echo "ERROR: Precompiled altera_mf library is not readable: $ALTERA_MF_LIBRARY" >&2; exit 1; }
+    mkdir -p "$CI_PROJECT_DIR/ci-debug"
+    export FINS_MODELSIM_INI="$CI_PROJECT_DIR/ci-debug/modelsim.ini"
+    cp "$MODELSIM_INSTALL_INI" "$FINS_MODELSIM_INI"
+    MODELSIM="$FINS_MODELSIM_INI" vmap altera_mf "$ALTERA_MF_LIBRARY"
+    MODELSIM="$FINS_MODELSIM_INI" vmap altera_mf > "$CI_PROJECT_DIR/ci-debug/altera_mf_mapping.log"
+    cat "$CI_PROJECT_DIR/ci-debug/altera_mf_mapping.log"
+
+.collect-test-debug: &collect-test-debug
+    - |
+        mkdir -p ci-debug
+        if [ "${QUARTUS_VERSION:-}" = "19.4" ] && [ -n "${QUARTUS_PATH:-}" ]; then
+            export QUARTUS_ROOTDIR="$QUARTUS_PATH/quartus"
+            export PATH="$PATH:$QUARTUS_ROOTDIR/bin:$QUARTUS_ROOTDIR/sopc_builder/bin:$QUARTUS_PATH/modelsim_ase/bin"
+            MODELSIM_INSTALL_INI="$QUARTUS_PATH/modelsim_ase/modelsim.ini"
+            if [ -r "$MODELSIM_INSTALL_INI" ]; then
+                cp "$MODELSIM_INSTALL_INI" ci-debug/modelsim-install.ini
+            fi
+            if [ -r "ci-debug/modelsim.ini" ]; then
+                export MODELSIM="$CI_PROJECT_DIR/ci-debug/modelsim.ini"
+            else
+                export MODELSIM="$MODELSIM_INSTALL_INI"
+            fi
+        fi
+        {
+            date -u
+            uname -a
+            printf 'CI_JOB_NAME=%s\n' "${CI_JOB_NAME:-}"
+            printf 'CI_JOB_ID=%s\n' "${CI_JOB_ID:-}"
+            printf 'CI_PIPELINE_ID=%s\n' "${CI_PIPELINE_ID:-}"
+            printf 'CI_COMMIT_SHA=%s\n' "${CI_COMMIT_SHA:-}"
+            printf 'TEST_SCOPE=%s\n' "${TEST_SCOPE:-}"
+            python3 --version
+            command -v fins || true
+            fins --version || true
+            command -v tclsh || true
+            tclsh <<< 'puts [info patchlevel]' || true
+            command -v quartus_sh || true
+            quartus_sh --version || true
+            command -v vsim || true
+            vsim -version || true
+            command -v vivado || true
+            vivado -version || true
+            printf 'VIVADO_PATH=%s\n' "${VIVADO_PATH:-}"
+            printf 'QUARTUS_PATH=%s\n' "${QUARTUS_PATH:-}"
+            printf 'QUARTUS_ROOTDIR=%s\n' "${QUARTUS_ROOTDIR:-}"
+            printf 'MODELSIM=%s\n' "${MODELSIM:-}"
+            dpkg --print-architecture || true
+            dpkg --print-foreign-architectures || true
+            sed -n '1,200p' /etc/apt/sources.list || true
+            python3 -m pip list || true
+            if command -v vmap >/dev/null 2>&1; then
+                vmap altera_mf || true
+                vmap lpm || true
+                vmap sgate || true
+            fi
+            df -h
+        } > ci-debug/tool-environment.txt 2>&1
+        find test tutorials -type f \( \
+            -path '*/log/**' -o \
+            -name 'modelsim.ini' -o \
+            -name 'msim_setup.tcl' -o \
+            -name '*_files.tcl' -o \
+            -name '*_generation.rpt' \
+        \) -print 2>/dev/null | sort > ci-debug/captured-files.txt
+        find test tutorials -type f \( \
+            -path '*/log/*' -o \
+            -name '*.log' -o \
+            -name '*.jou' -o \
+            -name '*.rpt' \
+        \) -print 2>/dev/null | sort > ci-debug/log-files.txt
+        while IFS= read -r log_file; do
+            printf '\n===== %s (last 200 lines) =====\n' "$log_file"
+            tail -n 200 "$log_file" || true
+        done < ci-debug/log-files.txt > ci-debug/log-tails.txt 2>&1
+
+.test-artifacts: &test-artifacts
+    when: always
+    expire_in: never
+    name: "$CI_JOB_NAME_SLUG-$CI_COMMIT_SHORT_SHA"
+    paths:
+        - ci-debug/
+        - test/**/log/**
+        - test/**/*.log
+        - test/**/*.jou
+        - tutorials/**/log/**
+        - tutorials/**/*.log
+        - tutorials/**/*.jou
+        - test/**/gen/**/*.tcl
+        - test/**/gen/**/Makefile
+        - test/**/project/**/modelsim.ini
+        - test/**/project/**/msim_setup.tcl
+        - test/**/project/**/*_files.tcl
+        - test/**/project/**/*_generation.rpt
+        - test/**/project/**/fifo_*/sim/*.vhd
+        - test/**/project/**/ram_2port_*/sim/*.vhd
+        - test/**/project/**/*.qsys
+        - test/**/project/**/*.ip
+
+test-python:
     stage: test-core
     before_script:
         - *install-prereqs
     script:
-        - 'cd test/'
-        - './test_core.sh'
+        - 'mkdir -p ci-debug'
+        - 'bash -o pipefail -c ''./test/test_python.sh 2>&1 | tee ci-debug/test_python.log'''
+    after_script: *collect-test-debug
+    coverage: '/TOTAL.*\s+(\d+(?:\.\d+)?)%$/'
+    artifacts:
+        when: always
+        expire_in: never
+        reports:
+            coverage_report:
+                coverage_format: cobertura
+                path: coverage.xml
+        paths:
+            - coverage.xml
+            - ci-debug/
+            - test/**/log/**
+    tags:
+        - fpga
+
+test-core-generation:
+    stage: test-core
+    parallel:
+        matrix:
+            - TEST_SCOPE:
+                - node
+                - application-system
+                - axis-files
+                - tutorials
+    before_script:
+        - *install-prereqs
+    script:
+        - 'mkdir -p ci-debug'
+        - 'bash -o pipefail -c ''cd test && ./test_core.sh "$TEST_SCOPE" 2>&1 | tee "../ci-debug/test_core_${TEST_SCOPE}.log"'''
+    after_script: *collect-test-debug
+    artifacts: *test-artifacts
     tags:
         - fpga
 
 test-vivado 2022.2:
     stage: test-backends
+    resource_group: vivado-2022.2-simulation
+    parallel:
+        matrix:
+            - TEST_SCOPE:
+                - node
+                - application-system
+                - tutorials
     variables:
         VIVADO_VERSION: '2022.2'
         VIVADO_PATH: '/opt/fpga/Xilinx/Vivado/$VIVADO_VERSION'
@@ -72,13 +217,10 @@ test-vivado 2022.2:
         - 'source $VIVADO_PATH/settings64.sh'
         # See https://support.xilinx.com/s/question/0D52E000079NURRSA4/synthesis-failed-abnormal-termination-tcmalloc-large-allocation?language=en_US
         - export LD_PRELOAD=/lib/x86_64-linux-gnu/libudev.so.1
-        - 'cd test/'
-        - './test_backend.sh vivado'
-    artifacts:
-        when: on_failure
-        paths:
-            - test/**/log/*
-            - tutorial/**/log/*
+        - 'mkdir -p ci-debug'
+        - 'bash -o pipefail -c ''cd test && ./test_backend.sh vivado "$TEST_SCOPE" 2>&1 | tee "../ci-debug/test_backend_vivado_${VIVADO_VERSION}_${TEST_SCOPE}.log"'''
+    after_script: *collect-test-debug
+    artifacts: *test-artifacts
     except:
         variables:
             [ $VIVADO_DISABLE == 'true' ]
@@ -87,6 +229,13 @@ test-vivado 2022.2:
 
 test-vivado 2025.1.1:
     stage: test-backends
+    resource_group: vivado-2025.1.1-simulation
+    parallel:
+        matrix:
+            - TEST_SCOPE:
+                - node
+                - application-system
+                - tutorials
     variables:
         VIVADO_VERSION: '2025.1.1'
         VIVADO_PATH: '/opt/fpga/Xilinx/$VIVADO_VERSION'
@@ -97,13 +246,10 @@ test-vivado 2025.1.1:
         - 'source $VIVADO_PATH/Vivado/settings64.sh'
         # See https://support.xilinx.com/s/question/0D52E000079NURRSA4/synthesis-failed-abnormal-termination-tcmalloc-large-allocation?language=en_US
         - export LD_PRELOAD=/lib/x86_64-linux-gnu/libudev.so.1
-        - 'cd test/'
-        - './test_backend.sh vivado'
-    artifacts:
-        when: on_failure
-        paths:
-            - test/**/log/*
-            - tutorial/**/log/*
+        - 'mkdir -p ci-debug'
+        - 'bash -o pipefail -c ''cd test && ./test_backend.sh vivado "$TEST_SCOPE" 2>&1 | tee "../ci-debug/test_backend_vivado_${VIVADO_VERSION}_${TEST_SCOPE}.log"'''
+    after_script: *collect-test-debug
+    artifacts: *test-artifacts
     except:
         variables:
             [ $VIVADO_DISABLE == 'true' ]
@@ -112,6 +258,13 @@ test-vivado 2025.1.1:
 
 test-quartus 19.4:
     stage: test-backends
+    resource_group: quartus-19.4-simulation
+    parallel:
+        matrix:
+            - TEST_SCOPE:
+                - node
+                - application-system
+                - tutorials
     variables:
         QUARTUS_VERSION: '19.4'
         QUARTUS_PATH: '/opt/fpga/intelFPGA_pro/$QUARTUS_VERSION'
@@ -119,16 +272,38 @@ test-quartus 19.4:
         - *install-prereqs
         - 'python3 -m pip install ./quartus'
     script:
-        - 'export PATH=$PATH:$QUARTUS_PATH/quartus/bin:$QUARTUS_PATH/quartus/sopc_builder/bin:$QUARTUS_PATH/quartus/../modelsim_ase/bin'
-        - 'cd test/'
-        - './test_backend.sh quartus'
-    artifacts:
-        when: on_failure
-        paths:
-            - test/**/log/*
-            - tutorial/**/log/*
+        - *setup-quartus-19-4
+        - 'mkdir -p ci-debug'
+        - 'bash -o pipefail -c ''cd test && ./test_backend.sh quartus "$TEST_SCOPE" 2>&1 | tee "../ci-debug/test_backend_quartus_${QUARTUS_VERSION}_${TEST_SCOPE}.log"'''
+    after_script: *collect-test-debug
+    artifacts: *test-artifacts
     except:
         variables:
             [ $QUARTUS_DISABLE == 'true' ]
+    tags:
+        - fpga
+
+test-multibackend end-to-end:
+    stage: test-backends
+    resource_group: quartus-19.4-simulation
+    parallel:
+        matrix:
+            - TEST_SCOPE:
+                - node
+                - application
+    variables:
+        VIVADO_VERSION: '2022.2'
+        VIVADO_PATH: '/opt/fpga/Xilinx/Vivado/$VIVADO_VERSION'
+        QUARTUS_VERSION: '19.4'
+        QUARTUS_PATH: '/opt/fpga/intelFPGA_pro/$QUARTUS_VERSION'
+    before_script:
+        - *install-prereqs
+        - 'python3 -m pip install ./vivado ./quartus'
+    script:
+        - *setup-quartus-19-4
+        - 'mkdir -p ci-debug'
+        - 'bash -o pipefail -c ''./test/test_multibackend.sh "$TEST_SCOPE" 2>&1 | tee "ci-debug/test_multibackend_${TEST_SCOPE}.log"'''
+    after_script: *collect-test-debug
+    artifacts: *test-artifacts
     tags:
         - fpga

@@ -1,6 +1,6 @@
 {#-
  %
- % Copyright (C) 2021 Geon Technologies, LLC
+ % Copyright (C) 2021, 2026 Geon Technologies, LLC
  %
  % This file is part of FINS.
  %
@@ -78,7 +78,6 @@
 %              so there is validation in this function to require that the
 %              data field exists. However, if this validation is removed, the
 %              rest of the code permits metadata to exist without data.
-% TODO:        This function currently does not support metadata.
 %==============================================================================
 
 function [ packets, lasts ] = {{ fins['name']|lower }}_axis_file_read( port_name, filepath, use_cell_array )
@@ -95,6 +94,7 @@ function [ packets, lasts ] = {{ fins['name']|lower }}_axis_file_read( port_name
   ports.{{ port['name']|lower }}.data.num_samples  = {{ port['data']['num_samples'] }};
   ports.{{ port['name']|lower }}.data.num_channels = {{ port['data']['num_channels'] }};
   {%- if 'metadata' in port %}
+  ports.{{ port['name']|lower }}.metadata_fieldnames = { {% for metafield in port['metadata'] %}'{{ metafield['name']|lower }}'{% if not loop.last %}, {% endif %}{% endfor %} };
   {%- for metafield in port['metadata'] %}
   ports.{{ port['name']|lower }}.metadata.{{ metafield['name']|lower }}.bit_width  = {{ metafield['bit_width'] }};
   ports.{{ port['name']|lower }}.metadata.{{ metafield['name']|lower }}.is_complex = {{ metafield['is_complex']|lower }};
@@ -151,8 +151,21 @@ function [ packets, lasts ] = {{ fins['name']|lower }}_axis_file_read( port_name
   PORT_HAS_DATA = isfield(PORT_DEFINITION, 'data');
   PORT_HAS_METADATA = isfield(PORT_DEFINITION, 'metadata');
   if (PORT_HAS_METADATA)
-    METADATA_FIELDNAMES = fieldnames(PORT_DEFINITION.metadata);
+    % Preserve declaration order because it defines the TUSER bit layout.
+    METADATA_FIELDNAMES = PORT_DEFINITION.metadata_fieldnames(:);
     NUM_METADATA_FIELDNAMES = length(METADATA_FIELDNAMES);
+    NUM_TOTAL_METADATA_BITS = 0;
+    for field_index=1:NUM_METADATA_FIELDNAMES
+      metafield_definition = PORT_DEFINITION.metadata.(METADATA_FIELDNAMES{field_index});
+      component_bit_width = metafield_definition.bit_width;
+      if (metafield_definition.is_complex)
+        component_bit_width = component_bit_width/2;
+      end
+      if (component_bit_width > PROCESSOR_WIDTH)
+        error(['Metadata field ',METADATA_FIELDNAMES{field_index},' has a component wider than ',num2str(PROCESSOR_WIDTH),' bits']);
+      end
+      NUM_TOTAL_METADATA_BITS = NUM_TOTAL_METADATA_BITS + metafield_definition.bit_width;
+    end
   end
 
   % Calculate derived parameters
@@ -160,13 +173,6 @@ function [ packets, lasts ] = {{ fins['name']|lower }}_axis_file_read( port_name
     NUM_SAMPLES_PER_TRANSACTION = PORT_DEFINITION.data.num_channels * PORT_DEFINITION.data.num_samples;
   else
     NUM_SAMPLES_PER_TRANSACTION = 1;
-  end
-
-  %----------------------------------------------------------------------------
-  % TODO: Remove this when Metadata is implemented
-  %----------------------------------------------------------------------------
-  if (PORT_HAS_METADATA)
-    error('This function currently does not support metadata');
   end
 
   %----------------------------------------------------------------------------
@@ -195,10 +201,10 @@ function [ packets, lasts ] = {{ fins['name']|lower }}_axis_file_read( port_name
   end
 
   % Convert to unsigned column arrays
-  num_hex_chars = ceil(NUM_SAMPLES_PER_TRANSACTION*PORT_DEFINITION.data.bit_width/4);
-  num_unsigned_columns = ceil(num_hex_chars/NUM_PROCESSOR_HEX_CHARS);
   transactions_last_unsigned = hex2dec(transactions_last_hex);
   if (PORT_HAS_DATA)
+    num_hex_chars = ceil(NUM_SAMPLES_PER_TRANSACTION*PORT_DEFINITION.data.bit_width/4);
+    num_unsigned_columns = ceil(num_hex_chars/NUM_PROCESSOR_HEX_CHARS);
     % Convert each hex character into columns that are convertable by the processor
     transactions_data_unsigned = zeros(size(transactions_data_hex,1), num_unsigned_columns);
     for column_index=1:num_unsigned_columns
@@ -210,7 +216,17 @@ function [ packets, lasts ] = {{ fins['name']|lower }}_axis_file_read( port_name
     end
   end
   if (PORT_HAS_METADATA)
-    transactions_metadata_unsigned = hex2dec(transactions_metadata_hex);
+    % Split wide TUSER words into exactly representable 52-bit columns.
+    num_metadata_hex_chars = ceil(NUM_TOTAL_METADATA_BITS/4);
+    num_metadata_unsigned_columns = ceil(num_metadata_hex_chars/NUM_PROCESSOR_HEX_CHARS);
+    transactions_metadata_unsigned = zeros(size(transactions_metadata_hex,1), num_metadata_unsigned_columns);
+    for column_index=1:num_metadata_unsigned_columns
+      if (column_index == num_metadata_unsigned_columns)
+        transactions_metadata_unsigned(:, column_index) = hex2dec(transactions_metadata_hex(:, 1:end-(column_index-1)*NUM_PROCESSOR_HEX_CHARS));
+      else
+        transactions_metadata_unsigned(:, column_index) = hex2dec(transactions_metadata_hex(:, end-column_index*NUM_PROCESSOR_HEX_CHARS+1:end-(column_index-1)*NUM_PROCESSOR_HEX_CHARS));
+      end
+    end
   end
 
   % Validate that lengths match
@@ -220,7 +236,7 @@ function [ packets, lasts ] = {{ fins['name']|lower }}_axis_file_read( port_name
     end
   end
   if (PORT_HAS_METADATA)
-    if (length(transactions_last_unsigned) ~= length(transactions_metadata_unsigned))
+    if (length(transactions_last_unsigned) ~= size(transactions_metadata_unsigned, 1))
       error('Parsing of the hex character file failed, make sure the file format matches the port definition!');
     end
   end
@@ -297,10 +313,10 @@ function [ packets, lasts ] = {{ fins['name']|lower }}_axis_file_read( port_name
     transactions_last_indices = find(transactions_last_unsigned);
     transactions_first_indices = [1; transactions_last_indices(1:end-1)+1];
     % Retrieve the metadata for each packet
-    packet_metadatas_unsigned = transactions_metadata_unsigned(transactions_first_indices);
+    packet_metadatas_unsigned = transactions_metadata_unsigned(transactions_first_indices, :);
     % Set up variables that wouldn't be set up if no data
     if (~PORT_HAS_DATA)
-      num_packets = length(packet_metadatas_unsigned);
+      num_packets = size(packet_metadatas_unsigned, 1);
       packets = cell(num_packets, 1);
       for packet_index=1:num_packets
         packets{packet_index} = struct();
@@ -320,8 +336,8 @@ function [ packets, lasts ] = {{ fins['name']|lower }}_axis_file_read( port_name
         % Parse the field
         if (metafield_is_complex)
           % Parse into real/imag
-          metafield_value_real = mod(floor(packet_metadatas_unsigned(packet_index) / 2^bit_index), 2^(metafield_bit_width/2));
-          metafield_value_imag = mod(floor(packet_metadatas_unsigned(packet_index) / 2^(bit_index+metafield_bit_width/2)), 2^(metafield_bit_width/2));
+          metafield_value_real = unpack_unsigned_field_from_columns(packet_metadatas_unsigned(packet_index, :), bit_index, metafield_bit_width/2);
+          metafield_value_imag = unpack_unsigned_field_from_columns(packet_metadatas_unsigned(packet_index, :), bit_index+metafield_bit_width/2, metafield_bit_width/2);
           % Handle the sign bit
           if (metafield_is_signed)
             if (metafield_value_real >= 2^(metafield_bit_width/2-1))
@@ -335,7 +351,7 @@ function [ packets, lasts ] = {{ fins['name']|lower }}_axis_file_read( port_name
           metafield_value = complex(metafield_value_real, metafield_value_imag);
         else
           % Parse
-          metafield_value = mod(floor(packet_metadatas_unsigned(packet_index) / 2^bit_index), 2^metafield_bit_width);
+          metafield_value = unpack_unsigned_field_from_columns(packet_metadatas_unsigned(packet_index, :), bit_index, metafield_bit_width);
           % Handle sign bit
           if (metafield_is_signed)
             if (metafield_value >= 2^(metafield_bit_width-1))
@@ -401,6 +417,25 @@ function [ packets, lasts ] = {{ fins['name']|lower }}_axis_file_read( port_name
           column_index = column_index + 1;
         end
       end
+    end
+  end
+
+  %----------------------------------------------------------------------------
+  % Nested Function
+  %----------------------------------------------------------------------------
+  function [ y ] = unpack_unsigned_field_from_columns( x, start_bit, bit_width )
+    % Extract a field from LSB-first 52-bit columns without constructing a
+    % scalar wider than MATLAB/Octave can represent exactly.
+    y = 0;
+    field_bit = 0;
+    while (field_bit < bit_width)
+      source_bit = start_bit + field_bit;
+      column_index = floor(source_bit/PROCESSOR_WIDTH) + 1;
+      column_bit = mod(source_bit, PROCESSOR_WIDTH);
+      num_bits = min(bit_width-field_bit, PROCESSOR_WIDTH-column_bit);
+      piece = mod(floor(x(column_index)/2^column_bit), 2^num_bits);
+      y = y + piece*2^field_bit;
+      field_bit = field_bit + num_bits;
     end
   end
 

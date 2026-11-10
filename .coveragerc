@@ -1,0 +1,13 @@
+[run]
+branch = True
+source = fins
+
+[report]
+fail_under = 50
+omit =
+    */templates/*
+show_missing = True
+skip_covered = True
+
+[xml]
+output = coverage.xml

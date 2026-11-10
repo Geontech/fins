@@ -10,6 +10,10 @@
       "is_required":true,
       "types":["int"]
     },
+    "node_type":{
+      "is_required":false,
+      "types":["str"]
+    },
     "description":{
       "is_required":false,
       "types":["str"]
@@ -46,6 +50,14 @@
       "is_required":false,
       "types":["str"]
     },
+    "parts":{
+      "is_required":false,
+      "types":["dict"],
+      "fields":{
+        "vivado":{"is_required":false,"types":["str"]},
+        "quartus":{"is_required":false,"types":["str"]}
+      }
+    },
     "top_source":{
       "is_required":false,
       "types":["str"]
@@ -69,6 +81,14 @@
           "list_types":["int"]
         },
         "description":{
+          "is_required":false,
+          "types":["str"]
+        },
+        "promote_to_generic":{
+          "is_required":false,
+          "types":["bool"]
+        },
+        "hdl_type":{
           "is_required":false,
           "types":["str"]
         }
@@ -313,6 +333,11 @@
             "type":{
               "is_required":false,
               "types":["str"]
+            },
+            "backend":{
+              "is_required":false,
+              "types":["str","list"],
+              "list_types":["str"]
             }
           }
         },
@@ -328,6 +353,11 @@
             "type":{
               "is_required":false,
               "types":["str"]
+            },
+            "backend":{
+              "is_required":false,
+              "types":["str","list"],
+              "list_types":["str"]
             }
           }
         },
@@ -343,6 +373,11 @@
             "type":{
               "is_required":false,
               "types":["str"]
+            },
+            "backend":{
+              "is_required":false,
+              "types":["str","list"],
+              "list_types":["str"]
             }
           }
         },
@@ -362,6 +397,11 @@
                 "type":{
                   "is_required":false,
                   "types":["str"]
+                },
+                "backend":{
+                  "is_required":false,
+                  "types":["str","list"],
+                  "list_types":["str"]
                 }
               }
             },
@@ -377,6 +417,11 @@
                 "type":{
                   "is_required":false,
                   "types":["str"]
+                },
+                "backend":{
+                  "is_required":false,
+                  "types":["str","list"],
+                  "list_types":["str"]
                 }
               }
             },
@@ -392,6 +437,11 @@
                 "type":{
                   "is_required":false,
                   "types":["str"]
+                },
+                "backend":{
+                  "is_required":false,
+                  "types":["str","list"],
+                  "list_types":["str"]
                 }
               }
             },
@@ -407,6 +457,11 @@
                 "type":{
                   "is_required":false,
                   "types":["str"]
+                },
+                "backend":{
+                  "is_required":false,
+                  "types":["str","list"],
+                  "list_types":["str"]
                 }
               }
             },
@@ -422,6 +477,11 @@
                 "type":{
                   "is_required":false,
                   "types":["str"]
+                },
+                "backend":{
+                  "is_required":false,
+                  "types":["str","list"],
+                  "list_types":["str"]
                 }
               }
             }

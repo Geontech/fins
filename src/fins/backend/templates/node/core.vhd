@@ -1,6 +1,6 @@
 {#-
 --
--- Copyright (C) 2019 Geon Technologies, LLC
+-- Copyright (C) 2019, 2026 Geon Technologies, LLC
 --
 -- This file is part of FINS.
 --
@@ -46,6 +46,13 @@ use work.{{ fins['name']|lower }}_pkg.all;
 
 -- Entity
 entity {{ fins['name']|lower }}_core is
+  {%- if 'params' in fins and fins['params']|selectattr('promote_to_generic', 'defined')|selectattr('promote_to_generic')|list|length > 0 %}
+  generic (
+    {%- for param in fins['params'] if param.get('promote_to_generic', false) %}
+    {{ param['name'] }} : {{ param['hdl_type'] }} := {% if param['value'] is sameas true %}true{% elif param['value'] is sameas false %}false{% elif param['value'] is string %}"{{ param['value'] }}"{% else %}{{ param['value'] }}{% endif %}{% if not loop.last %};{% endif %}
+    {%- endfor %}
+  );
+  {%- endif %}
   port (
     {%- if 'properties' in fins %}
     props_control : in  t_{{ fins['name']|lower }}_props_control;
@@ -143,20 +150,16 @@ begin
   -- signal record. The fields of the port name records are dependent on the port
   -- characteristics and are listed in the table below:
   --
-  --   | `direction` | `supports_backpressure` | `data` exists | `metadata` exists | ports_in Record Fields      | ports_out Record Fields     |
-  --   | ----------- | ----------------------- | ------------- | ----------------- | --------------------------- | --------------------------- |
-  --   | in          | true                    | true          | false             | valid, last, data           | ready                       |
-  --   | in          | true                    | false         | true              | valid, last, metadata       | ready                       |
-  --   | in          | true                    | true          | true              | valid, last, data, metadata | ready                       |
-  --   | in          | false                   | true          | false             | valid, last, data           |                             |
-  --   | in          | false                   | false         | true              | valid, last, metadata       |                             |
-  --   | in          | false                   | true          | true              | valid, last, data, metadata |                             |
-  --   | out         | true                    | true          | false             | ready                       | valid, last, data           |
-  --   | out         | true                    | false         | true              | ready                       | valid, last, metadata       |
-  --   | out         | true                    | true          | true              | ready                       | valid, last, data, metadata |
-  --   | out         | false                   | true          | false             |                             | valid, last, data           |
-  --   | out         | false                   | false         | true              |                             | valid, last, metadata       |
-  --   | out         | false                   | true          | true              |                             | valid, last, data, metadata |
+  --   | `direction` | `supports_backpressure` | `metadata` exists | ports_in Record Fields      | ports_out Record Fields     |
+  --   | ----------- | ----------------------- | ----------------- | --------------------------- | --------------------------- |
+  --   | in          | true                    | false             | valid, last, data           | ready                       |
+  --   | in          | true                    | true              | valid, last, data, metadata | ready                       |
+  --   | in          | false                   | false             | valid, last, data           |                             |
+  --   | in          | false                   | true              | valid, last, data, metadata |                             |
+  --   | out         | true                    | false             | ready                       | valid, last, data           |
+  --   | out         | true                    | true              | ready                       | valid, last, data, metadata |
+  --   | out         | false                   | false             |                             | valid, last, data           |
+  --   | out         | false                   | true              |                             | valid, last, data, metadata |
   --
   -- At the lowest level, the data or metadata values have either signed or
   -- unsigned types (indicated by the "is_signed" field). However, the data field

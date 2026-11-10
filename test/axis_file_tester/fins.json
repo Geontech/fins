@@ -260,6 +260,14 @@
           { "name":"field1", "bit_width":12, "is_signed":true, "is_complex":false },
           { "name":"field2", "bit_width":26, "is_signed":true, "is_complex":true }
         ]
+      },
+      {
+        "name":"metadata_declaration_order", "direction":"in",
+        "data":{ "bit_width":8, "is_complex":false, "is_signed":false, "num_samples":1, "num_channels":1 },
+        "metadata":[
+          { "name":"z_first", "bit_width":4, "is_signed":false, "is_complex":false },
+          { "name":"a_second", "bit_width":4, "is_signed":false, "is_complex":false }
+        ]
       }
     ]
   }

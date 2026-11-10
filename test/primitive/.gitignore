@@ -1,0 +1,13 @@
+# FINS-generated outputs
+/gen/*
+/project/*
+/log/*
+Makefile
+/*.override
+
+# Vivado logs
+vivado*.jou
+vivado*.log
+vivado*.str
+vivado*.zip
+/xgui/*
