@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019 Geon Technologies, LLC
+# Copyright (C) 2019, 2026 Geon Technologies, LLC
 #
 # This file is part of FINS.
 #
@@ -65,7 +65,16 @@ if { $FINS_BACKEND == "vivado" } {
     set FIFO_MODE_SHOW_AHEAD 0
     set FIFO_USED_WORDS_COUNT_DISABLED 0
     set FIFO_USED_WORDS_COUNT_ENABLED 1
-    add_hdl_instance $FIFO_MODULE_NAME fifo 19.1
+    try {
+        add_hdl_instance $FIFO_MODULE_NAME fifo 19.4.0
+    } on error {} {
+        try {
+            add_hdl_instance $FIFO_MODULE_NAME fifo 19.3.0
+        } on error {} {
+            add_hdl_instance $FIFO_MODULE_NAME fifo 19.1.0
+        }
+    }
+    set_instance_parameter_value $FIFO_MODULE_NAME "DEVICE_FAMILY" $IP_DEVICE_FAMILY
     set_instance_parameter_value $FIFO_MODULE_NAME "GUI_LegacyRREQ" $FIFO_MODE_SHOW_AHEAD
     set_instance_parameter_value $FIFO_MODULE_NAME "GUI_Width" $FIFO_WIDTH
     set_instance_parameter_value $FIFO_MODULE_NAME "GUI_Depth" $FIFO_DEPTH

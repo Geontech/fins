@@ -42,6 +42,14 @@
       "is_required":false,
       "types":["str"]
     },
+    "parts":{
+      "is_required":false,
+      "types":["dict"],
+      "fields":{
+        "vivado":{"is_required":false,"types":["str"]},
+        "quartus":{"is_required":false,"types":["str"]}
+      }
+    },
     "is_application":{
       "is_required":true,
       "types":["bool"]
@@ -144,7 +152,7 @@
         }
       }
     },
-    "port-exports":{
+    "port_exports":{
       "is_required":false,
       "types":["list"],
       "list_types":["dict"],
@@ -159,7 +167,7 @@
         }
       }
     },
-    "hdl-port-exports":{
+    "hdl_port_exports":{
       "is_required":false,
       "types":["list"],
       "list_types":["dict"],
@@ -224,6 +232,11 @@
             "type":{
               "is_required":false,
               "types":["str"]
+            },
+            "backend":{
+              "is_required":false,
+              "types":["str","list"],
+              "list_types":["str"]
             }
           }
         },
@@ -239,6 +252,11 @@
             "type":{
               "is_required":false,
               "types":["str"]
+            },
+            "backend":{
+              "is_required":false,
+              "types":["str","list"],
+              "list_types":["str"]
             }
           }
         },
@@ -258,6 +276,11 @@
                 "type":{
                   "is_required":false,
                   "types":["str"]
+                },
+                "backend":{
+                  "is_required":false,
+                  "types":["str","list"],
+                  "list_types":["str"]
                 }
               }
             },
@@ -273,6 +296,11 @@
                 "type":{
                   "is_required":false,
                   "types":["str"]
+                },
+                "backend":{
+                  "is_required":false,
+                  "types":["str","list"],
+                  "list_types":["str"]
                 }
               }
             },
@@ -288,6 +316,11 @@
                 "type":{
                   "is_required":false,
                   "types":["str"]
+                },
+                "backend":{
+                  "is_required":false,
+                  "types":["str","list"],
+                  "list_types":["str"]
                 }
               }
             },
@@ -303,6 +336,11 @@
                 "type":{
                   "is_required":false,
                   "types":["str"]
+                },
+                "backend":{
+                  "is_required":false,
+                  "types":["str","list"],
+                  "list_types":["str"]
                 }
               }
             },
@@ -318,6 +356,11 @@
                 "type":{
                   "is_required":false,
                   "types":["str"]
+                },
+                "backend":{
+                  "is_required":false,
+                  "types":["str","list"],
+                  "list_types":["str"]
                 }
               }
             }

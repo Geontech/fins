@@ -1,6 +1,6 @@
 {#-
  #
- # Copyright (C) 2019 Geon Technologies, LLC
+ # Copyright (C) 2019, 2026 Geon Technologies, LLC
  #
  # This file is part of FINS.
  #
@@ -91,7 +91,7 @@ set_parameter_property {{ generic['name'] }} DEFAULT_VALUE 1
 
 # Define FINS Parameters
 {%- if 'params' in fins %}
-{%- for param in fins['params'] %}
+{%- for param in fins['params'] if not param.get('promote_to_generic', false) %}
 add_parameter {{ param['name'] }}
 {%- if param['value'] is iterable and param['value'] is not string %} INTEGER_LIST [list {{ param['value']|join(' ') }}]
 {%- elif param['value'] is string %} STRING "{{ param['value'] }}"

@@ -1,6 +1,6 @@
 {#-
  %
- % Copyright (C) 2021 Geon Technologies, LLC
+ % Copyright (C) 2021, 2026 Geon Technologies, LLC
  %
  % This file is part of FINS.
  %
@@ -73,7 +73,6 @@
 %              so there is validation in this function to require that the
 %              data field exists. However, if this validation is removed, the
 %              rest of the code permits metadata to exist without data.
-% TODO:        This function currently does not support metadata.
 %==============================================================================
 
 function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, packets, packet_size )
@@ -90,6 +89,7 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
   ports.{{ port['name']|lower }}.data.num_samples  = {{ port['data']['num_samples'] }};
   ports.{{ port['name']|lower }}.data.num_channels = {{ port['data']['num_channels'] }};
   {%- if 'metadata' in port %}
+  ports.{{ port['name']|lower }}.metadata_fieldnames = { {% for metafield in port['metadata'] %}'{{ metafield['name']|lower }}'{% if not loop.last %}, {% endif %}{% endfor %} };
   {%- for metafield in port['metadata'] %}
   ports.{{ port['name']|lower }}.metadata.{{ metafield['name']|lower }}.bit_width  = {{ metafield['bit_width'] }};
   ports.{{ port['name']|lower }}.metadata.{{ metafield['name']|lower }}.is_complex = {{ metafield['is_complex']|lower }};
@@ -142,7 +142,8 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
   PORT_HAS_DATA = isfield(PORT_DEFINITION, 'data');
   PORT_HAS_METADATA = isfield(PORT_DEFINITION, 'metadata');
   if (PORT_HAS_METADATA)
-    METADATA_FIELDNAMES = fieldnames(PORT_DEFINITION.metadata);
+    % Preserve declaration order because it defines the TUSER bit layout.
+    METADATA_FIELDNAMES = PORT_DEFINITION.metadata_fieldnames(:);
     NUM_METADATA_FIELDNAMES = length(METADATA_FIELDNAMES);
   end
 
@@ -169,7 +170,15 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
     NUM_TOTAL_METADATA_BITS = 0;
     if (PORT_HAS_METADATA)
       for field_index=1:NUM_METADATA_FIELDNAMES
-        NUM_TOTAL_METADATA_BITS = NUM_TOTAL_METADATA_BITS + PORT_DEFINITION.metadata.(METADATA_FIELDNAMES{field_index}).bit_width;
+        metafield_definition = PORT_DEFINITION.metadata.(METADATA_FIELDNAMES{field_index});
+        component_bit_width = metafield_definition.bit_width;
+        if (metafield_definition.is_complex)
+          component_bit_width = component_bit_width/2;
+        end
+        if (component_bit_width > PROCESSOR_WIDTH)
+          error(['Metadata field ',METADATA_FIELDNAMES{field_index},' has a component wider than ',num2str(PROCESSOR_WIDTH),' bits']);
+        end
+        NUM_TOTAL_METADATA_BITS = NUM_TOTAL_METADATA_BITS + metafield_definition.bit_width;
       end
     end
   elseif (isnumeric(packets))
@@ -178,13 +187,6 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
     NUM_PACKETS = NUM_TOTAL_SAMPLES / packet_size;
     NUM_SAMPLES_PER_TRANSACTION = PORT_DEFINITION.data.num_channels * PORT_DEFINITION.data.num_samples;
     NUM_TRANSACTIONS = NUM_TOTAL_SAMPLES / NUM_SAMPLES_PER_TRANSACTION;
-  end
-
-  %----------------------------------------------------------------------------
-  % TODO: Remove this when Metadata is implemented
-  %----------------------------------------------------------------------------
-  if (PORT_HAS_METADATA)
-    error('This function currently does not support metadata');
   end
 
   %----------------------------------------------------------------------------
@@ -390,17 +392,25 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
   if (PORT_HAS_METADATA)
     % Get the indices of the transactions last flags
     transactions_last_indices = find(transactions_last);
-    % Initialize the unsigned words that represent the metadata bits of AXI-Stream transactions
-    transactions_metadata_unsigned = zeros(NUM_TRANSACTIONS, 1);
-    % Loop through the packets, convert metadata to unsigned word, and then assign to transaction indices
+    % Initialize LSB-first 52-bit columns for the metadata bits. Columns keep
+    % wide TUSER words exactly representable in MATLAB/Octave.
+    num_metadata_columns = ceil(NUM_TOTAL_METADATA_BITS/PROCESSOR_WIDTH);
+    transactions_metadata_unsigned = zeros(NUM_TRANSACTIONS, num_metadata_columns);
+    % Loop through the packets, pack each field, and assign it to all packet transactions.
     for packet_index=1:NUM_PACKETS
-      % Initialize the accumulator for this packet
-      packet_metadata_unsigned = 0;
-      % Scale and accumulate the fields that compose the metadata
+      packet_metadata_unsigned = zeros(1, num_metadata_columns);
       scaling_index = 0;
       for field_index=1:NUM_METADATA_FIELDNAMES
-        packet_metadata_unsigned = packet_metadata_unsigned + 2^scaling_index * cast_to_unsigned(packets{packet_index}.metadata.(METADATA_FIELDNAMES{field_index}), PORT_DEFINITION.metadata.(METADATA_FIELDNAMES{field_index}).bit_width);
-        scaling_index = scaling_index + PORT_DEFINITION.metadata.(METADATA_FIELDNAMES{field_index}).bit_width;
+        metafield_definition = PORT_DEFINITION.metadata.(METADATA_FIELDNAMES{field_index});
+        metafield_value = cast_to_unsigned(packets{packet_index}.metadata.(METADATA_FIELDNAMES{field_index}), metafield_definition.bit_width);
+        if (metafield_definition.is_complex)
+          component_bit_width = metafield_definition.bit_width/2;
+          packet_metadata_unsigned = pack_unsigned_field_into_columns(packet_metadata_unsigned, real(metafield_value), scaling_index, component_bit_width);
+          packet_metadata_unsigned = pack_unsigned_field_into_columns(packet_metadata_unsigned, imag(metafield_value), scaling_index+component_bit_width, component_bit_width);
+        else
+          packet_metadata_unsigned = pack_unsigned_field_into_columns(packet_metadata_unsigned, metafield_value, scaling_index, metafield_definition.bit_width);
+        end
+        scaling_index = scaling_index + metafield_definition.bit_width;
       end
       % Assign the transaction indices to the converted metadata for this packet
       if (packet_index == 1)
@@ -408,10 +418,24 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
       else
         transaction_indices = transactions_last_indices(packet_index-1)+1:transactions_last_indices(packet_index);
       end
-      transactions_metadata_unsigned(transaction_indices) = packet_metadata_unsigned;
+      transactions_metadata_unsigned(transaction_indices, :) = repmat(packet_metadata_unsigned, length(transaction_indices), 1);
     end
-    % Convert to hex
-    transactions_metadata_hex = dec2hex(transactions_metadata_unsigned, ceil(NUM_TOTAL_METADATA_BITS/4));
+    % Convert columns to one fixed-width hexadecimal TUSER word.
+    num_metadata_hex_chars = ceil(NUM_TOTAL_METADATA_BITS/4);
+    transactions_metadata_hex = repmat(char(0), NUM_TRANSACTIONS, num_metadata_hex_chars);
+    for column_index=1:num_metadata_columns
+      hex_column = dec2hex(transactions_metadata_unsigned(:, column_index), NUM_PROCESSOR_HEX_CHARS);
+      if (column_index == num_metadata_columns)
+        num_remaining_hex_chars = mod(num_metadata_hex_chars, NUM_PROCESSOR_HEX_CHARS);
+        if (num_remaining_hex_chars == 0)
+          transactions_metadata_hex(:, 1:NUM_PROCESSOR_HEX_CHARS) = hex_column;
+        else
+          transactions_metadata_hex(:, 1:num_remaining_hex_chars) = hex_column(:, end-num_remaining_hex_chars+1:end);
+        end
+      else
+        transactions_metadata_hex(:, end-column_index*NUM_PROCESSOR_HEX_CHARS+1:end-(column_index-1)*NUM_PROCESSOR_HEX_CHARS) = hex_column;
+      end
+    end
   end
 
   %----------------------------------------------------------------------------
@@ -523,6 +547,24 @@ function [ ] = {{ fins['name']|lower }}_axis_file_write( port_name, filepath, pa
           column_index = column_index + 1;
         end
       end
+    end
+  end
+
+  %----------------------------------------------------------------------------
+  % Nested Function
+  %----------------------------------------------------------------------------
+  function [ y ] = pack_unsigned_field_into_columns( y, x, start_bit, bit_width )
+    % Insert a field into LSB-first 52-bit columns without constructing a
+    % scalar wider than MATLAB/Octave can represent exactly.
+    field_bit = 0;
+    while (field_bit < bit_width)
+      destination_bit = start_bit + field_bit;
+      column_index = floor(destination_bit/PROCESSOR_WIDTH) + 1;
+      column_bit = mod(destination_bit, PROCESSOR_WIDTH);
+      num_bits = min(bit_width-field_bit, PROCESSOR_WIDTH-column_bit);
+      piece = mod(floor(x/2^field_bit), 2^num_bits);
+      y(column_index) = y(column_index) + piece*2^column_bit;
+      field_bit = field_bit + num_bits;
     end
   end
 

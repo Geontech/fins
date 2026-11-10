@@ -1,0 +1,15 @@
+{
+  "name": "primitive_counter",
+  "node_type": "primitive",
+  "description": "Minimal primitive Node used for direct simulator integration testing",
+  "top_source": "primitive_counter",
+  "top_sim": "primitive_counter_tb",
+  "filesets": {
+    "source": [
+      { "path": "hdl/primitive_counter.vhd", "type": "vhdl" }
+    ],
+    "sim": [
+      { "path": "hdl/primitive_counter_tb.vhd", "type": "vhdl" }
+    ]
+  }
+}

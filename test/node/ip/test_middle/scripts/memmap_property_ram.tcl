@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019 Geon Technologies, LLC
+# Copyright (C) 2019, 2026 Geon Technologies, LLC
 #
 # This file is part of FINS.
 #
@@ -32,9 +32,9 @@ if { $FINS_BACKEND == "vivado" } {
 } else {
     set RAM_MODULE_NAME "intel_memmap_property_ram"
     try {
-        add_hdl_instance $RAM_MODULE_NAME ram_2port 20.0
+        add_hdl_instance $RAM_MODULE_NAME ram_2port 20.5.0
     } on error {} {
-        add_hdl_instance $RAM_MODULE_NAME ram_2port 19.1
+        add_hdl_instance $RAM_MODULE_NAME ram_2port 20.0.0
     }
     set_instance_parameter_value $RAM_MODULE_NAME "DEVICE_FAMILY" $IP_DEVICE_FAMILY
     set_instance_parameter_value $RAM_MODULE_NAME "GUI_MODE" 0

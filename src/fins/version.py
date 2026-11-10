@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2024 Geon Technologies, LLC
+# Copyright (C) 2026 Geon Technologies, LLC
 #
 # This file is part of FINS.
 #
@@ -17,4 +17,4 @@
 # along with this program.  If not, see http://www.gnu.org/licenses/.
 #
 
-__version__ = '0.16.5'
+__version__ = '0.16.6'

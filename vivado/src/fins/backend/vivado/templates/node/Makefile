@@ -1,6 +1,6 @@
 {#-
  #
- # Copyright (C) 2019 Geon Technologies, LLC
+ # Copyright (C) 2019, 2026 Geon Technologies, LLC
  #
  # This file is part of FINS.
  #
@@ -65,13 +65,13 @@ PROJECT_DIR:=project
 PROJECT_VIVADO_DIR:=$(PROJECT_DIR)/vivado
 
 # Logging directory
-LOGS_DIR:=log
+LOGS_DIR:=log/vivado
 
 #-------------------------------------------------------------------------------
 # File lists
 #-------------------------------------------------------------------------------
 # Temporary build products and files
-TEMP_FILES:=vivado*.log vivado*.jou vivado*.str vivado*.zip xgui .Xil $(PROJECT_DIR) $(LOGS_DIR)
+TEMP_FILES:=vivado*.log vivado*.jou vivado*.str vivado*.zip xgui .Xil $(PROJECT_VIVADO_DIR) $(LOGS_DIR)
 
 {%- if 'filesets' in fins %}
 {%- if 'source' in fins['filesets'] %}
@@ -111,10 +111,10 @@ IP_TARGET:=$(PROJECT_VIVADO_DIR)/{{ fins['name'] }}.xpr
 all:
 	{%- for ip in fins['ip'] %}
 	{%- if ip['library'] == "user" %}
-	$(MAKE) -C {{ ip['fins_path']|dirname }} all
+	$(MAKE) -C {{ ip['fins_path']|dirname }} BACKEND=vivado all
 	{%- endif %}
 	{%- endfor %}
-	$(MAKE) -C . $(IP_TARGET)
+	$(MAKE) -f $(FINS_VIVADO_DIR)/Makefile $(IP_TARGET)
 
 # Clean target that cleans only this IP
 clean:
@@ -124,7 +124,7 @@ clean:
 clean-all:
 {%- for ip in fins['ip'] %}
 {%- if ip['library'] == "user" %}
-	$(MAKE) -C {{ ip['fins_path']|dirname }} $@
+	$(MAKE) -C {{ ip['fins_path']|dirname }} BACKEND=vivado $@
 {%- endif %}
 {%- endfor %}
 	rm -rf $(TEMP_FILES)
@@ -207,7 +207,7 @@ endif
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
-	vivado $(if $(UseBatch),-mode batch) -source $(FINS_VIVADO_DIR)/ip_simulate.tcl $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
+	vivado $(if $(UseBatch),-mode batch) -source $(FINS_VIVADO_DIR)/ip_simulate.tcl $(if $(UseBatch),-tclargs --batch-no-waves) $(if $(UseBatch),>> $(LOGS_DIR)/ip_simulate.log 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
 	{%- if 'postsim' in fins['filesets']['scripts'] %}

@@ -18,7 +18,7 @@ The top-level `ip` field of the FINS Node JSON schema is an array of dictionarie
 | --parent      | string            | YES      | The name of the current IP's parameter to link. |
 | instances     | dict[]            | YES      | An array of instances of this sub-IP to create |
 | --module_name | string            | YES      | The name of the generated instance. |
-| --generics    | dict[]            | YES      | The list of VHDL generics or Verilog parameters to set for this instance. |
+| --generics    | dict[]            | NO       | The list of VHDL generics or Verilog parameters to set for this instance. |
 | --++name      | string            | YES      | The name of the generic/parameter. |
 | --++value     | string, int, bool | YES      | The value of the generic/parameter. Using a parameter for the value of this field is unsupported. |
 
@@ -46,12 +46,12 @@ The creation of the sub-IPs is automated through code generation of the IP build
 
 For the `vivado` backend:
 
-* **Makefile**: This makefile runs the build and simulation of the IP. Sub-IP Makefiles are called using the `make -C` option to dependencies are met and sub-IP changes are rebuilt.
+* **Makefile**: This makefile runs the build and simulation of the IP. Sub-IP Makefiles are called using the `make -C` option so dependencies are met and sub-IP changes are rebuilt.
 * **ip_create.tcl**: This script builds and packages the IP. The sub-IPs are created and the `generics` are set for the instance.
 
 For the `quartus` backend:
 
-* **Makefile**: This makefile runs the build and simulation of the IP. Sub-IP Makefiles are called using the `make -C` option to dependencies are met and sub-IP changes are rebuilt.
+* **Makefile**: This makefile runs the build and simulation of the IP. Sub-IP Makefiles are called using the `make -C` option so dependencies are met and sub-IP changes are rebuilt.
 * **ip_hw.tcl**: This script represents the packaged IP. The sub-IPs are created and the `generics` are set for the instance within the "elaboration" callback.
 
 **[RETURN TO TOP LEVEL README](../README.md)**

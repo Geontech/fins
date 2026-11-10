@@ -107,7 +107,7 @@
     <g>
       <rect style="fill: #ffffff; fill-opacity: 1; stroke-opacity: 1; stroke-width: 2; stroke: #000000" x="-260" y="-780" width="140" height="80" rx="0" ry="0"/>
       <text font-size="12.8" style="fill: #000000; fill-opacity: 1; stroke: none;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="-190" y="-736.119">
-        <tspan x="-190" y="-736.119">nodeset.json</tspan>
+        <tspan x="-190" y="-736.119">application.json</tspan>
       </text>
     </g>
     <g>

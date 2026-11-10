@@ -1,6 +1,6 @@
 {#-
  #
- # Copyright (C) 2020 Geon Technologies, LLC
+ # Copyright (C) 2020, 2026 Geon Technologies, LLC
  #
  # This file is part of FINS.
  #
@@ -57,6 +57,15 @@ set IP_SEARCH_PATHS "$IP_SEARCH_PATHS;$QUARTUS_TO_ROOT/{{ ip['fins_path']|dirnam
 set IP_SEARCH_PATHS "$IP_SEARCH_PATHS;$QUARTUS_TO_ROOT/{{ fins['user_ip_catalog'] }}/**/*"
 {%- endif %}
 set_global_assignment -name IP_SEARCH_PATHS "$IP_SEARCH_PATHS;"
+
+# Add timing constraints to the Quartus project
+{%- if 'filesets' in fins and 'constraints' in fins['filesets'] %}
+{%- for constraint_file in fins['filesets']['constraints'] %}
+{%- if constraint_file['type']|lower == 'sdc' %}
+set_global_assignment -name SDC_FILE "$QUARTUS_TO_ROOT/{{ constraint_file['path'] }}"
+{%- endif %}
+{%- endfor %}
+{%- endif %}
 
 # Commit assignments and close project
 export_assignments

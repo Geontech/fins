@@ -2,7 +2,15 @@
 
 **[RETURN TO TOP LEVEL README](../README.md)**
 
-In this tutorial, we will buid on the work done in [Tutorial: FINS Node Power Converter](tutorial1.md) to create a simple FINS Application using FINS and Intel Quartus Prime Pro 19.4. This Application will include the Power Converter Node and a basic Passthrough Node. Make sure you have installed `fins` and the `fins-quartus` backed, and make sure you have completed the [first tutorial](tutorial1.md).
+In this tutorial, we will build on the work done in
+[Tutorial: FINS Node Power Converter](tutorial1.md) to create a simple FINS
+Application containing the Power Converter Node and a basic Passthrough Node.
+We will generate, build, and simulate the Application with both Xilinx Vivado
+and Intel Quartus Prime Pro. Make sure you have installed `fins`,
+`fins-vivado`, and `fins-quartus`, and that you have completed the
+[first tutorial](tutorial1.md). See the
+[CI-tested FPGA tool versions](../README.md#ci-tested-fpga-tool-versions) for
+the versions currently exercised by automated testing.
 
 ## Step 1: Copy the Passthrough Node into your workspace
 
@@ -11,11 +19,11 @@ Copy **tutorials/power_passthrough** to the same directory that contains your ne
 $ cp <path-to-fins>/tutorials/power_passthrough/ .
 ```
 
-Your top-level directory structure should look roughly a follows:
+Your top-level directory structure should look roughly as follows:
 ```bash
 $ tree -L 1
 ├── power_converter
-└ ─ power_passthrough
+└── power_passthrough
 ```
 
 ## Step 2: Creating the FINS Application Specification JSON File
@@ -41,7 +49,6 @@ Using your favorite text editor, create a file called **fins.json** in the **pow
     {
       "fins_path":"../power_converter/fins.json",
       "module_name":"power_converter_0",
-      "interface_name":"S_AXI_POWER_CONVERTER_0",
       "params": [
         { "name":"IQ_DATA_WIDTH",         "parent": "IQ_DATA_WIDTH" },
         { "name":"POWER_DATA_WIDTH",      "parent": "POWER_DATA_WIDTH" }
@@ -84,13 +91,13 @@ Using your favorite text editor, create a file called **fins.json** in the **pow
 
 In the **fins.json** file we just created, we have defined:
 1. Two "params" which override params of the Nodes in this Application. See [here](parameters.md) for more information about parameters.
-2. A list of FINS "nodes" to be instantiated and connected in this Application. Each Node's property interface is assigned a meaningful name, and Node parameters are overwritten by parameters of the Application. FINS code-generation instantiates the nodes listed here in a backend/tool-specific block design (Vivado Block Design or Quartus Platform Designer System). For more information on the fields of each "nodes" entry see [here](applications.md#application-json-schema-nodes).
+2. A list of FINS "nodes" to be instantiated and connected in this Application. Each Node is assigned a meaningful module name, and Node parameters are overwritten by parameters of the Application. FINS code-generation instantiates the nodes listed here in a backend/tool-specific block design (Vivado Block Design or Quartus Platform Designer System). For more information on the fields of each "nodes" entry see [here](applications.md#application-json-schema-nodes).
 3. Connections between Node ports. For more information on "connections" see [here](applications.md#application-json-schema-connections).
-3. Clock domains and their assignments to ports. For more information on "clocks" see [here](applications.md#application-json-schema-clocks).
+4. Clock domains and their assignments to ports. For more information on "clocks" see [here](applications.md#application-json-schema-clocks).
 
-## Step 3: Auto-generating Block Designs and HDL
+## Step 3: Generating the Vendor-Neutral Application Files
 
-Next, run `fins` using the **fins.json** file as the command line argument.
+Generate the common Application HDL and testbench files using the core backend:
 
 ```bash
 $ fins fins.json
@@ -198,50 +205,107 @@ We can tell FINS to add this script to the simulation process by adding it to th
 
 This script is referenced as `postsim` in the JSON's `filesets`, so it will run _after_ simulation completes.
 
-## Step 5: Building the Application with Intel Quartus Prime Pro
+## Step 5: Building the Application with Vivado and Quartus
 
-To auto-generate Intel Quartus Prime Pro TCL scripts and a **Makefile**, execute the following commands.
+Generate the common files and both supported vendor backends:
 
 ```bash
-$ fins -b quartus fins.json
+$ fins -b all fins.json
 ```
 
-Inspect the **./gen/quartus** directory to find the auto-generated Intel Quartus Prime Pro TCL scripts listed below.
+The generated vendor directories contain the scripts needed to create each
+project:
 
-* **nodes_instantiate.tcl**: This is a Platform Designer Tcl script that instantiates and connects the Nodes of this Application.
-* **application_create.tcl**: This is the script that the **Makefile** will use to create a Quartus Platform Designer System (QSYS). It calls **nodes_instantiate.tcl** and then exports property interfaces and unconnected ports to become externals of the QSYS. It also manages connections to clocks and resets of the Nodes. 
-* **application_simulate.tcl**: This is the script that will run the simulation in the next step of this tutorial.
+* **gen/vivado/application_create.tcl**: Creates the Vivado project and block
+  design, instantiates and connects the Nodes, exports open interfaces, and
+  connects clocks and resets.
+* **gen/vivado/application_simulate.tcl**: Configures and runs the XSim
+  simulation.
+* **gen/quartus/application_project.tcl**: Creates the Quartus project.
+* **gen/quartus/application_create.tcl**: Creates the Platform Designer system,
+  instantiates and connects the Nodes, exports open interfaces, and connects
+  clocks and resets.
+* **gen/quartus/application_simulate.tcl**: Configures and runs the ModelSim
+  simulation.
 
-To package and build the Application with Intel Quartus Prime Pro, execute the following commands.
+To create and open the Vivado project, execute:
+
+> NOTE: Make sure you have sourced the **settings64.sh** script for the version
+> of Xilinx Vivado that you want to use.
+
+```bash
+$ make vivado UseGui=1
+```
+
+The Vivado project is written to:
+
+```text
+project/vivado/power_application.xpr
+```
+
+To create the Quartus project and Platform Designer system, execute:
 
 > NOTE: Make sure you have the path to the `quartus` executable on your `PATH` environmental variable for the version of Intel Quartus that you want to use.
 
 ```bash
-$ make clean
-$ make UseGui=1
+$ make quartus UseGui=1
 ```
 
-The `UseGui=1` make variable tells FINS to display the Quartus messages to the command window. Since Quartus has a more command-line flow, the Quartus GUI is not opened. Once the operations have completed, check the command line console output to make sure that there were no errors. Look inside the **./project/quartus** directory and you will find the **power_application.qpf** project file that was created and the **power_application.qsys** Platform Designer System definition file.
+The Quartus project and Platform Designer system are written to:
 
-You can open up the Application in the Platform Designer GUI to inspect:
+```text
+project/quartus/power_application.qpf
+project/quartus/power_application.qsys
+```
+
+The `UseGui=1` make variable launches the Vivado GUI for the Vivado build and
+displays Quartus messages in the command window for the Quartus build. Since
+Quartus uses a command-line flow here, its GUI is not opened automatically.
+
+You can also open either generated project directly:
+
 ```bash
-qsys-edit --quartus_project=power_application.qpf power_application.qsys
+$ vivado project/vivado/power_application.xpr
+$ qsys-edit --quartus_project=project/quartus/power_application.qpf \
+    project/quartus/power_application.qsys
 ```
+
+The following screenshots show the Quartus Platform Designer view. Vivado
+represents the same Nodes and connections in its block design.
+
 ![](tutorial_qsys.png)
 ![](tutorial_qsys_schematic.png)
 
-## Step 6: Simulating the Application with ModelSim
+## Step 6: Simulating the Application with XSim and ModelSim
 
-Execute the following command to run the simulation with the ModelSim GUI.
+Run the Vivado XSim simulation with the GUI:
 
-> NOTE: This command assumes that you have followed this tutorial exactly and results of the the previous steps are located in the repository.
+> NOTE: This command assumes that you have followed this tutorial exactly and the results of the previous steps are located in the repository.
 
 ```bash
-$ make sim UseGui=1
+$ make sim-vivado UseGui=1
 ```
-In the ModelSim GUI, notice the "***** SIMULATION PASSED *****" message in the Transcript window. Click "Yes" in the dialog message that asks if you want to quit.
 
-Verify all the commands completed without error, and check the log files after each `make sim` to ensure the Python script passed!
+Run the Quartus ModelSim simulation with the GUI:
+
+```bash
+$ make sim-quartus UseGui=1
+```
+
+Both simulations run the generated testbench and the post-simulation
+verification script. A successful run reports `***** SIMULATION PASSED *****`.
+
+For unattended operation, omit `UseGui=1`:
+
+```bash
+$ make sim-vivado
+$ make sim-quartus
+```
+
+Batch-mode output, including the result of the Python verification script, is
+written to **log/vivado/application_simulate.log** and
+**log/quartus/application_simulate.log**. Verify that both commands complete
+without error and that both logs report a passing simulation.
 
 ## Solution
 

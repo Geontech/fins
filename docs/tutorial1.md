@@ -2,7 +2,11 @@
 
 **[RETURN TO TOP LEVEL README](../README.md)**
 
-In this tutorial, we will create a simple power conversion firmware IP Node using FINS, Intel Quartus Prime Pro 19.1, and Xilinx Vivado 2019.1. Make sure you have installed `fins`, the `fins-quartus` backend, and the `fins-vivado` backend!
+In this tutorial, we will create a simple power conversion firmware IP Node
+using FINS, Intel Quartus Prime Pro, and Xilinx Vivado. Make sure you have
+installed `fins`, the `fins-quartus` backend, and the `fins-vivado` backend.
+See the [CI-tested FPGA tool versions](../README.md#ci-tested-fpga-tool-versions)
+for the versions currently exercised by automated testing.
 
 ## Step 1: Creating the Firmware IP Node Specification JSON File
 
@@ -50,7 +54,7 @@ In the **fins.json** file we just created, we have defined:
 
 1. Two "params" which translate into constants in an auto-generated VHDL package. See [here](parameters.md) for more information about parameters.
 2. A "properties" interface with a single property called "gain". The "properties" interface is used to auto-generate an AXI4-Lite decode module that gives us software control of "gain". The "read-write-data" property type is the most commonly used type, and it defines a readable and writable property whose data is available to our user code. See [here](properties.md) for more information about properties.
-3. A "ports" interface wtih two ports: "iq" input and "power" output. Notice that the parameters we defined earlier are used instead of literal values. The ports are defined so that our FINS IP will have complex signed IQ input and a real-only signed power output. See [here](properties.md) for more information about properties.
+3. A "ports" interface with two ports: "iq" input and "power" output. Notice that the parameters we defined earlier are used instead of literal values. The ports are defined so that our FINS IP will have complex signed IQ input and a real-only signed power output. See [here](ports.md) for more information about ports.
 
 > NOTE: The parameters, properties, and ports definitions we created above used minimal options to define their characteristics. We were able to take advantage of the defaults of different dictionary fields. For instance, the "is_complex" field of the "power" port was not set since the default is `false`. Make sure you familiarize yourself with the default settings that are located in the "JSON Schema" sections of the various documentation pages!
 
@@ -177,13 +181,16 @@ The `filesets` top-level key indicates which files are used in the HDL project. 
 
 ## Step 5: Building the IP with Xilinx Vivado
 
-To auto-generate Xilinx Vivado TCL scripts and a **Makefile**, execute the following commands.
+Generate the common files and both supported vendor backends:
 
 ```bash
-$ fins -b vivado fins.json
+$ fins -b all fins.json
 ```
 
-Inspect the **./gen/vivado** directory to find the auto-generated Xilinx Vivado TCL scripts listed below.
+This creates the common generated HDL along with the Vivado and Quartus
+integration files under **./gen/vivado** and **./gen/quartus**. Inspect the
+**./gen/vivado** directory to find the auto-generated Xilinx Vivado Tcl
+scripts listed below.
 
 * **ip_create.tcl**: This is the script that the **Makefile** will use to create a Vivado project with the source and simulation files and to package the IP.
 * **ip_simulate.tcl**: This is the script that will run the simulation in the next step of this tutorial.
@@ -193,20 +200,16 @@ To package and build the IP with Xilinx Vivado, execute the following commands.
 > NOTE: Make sure you have sourced the **settings64.sh** script for the version of Xilinx Vivado that you want to use.
 
 ```bash
-$ make UseGui=1
+$ make vivado UseGui=1
 ```
 
 The `UseGui=1` make variable tells FINS to launch the Vivado GUI to perform the operations. Once the operations have completed, check the "TCL Console" to make sure that there were no errors. Take a moment to look at the project hierarchy and the IP packaging details, and then close Vivado. Look inside the **./project/vivado** directory and you will find the **power_converter.xpr** IP project file that we just closed.
 
 ## Step 6: Building the IP with Intel Quartus Prime Pro
 
-To auto-generate Intel Quartus Prime Pro TCL scripts and a **Makefile**, execute the following commands.
-
-```bash
-$ fins -b quartus fins.json
-```
-
-Inspect the **./gen/quartus** directory to find the auto-generated Intel Quartus Prime Pro TCL scripts listed below.
+The previous `fins -b all` command also generated the Intel Quartus Prime Pro
+integration files. Inspect the **./gen/quartus** directory to find the
+auto-generated Quartus Tcl scripts listed below.
 
 * **ip_hw.tcl**: This a Platform Designer IP definition file that is used when adding an IP to a Platform Designer System.
 * **ip_create.tcl**: This is the script that the **Makefile** will use to create a Quartus project with the source and simulation files and to package the IP.
@@ -217,13 +220,12 @@ To package and build the IP with Intel Quartus Prime Pro, execute the following 
 > NOTE: Make sure you have the path to the `quartus` executable on your `PATH` environmental variable for the version of Intel Quartus that you want to use.
 
 ```bash
-$ make clean
-$ make UseGui=1
+$ make quartus UseGui=1
 ```
 
-The `UseGui=1` make variable tells FINS to display the Quartus messages to the command window. Since Quartus has a more command-line flow, the Quartus GUI is not opened. Once the operations have completed, check the command line console output to make sure that there were no errors. Look inside the **./project/quartus** directory and you will find the **power_converter.qpf** IP project file that was created and the **power_converter.ip** IP definition file.
+The `UseGui=1` make variable tells FINS to display the Quartus messages to the command window. Since Quartus has a more command-line flow, the Quartus GUI is not opened. Once the operations have completed, check the command line console output to make sure that there were no errors. Look inside the **./project/quartus** directory and you will find the **power_converter_wrapper.qpf** IP project file that was created and the **power_converter_wrapper.ip** IP definition file.
 
-## Step 7: Simulating the IP with ModelSim and Vivado
+## Step 7: Simulating the IP with XSim and ModelSim
 
 First we need to create a simulation source file for the "iq" input port. Create a directory **./sim_data** in the IP root to contain our simulation files. **./sim_data** is the default simulation file source/sink location of the generated testbench **gen/core/power_converter_tb.vhd**.
 
@@ -246,25 +248,23 @@ Create a text file called **sim_source_iq.txt** in the **sim_data** directory wi
 
 > NOTE: Make sure there is not an extra newline at the start or end of this file
 
-The data format used above for **sim_source_iq.txt** is a hex-character-only text file for AXI4-Stream. The first column is always the TLAST signal. If only data exists in the port, then the second column is the TDATA signal. If only metadata exists in the port, then the second column is the TUSER signal. If both data and metadata exist in the port, then the second column is the TDATA signal and the third column is the TUSER signal.
+The data format used above for **sim_source_iq.txt** is a hex-character-only text file for AXI4-Stream. The first column is always the TLAST signal and the second column is the required TDATA signal. If the port has optional metadata, the third column is the TUSER signal.
 
-Execute the following command to run the simulation with the ModelSim GUI.
+Execute the following command to run the Quartus ModelSim simulation with the
+GUI.
 
-> NOTE: This command assumes that you have followed this tutorial exactly and results of the the previous steps are located in the repository.
+> NOTE: This command assumes that you have followed this tutorial exactly and the results of the previous steps are located in the repository.
 
 ```bash
-$ make sim UseGui=1
+$ make sim-quartus UseGui=1
 ```
 
 In the ModelSim GUI, notice the "***** SIMULATION PASSED *****" message in the Transcript window. Click "Yes" in the dialog message that asks if you want to quit.
 
-Execute the following commands to run the simulation with the Vivado GUI.
+Execute the following command to run the Vivado XSim simulation with the GUI.
 
 ```bash
-$ make clean
-$ fins -b vivado fins.json
-$ make
-$ make sim UseGui=1
+$ make sim-vivado UseGui=1
 ```
 
 In the Vivado GUI, notice the "***** SIMULATION PASSED *****" message in the Tcl Console window. Close the Vivado GUI.
@@ -328,20 +328,21 @@ We can tell FINS to add this script to the simulation process by adding it to th
 
 This script is referenced as `postsim` in the JSON's `filesets`, so it will run _after_ simulation completes.
 
-The next step is to regenerate the scripts and re-run the ModelSim (Quartus) and Vivado simulations.
+The next step is to regenerate both backends and re-run the Vivado XSim and
+Quartus ModelSim simulations.
 
-> NOTE: In these commands, we are running the simulations in "batch" mode. This means that the GUIs will not launch and the results will be located in the **log/ip_simulate.log** file.
+> NOTE: These commands run the simulations in batch mode. Vivado writes its
+> results to **log/vivado/ip_simulate.log**, while Quartus writes its results
+> to **log/quartus/ip_simulate.log**.
 
 ```bash
-$ make clean
-$ fins -b vivado fins.json
-$ make sim
-$ make clean
-$ fins -b quartus fins.json
-$ make sim
+$ fins -b all fins.json
+$ make sim-vivado
+$ make sim-quartus
 ```
 
-Verify all the commands completed without error, and check the log files after each `make sim` to ensure the Python script passed!
+Verify all the commands completed without error, and check each backend's log
+file to ensure the Python script passed.
 
 ## Solution
 

@@ -1,6 +1,6 @@
 {#-
  #
- # Copyright (C) 2019 Geon Technologies, LLC
+ # Copyright (C) 2019, 2026 Geon Technologies, LLC
  #
  # This file is part of FINS.
  #
@@ -46,6 +46,14 @@
 # Inverse of UseGui
 UseBatch:=$(if $(UseGui),,1)
 
+# Quartus 19.4 uses the legacy ModelSim flow. Copy its repaired configuration
+# into the simulation directory because the generated IP compilation runs
+# there. Newer releases use the supplied Questa configuration directly.
+QUARTUS_VERSION:=$(shell quartus_sh --version 2> /dev/null | sed -n 's/.*Version \([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p' | head -n 1)
+QUARTUS_LEGACY_19_4:=$(filter 19.4,$(QUARTUS_VERSION))
+MODELSIM_LEGACY_SETUP:=$(if $(and $(QUARTUS_LEGACY_19_4),$(FINS_MODELSIM_INI)),cp "$(FINS_MODELSIM_INI)" modelsim.ini &&)
+MODELSIM_INI_OPTION:=$(if $(QUARTUS_LEGACY_19_4),$(if $(FINS_MODELSIM_INI),-modelsimini modelsim.ini),$(if $(MODELSIM),-modelsimini "$(MODELSIM)"))
+
 # Check if matlab exists
 MatlabExists:=$(shell command -v matlab 2> /dev/null)
 
@@ -65,13 +73,13 @@ MODELSIM_DIR:=$(QUARTUS_DIR)/mentor
 MODELSIM_TO_ROOT:=../../..
 
 # Logging directory
-LOGS_DIR:=log
+LOGS_DIR:=log/quartus
 
 #-------------------------------------------------------------------------------
 # File lists
 #-------------------------------------------------------------------------------
 # Temporary build products and files
-TEMP_FILES:=$(PROJECT_DIR) $(LOGS_DIR)
+TEMP_FILES:=$(QUARTUS_DIR) $(LOGS_DIR)
 {% if 'filesets' in fins %}
 {%- if 'source' in fins['filesets'] %}
 # Source files
@@ -172,10 +180,10 @@ IP_TARGET:=$(QUARTUS_DIR)/$(PROJECT_FILENAME)
 all:
 	{%- for ip in fins['ip'] %}
 	{%- if ip['library'] == "user" %}
-	$(MAKE) -C {{ ip['fins_path']|dirname }} all
+	$(MAKE) -C {{ ip['fins_path']|dirname }} BACKEND=quartus all
 	{%- endif %}
 	{%- endfor %}
-	$(MAKE) -C . $(IP_TARGET)
+	$(MAKE) -f $(FINS_OUTPUT_DIR)/Makefile $(IP_TARGET)
 
 # Clean target that cleans only this IP
 clean:
@@ -272,7 +280,7 @@ endif
 	{%- endif %}
 	{%- endif %}
 	cd $(QUARTUS_DIR) && ip-setup-simulation --quartus-project=$(PROJECT_FILENAME) --output-directory=./ --use-relative-paths $(if $(UseBatch),>> $(QUARTUS_TO_IP_SIMULATE_LOG_PATH) 2>&1)
-	cd $(MODELSIM_DIR) && vsim $(if $(UseBatch),-batch) -do $(MODELSIM_TO_IP_SIMULATE_SCRIPT_PATH) $(if $(UseBatch),>> $(MODELSIM_TO_IP_SIMULATE_LOG_PATH) 2>&1)
+	cd $(MODELSIM_DIR) && $(MODELSIM_LEGACY_SETUP) vsim $(MODELSIM_INI_OPTION) $(if $(UseBatch),-batch) -do $(MODELSIM_TO_IP_SIMULATE_SCRIPT_PATH) $(if $(UseBatch),>> $(MODELSIM_TO_IP_SIMULATE_LOG_PATH) 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
 	{%- if 'postsim' in fins['filesets']['scripts'] %}

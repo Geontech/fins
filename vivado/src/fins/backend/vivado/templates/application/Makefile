@@ -1,6 +1,6 @@
 {#-
  #
- # Copyright (C) 2020 Geon Technologies, LLC
+ # Copyright (C) 2020, 2026 Geon Technologies, LLC
  #
  # This file is part of FINS.
  #
@@ -63,13 +63,13 @@ PROJECT_DIR:=project
 PROJECT_VIVADO_DIR:=$(PROJECT_DIR)/vivado
 
 # Logging directory
-LOGS_DIR:=log
+LOGS_DIR:=log/vivado
 
 #-------------------------------------------------------------------------------
 # File lists
 #-------------------------------------------------------------------------------
 # Temporary build products and files
-TEMP_FILES:=$(PROJECT_DIR) $(LOGS_DIR)
+TEMP_FILES:=$(PROJECT_VIVADO_DIR) $(LOGS_DIR)
 {% if 'filesets' in fins %}
 {%- if 'source' in fins['filesets'] %}
 # Source files
@@ -119,9 +119,9 @@ APPLICATION_TARGET:=$(PROJECT_VIVADO_DIR)/{{ fins['name'] }}.xpr
 # All phony target to build the {{ fins['backend'] }} project
 all:
 	{%- for node in fins['nodes'] %}
-	$(MAKE) -C {{ node['fins_dir'] }} all
+	$(MAKE) -C {{ node['fins_dir'] }} BACKEND=vivado all
 	{%- endfor %}
-	$(MAKE) -C . $(APPLICATION_TARGET)
+	$(MAKE) -f $(FINS_VIVADO_DIR)/Makefile $(APPLICATION_TARGET)
 
 # Clean phony target that cleans only this Application
 clean:
@@ -130,7 +130,7 @@ clean:
 # Clean-nodes phony target that cleans all nodes
 clean-nodes:
 {%- for node in fins['nodes'] %}
-	$(MAKE) -C {{ node['fins_dir'] }} clean-all
+	$(MAKE) -C {{ node['fins_dir'] }} BACKEND=vivado clean-all
 {%- endfor %}
 
 # Clean-all phony target that cleans this Application and all nodes

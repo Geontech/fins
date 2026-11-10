@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019 Geon Technologies, LLC
+# Copyright (C) 2019, 2026 Geon Technologies, LLC
 #
 # This file is part of FINS.
 #
@@ -41,16 +41,28 @@ class QuartusGenerator(Generator):
             root_dir = ''
             output_dir = QUARTUS_OUTPUT_DIR
         os.makedirs(output_dir, exist_ok=True)
+        self.generate_node_backend_core(fins_data, output_dir)
 
         # Load JSON and Jinja
         jinja_env = self.create_jinja_env(os.path.join(QUARTUS_TEMPLATE_DIR, 'node'))
 
-        # Generate Quartus targets
-        self.render_jinja_template(jinja_env, 'Makefile', root_dir + 'Makefile', fins_data)
-        self.render_jinja_template(jinja_env, 'ip_project.tcl', output_dir + 'ip_project.tcl', fins_data)
-        self.render_jinja_template(jinja_env, 'ip_create.tcl', output_dir + 'ip_create.tcl', fins_data)
-        self.render_jinja_template(jinja_env, 'ip_hw.tcl', output_dir + 'ip_hw.tcl', fins_data)
-        self.render_jinja_template(jinja_env, 'ip_simulate.tcl', output_dir + 'ip_simulate.tcl', fins_data)
+        # Generate Quartus targets. Primitive nodes compile and simulate their
+        # HDL directly and are not packaged as Platform Designer components.
+        if fins_data.get('node_type', 'ip') == 'primitive':
+            self.render_jinja_template(
+                jinja_env, 'primitive_Makefile',
+                output_dir + 'Makefile', fins_data)
+            self.render_jinja_template(
+                jinja_env, 'primitive_simulate.tcl',
+                output_dir + 'primitive_simulate.tcl', fins_data)
+        else:
+            self.render_jinja_template(jinja_env, 'Makefile', output_dir + 'Makefile', fins_data)
+            self.render_jinja_template(jinja_env, 'ip_project.tcl', output_dir + 'ip_project.tcl', fins_data)
+            self.render_jinja_template(jinja_env, 'ip_create.tcl', output_dir + 'ip_create.tcl', fins_data)
+            self.render_jinja_template(jinja_env, 'ip_hw.tcl', output_dir + 'ip_hw.tcl', fins_data)
+            self.render_jinja_template(jinja_env, 'ip_simulate.tcl', output_dir + 'ip_simulate.tcl', fins_data)
+        self.generate_node_file_dependencies(fins_data, filename, output_dir)
+        self.generate_backend_dispatcher(fins_data, filename)
 
     def generate_application_backend(self, fins_data, filename):
         # Determine and create the root directory
@@ -61,12 +73,14 @@ class QuartusGenerator(Generator):
             root_dir = ''
             output_dir = QUARTUS_OUTPUT_DIR
         os.makedirs(output_dir, exist_ok=True)
+        self.generate_application_backend_core(fins_data, output_dir)
 
     # Load JSON and Jinja
         jinja_env = self.create_jinja_env(os.path.join(QUARTUS_TEMPLATE_DIR, 'application'))
 
         # Generate Quartus targets
-        self.render_jinja_template(jinja_env, 'Makefile', root_dir + 'Makefile', fins_data)
+        self.render_jinja_template(jinja_env, 'Makefile', output_dir + 'Makefile', fins_data)
         self.render_jinja_template(jinja_env, 'application_project.tcl', output_dir + 'application_project.tcl', fins_data)
         self.render_jinja_template(jinja_env, 'application_create.tcl', output_dir + 'application_create.tcl', fins_data)
         self.render_jinja_template(jinja_env, 'application_simulate.tcl', output_dir + 'application_simulate.tcl', fins_data)
+        self.generate_backend_dispatcher(fins_data, filename)

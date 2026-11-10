@@ -1,6 +1,6 @@
 {#-
  #
- # Copyright (C) 2020 Geon Technologies, LLC
+ # Copyright (C) 2020, 2026 Geon Technologies, LLC
  #
  # This file is part of FINS.
  #
@@ -38,6 +38,20 @@
 
 package require qsys
 
+if {[catch {exec quartus_sh --version} FINS_QUARTUS_VERSION_OUTPUT]} {
+    error "Unable to determine Quartus version: $FINS_QUARTUS_VERSION_OUTPUT"
+}
+if {![regexp {Version ([0-9][0-9]*\.[0-9][0-9]*)} \
+        $FINS_QUARTUS_VERSION_OUTPUT FINS_VERSION_MATCH FINS_QUARTUS_VERSION]} {
+    error "Unable to parse Quartus version from: $FINS_QUARTUS_VERSION_OUTPUT"
+}
+if {[string compare $FINS_QUARTUS_VERSION "19.4"] == 0} {
+    set FINS_BRIDGE_VERSION "19.1"
+} else {
+    set FINS_BRIDGE_VERSION "19.2.0"
+}
+puts "FINS Quartus compatibility: tool=$FINS_QUARTUS_VERSION bridge=$FINS_BRIDGE_VERSION"
+
 # Set the fixed filepaths
 set QUARTUS_TO_ROOT "../.."
 set FINS_OUTPUT_DIR "gen/quartus"
@@ -72,7 +86,7 @@ set_use_testbench_naming_pattern 0 {}
 {%- set clock_bridge_name = clock['base_name'] + '_clock_bridge' %}
 {%- set reset_bridge_name = clock['base_name'] + '_reset_bridge' %}
 # Add "{{ clock_bridge_name }}" clock bridge
-add_component {{ clock_bridge_name }} ip/{{ fins['name'] }}/{{ clock_bridge_name }}_clock_in.ip altera_clock_bridge clock_in 19.1
+add_component {{ clock_bridge_name }} ip/{{ fins['name'] }}/{{ clock_bridge_name }}_clock_in.ip altera_clock_bridge clock_in $FINS_BRIDGE_VERSION
 load_component {{ clock_bridge_name }}
 
 set_component_parameter_value NUM_CLOCK_OUTPUTS {1}
@@ -90,10 +104,7 @@ add_instantiation_interface_port out_clk out_clk clk 1 STD_LOGIC Output
 save_instantiation
 
 # Add reset bridge
-{#
-# TODO do I need version here for add_component?
-#}
-add_component {{ reset_bridge_name }} ip/{{ fins['name'] }}/{{ reset_bridge_name }}_reset_in.ip altera_reset_bridge reset_in 19.1
+add_component {{ reset_bridge_name }} ip/{{ fins['name'] }}/{{ reset_bridge_name }}_reset_in.ip altera_reset_bridge reset_in $FINS_BRIDGE_VERSION
 load_component {{ reset_bridge_name }}
 set_component_parameter_value ACTIVE_LOW_RESET {1}
 set_component_parameter_value NUM_RESET_OUTPUTS {1}

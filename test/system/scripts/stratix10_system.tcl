@@ -5,8 +5,24 @@
 
 package require -exact qsys 18.0
 
+if {[catch {exec quartus_sh --version} FINS_QUARTUS_VERSION_OUTPUT]} {
+	error "Unable to determine Quartus version: $FINS_QUARTUS_VERSION_OUTPUT"
+}
+if {![regexp {Version ([0-9][0-9]*\.[0-9][0-9]*)} \
+		$FINS_QUARTUS_VERSION_OUTPUT FINS_VERSION_MATCH FINS_QUARTUS_VERSION]} {
+	error "Unable to parse Quartus version from: $FINS_QUARTUS_VERSION_OUTPUT"
+}
+if {[string compare $FINS_QUARTUS_VERSION "19.4"] == 0} {
+	set FINS_BRIDGE_VERSION "19.1"
+	set FINS_HPS_VERSION "19.1"
+} else {
+	set FINS_BRIDGE_VERSION "19.2.0"
+	set FINS_HPS_VERSION "20.1.0"
+}
+puts "FINS Quartus compatibility: tool=$FINS_QUARTUS_VERSION bridge=$FINS_BRIDGE_VERSION hps=$FINS_HPS_VERSION"
+
 # create the system "system"
-proc do_create_system {} {
+proc do_create_system {FINS_BRIDGE_VERSION FINS_HPS_VERSION} {
 	# create the system
 	create_system system
 	set_project_property DEVICE {1SX280LU2F50E1VG}
@@ -16,7 +32,7 @@ proc do_create_system {} {
 
 	# add the components
 	add_instance application_test_0 application_test
-	add_component clock_in ip/system/system_clock_in.ip altera_clock_bridge clock_in 19.1
+	add_component clock_in ip/system/system_clock_in.ip altera_clock_bridge clock_in $FINS_BRIDGE_VERSION
 	load_component clock_in
 	set_component_parameter_value EXPLICIT_CLOCK_RATE {50000000.0}
 	set_component_parameter_value NUM_CLOCK_OUTPUTS {1}
@@ -38,7 +54,7 @@ proc do_create_system {} {
 	set_instantiation_interface_sysinfo_parameter_value out_clk clock_rate {50000000}
 	add_instantiation_interface_port out_clk out_clk clk 1 STD_LOGIC Output
 	save_instantiation
-	add_component reset_in ip/system/system_reset_in.ip altera_reset_bridge reset_in 19.1
+	add_component reset_in ip/system/system_reset_in.ip altera_reset_bridge reset_in $FINS_BRIDGE_VERSION
 	load_component reset_in
 	set_component_parameter_value ACTIVE_LOW_RESET {0}
 	set_component_parameter_value NUM_RESET_OUTPUTS {1}
@@ -65,7 +81,7 @@ proc do_create_system {} {
 	set_instantiation_interface_parameter_value out_reset synchronousEdges {DEASSERT}
 	add_instantiation_interface_port out_reset out_reset reset 1 STD_LOGIC Output
 	save_instantiation
-	add_component stratix10_hps_0 ip/system/system_stratix10_hps_0.ip altera_stratix10_hps stratix10_hps_0 19.1
+	add_component stratix10_hps_0 ip/system/system_stratix10_hps_0.ip altera_stratix10_hps stratix10_hps_0 $FINS_HPS_VERSION
 	load_component stratix10_hps_0
 	set_component_parameter_value CLK_EMACA_SOURCE {1}
 	set_component_parameter_value CLK_EMACB_SOURCE {1}
@@ -144,7 +160,10 @@ proc do_create_system {} {
 	set_component_parameter_value H2F_USER0_CLK_FREQ {500}
 	set_component_parameter_value H2F_USER1_CLK_Enable {0}
 	set_component_parameter_value H2F_USER1_CLK_FREQ {500}
-	set_component_parameter_value HPS_BOOT {0}
+	# HPS_BOOT exists in the 19.1 component but was removed by 20.1.0.
+	if {[lsearch -exact [get_component_parameters] HPS_BOOT] >= 0} {
+		set_component_parameter_value HPS_BOOT {0}
+	}
 	set_component_parameter_value HPS_DIV_GPIO_FREQ {125}
 	set_component_parameter_value HPS_DIV_GPIO_FREQ2 {200}
 	set_component_parameter_value HPS_IO_Enable {unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused unused}
@@ -644,4 +663,4 @@ proc do_create_system {} {
 	save_system system
 }
 
-do_create_system
+do_create_system $FINS_BRIDGE_VERSION $FINS_HPS_VERSION
