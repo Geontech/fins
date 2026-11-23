@@ -184,6 +184,7 @@ endif
 {%- if 'sim' in fins['filesets'] %}
 # Simulation phony target
 sim : all
+	$(if $(UseBatch),mkdir -p $(LOGS_DIR))
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
 	{%- if 'presim' in fins['filesets']['scripts'] %}

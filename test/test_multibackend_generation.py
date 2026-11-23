@@ -939,6 +939,20 @@ class MultiBackendGenerationTest(unittest.TestCase):
             '--batch-no-waves',
             (self.node_dir / 'gen/quartus/Makefile').read_text())
 
+    def test_batch_simulation_targets_create_log_directories(self):
+        target_by_template = {
+            'node': 'sim : all',
+            'application': 'sim : all $(APPLICATION_TARGET)',
+        }
+        mkdir_logs = '\t$(if $(UseBatch),mkdir -p $(LOGS_DIR))'
+
+        for backend in ('vivado', 'quartus'):
+            for template, target in target_by_template.items():
+                makefile = (
+                    REPO_ROOT / backend / 'src/fins/backend' / backend /
+                    'templates' / template / 'Makefile').read_text()
+                self.assertIn(f'{target}\n{mkdir_logs}', makefile)
+
     def test_dependency_file_handles_optional_fields_and_normalizes_paths(self):
         output_dir = self.temp_root / 'dependencies'
         output_dir.mkdir()
