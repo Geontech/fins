@@ -939,6 +939,63 @@ class MultiBackendGenerationTest(unittest.TestCase):
             '--batch-no-waves',
             (self.node_dir / 'gen/quartus/Makefile').read_text())
 
+    def test_gui_simulations_remain_open_after_script_completion(self):
+        self._generate_all()
+
+        vivado_tcl = (
+            self.node_dir / 'gen/vivado/ip_simulate.tcl').read_text()
+        self.assertIn(
+            'set FINS_BATCH_MODE $FINS_BATCH_NO_WAVES', vivado_tcl)
+        self.assertIn(
+            'if {$FINS_BATCH_MODE} {\n    exit $return_code\n}',
+            vivado_tcl)
+
+        quartus_makefile = (
+            self.node_dir / 'gen/quartus/Makefile').read_text()
+        quartus_tcl = (
+            self.node_dir / 'gen/quartus/ip_simulate.tcl').read_text()
+        self.assertIn(
+            'set FINS_BATCH_MODE $(if $(UseBatch),1,0); do {',
+            quartus_makefile)
+        self.assertIn(
+            'if {$FINS_BATCH_MODE} {\n    exit -code $return_code\n}',
+            quartus_tcl)
+        self.assertIn('proc fins_abort {message}', quartus_tcl)
+
+        batch_run = subprocess.run(
+            ['make', '-n', '-f', 'gen/quartus/Makefile',
+             'sim', 'UseGui='],
+            cwd=self.node_dir, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, text=True)
+        self.assertEqual(0, batch_run.returncode, batch_run.stderr)
+        self.assertIn('set FINS_BATCH_MODE 1;', batch_run.stdout)
+
+        gui_run = subprocess.run(
+            ['make', '-n', '-f', 'gen/quartus/Makefile',
+             'sim', 'UseGui=1'],
+            cwd=self.node_dir, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, text=True)
+        self.assertEqual(0, gui_run.returncode, gui_run.stderr)
+        self.assertIn('set FINS_BATCH_MODE 0;', gui_run.stdout)
+
+        application_templates = {
+            'vivado': (
+                'vivado/src/fins/backend/vivado/templates/application',
+                'exit $return_code', '--batch-mode'),
+            'quartus': (
+                'quartus/src/fins/backend/quartus/templates/application',
+                'exit -code $return_code', 'FINS_BATCH_MODE'),
+        }
+        for backend, (template_dir, exit_command, mode_marker) in \
+                application_templates.items():
+            template_root = REPO_ROOT / template_dir
+            simulation_tcl = (
+                template_root / 'application_simulate.tcl').read_text()
+            self.assertIn('if {$FINS_BATCH_MODE} {', simulation_tcl)
+            self.assertIn(exit_command, simulation_tcl)
+            self.assertIn(mode_marker,
+                          (template_root / 'Makefile').read_text())
+
     def test_batch_simulation_targets_create_log_directories(self):
         target_by_template = {
             'node': 'sim : all',
@@ -1387,6 +1444,10 @@ class MultiBackendGenerationTest(unittest.TestCase):
             else:
                 self.assertIn('-c work.test_top_tb', batch_run.stdout)
                 self.assertNotIn('-c work.test_top_tb', gui_run.stdout)
+                self.assertIn(
+                    'set FINS_BATCH_MODE 1;', batch_run.stdout)
+                self.assertIn(
+                    'set FINS_BATCH_MODE 0;', gui_run.stdout)
 
             self.assertIn('primitive_simulate.log 2>&1', batch_run.stdout)
             self.assertNotIn('primitive_simulate.log 2>&1', gui_run.stdout)

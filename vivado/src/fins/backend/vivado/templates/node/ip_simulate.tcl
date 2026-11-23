@@ -44,6 +44,7 @@ set return_code 0
 set FINS_BATCH_NO_WAVES [expr {
     [lsearch -exact $argv "--batch-no-waves"] >= 0
 }]
+set FINS_BATCH_MODE $FINS_BATCH_NO_WAVES
 
 # Setup paths
 set PROJECT_VIVADO_DIR "./project/vivado"
@@ -153,4 +154,9 @@ source {{ postsim_script['path'] }}
 if {![fins_check_simulation_done "/{{ fins['top_sim'] }}/simulation_done"]} {
     set return_code 1
 }
-exit $return_code
+
+# In GUI mode, leave Vivado open so the completed simulation and waveforms can
+# be inspected. Batch mode must still terminate with the simulation status.
+if {$FINS_BATCH_MODE} {
+    exit $return_code
+}

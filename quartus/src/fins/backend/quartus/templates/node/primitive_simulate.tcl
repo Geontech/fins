@@ -1,5 +1,12 @@
 # FINS-generated direct ModelSim run script for a primitive HDL node.
 set return_code 0
+
+if {![info exists FINS_BATCH_MODE]} {
+    set FINS_BATCH_MODE 0
+    if {[llength [info commands batch_mode]] > 0} {
+        set FINS_BATCH_MODE [batch_mode]
+    }
+}
 set FINS_BACKEND "{{ fins['backend'] }}"
 {%- if 'params' in fins %}
 {% for param in fins['params'] -%}
@@ -35,4 +42,9 @@ if {[catch {examine /{{ fins['top_sim'] }}/simulation_done} value]} {
 } else {
     puts "***** SIMULATION PASSED *****"
 }
-exit -code $return_code
+if {$FINS_BATCH_MODE} {
+    exit -code $return_code
+}
+if {$return_code != 0} {
+    error "***** SIMULATION FAILED *****"
+}

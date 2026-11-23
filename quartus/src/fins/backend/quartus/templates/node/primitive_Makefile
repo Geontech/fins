@@ -40,7 +40,7 @@ $(COMPILE_STAMP):{% if 'filesets' in fins %}{% for group in ('source', 'sim') %}
 	touch $@
 
 sim: all
-	cd $(MODELSIM_DIR) && vsim $(MODELSIM_INI_OPTION) $(MODELSIM_TIME_OPTION) $(if $(UseBatch),-c) work.{{ fins['top_sim'] }} -do ../../../$(FINS_QUARTUS_DIR)/primitive_simulate.tcl $(if $(UseBatch),> ../../../$(LOGS_DIR)/primitive_simulate.log 2>&1)
+	cd $(MODELSIM_DIR) && vsim $(MODELSIM_INI_OPTION) $(MODELSIM_TIME_OPTION) $(if $(UseBatch),-c) work.{{ fins['top_sim'] }} -do "set FINS_BATCH_MODE $(if $(UseBatch),1,0); do {../../../$(FINS_QUARTUS_DIR)/primitive_simulate.tcl}" $(if $(UseBatch),> ../../../$(LOGS_DIR)/primitive_simulate.log 2>&1)
 
 clean:
 	rm -rf project/quartus $(LOGS_DIR)

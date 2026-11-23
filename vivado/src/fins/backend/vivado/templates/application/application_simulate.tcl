@@ -39,6 +39,11 @@
 # Default the return code to 0=SUCCESS
 set return_code 0
 
+# The generated Makefile passes this flag only for non-interactive runs.
+set FINS_BATCH_MODE [expr {
+    [lsearch -exact $argv "--batch-mode"] >= 0
+}]
+
 # Setup paths
 set PROJECT_VIVADO_DIR "./project/vivado"
 
@@ -157,4 +162,9 @@ source {{ postsim_script['path'] }}
 if {![fins_check_simulation_done "/{{ fins['top_sim'] }}/simulation_done"]} {
     set return_code 1
 }
-exit $return_code
+
+# In GUI mode, leave Vivado open so the completed simulation and waveforms can
+# be inspected. Batch mode must still terminate with the simulation status.
+if {$FINS_BATCH_MODE} {
+    exit $return_code
+}
