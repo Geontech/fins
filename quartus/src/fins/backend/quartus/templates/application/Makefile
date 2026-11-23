@@ -284,7 +284,7 @@ endif
 ifeq ($(filter $(QUARTUS_VERSION),$(QUARTUS_IP_SETUP_ONLY_VERSIONS)),)
 	cd $(QUARTUS_DIR) && sim-script-gen --search-path=$(IP_SEARCH_PATHS)$$ --system-file=$(QSYS_APPLICATION_FILENAME) --output-directory=./ --use-relative-paths $(if $(UseBatch),>> $(QUARTUS_TO_APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 endif
-	cd $(MODELSIM_DIR) && $(MODELSIM_LEGACY_SETUP) vsim $(MODELSIM_INI_OPTION) $(if $(UseBatch),-batch) -do $(MODELSIM_TO_APPLICATION_SIMULATE_SCRIPT_PATH) $(if $(UseBatch),>> $(MODELSIM_TO_APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	cd $(MODELSIM_DIR) && $(MODELSIM_LEGACY_SETUP) vsim $(MODELSIM_INI_OPTION) $(if $(UseBatch),-batch) -do "set FINS_BATCH_MODE $(if $(UseBatch),1,0); do {$(MODELSIM_TO_APPLICATION_SIMULATE_SCRIPT_PATH)}" $(if $(UseBatch),>> $(MODELSIM_TO_APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
 	{%- if 'postsim' in fins['filesets']['scripts'] %}

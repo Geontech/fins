@@ -217,7 +217,7 @@ endif
 	{%- endif %}
 	{%- endif %}
 	{%- endif %}
-	vivado $(if $(UseBatch),-mode batch) -source $(APPLICATION_SIMULATE_SCRIPT_PATH) $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
+	vivado $(if $(UseBatch),-mode batch) -source $(APPLICATION_SIMULATE_SCRIPT_PATH) $(if $(UseBatch),-tclargs --batch-mode) $(if $(UseBatch),>> $(APPLICATION_SIMULATE_LOG_PATH) 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
 	{%- if 'postsim' in fins['filesets']['scripts'] %}

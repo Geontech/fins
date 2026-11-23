@@ -281,7 +281,7 @@ endif
 	{%- endif %}
 	{%- endif %}
 	cd $(QUARTUS_DIR) && ip-setup-simulation --quartus-project=$(PROJECT_FILENAME) --output-directory=./ --use-relative-paths $(if $(UseBatch),>> $(QUARTUS_TO_IP_SIMULATE_LOG_PATH) 2>&1)
-	cd $(MODELSIM_DIR) && $(MODELSIM_LEGACY_SETUP) vsim $(MODELSIM_INI_OPTION) $(if $(UseBatch),-batch) -do $(MODELSIM_TO_IP_SIMULATE_SCRIPT_PATH) $(if $(UseBatch),>> $(MODELSIM_TO_IP_SIMULATE_LOG_PATH) 2>&1)
+	cd $(MODELSIM_DIR) && $(MODELSIM_LEGACY_SETUP) vsim $(MODELSIM_INI_OPTION) $(if $(UseBatch),-batch) -do "set FINS_BATCH_MODE $(if $(UseBatch),1,0); do {$(MODELSIM_TO_IP_SIMULATE_SCRIPT_PATH)}" $(if $(UseBatch),>> $(MODELSIM_TO_IP_SIMULATE_LOG_PATH) 2>&1)
 	{%- if 'filesets' in fins %}
 	{%- if 'scripts' in fins['filesets'] %}
 	{%- if 'postsim' in fins['filesets']['scripts'] %}

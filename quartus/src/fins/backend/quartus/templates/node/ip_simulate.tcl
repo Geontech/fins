@@ -39,6 +39,23 @@
 # Default the return code to 0=SUCCESS
 set return_code 0
 
+# The generated Makefile sets this explicitly. Fall back to the simulator's
+# mode when the script is run manually.
+if {![info exists FINS_BATCH_MODE]} {
+    set FINS_BATCH_MODE 0
+    if {[llength [info commands batch_mode]] > 0} {
+        set FINS_BATCH_MODE [batch_mode]
+    }
+}
+
+proc fins_abort {message} {
+    puts stderr "ERROR: $message"
+    if {$::FINS_BATCH_MODE} {
+        exit -code 1
+    }
+    return -code error $message
+}
+
 # Set the relative path back to the IP root directory
 set IP_ROOT_RELATIVE_TO_PROJ "../../.."
 
@@ -114,12 +131,10 @@ set USER_DEFINED_ELAB_OPTIONS "-t 1ps"
 source msim_setup.tcl
 
 if {[llength [info commands ld]] == 0} {
-    puts stderr "ERROR: msim_setup.tcl does not define the required ld command"
-    exit -code 1
+    fins_abort "msim_setup.tcl does not define the required ld command"
 }
 if {[catch {ld} message]} {
-    puts stderr "ERROR: Quartus simulation compilation/elaboration failed: $message"
-    exit -code 1
+    fins_abort "Quartus simulation compilation/elaboration failed: $message"
 }
 run -all
 
@@ -141,4 +156,10 @@ if {![fins_check_simulation_done "/{{ fins['top_sim'] }}/simulation_done"]} {
     set return_code 1
 }
 
-exit -code $return_code
+# Keep the simulator open in GUI mode for waveform and failure inspection.
+if {$FINS_BATCH_MODE} {
+    exit -code $return_code
+}
+if {$return_code != 0} {
+    error "***** SIMULATION FAILED *****"
+}

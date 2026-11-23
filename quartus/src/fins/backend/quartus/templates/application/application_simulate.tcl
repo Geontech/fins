@@ -39,6 +39,23 @@
 # Default the return code to 0=SUCCESS
 set return_code 0
 
+# The generated Makefile sets this explicitly. Fall back to the simulator's
+# mode when the script is run manually.
+if {![info exists FINS_BATCH_MODE]} {
+    set FINS_BATCH_MODE 0
+    if {[llength [info commands batch_mode]] > 0} {
+        set FINS_BATCH_MODE [batch_mode]
+    }
+}
+
+proc fins_abort {message} {
+    puts stderr "ERROR: $message"
+    if {$::FINS_BATCH_MODE} {
+        exit -code 1
+    }
+    return -code error $message
+}
+
 # Set the relative path back to the IP root directory
 set IP_ROOT_RELATIVE_TO_PROJ "../../.."
 
@@ -104,12 +121,10 @@ source msim_setup.tcl
 
 if {[llength [info commands com]] == 0 ||
     [llength [info commands elab]] == 0} {
-    puts stderr "ERROR: msim_setup.tcl does not define the required com and elab commands"
-    exit -code 1
+    fins_abort "msim_setup.tcl does not define the required com and elab commands"
 }
 if {[catch {com} message]} {
-    puts stderr "ERROR: Quartus simulation compilation failed: $message"
-    exit -code 1
+    fins_abort "Quartus simulation compilation failed: $message"
 }
 {%- if 'filesets' in fins %}
 {%- if 'sim' in fins['filesets'] %}
@@ -117,8 +132,7 @@ if {[catch {com} message]} {
 if {[catch {
     vcom -work {{ fins['name'] }} ${IP_ROOT_RELATIVE_TO_PROJ}/{{ src_file['path'] }}
 } message]} {
-    puts stderr "ERROR: Application simulation source compilation failed: $message"
-    exit -code 1
+    fins_abort "Application simulation source compilation failed: $message"
 }
 {%- endfor %}
 {%- endif %}
@@ -126,8 +140,7 @@ if {[catch {
 
 # Run the simulation
 if {[catch {elab} message]} {
-    puts stderr "ERROR: Quartus simulation elaboration failed: $message"
-    exit -code 1
+    fins_abort "Quartus simulation elaboration failed: $message"
 }
 run -all
 
@@ -149,4 +162,10 @@ if {![fins_check_simulation_done "/{{ fins['top_sim'] }}/simulation_done"]} {
     set return_code 1
 }
 
-exit -code $return_code
+# Keep the simulator open in GUI mode for waveform and failure inspection.
+if {$FINS_BATCH_MODE} {
+    exit -code $return_code
+}
+if {$return_code != 0} {
+    error "***** SIMULATION FAILED *****"
+}
